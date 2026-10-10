@@ -25,7 +25,8 @@ const stars=[...Array(60)].map(()=>({x:R()*W,y:R()*H,s:rr(.3,2.2)}));
 const IT={P:['#ff9d2e','ปืน+'],R:['#ffe14d','ยิงเร็ว'],S:['#38f0ff','โล่'],B:['#ff4d4d','บอมบ์'],M:['#c77dff','แม่เหล็ก'],H:['#4dff88','เลือด'],W:['#7dffea','ผู้ช่วย+'],K:['#ffb347','จรวดนำวิถี'],V:['#9dff5a','กระสุนทะลุ'],L:['#ff3dcb','เลเซอร์'],T:['#8fa8ff','สโลว์'],X:['#fff','x2']};
 function menu(){document.getElementById('pause').style.display='none';st='menu';ui.style.display='flex';let h='<h1>NOVA STRIKER</h1><small>เลือกด่าน (1–50)</small><div id="g">';
 for(let i=1;i<=50;i++)h+=`<button class="${i>unlocked?'l':''}" onclick="${i<=unlocked?'start('+i+')':''}">${i}${i%5==0?'👾':''}</button>`;
-h+='</div>'+shopBtn()+'<small>ศัตรูบุกเป็นขบวนทัพหลายสิบเวฟต่อด่าน • เก็บไอเท็มอัปอาวุธ • ลากนิ้วบนจอ ยานจะลอยอยู่เหนือนิ้ว • ยิงอัตโนมัติ • แตะปุ่มบอมบ์ขวาล่าง<br>👾 = ด่านบอส</small>';ui.innerHTML=h}
+h+='</div>'+shopBtn()+'<button onclick="privacy()" style="margin:8px">นโยบายความเป็นส่วนตัว</button>'+'<small>ศัตรูบุกเป็นขบวนทัพหลายสิบเวฟต่อด่าน • เก็บไอเท็มอัปอาวุธ • ลากนิ้วบนจอ ยานจะลอยอยู่เหนือนิ้ว • ยิงอัตโนมัติ • แตะปุ่มบอมบ์ขวาล่าง<br>👾 = ด่านบอส</small>';ui.innerHTML=h}
+function privacy(){st='privacy';ui.style.display='flex';ui.innerHTML=`<article style="margin:auto;max-width:560px;text-align:left;padding:24px 0"><h1 style="font-size:25px">นโยบายความเป็นส่วนตัว</h1><p>Nova Striker · Cockro Network / สุนันท์ ทองแสน<br>มีผล 10 ตุลาคม 2026</p><p>เกมออฟไลน์ ไม่ต้องสมัครบัญชี ไม่รวบรวมหรือแชร์ข้อมูลส่วนบุคคล ไม่มีโฆษณา การวิเคราะห์การใช้งาน การซื้อด้วยเงินจริง หรือแชท</p><p>ความคืบหน้า เหรียญ ยาน อาวุธ และการอัปเกรดเก็บในอุปกรณ์เท่านั้น ลบได้โดยล้างข้อมูลแอปในตั้งค่า Android หรือถอนการติดตั้ง โดยความคืบหน้าจะสูญหาย</p><p>เกมไม่ขอสิทธิ์อินเทอร์เน็ต ตำแหน่ง กล้อง ไมโครโฟน หรือรายชื่อผู้ติดต่อ บริการ Google Play อยู่ภายใต้นโยบายของ Google</p><p>หากส่งอีเมล เราใช้ข้อมูลเพื่อช่วยเหลือและตอบคำถาม คุณขอให้ลบข้อความนั้นได้ ติดต่อ sunan.tongsan@gmail.com</p><p><a style="color:#38f0ff" href="https://nova-striker-privacy.fit-rain-4305.chatgpt.site">อ่านนโยบายฉบับเต็มออนไลน์ / Privacy Policy</a></p><button onclick="menu()">◀ กลับเมนู</button></article>`;}
 function over(win){document.getElementById('pause').style.display='none';ov=win;st='over';sv();ui.style.display='flex';ui.innerHTML=`<h1>${win?'ผ่านด่าน '+lv+'!':'ภารกิจล้มเหลว'}</h1><small>คะแนน ${score}<br>เหรียญที่ได้ +${rc} 🪙 (รวม ${SV.coins})</small><br>`+(win&&lv<50?`<button class="p" onclick="start(${lv+1})">ด่านถัดไป ▶</button><br>`:'')+(win&&lv==50?'<h1>🏆 ชนะครบ 50 ด่าน!</h1>':'')+`<button class="p" onclick="start(${lv})">เล่นซ้ำ</button><br><button onclick="shopRet='o';shop(0)">🛠 อัพเกรด</button> <button onclick="menu()">เมนู</button>`}
 function start(l){document.getElementById('pause').style.display='block';lv=l;ui.style.display='none';st='play';E=[];B=[];EB=[];I=[];FX=[];spawned=0;spT=0;score=0;
 const boss=l%5==0;nW=61+(l/10|0);Wv=[];wvT=1.5;shT=3;dvT=6;
@@ -190,7 +191,7 @@ function dr(s,px,py,k=1,rot=0,a=1){x.save();x.translate(px,py);if(rot)x.rotate(r
 function panel(x0,y0,w,h,v,c1,c2){x.save();x.fillStyle='#0a1030cc';x.strokeStyle='#38f0ffaa';x.lineWidth=1.5;x.beginPath();x.roundRect(x0,y0,w,h,h/2);x.fill();x.stroke();const g=x.createLinearGradient(x0,0,x0+w,0);g.addColorStop(0,c1);g.addColorStop(1,c2);x.fillStyle=g;x.shadowColor=c2;x.shadowBlur=8;x.beginPath();x.roundRect(x0+2,y0+2,Math.max(h-4,(w-4)*Math.max(0,Math.min(1,v))),h-4,(h-4)/2);x.fill();x.restore()}
 function draw(){x.drawImage(S.bg,0,0,W,H);x.globalCompositeOperation='lighter';x.globalAlpha=.7;const oy=(T*14)%H;x.drawImage(S.cl,0,oy,W,H);x.drawImage(S.cl,0,oy-H,W,H);x.globalAlpha=1;
 stars.forEach(s=>{x.globalAlpha=.4+.6*Math.abs(Math.sin(T*2+s.x));x.drawImage(gl('#9fc8ff'),s.x-s.s*3,s.y-s.s*3,s.s*6,s.s*6)});x.globalAlpha=1;x.globalCompositeOperation='source-over';
-if(st=='menu'||st=='shop'||!P)return;
+if(st=='menu'||st=='shop'||st=='privacy'||!P)return;
 I.forEach(i=>{x.globalCompositeOperation='lighter';x.drawImage(gl(IT[i.t][0]),i.x-20,i.y-20,40,40);x.globalCompositeOperation='source-over';dr(S['i'+i.t],i.x,i.y+Math.sin(T*6+i.x)*2,(.75+Math.sin(T*8)*.04))});
 C.forEach(c=>{x.save();x.translate(c.x,c.y);x.scale(Math.abs(Math.sin(T*8+c.x))*.8+.2,1);x.drawImage(S.coin,-6,-6,12,12);x.restore()});
 E.forEach(e=>{if(e.en<0)return;const f=e.f>0;let s=[S.bee,S.sh,S.tk,S.dv,S.e4,S.e5,S.e6,S.e7,0,S.boss][e.t];
@@ -231,7 +232,7 @@ function pauseGame(){if(st!=='play')return;st='paused';cv.drag=0;sv();ui.style.d
 function resumeGame(){if(st!=='paused')return;last=performance.now();st='play';ui.style.display='none';}
 document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();sv();}});
 window.addEventListener('pagehide',sv);
-window.novaBack=()=>{if(st==='play')pauseGame();else if(st==='shop')menu();};
+window.novaBack=()=>{if(st==='play')pauseGame();else if(st==='shop'||st==='privacy')menu();};
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(st==='paused')resumeGame();else pauseGame();}});
 let last=performance.now();(function L(n){const d=Math.min(.05,(n-last)/1000);last=n;upd(d);draw();requestAnimationFrame(L)})(last);
 menu();

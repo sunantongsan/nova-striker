@@ -1,6 +1,8 @@
 package com.sunantongsan.novastriker;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.webkit.*;
 import android.view.View;
@@ -24,7 +26,13 @@ public class MainActivity extends Activity {
                 WebResourceResponse response = assets.shouldInterceptRequest(request.getUrl());
                 return response != null ? response : new WebResourceResponse("text/plain", "UTF-8", new java.io.ByteArrayInputStream(new byte[0]));
             }
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return true; }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (request.isForMainFrame() && request.getUrl().toString().equals("https://nova-striker-privacy.fit-rain-4305.chatgpt.site")) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl())); }
+                    catch (ActivityNotFoundException ignored) { /* Offline policy remains available in the game. */ }
+                }
+                return true;
+            }
         });
         setContentView(game);
         game.setOnApplyWindowInsetsListener((v, insets) -> {
