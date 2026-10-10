@@ -2,7 +2,7 @@
 เกมยิงยานออฟไลน์ 50 ด่าน พร้อมยาน 4 แบบ อาวุธ 4 แบบ และระบบอัปเกรด
 
 ## Android
-- Package: `com.sunantongsan.novastriker` (verify against any existing Play listing before first upload)
+- Package: `com.aistudio.novastriker.rpg` (existing Nova Striker RPG listing; versionCode 11 follows version 10)
 - Android 8+, target/compile API 36, Java 17, Gradle 8.13.
 - GitHub Actions builds a test APK on pushes to main.
 - Release AAB requires repository secrets ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD. Keep the existing upload key if this package was published before. Never commit keys/passwords.

@@ -3,11 +3,11 @@ android {
     namespace 'com.sunantongsan.novastriker'
     compileSdk 36
     defaultConfig {
-        applicationId 'com.sunantongsan.novastriker'
+        applicationId 'com.aistudio.novastriker.rpg'
         minSdk 26
         targetSdk 36
-        versionCode 1
-        versionName '1.0.0'
+        versionCode 11
+        versionName '11.0'
     }
     signingConfigs {
         release {
