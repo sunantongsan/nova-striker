@@ -1,0 +1,30 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.sunantongsan.novastriker'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.sunantongsan.novastriker'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0.0'
+    }
+    signingConfigs {
+        release {
+            if (System.getenv('ANDROID_KEYSTORE_PATH')) {
+                storeFile file(System.getenv('ANDROID_KEYSTORE_PATH'))
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes { release { signingConfig signingConfigs.release } }
+    sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets')] }
+}
+tasks.register('copyGame', Copy) {
+    from(rootProject.file('index.html'))
+    into(layout.buildDirectory.dir('generated/gameAssets'))
+}
+tasks.named('preBuild').configure { dependsOn 'copyGame' }
+dependencies { implementation 'androidx.webkit:webkit:1.14.0' }
