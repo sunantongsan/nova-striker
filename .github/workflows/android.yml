@@ -28,7 +28,7 @@ jobs:
       - name: Publish test APK to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "android-${{ github.run_number }}" app/build/outputs/apk/debug/*.apk --target "$GITHUB_SHA" --prerelease --title "Nova Striker Android build ${{ github.run_number }}" --notes 'Test APK. Release AAB requires the existing upload key.'
+        run: gh release create "android-${{ github.run_number }}" app/build/outputs/apk/debug/*.apk --target "$GITHUB_SHA" --prerelease --title "Nova Striker Android build ${{ github.run_number }}" --notes 'Test APK. Production package com.sunantongsan.novastriker. Signed releases use the new Nova upload key.'
       - name: Build signed Play bundle when signing is configured
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -45,8 +45,10 @@ jobs:
           trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
           gradle :app:bundleRelease --no-daemon
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Nova-Striker-Play-AAB
-          path: app/build/outputs/bundle/release/*.aab
-          if-no-files-found: ignore
+      - name: Attach signed AAB when available
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            gh release upload "android-${{ github.run_number }}" app/build/outputs/bundle/release/app-release.aab
+          fi
