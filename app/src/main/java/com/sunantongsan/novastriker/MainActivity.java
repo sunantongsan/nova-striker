@@ -6,6 +6,8 @@ import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.webkit.*;
 import android.view.View;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
@@ -34,11 +36,27 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
-        setContentView(game);
-        game.setOnApplyWindowInsetsListener((v, insets) -> {
-            v.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+        // Resize the WebView viewport itself; WebView padding does not protect fixed HTML overlays.
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xff07021a);
+        root.addView(game, new FrameLayout.LayoutParams(-1, -1));
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int left, top, right, bottom;
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                android.graphics.Insets safe = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                left = safe.left; top = safe.top; right = safe.right; bottom = safe.bottom;
+            } else {
+                left = insets.getSystemWindowInsetLeft(); top = insets.getSystemWindowInsetTop();
+                right = insets.getSystemWindowInsetRight(); bottom = insets.getSystemWindowInsetBottom();
+            }
+            FrameLayout.LayoutParams layout = (FrameLayout.LayoutParams) game.getLayoutParams();
+            layout.setMargins(left, top, right, bottom);
+            game.setLayoutParams(layout);
             return insets;
         });
+        setContentView(root);
+        root.requestApplyInsets();
         game.loadUrl("https://appassets.androidplatform.net/assets/index.html");
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> game.evaluateJavascript("window.novaBack && window.novaBack()", null));
