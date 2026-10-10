@@ -12,6 +12,9 @@ import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
     private WebView game;
+    private GameAds ads;
+    private boolean adsStarted;
+    void adFinished() { game.evaluateJavascript("window.novaAdDone && window.novaAdDone()", null); }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         game = new WebView(this);
@@ -23,7 +26,12 @@ public class MainActivity extends Activity {
         game.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         WebViewAssetLoader assets = new WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this)).build();
+        ads = new GameAds(this);
+        game.addJavascriptInterface(ads, "NovaAds");
         game.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView view, String url) {
+                if (!adsStarted && url.equals("https://appassets.androidplatform.net/assets/index.html")) { adsStarted=true; ads.begin(); }
+            }
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse response = assets.shouldInterceptRequest(request.getUrl());
                 return response != null ? response : new WebResourceResponse("text/plain", "UTF-8", new java.io.ByteArrayInputStream(new byte[0]));
@@ -65,8 +73,8 @@ public class MainActivity extends Activity {
     @Override public void onBackPressed() { game.evaluateJavascript("window.novaBack && window.novaBack()", null); }
     @Override protected void onPause() {
         game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
-        game.onPause(); super.onPause();
+        ads.pause(); game.onPause(); super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); }
-    @Override protected void onDestroy() { game.destroy(); super.onDestroy(); }
+    @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
+    @Override protected void onDestroy() { ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
