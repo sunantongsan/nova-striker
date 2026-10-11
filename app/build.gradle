@@ -20,7 +20,13 @@ android {
             }
         }
     }
-    buildTypes { release { signingConfig signingConfigs.release } }
+    buildTypes {
+        release {
+            if (System.getenv('ANDROID_KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
     sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets')] }
 }
 tasks.register('copyGame', Copy) {
