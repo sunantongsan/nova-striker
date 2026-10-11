@@ -47,13 +47,13 @@ jobs:
           trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
           gradle :app:bundleRelease --no-daemon
-      - name: Store unsigned bundle for local signing
-        uses: actions/upload-artifact@v4
-        with:
-          name: nova-unsigned-aab
-          path: app/build/outputs/bundle/release/app-unsigned.aab
-          if-no-files-found: ignore
-          retention-days: 3
+      - name: Attach unsigned bundle for local signing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f app/build/outputs/bundle/release/app-unsigned.aab ]; then
+            gh release upload "android-${{ github.run_number }}" app/build/outputs/bundle/release/app-unsigned.aab
+          fi
       - name: Attach signed AAB when available
         env:
           GH_TOKEN: ${{ github.token }}
