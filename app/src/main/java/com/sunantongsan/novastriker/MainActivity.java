@@ -13,6 +13,8 @@ import androidx.webkit.WebViewAssetLoader;
 public class MainActivity extends Activity {
     private WebView game;
     private GameAds ads;
+    private NovaCloud cloud;
+    void cloudEvent(String event, org.json.JSONObject data) { game.evaluateJavascript("window.novaCloudEvent && window.novaCloudEvent("+org.json.JSONObject.quote(event)+","+data.toString()+")",null); }
     private boolean adsStarted;
     void rewardStatus(String status) { game.evaluateJavascript("window.novaRewardStatus && window.novaRewardStatus("+org.json.JSONObject.quote(status)+")",null); }
     void rewardEarned(String id) { game.evaluateJavascript("window.novaRewardEarned && window.novaRewardEarned("+org.json.JSONObject.quote(id)+")",null); }
@@ -30,9 +32,11 @@ public class MainActivity extends Activity {
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this)).build();
         ads = new GameAds(this);
         game.addJavascriptInterface(ads, "NovaAds");
+        cloud=new NovaCloud(this);
+        game.addJavascriptInterface(cloud, "NovaCloud");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
-                if (!adsStarted && url.equals("https://appassets.androidplatform.net/assets/index.html")) { adsStarted=true; ads.begin(); }
+                if (!adsStarted && url.equals("https://appassets.androidplatform.net/assets/index.html")) { adsStarted=true; ads.begin(); cloud.callback(getIntent().getData()); }
             }
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse response = assets.shouldInterceptRequest(request.getUrl());
@@ -72,12 +76,13 @@ public class MainActivity extends Activity {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> game.evaluateJavascript("window.novaBack && window.novaBack()", null));
         }
     }
+    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); if(cloud!=null)cloud.callback(intent.getData()); }
     @Override public void onBackPressed() { game.evaluateJavascript("window.novaBack && window.novaBack()", null); }
     @Override protected void onPause() {
         game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
         ads.pause(); game.onPause(); super.onPause();
     }
     @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
-    @Override protected void onDestroy() { ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() { cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
 

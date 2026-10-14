@@ -38,3 +38,11 @@ References:
 - https://developer.android.com/google/play/billing/security
 - https://developers.google.com/admob/android/rewarded
 - https://developers.google.com/admob/android/ssv
+
+## 1.4 implementation checkpoint
+- Deployed owner-only `public.nova_rts_saves` (see `backend/nova_cloud.sql`). Read-only verification confirmed RLS on, anon SELECT denied, four owner policies and revision guard installed, zero saved rows.
+- Security advisors show authenticated GraphQL schema discoverability for the table because authenticated SELECT is intentional; owner RLS still applies. This is schema discoverability, not cross-user row access. Reference: https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed . Unrelated pre-existing findings were not changed.
+- A proposed test inserting fake auth users inside a rollback transaction was rejected by automatic review. It was NOT executed. Use an isolated local database or explicitly authorized test accounts for cross-user integration verification.
+- Native Google PKCE/session/cloud-backup implementation and guarded UI are included but disabled. Dashboard redirect configuration is blocked by sign-in. No live OAuth, cross-device or purchase validation claim.
+- Offline earned diamonds are part of campaign backup only. A future paid wallet must use server-owned balances/receipts and cannot trust these values.
+- Play Games remains a separate future identity integration. Do not label the Google OAuth button as Play Games.
