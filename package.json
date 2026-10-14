@@ -1,6 +1,6 @@
 {
   "name": "nova-striker-tests",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "scripts": {
     "test": "node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs"

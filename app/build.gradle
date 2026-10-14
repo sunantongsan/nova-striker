@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 15
-        versionName '1.6.0'
+        versionCode 16
+        versionName '1.6.1'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'
         buildConfigField 'boolean', 'NOVA_WAR_ENABLED', 'true'
         buildConfigField 'String', 'NOVA_CLOUD_URL', '"https://uzinxxeadejmzxqmqqtx.supabase.co"'
