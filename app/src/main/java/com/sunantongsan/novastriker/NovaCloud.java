@@ -42,6 +42,7 @@ final class NovaCloud {
         return ((KeyStore.SecretKeyEntry)store.getEntry("nova_cloud_session",null)).getSecretKey();
     }
     private void keep(JSONObject session)throws Exception {
+        if(!session.has("expires_at"))session.put("expires_at",System.currentTimeMillis()/1000+session.optLong("expires_in",3600));
         Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.ENCRYPT_MODE,encryptionKey());
         byte[] encrypted=cipher.doFinal(session.toString().getBytes(StandardCharsets.UTF_8));
         prefs.edit().putString("session",encode(encrypted)).putString("iv",encode(cipher.getIV())).commit();
@@ -96,6 +97,24 @@ final class NovaCloud {
             JSONObject data=new JSONObject(request("/rest/v1/rpc/nova_war_command","POST",new JSONObject().put("action",action).put("payload",new JSONObject(payload)),s.getString("access_token")));
             emit("war",new JSONObject().put("action",action).put("data",data));
         }catch(Exception e){try{emit("war_error",new JSONObject().put("message","ทำรายการไม่สำเร็จ ตรวจเครือข่าย โล่ และเวลาพัก แล้วลองใหม่ด้วยรายการเดิม"));}catch(Exception ignored){}}});
+    }
+    @JavascriptInterface public boolean playGamesAvailable(){return available()&&BuildConfig.NOVA_PGS_ENABLED&&!BuildConfig.NOVA_PGS_CLIENT_ID.isEmpty();}
+    @JavascriptInterface public void playGamesLogin(){
+        if(!playGamesAvailable()){status("Google Play Games ยังรอเปิดบริการ ใช้บัญชี Google หรือเล่นในเครื่องได้");return;}
+        activity.runOnUiThread(()->com.google.android.gms.games.PlayGames.getGamesSignInClient(activity).signIn().addOnCompleteListener(task->{
+            if(!task.isSuccessful()||!task.getResult().isAuthenticated()){status("ยังไม่ได้เชื่อม Play Games คุณยังเล่นในเครื่องได้");return;}
+            com.google.android.gms.games.PlayGames.getGamesSignInClient(activity).requestServerSideAccess(
+                BuildConfig.NOVA_PGS_CLIENT_ID,false,java.util.Arrays.asList(com.google.android.gms.games.gamessignin.AuthScope.OPEN_ID,com.google.android.gms.games.gamessignin.AuthScope.EMAIL)
+            ).addOnCompleteListener(auth->{
+                if(!auth.isSuccessful()){status("ยืนยัน Play Games ไม่สำเร็จ ลองเข้าสู่ระบบด้วย Google");return;}
+                String code=auth.getResult().getAuthCode();
+                worker.execute(()->{try{
+                    JSONObject session=new JSONObject(request("/functions/v1/nova-pgs-auth","POST",new JSONObject().put("code",code),null));
+                    if(!session.has("access_token")||!session.has("refresh_token"))throw new Exception("missing_session");
+                    keep(session);emit("signed_in",new JSONObject().put("id",session.getJSONObject("user").getString("id")).put("source","play_games"));
+                }catch(Exception e){status("เชื่อมเซฟ Play Games ไม่สำเร็จ ใช้บัญชี Google เดียวกันเพื่อสมัครได้");}});
+            });
+        }));
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }

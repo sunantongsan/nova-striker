@@ -1,0 +1,10 @@
+import {handle} from '../backend/pgs/auth.mjs';import assert from 'node:assert/strict';
+const env={PGS_CLIENT_ID:'test.apps.googleusercontent.com',PGS_CLIENT_SECRET:'test-server-only',PGS_APPLICATION_ID:'123',SUPABASE_URL:'https://test.supabase.co',SUPABASE_PUBLISHABLE_KEY:'test-publishable'};
+const req=()=>new Request('https://example.test',{method:'POST',body:JSON.stringify({code:'one-use-code',player_id:'forged-id'})});
+assert.equal((await handle(req(),{},()=>{throw Error('must not fetch')})).status,503);
+assert.equal((await handle(req(),env,async()=>new Response('{}',{status:400}))).status,401);
+let calls=[];const mock=async(url,opt)=>{calls.push([url,opt]);if(calls.length===1)return Response.json({access_token:'google-access',id_token:'google-id'});if(calls.length===2)return Response.json({player_id:'server-verified-player'});return Response.json({access_token:'supabase-access',refresh_token:'supabase-refresh',user:{id:'supabase-user'}});};
+let result=await handle(req(),env,mock);assert.equal(result.status,200);assert.equal((await result.json()).user.id,'supabase-user');assert(calls[1][0].endsWith('/applications/123/verify'));assert.equal(calls[1][1].headers.Authorization,'Bearer google-access');assert.equal(JSON.parse(calls[2][1].body).id_token,'google-id');assert(!JSON.stringify(calls).includes('forged-id'));
+let count=0;result=await handle(req(),env,async()=>{count++;return count===1?Response.json({access_token:'access',id_token:'id'}):new Response('{}',{status:401});});assert.equal(result.status,401);assert.equal(count,2);
+result=await handle(req(),env,async()=>Response.json({access_token:'access'}));assert.equal(result.status,401);
+console.log('PASS: staged PGS server exchange rejects missing config, invalid codes, missing consent and wrong game; never trusts client player IDs');

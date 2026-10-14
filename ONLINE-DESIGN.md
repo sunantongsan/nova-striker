@@ -48,7 +48,7 @@ References:
 - Play Games remains a separate future identity integration. Do not label the Google OAuth button as Play Games.
 
 
-## 1.5.0 reviewable implementation — ONLINE NOT DEPLOYED
+## 1.5.0 historical checkpoint — superseded by 1.5.1 below
 
 Offline changes: training cards update in place (no modal replacement/scroll reset); every click starts an independent job immediately and reserves army capacity. Jobs finish independently, including unsorted completion times; existing saved jobs retain their original deadlines. Per-kind animated clock, live count and next completion. Level 1–5 palette/size/module changes. Nine weapon effects (machine gun, cannon, grenade, healing beam, sniper, missile, shock fist, bomb, plasma); Tesla uses a jagged bolt. Cannon/grenade/bomber area damage applies to buildings.
 
@@ -63,3 +63,13 @@ New-player shield 15 minutes; after any raid defender gets 30 minutes; attacking
 Data access: both new public tables have RLS enabled and no direct anon/authenticated grants. An exposed SECURITY INVOKER wrapper calls the private SECURITY DEFINER command; the private command explicitly verifies auth.uid(), derives the actor from that verified identity, validates action/input, and only returns permitted player profiles/targets and participant reports. No email/auth tokens in results. No client-chosen resource or damage result. No service-role credentials in client.
 
 Activation after approval: apply the reviewed migration, check production schema/security advisors, validate Google callback allow-list `novastriker://auth/callback` and PKCE on a real device, enable both build flags only after the service and authentication work, then run two-account attack/retry/cooldown/cross-device tests. Google provider is enabled at the Auth settings endpoint, but a successful mobile login has not yet been verified. Do not claim online is live before this gate passes.
+
+
+## 1.5.1 integration checkpoint
+The user authorized installing the backend and continuing with Supabase. Applied nova_async_war_v1 to project uzinxxeadejmzxqmqqtx. Verified RLS enabled on both war tables, no anonymous RPC permission and no direct authenticated writes. Existing Google provider is enabled and novastriker://auth/callback is already allowlisted. CLOUD and WAR flags are enabled for device testing; actual Google sign-in still requires testing on an Android device. Online battles are asynchronous server-resolved raids, not realtime combat.
+
+Play Games SDK 22.1.0 and native login bridge are included but NOVA_PGS_ENABLED remains false. The server exchange under backend/pgs is staged, not deployed. It exchanges a one-use code, verifies the game application with Google, and lets Supabase verify the Google ID token. It never trusts client-supplied player IDs or merges accounts by email. Google account identity (sub) must match to use the same Supabase account.
+
+Remaining activation: create/select a dedicated Nova Google Cloud project; accept PGS/GCP/API terms with action-time user confirmation; configure Play Games application and Android OAuth clients with package and signing SHA-1; create server OAuth client, add its ID to Supabase Google allowed client IDs; configure PGS_CLIENT_ID, PGS_CLIENT_SECRET, PGS_APPLICATION_ID, SUPABASE_URL, NOVA_SUPABASE_PUBLISHABLE_KEY in the Edge Function environment; deploy nova-pgs-auth with verify_jwt=false (the handler verifies the Google authorization itself); configure Android build IDs and enable flag only after real-device tests. No client secret belongs in the APK or repository.
+
+The signed-in Play Console setup was inspected but not saved. Google Cloud projectcreate returned Site Unavailable twice, so project creation is blocked. Existing unrelated projects were not reused. Play Games requires a Google Play Games profile; it is not anonymous guest authentication. Offline play remains available without an account.
