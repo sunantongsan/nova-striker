@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 8
-        versionName '1.1.0'
+        versionCode 9
+        versionName '1.2.0'
     }
     signingConfigs {
         release {
@@ -31,6 +31,7 @@ android {
 }
 tasks.register('copyGame', Copy) {
     from(rootProject.file('index.html'))
+    from(rootProject.file('game.js'))
     from(rootProject.file('assets')) { include '*.webp'; into 'assets' }
     into(layout.buildDirectory.dir('generated/gameAssets'))
 }
