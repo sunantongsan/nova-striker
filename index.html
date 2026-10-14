@@ -77,7 +77,7 @@ E.push({t,x:0,y:-60,w,ox:v[0],oy:v[1],hp:1+Math.floor(lv/20)+Math.max(1,[1+lv/14
 if(lv>=4&&i>1&&i<nW-2&&R()<.025){const mh=Math.floor(20+lv*3.5);E.push({t:9,mini:1,bt:[0,1,2,3,5][R()*5|0],k:.4,r:22,lim:60,mhp:mh,hp:mh,x:W/2,y:-50,vx:90,cd:1.5,en:0});msg='MINI BOSS!';msgT=1.6;return}
 if(spawned%10==1){msg='WAVE '+spawned+'/'+nW;msgT=1.3}}
 function bossAI(e,ed,sp){
-e.launchCd=(e.launchCd??4)-ed;
+e.launchCd=(e.launchCd == null ? 4 : e.launchCd)-ed;
 if(e.launchCd<=0&&E.length<150){e.launchCd=e.mini?8:6;for(let i=-1;i<=1;i++)E.push({t:5,x:e.x+i*20,y:e.y+20,sx:e.x+i*20,sy:e.y+20,hp:2+Math.floor(lv/15),r:9,k:.52,en:2,dive:1,attack:3,dt:-1-(i+1)*.22,dx:P.x+i*18,aimY:P.y,ph:R()*6});msg='⚠ บอสปล่อยหน่วยกามิกาเซ่';msgT=1;}
 const b=e.bt,ph=e.hp<e.mhp/2,m=e.mini?1.7:1,L=e.lim||120;e.cd-=ed;e.c2=(e.c2||0)-ed;
 if(!e.chg&&!e.back&&e.y<(e.mini?110:130))e.y+=50*ed;
@@ -103,7 +103,7 @@ function bomb(){if(P.bombs<1||st!='play')return;P.bombs--;flash=.5;EB=[];E.forEa
 
 // Sweep the projectile's whole travel segment, resolving the nearest impact first.
 function impactTime(b,e){
- const ax=b.px??b.x,ay=b.py??b.y,dx=b.x-ax,dy=b.y-ay,r=e.r+5;
+ const ax=b.px == null ? b.x : b.px,ay=b.py == null ? b.y : b.py,dx=b.x-ax,dy=b.y-ay,r=e.r+5;
  let lo=0,hi=1;
  for(const [p,v,center] of [[ax,dx,e.x],[ay,dy,e.y]]){
   if(Math.abs(v)<1e-8){if(Math.abs(p-center)>r)return null;continue}
@@ -118,7 +118,7 @@ function resolveBullets(){
    const t=impactTime(b,e);if(t!==null)hits.push({e,t});}
   hits.sort((a,z)=>a.t-z.t);
   for(const {e,t} of hits){if(e.dead)continue;
-   const ix=(b.px??b.x)+(b.x-(b.px??b.x))*t,iy=(b.py??b.y)+(b.y-(b.py??b.y))*t;
+   const ix=(b.px == null ? b.x : b.px)+(b.x-(b.px == null ? b.x : b.px))*t,iy=(b.py == null ? b.y : b.py)+(b.y-(b.py == null ? b.y : b.py))*t;
    hit(e,b.d);boom(ix,iy,'#9dfaff',b.m?10:4);
    if(b.m)for(const o of E)if(o!==e&&!o.dead&&o.en>=0&&!(o.w&&o.w.t<o.w.rd)&&Math.hypot(o.x-e.x,o.y-e.y)<50)hit(o,b.d*.6);
    b.dead=true;break;
