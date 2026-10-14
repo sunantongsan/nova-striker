@@ -71,7 +71,7 @@ final class NovaCloud {
         if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}
         activity.runOnUiThread(()->{try{
             byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes),challenge=encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
-            prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).commit();
+            prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",false).commit();
             Uri uri=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider","google").appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256").build();
             activity.startActivity(new Intent(Intent.ACTION_VIEW,uri));
         }catch(Exception e){status("เปิดหน้าล็อกอินไม่ได้ กรุณาลองใหม่");}});
@@ -79,9 +79,10 @@ final class NovaCloud {
     void callback(Uri uri){
         if(!available()||uri==null||!"novastriker".equals(uri.getScheme())||!"auth".equals(uri.getHost())||!"/callback".equals(uri.getPath()))return;
         String code=uri.getQueryParameter("code"),verifier=prefs.getString("verifier","");long age=System.currentTimeMillis()-prefs.getLong("login_at",0);
-        prefs.edit().remove("verifier").remove("login_at").commit();
-        if(code==null||verifier.isEmpty()||age<0||age>600000){status("การล็อกอินหมดอายุหรือยกเลิก กรุณาลองใหม่");return;}
-        worker.execute(()->{try{JSONObject s=new JSONObject(request("/auth/v1/token?grant_type=pkce","POST",new JSONObject().put("auth_code",code).put("code_verifier",verifier),null));keep(s);emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));}catch(Exception e){status("ล็อกอินไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่");}});
+        boolean recovery=prefs.getBoolean("recovery",false);
+        prefs.edit().remove("verifier").remove("login_at").remove("recovery").commit();
+        if(code==null||verifier.isEmpty()||age<0||age>3600000){status("การล็อกอินหมดอายุหรือยกเลิก กรุณาลองใหม่");return;}
+        worker.execute(()->{try{JSONObject s=new JSONObject(request("/auth/v1/token?grant_type=pkce","POST",new JSONObject().put("auth_code",code).put("code_verifier",verifier),null));keep(s);if(recovery){prefs.edit().putBoolean("recovery_ready",true).commit();emit("password_recovery",new JSONObject());}else emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));}catch(Exception e){status("ล็อกอินไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่");}});
     }
     @JavascriptInterface public void load(){if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}worker.execute(()->{try{JSONObject s=session();JSONArray rows=new JSONArray(request("/rest/v1/nova_rts_saves?select=revision,payload,updated_at&user_id=eq."+s.getJSONObject("user").getString("id"),"GET",null,s.getString("access_token")));emit("loaded",new JSONObject().put("id",s.getJSONObject("user").getString("id")).put("save",rows.length()>0?rows.getJSONObject(0):JSONObject.NULL));}catch(Exception e){status("โหลดเซฟไม่ได้ กรุณาล็อกอินหรือตรวจอินเทอร์เน็ต");}});}
     @JavascriptInterface public void save(String json,long revision){if(!available()||json.length()>131072||revision<0)return;worker.execute(()->{try{JSONObject s=session(),payload=new JSONObject(json);String uid=s.getJSONObject("user").getString("id"),path="/rest/v1/nova_rts_saves";JSONObject body=new JSONObject().put("payload",payload).put("revision",revision+1);if(revision==0)body.put("user_id",uid);else path+="?user_id=eq."+uid+"&revision=eq."+revision;JSONArray rows=new JSONArray(request(path,revision==0?"POST":"PATCH",body,s.getString("access_token")));if(rows.length()!=1){status("มีเซฟใหม่จากอีกเครื่อง กรุณาโหลดจากคลาวด์ก่อน");return;}emit("saved",new JSONObject().put("revision",rows.getJSONObject(0).getLong("revision")).put("id",uid));}catch(Exception e){status("บันทึกออนไลน์ไม่สำเร็จหรือเซฟขัดแย้ง โหลดเซฟล่าสุดก่อนลองใหม่");}});}
@@ -98,23 +99,28 @@ final class NovaCloud {
             emit("war",new JSONObject().put("action",action).put("data",data));
         }catch(Exception e){try{emit("war_error",new JSONObject().put("message","ทำรายการไม่สำเร็จ ตรวจเครือข่าย โล่ และเวลาพัก แล้วลองใหม่ด้วยรายการเดิม"));}catch(Exception ignored){}}});
     }
-    @JavascriptInterface public boolean playGamesAvailable(){return available()&&BuildConfig.NOVA_PGS_ENABLED&&!BuildConfig.NOVA_PGS_CLIENT_ID.isEmpty();}
-    @JavascriptInterface public void playGamesLogin(){
-        if(!playGamesAvailable()){status("Google Play Games ยังรอเปิดบริการ ใช้บัญชี Google หรือเล่นในเครื่องได้");return;}
-        activity.runOnUiThread(()->com.google.android.gms.games.PlayGames.getGamesSignInClient(activity).signIn().addOnCompleteListener(task->{
-            if(!task.isSuccessful()||!task.getResult().isAuthenticated()){status("ยังไม่ได้เชื่อม Play Games คุณยังเล่นในเครื่องได้");return;}
-            com.google.android.gms.games.PlayGames.getGamesSignInClient(activity).requestServerSideAccess(
-                BuildConfig.NOVA_PGS_CLIENT_ID,false,java.util.Arrays.asList(com.google.android.gms.games.gamessignin.AuthScope.OPEN_ID,com.google.android.gms.games.gamessignin.AuthScope.EMAIL)
-            ).addOnCompleteListener(auth->{
-                if(!auth.isSuccessful()){status("ยืนยัน Play Games ไม่สำเร็จ ลองเข้าสู่ระบบด้วย Google");return;}
-                String code=auth.getResult().getAuthCode();
-                worker.execute(()->{try{
-                    JSONObject session=new JSONObject(request("/functions/v1/nova-pgs-auth","POST",new JSONObject().put("code",code),null));
-                    if(!session.has("access_token")||!session.has("refresh_token"))throw new Exception("missing_session");
-                    keep(session);emit("signed_in",new JSONObject().put("id",session.getJSONObject("user").getString("id")).put("source","play_games"));
-                }catch(Exception e){status("เชื่อมเซฟ Play Games ไม่สำเร็จ ใช้บัญชี Google เดียวกันเพื่อสมัครได้");}});
-            });
-        }));
+    private String beginEmailLink(boolean recovery)throws Exception {
+        byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes);
+        prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",recovery).commit();
+        return encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
+    }
+    @JavascriptInterface public void emailAuth(String action,String email,String password){
+        if(!available()||email==null||password==null)return;
+        if(!java.util.Arrays.asList("signup","login","recover","update").contains(action))return;
+        if(!action.equals("update")&&(!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()||email.length()>254)){status("กรุณากรอกอีเมลให้ถูกต้อง");return;}
+        if(!action.equals("recover")&&(password.length()<(action.equals("login")?1:8)||password.length()>128)){status("รหัสผ่านใหม่ต้องมี 8–128 ตัวอักษร");return;}
+        worker.execute(()->{try{
+            JSONObject body=new JSONObject().put("email",email);String path,token=null;
+            if(action.equals("update")){
+                if(!prefs.getBoolean("recovery_ready",false))throw new Exception("recovery_required");
+                token=session().getString("access_token");body=new JSONObject().put("password",password);path="/auth/v1/user";
+            }else if(action.equals("login")){path="/auth/v1/token?grant_type=password";body.put("password",password);}
+            else {path="/auth/v1/"+(action.equals("signup")?"signup":"recover")+"?redirect_to="+Uri.encode(CALLBACK);body.put("code_challenge",beginEmailLink(action.equals("recover"))).put("code_challenge_method","s256");if(action.equals("signup"))body.put("password",password);}
+            JSONObject result=new JSONObject(request(path,action.equals("update")?"PUT":"POST",body,token));
+            if(action.equals("update")){prefs.edit().remove("recovery_ready").commit();emit("signed_in",new JSONObject());status("เปลี่ยนรหัสผ่านแล้ว");}
+            else if(result.has("access_token")){keep(result);emit("signed_in",new JSONObject().put("id",result.getJSONObject("user").getString("id")));}
+            else status(action.equals("recover")?"หากอีเมลนี้มีบัญชี ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ เปิดจากมือถือเครื่องนี้":"ตรวจกล่องอีเมลและสแปมเพื่อยืนยันบัญชี แล้วกลับมาเข้าสู่ระบบ หากเคยสมัครแล้วให้เข้าสู่ระบบแทน");
+        }catch(Exception e){status("ทำรายการไม่ได้ ตรวจอีเมล รหัสผ่าน และการยืนยันอีเมล หากส่งอีเมลไม่ได้ให้ใช้ Google หรือลองใหม่ภายหลัง");}});
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }
