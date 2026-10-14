@@ -7,15 +7,63 @@ import android.os.SystemClock;
 import android.webkit.JavascriptInterface;
 import com.google.android.gms.ads.*;
 import com.google.android.gms.ads.interstitial.*;
+import com.google.android.gms.ads.rewarded.*;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.ump.*;
 
-/** Ads can only appear at the completed-level transition, never at app/level start. */
+/** Interstitials only at transitions; rewarded ads only after an explicit request. No reward on dismissal. */
 final class GameAds {
     private final MainActivity activity;
     private final SharedPreferences prefs;
     private final ConsentInformation consent;
     private InterstitialAd ready;
+    private RewardedAd rewardReady;
+    private boolean rewardLoading;
+    private long rewardLoadedAt;
+    private static final String REWARD_UNIT = ""; // Set to a real rewarded unit only after AdMob setup.
+    private void rewardStatus(String status) { if(!destroyed) activity.rewardStatus(status); }
+    void deliverPending() {
+        String pending=prefs.getString("rewardPending", "");
+        if(!destroyed && !pending.isEmpty()) activity.rewardEarned(pending);
+    }
+    @JavascriptInterface public void acknowledgeReward(String id) {
+        activity.runOnUiThread(() -> { if(id.equals(prefs.getString("rewardPending", ""))) prefs.edit().remove("rewardPending").apply(); });
+    }
+    @JavascriptInterface public void reward() {
+        activity.runOnUiThread(() -> {
+            if(destroyed || showing) return;
+            if(!prefs.getString("rewardPending", "").isEmpty()) { deliverPending(); return; }
+            String unit=BuildConfig.DEBUG?"ca-app-pub-3940256099942544/5224354917":REWARD_UNIT;
+            if(unit.isEmpty()) { rewardStatus("unconfigured"); return; }
+            if(!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
+            long now=System.currentTimeMillis(), day=(now+25200000L)/86400000L;
+            if(now-prefs.getLong("rewardLast",0)<120000L) { rewardStatus("cooldown"); return; }
+            if(day==prefs.getLong("rewardDay",-1)&&prefs.getInt("rewardCount",0)>=5) { rewardStatus("limit"); return; }
+            if(rewardReady==null || SystemClock.elapsedRealtime()-rewardLoadedAt>3500000L) {
+                if(rewardLoading) { rewardStatus("loading"); return; }
+                rewardReady=null; rewardLoading=true; rewardStatus("loading"); final int gen=generation;
+                Bundle extras=new Bundle(); extras.putString("npa","1");
+                RewardedAd.load(activity,unit,new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class,extras).build(),new RewardedAdLoadCallback(){
+                    @Override public void onAdLoaded(RewardedAd ad){rewardLoading=false;if(enabled()&&generation==gen){rewardReady=ad;rewardLoadedAt=SystemClock.elapsedRealtime();rewardStatus("ready");}}
+                    @Override public void onAdFailedToLoad(LoadAdError error){rewardLoading=false;rewardReady=null;rewardStatus("unavailable");}
+                }); return;
+            }
+            if(!foreground) return;
+            RewardedAd ad=rewardReady;rewardReady=null;showing=true;final boolean[] earned={false};
+            ad.setFullScreenContentCallback(new FullScreenContentCallback(){
+                @Override public void onAdDismissedFullScreenContent(){showing=false;if(!earned[0])rewardStatus("closed");deliverPending();}
+                @Override public void onAdFailedToShowFullScreenContent(AdError error){showing=false;rewardStatus("unavailable");}
+            });
+            try { ad.show(activity,item -> {
+                if(earned[0]||destroyed) return;earned[0]=true;
+                long earnedAt=System.currentTimeMillis(),earnedDay=(earnedAt+25200000L)/86400000L;
+                int count=earnedDay==prefs.getLong("rewardDay",-1)?prefs.getInt("rewardCount",0):0;
+                String id=java.util.UUID.randomUUID().toString();
+                prefs.edit().putLong("rewardDay",earnedDay).putInt("rewardCount",count+1).putLong("rewardLast",earnedAt).putString("rewardPending",id).commit();
+                deliverPending();
+            }); } catch(RuntimeException error){showing=false;rewardStatus("unavailable");}
+        });
+    }
     private boolean initialized, loading, showing, destroyed, foreground;
     private long lastShown = SystemClock.elapsedRealtime();
     private int generation;
@@ -25,6 +73,7 @@ final class GameAds {
         consent = UserMessagingPlatform.getConsentInformation(activity);
     }
     void begin() {
+        deliverPending();
         if (!prefs.contains("enabled")) settings();
         else if (enabled()) requestConsent();
     }
@@ -33,16 +82,16 @@ final class GameAds {
         activity.runOnUiThread(() -> {
             if (destroyed || showing) return;
             new AlertDialog.Builder(activity).setTitle("โฆษณาและความเป็นส่วนตัว")
-                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาหลังจบด่านเพื่อสนับสนุนเกมได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
+                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบบรับรางวัลเพื่อรับเพชรได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
                 .setPositiveButton("อายุ 18+ และเปิดโฆษณา", (d,w) -> {
                     prefs.edit().putBoolean("enabled", true).apply(); requestConsent();
                 })
                 .setNegativeButton("ไม่เปิด / อายุต่ำกว่า 18", (d,w) -> {
-                    prefs.edit().putBoolean("enabled", false).apply(); generation++; ready=null;
+                    prefs.edit().putBoolean("enabled", false).apply(); generation++; ready=null; rewardReady=null;
                 })
                 .setNeutralButton("จัดการความยินยอม", (d,w) -> {
                     if (consent.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED) {
-                        ready=null; generation++;
+                        ready=null; rewardReady=null; generation++;
                         UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
                     }
                 }).show();
@@ -96,5 +145,6 @@ final class GameAds {
     private void done() { if (!destroyed) activity.adFinished(); }
     void resume() { foreground=true; }
     void pause() { foreground=false; }
-    void destroy() { destroyed=true; generation++; ready=null; }
+    void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; }
 }
+
