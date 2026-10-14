@@ -1,9 +1,9 @@
 {
   "name": "nova-striker-tests",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "private": true,
   "scripts": {
-    "test": "node tests/rts.cjs && node tests/online.cjs"
+    "test": "node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"

@@ -91,7 +91,7 @@ final class NovaCloud {
     @JavascriptInterface public boolean warAvailable(){return available() && BuildConfig.NOVA_WAR_ENABLED;}
     @JavascriptInterface public void war(String action,String payload){
         if(!warAvailable()){status("สงครามออนไลน์ยังไม่เปิดให้บริการ");return;}
-        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave").contains(action))return;
+        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave","infrastructure","forge","station","research","fund","cancel").contains(action))return;
         worker.execute(()->{try{
             JSONObject s;
             try{s=session();}catch(Exception e){emit("war_login",new JSONObject());return;}

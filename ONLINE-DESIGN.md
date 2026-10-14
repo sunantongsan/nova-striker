@@ -77,3 +77,15 @@ The signed-in Play Console setup was inspected but not saved. Google Cloud proje
 
 ## 1.5.2 supersedes Play Games plan
 User chose email/password and Google only. Removed Play Games SDK, application initializer, UI and staged server implementation. Email signup, password login, PKCE email confirmation/recovery and password update are implemented using Supabase Auth. Passwords are not persisted; session tokens remain native Keystore-encrypted. Email and Google providers are enabled and signup allowed, email confirmation remains enabled. Dashboard shows built-in SMTP only: public email signup/recovery requires a configured production email sender; do not disable confirmation as a workaround. Device sign-in and real email delivery remain unverified.
+
+
+## 1.6.0 base expansion
+20x20 build area; old coordinates translated +5 once using mapSize marker. All buildings support 15 levels with tier colors, modules, level labels; 100 wall cap. Added crystal plant/store, independent gold/power stores, garrison, missile/cannon turrets, shield generator; 2 heavy units and 5-level weapon/armor research. Offline crystal production 120 per plant level/hour; storage 200 base +800 per store level. Online wallet is server-owned and client cache cannot accrue or spend offline. Joining explicitly switches to the existing server wallet (no importing editable offline balance); withdrawal deletes that wallet and starts offline crystals at zero. Existing server crystals and pre-migration legacy accrual preserved.
+
+Crystal infrastructure online levels are server-owned, upgrade costs 50*current level and requires higher online tier. Offline normal upgrades >=Lv6 cost 20*(current level-4) crystals. Online payment for offline upgrades/units uses persisted nonces, resource reservation and server receipts; cancellation is serialized and cannot cancel a committed spend. Receipts cannot be read or written directly.
+
+Local garrison reserves trained army, occupancy 5+5*level; cannot deploy reserved soldiers; restored after defense. Online arsenal/garrison is separately trained from the server wallet (never imports editable offline troop counts). This distinction is explicit in both menus. Online garrison and advanced defenses contribute to server resolution; online PvP remains asynchronous reports, not a live battle simulation.
+
+Impact effects: collision-checked weight-based knockback, hop, stun, death fade, timed sparks, building shake/cracks/smoke/fire, persistent nonblocking ruins. Defender path updates throttled; particles bounded. Home defense on 22x22 border; offline campaign stays 12x12. Same-opponent cooldown reduced from 6h to30min, waiting reasons displayed.
+
+Validation: local migration/rules/reservation/production/level15/combat tests; PGlite old+new migrations with anon/direct access denial, spending/retry/cancel idempotency, no production without plant, researched strength and online garrison. Mobile UI exercised all new menus and heavy training, preserving lower-card scroll. Email SMTP remains pending as in 1.5.2.
