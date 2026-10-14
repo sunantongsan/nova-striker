@@ -7,9 +7,10 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 11
-        versionName '1.4.0'
+        versionCode 12
+        versionName '1.5.0'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'false'
+        buildConfigField 'boolean', 'NOVA_WAR_ENABLED', 'false'
         buildConfigField 'String', 'NOVA_CLOUD_URL', '"https://uzinxxeadejmzxqmqqtx.supabase.co"'
         buildConfigField 'String', 'NOVA_CLOUD_KEY', '"sb_publishable_4R8VSfnmuFq6hAgWRtDX6Q_IcSVh82m"'
     }
@@ -57,4 +58,5 @@ tasks.register('verifySdkVersions') {
         }
     }
 }
+
 

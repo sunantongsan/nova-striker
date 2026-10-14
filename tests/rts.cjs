@@ -14,3 +14,12 @@ f=fresh();e=f.e;assert(e.scout(1));for(let i=0;i<4;i++)while(e.d.army[i]>0)e.dep
 f=fresh();e=f.e;let buildings=JSON.stringify(e.d.buildings);assert.equal(e.startDefense(),'');steps=0;while(!e.defense.result&&steps++<1400)e.tickDefense(.1);assert(e.defense.result);assert.equal(JSON.stringify(e.d.buildings),buildings,'Defense damage must not delete or mutate original base');let waveBefore=e.d.defenseLevel;e.defense=null;e.d.buildings.forEach(b=>b.lv=5);assert.equal(e.startDefense(),'');e.defense.remaining=0;e.defense.enemies=[];e.tickDefense(.1);assert(e.defense.result.win);gold=e.d.gold;gems=e.d.gems;e.finishDefense(true);assert.equal(e.d.gold,gold);assert.equal(e.d.gems,gems);assert.equal(e.d.defenseLevel,waveBefore+1);
 const path=NovaRTS.route({x:1,y:1},{x:4,y:1},[{x:2,y:1,hp:1}],1);assert(path&&!path.some(p=>p.x===2&&p.y===1));assert.equal(NovaRTS.duration(61),'1:01');
 console.log('PASS: automatic production, full capacity/no hidden backlog, migration, exact completion, warehouse, connected walls/quotes, training speed-up, daily tasks, diamond caps/replay, campaign/boss, defense and routing');
+
+// Parallel completion must not be blocked by an earlier slow production job.
+f=fresh();e=f.e;e.d.army.fill(0);e.d.power=2000;e.d.buildings.push({id:20,type:'factory',x:1,y:1,lv:1});
+assert.equal(e.train(1),'');assert.equal(e.train(0),'');assert.equal(e.d.queue[0].until-f.now(),10000);assert.equal(e.d.queue[1].until-f.now(),4000);assert.equal(e.housing(),5);
+f.advance(4000);assert.equal(e.d.army[0],1);assert.equal(e.d.army[1],0);assert.equal(e.d.queue.length,1);f.advance(6000);assert.equal(e.d.army[1],1);
+f=fresh();e=f.e;e.d.army.fill(0);e.d.power=2000;for(let i=0;i<20;i++)assert.equal(e.train(0),'');assert.equal(e.housing(),20);let beforePower=e.d.power;assert(e.train(0));assert.equal(e.d.power,beforePower);f.advance(4000);assert.equal(e.d.army[0],20);assert.equal(e.d.queue.length,0);e.sync();assert.equal(e.d.army[0],20);
+f=fresh();e=f.e;e.d.army.fill(0);e.d.power=2000;e.d.buildings.push({id:20,type:'factory',x:1,y:1,lv:1});e.train(1);e.train(0);e.d.gems=10;assert.equal(e.speedTraining(1),'');assert.equal(e.d.army[0],1);assert.equal(e.d.army[1],1);assert.equal(e.d.gems,9);
+assert.equal(new Set(NovaRTS.units.map(u=>u.weapon)).size,9);
+console.log('PASS: parallel jobs, short-job completion, >8 jobs, housing reservation, no double completion, maximum speed-up deadline and nine weapon profiles');

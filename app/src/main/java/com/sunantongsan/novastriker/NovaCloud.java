@@ -86,5 +86,17 @@ final class NovaCloud {
     @JavascriptInterface public void save(String json,long revision){if(!available()||json.length()>131072||revision<0)return;worker.execute(()->{try{JSONObject s=session(),payload=new JSONObject(json);String uid=s.getJSONObject("user").getString("id"),path="/rest/v1/nova_rts_saves";JSONObject body=new JSONObject().put("payload",payload).put("revision",revision+1);if(revision==0)body.put("user_id",uid);else path+="?user_id=eq."+uid+"&revision=eq."+revision;JSONArray rows=new JSONArray(request(path,revision==0?"POST":"PATCH",body,s.getString("access_token")));if(rows.length()!=1){status("มีเซฟใหม่จากอีกเครื่อง กรุณาโหลดจากคลาวด์ก่อน");return;}emit("saved",new JSONObject().put("revision",rows.getJSONObject(0).getLong("revision")).put("id",uid));}catch(Exception e){status("บันทึกออนไลน์ไม่สำเร็จหรือเซฟขัดแย้ง โหลดเซฟล่าสุดก่อนลองใหม่");}});}
     @JavascriptInterface public void deleteSave(){if(!available())return;worker.execute(()->{try{JSONObject s=session();request("/rest/v1/nova_rts_saves?user_id=eq."+s.getJSONObject("user").getString("id"),"DELETE",null,s.getString("access_token"));emit("deleted",new JSONObject());}catch(Exception e){status("ลบข้อมูลออนไลน์ไม่สำเร็จ");}});}
     @JavascriptInterface public void logout(){worker.execute(()->{try{JSONObject s=read();request("/auth/v1/logout?scope=local","POST",null,s.getString("access_token"));}catch(Exception ignored){}prefs.edit().clear().commit();emit("signed_out",new JSONObject());});}
+    @JavascriptInterface public boolean warAvailable(){return available() && BuildConfig.NOVA_WAR_ENABLED;}
+    @JavascriptInterface public void war(String action,String payload){
+        if(!warAvailable()){status("สงครามออนไลน์ยังไม่เปิดให้บริการ");return;}
+        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave").contains(action))return;
+        worker.execute(()->{try{
+            JSONObject s;
+            try{s=session();}catch(Exception e){emit("war_login",new JSONObject());return;}
+            JSONObject data=new JSONObject(request("/rest/v1/rpc/nova_war_command","POST",new JSONObject().put("action",action).put("payload",new JSONObject(payload)),s.getString("access_token")));
+            emit("war",new JSONObject().put("action",action).put("data",data));
+        }catch(Exception e){try{emit("war_error",new JSONObject().put("message","ทำรายการไม่สำเร็จ ตรวจเครือข่าย โล่ และเวลาพัก แล้วลองใหม่ด้วยรายการเดิม"));}catch(Exception ignored){}}});
+    }
     void destroy(){closed=true;worker.shutdownNow();}
 }
+

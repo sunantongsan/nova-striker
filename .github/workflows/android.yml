@@ -24,7 +24,9 @@ jobs:
       - name: Install Android SDK
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: Test RTS gameplay
-        run: node tests/rts.cjs
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
       - name: Build test APK
         run: gradle :app:verifySdkVersions :app:assembleDebug --no-daemon
       - name: Publish test APK to GitHub Release
@@ -71,4 +73,5 @@ jobs:
           name: nova-play-bundle
           path: app/build/outputs/bundle/release/*.aab
           retention-days: 7
+
 
