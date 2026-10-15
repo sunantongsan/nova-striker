@@ -557,7 +557,19 @@ var fighter212=drawFighter;drawFighter=function(t,enemy){fighter212(liveRoom&&!l
 
 // Manual alien recruitment: one receipt delivers one troop, never timer production.
 var mercRetryAt=0;
-function mercCard213(){var m=E.d.mercenaries||{},lv=E.level('mercenary'),lock=lv<1||E.level('tech')<2,full=(m.total||0)>=(m.capacity||10+2*lv);return '<section id="mercRecruit"><h3>ทหารรับจ้างต่างดาว</h3><p>มี '+(m.total||0)+' / '+(lv?(m.capacity||10+2*lv):0)+' นาย • บุก '+(m.attack||0)+' / เฝ้าฐาน '+(m.guard||0)+'</p><p>150 พลังงาน / นาย • ได้ทันที<br>เลือด 330 • โจมตี 48 • ความสามารถเท่าเครื่องบินขับไล่<br>อัปเกรดฐานเพิ่มความจุ 2 นายต่อระดับ</p><button class="wide green" onclick="Game.buyMercenary()" '+(lock||full||E.d.pendingMerc?'disabled':'')+'>'+(E.d.pendingMerc?'กำลังซื้อ…':lock?'ปลดล็อก: ฐานทหารรับจ้าง 1 / ศูนย์วิจัย 2':full?'ฐานทหารรับจ้างเต็ม':'ซื้อ +1 นาย • 150 พลังงาน')+'</button><button class="wide" onclick="Game.enhanceInfo(\'unit:alien\',1)">ข้อมูล / ตีบวก</button></section>';}
+function mercCard213(){
+ var m=E.d.mercenaries||{},lv=E.level('mercenary'),lock=lv<1||E.level('tech')<2,full=(m.total||0)>=(m.capacity||10+2*lv),base=E.d.buildings.find(function(b){return b.type==='mercenary';}),upgrade='สร้างฐานทหารรับจ้างเพื่อเก็บกำลังพล';
+ if(base){var cost=E.upgradeCost(base);upgrade=base.until?'ฐานกำลังก่อสร้างหรืออัปเกรด':lv>=15?'ฐานระดับสูงสุด • จุ 40 นาย':'อัปเกรดฐาน '+lv+' → '+(lv+1)+' • ความจุ '+(10+2*lv)+' → '+(12+2*lv)+' นาย<br>ใช้ '+cost.gold.toLocaleString()+' ทอง / '+cost.power.toLocaleString()+' พลังงาน'+(cost.crystals?' / '+cost.crystals.toLocaleString()+' ผลึก':'')+' • '+duration(cost.time);}
+ return '<section id="mercRecruit"><h3>ทหารรับจ้างต่างดาว</h3><p>มี '+(m.total||0)+' / '+(lv?(m.capacity||10+2*lv):0)+' นาย • บุก '+(m.attack||0)+' / เฝ้าฐาน '+(m.guard||0)+'</p><p>แบ่งกำลังครึ่งหนึ่งร่วมบุก อีกครึ่งเฝ้าฐาน<br>ทหารเฝ้าฐานเข้าต่อสู้เมื่อศัตรูบุก</p><p>'+upgrade+'</p><button class="wide green" onclick="Game.buyMercenary()" '+(lock||full||E.d.pendingMerc?'disabled':'')+'>'+(E.d.pendingMerc?'กำลังซื้อ…':lock?'ปลดล็อก: ฐานทหารรับจ้าง 1 / ศูนย์วิจัย 2':full?'ฐานทหารรับจ้างเต็ม':'ซื้อ +1 นาย • 150 พลังงาน')+'</button><button class="wide" onclick="Game.enhanceInfo(\'unit:alien\',1)">ค่าพลัง / ตีบวก</button></section>';
+}
+function refreshMercCard214(){
+ if(modal.innerHTML.indexOf('mercRecruit')<0)return;
+ var card=$('mercRecruit');if(!card)return;
+ var sheet=card.parentNode,top=sheet?sheet.scrollTop:0;
+ card.innerHTML=mercCard213().replace('<section id="mercRecruit">','').replace(/<\/section>$/,'');
+ if(sheet)sheet.scrollTop=top;
+}
+
 var training213=Game.training;Game.training=function(){training213();modal.innerHTML=modal.innerHTML.replace('<p id="queue">',mercCard213()+'<p id="queue">');};
 Game.buyMercenary=function(){
  if(warBusy)return;
@@ -576,7 +588,7 @@ var event213=warEvent;warEvent=function(event,message){
  event213(event,message);
  if(isBuy&&E.d.pendingMerc){
   var r=event==='war'&&message.data.receipt,permanent=event==='war_error'&&/พลังงานไม่พอ|ฐานทหารรับจ้างเต็ม|ต้องมีฐานทหารรับจ้าง|รอการรบสิ้นสุด|รหัสรายการไม่ถูกต้อง|เข้าร่วมออนไลน์/.test(message.message||'');
-  if(r&&r.id===E.d.pendingMerc.request_id&&r.action==='merc_recruit'||permanent){var before=E.d.pendingMerc;delete E.d.pendingMerc;if(!E.save()){E.d.pendingMerc=before;return;}if(r)toast('ซื้อทหารรับจ้างแล้ว');if(modal.innerHTML.indexOf('mercRecruit')>=0)Game.training();}
+  if(r&&r.id===E.d.pendingMerc.request_id&&r.action==='merc_recruit'||permanent){var before=E.d.pendingMerc;delete E.d.pendingMerc;if(!E.save()){E.d.pendingMerc=before;return;}if(r)toast('ซื้อทหารรับจ้างแล้ว');refreshMercCard214();}
  }
 };
 var heartbeat213=liveHeartbeat;liveHeartbeat=function(){
