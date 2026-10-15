@@ -27,6 +27,11 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm test
+      - name: Test patch integrity on JVM
+        run: |
+          mkdir -p /tmp/nova-patch-tests
+          javac -d /tmp/nova-patch-tests app/src/main/java/com/sunantongsan/novastriker/PatchFiles.java tests/PatchFilesTest.java
+          java -cp /tmp/nova-patch-tests com.sunantongsan.novastriker.PatchFilesTest
       - name: Build test APK
         run: gradle :app:verifySdkVersions :app:assembleDebug --no-daemon
       - name: Publish test APK to GitHub Release
@@ -73,5 +78,6 @@ jobs:
           name: nova-play-bundle
           path: app/build/outputs/bundle/release/*.aab
           retention-days: 7
+
 
 

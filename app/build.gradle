@@ -7,8 +7,10 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 18
-        versionName '1.7.1'
+        versionCode 19
+        versionName '1.7.2'
+        buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
+        buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'
         buildConfigField 'boolean', 'NOVA_WAR_ENABLED', 'true'
         buildConfigField 'String', 'NOVA_CLOUD_URL', '"https://uzinxxeadejmzxqmqqtx.supabase.co"'
@@ -31,7 +33,7 @@ android {
             }
         }
     }
-    sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets')] }
+    sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets'), layout.buildDirectory.dir('generated/patchAssets')] }
 }
 tasks.register('copyGame', Copy) {
     from(rootProject.file('index.html'))
@@ -39,7 +41,11 @@ tasks.register('copyGame', Copy) {
     from(rootProject.file('assets')) { include '*.webp'; into 'assets' }
     into(layout.buildDirectory.dir('generated/gameAssets'))
 }
-tasks.named('preBuild').configure { dependsOn 'copyGame' }
+tasks.register('generatePatchManifest', Exec) {
+    workingDir rootProject.projectDir
+    commandLine 'node', 'scripts/patch.cjs', '--android'
+}
+tasks.named('preBuild').configure { dependsOn 'copyGame', 'generatePatchManifest' }
 dependencies {
     implementation 'androidx.fragment:fragment:1.8.9'
     implementation 'androidx.activity:activity:1.10.1'
