@@ -330,7 +330,7 @@ Game.receiveTestResources=function(){var d=E.d.testDelivery;if(d){E.sync();d.gol
 function coordinates(e){var r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*420/r.width,y:(e.clientY-r.top)*viewHeight/r.height};}
 canvas.addEventListener('pointerdown',function(e){var p=coordinates(e);drag={id:e.pointerId,x:p.x,y:p.y,px:panX,py:panY,moved:false};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',function(e){if(!drag||drag.id!==e.pointerId)return;var p=coordinates(e),dx=p.x-drag.x,dy=p.y-drag.y;if(Math.abs(dx)+Math.abs(dy)>7)drag.moved=true;if(drag.moved){panX=Math.max(-650,Math.min(650,drag.px+dx));panY=Math.max(-650,Math.min(350,drag.py+dy));drawNeeded=true;}});canvas.addEventListener('pointerup',function(e){if(!drag||drag.id!==e.pointerId)return;var moved=drag.moved;drag=null;if(moved)return;var p=coordinates(e),q=unpoint(p.x,p.y),x=Math.round(q.x),y=Math.round(q.y);if(screen==='defense')return;if(screen==='raid'){var msg=E.deploy(deployKind,q.x,q.y);if(msg)toast(msg);hud();return;}if(placing){var msg=E.build(placing,x,y);if(msg)toast(msg);else{toast('เริ่มก่อสร้างแล้ว');placing=null;}}else if(moving){var msg=E.move(moving,x,y);if(msg)toast(msg);else moving=null;}else{var best=null,d=100;E.d.buildings.forEach(function(b){var bp=point(b.x,b.y),dd=Math.hypot(p.x-bp.x,p.y-(bp.y-13));if(dd<30&&dd<d){d=dd;best=b;}});selected=best?best.id:null;}hud();});canvas.addEventListener('pointercancel',function(){drag=null;});
 document.addEventListener('visibilitychange',function(){if(document.hidden)pause();else{E.sync();hud();}});root.addEventListener('pagehide',function(){E.save();});
-function loop(n){requestAnimationFrame(loop);if(document.hidden){last=n;return;}if(n-last<32)return;var dt=Math.min(.08,(n-last)/1000);last=n;try{if(screen==='defense'&&!paused&&!E.defense.result){E.tickDefense(dt);drawNeeded=true;if(E.defense.fx.length&&frame%7===0)sound(180,.04);if(E.defense.result)defenseResult();}if(screen==='raid'&&!paused&&E.raid.phase==='battle'){E.tick(dt);if(E.raid.fx.length&&frame%7===0)sound(240,.04);drawNeeded=true;if(E.raid.result)result();}if(++frame%30===0){var jobs=E.d.buildings.filter(function(b){return b.until;}).length;E.sync();if(jobs>E.d.buildings.filter(function(b){return b.until;}).length)sound(780,.18);hud();updateTraining();}if(screen==='home'&&frame%3===0)drawNeeded=true;if(drawNeeded){draw();drawNeeded=false;}}catch(e){paused=true;$('boot').style.display='block';$('bootmessage').textContent='โหลดสนามไม่สำเร็จ กดลองเปิดใหม่ ข้อมูลฐานที่บันทึกไว้ยังอยู่';}}
+function loop(n){requestAnimationFrame(loop);if(document.hidden){last=n;return;}if(n-last<32)return;var dt=Math.min(.08,(n-last)/1000);last=n;try{if(screen==='defense'&&!paused&&!E.defense.result){E.tickDefense(dt);drawNeeded=true;if(E.defense.fx.length&&frame%7===0)sound(180,.04);if(E.defense.result)defenseResult();}if(screen==='raid'&&!paused&&E.raid.phase==='battle'){E.tick(dt);if(E.raid.fx.length&&frame%7===0)sound(240,.04);drawNeeded=true;if(E.raid.result)result();}if(++frame%30===0){var jobs=E.d.buildings.filter(function(b){return b.until;}).length;E.sync();if(jobs>E.d.buildings.filter(function(b){return b.until;}).length)sound(780,.18);hud();updateTraining();}if(screen==='raid'&&E.raid&&E.raid.phase==='spectator')drawNeeded=true;if(screen==='home'&&frame%3===0)drawNeeded=true;if(drawNeeded){draw();drawNeeded=false;}}catch(e){paused=true;$('boot').style.display='block';$('bootmessage').textContent='โหลดสนามไม่สำเร็จ กดลองเปิดใหม่ ข้อมูลฐานที่บันทึกไว้ยังอยู่';}}
 home();$('boot').style.display='none';if(!localStorage.getItem('novaRTSIntro')){root.Game.help();try{localStorage.setItem('novaRTSIntro','1');}catch(e){}}requestAnimationFrame(loop);
 
 var resumeCrystal=false,crystalRecoveryTimer=null;
@@ -387,7 +387,7 @@ var warRequestEconomy=warRequest;
 warRequest=function(action,payload){
  if(warBusy)return;
  payload=Object.assign({},payload||{});
- if(action.indexOf('test_')!==0){
+ if(action.indexOf('test_')!==0&&!payload.transport){
   E.sync();var ack=E.d.raidDeltas||{gold_delta:0,power_delta:0};
   E.d.resourceSeq=(E.d.resourceSeq||0)+1;
   payload.resourceSnapshot={owner:E.d.onlineCrystal&&E.d.onlineCrystal.owner,seq:E.d.resourceSeq,gold:Math.floor(E.d.gold),power:Math.floor(E.d.power),gold_delta:ack.gold_delta,power_delta:ack.power_delta,gold_cap:E.resourceCapacity(),power_cap:E.resourceCapacity('power'),gold_rate:Math.round(E.d.buildings.filter(function(b){return b.type==='mine'&&active(b);}).reduce(function(n,b){return n+2160*b.lv;},0)),power_rate:Math.round(E.d.buildings.filter(function(b){return b.type==='reactor'&&active(b);}).reduce(function(n,b){return n+2160*b.lv;},0))};
@@ -405,6 +405,7 @@ warEvent=function(event,message){
  warEventEconomy(event,message);
 };
 function pollResources(){
+ if(lastEconomyReply&&Date.now()-lastEconomyReply<15000){setTimeout(pollResources,30000);return;}
  if(E.d.onlineCrystal&&!liveRoom&&!warBusy&&!E.d.pendingCrystal&&!E.d.pendingWar&&!E.d.pendingTest){resourcePolling=true;warRequest('status');}
  setTimeout(pollResources,30000);
 }
@@ -469,9 +470,9 @@ function siegeSummary(b){var r=b.result||{},attack=b.role==='attacker',sign=atta
 var accept200=acceptLive;acceptLive=function(b){if(!b||b.v!==2){accept200(b);return;}if((E.d.liveReceipts||[]).includes(b.id))return;var changed=!liveRoom||liveRoom.id!==b.id,hostChanged=siegeEpoch!==b.epoch;liveRoom=b;liveSeq=b.seq||0;E.d.liveBattle={id:b.id,role:b.role,army:b.roster};
  if(b.role==='attacker'){delete E.d.pendingLiveStart;}
  if(changed||!E.raid||!E.raid.liveMode||E.raid.liveMode==='preview'){liveScene(b.target,b.role);hostChanged=true;liveAlarm(b.role==='attacker');liveAlarmAt=Date.now();}
- if(!b.host||hostChanged){liveUnpack(b.frame);siegeAck=b.ack||0;}
+ if(!b.host||hostChanged){if(b.frame)liveUnpack(b.frame);siegeAck=b.ack||0;}
  siegeEpoch=b.epoch;E.raid.army=(b.army||[]).slice();E.raid.time=b.remaining;E.raid.phase=b.host?'battle':'spectator';siegeOrders(b);
- if(b.finished){var before=JSON.stringify(E.d);if(b.role==='attacker')(b.result.army||[]).forEach(function(n,i){E.d.army[i]+=n;});E.d.liveReceipts=(E.d.liveReceipts||[]).concat(b.id).slice(-500);E.d.battleReports=(E.d.battleReports||[]).concat({id:b.id,role:b.role,result:b.result,at:Date.now()}).slice(-100);delete E.d.liveBattle;delete E.d.pendingSiegeDeploy;delete E.d.pendingLiveStart;if(!E.save()){E.d=JSON.parse(before);toast('บันทึกผลรบไม่ได้ กรุณาตรวจพื้นที่ว่าง');return;}E.raid.phase='result';open(siegeSummary(b));liveSending=false;}else{E.save();hud();}
+ if(b.finished){var before=JSON.stringify(E.d);if(b.role==='attacker')(b.result.army||[]).forEach(function(n,i){E.d.army[i]+=n;});E.d.liveReceipts=(E.d.liveReceipts||[]).concat(b.id).slice(-500);E.d.battleReports=(E.d.battleReports||[]).concat({id:b.id,role:b.role,result:b.result,at:Date.now()}).slice(-100);delete E.d.liveBattle;delete E.d.pendingSiegeDeploy;delete E.d.pendingLiveStart;if(!E.save()){E.d=JSON.parse(before);toast('บันทึกผลรบไม่ได้ กรุณาตรวจพื้นที่ว่าง');return;}E.raid.phase='result';open(siegeSummary(b));liveSending=false;}else{if(changed||hostChanged)E.save();hud();}
 };
 var deploy200=E.deploy;E.deploy=function(i,x,y){if(!liveRoom||liveRoom.v!==2)return deploy200.call(this,i,x,y);if(liveRoom.role!=='attacker'||liveRoom.withdrawn)return'ส่งกำลังไม่ได้';if(E.d.pendingSiegeDeploy||warBusy)return'กำลังส่งคำสั่ง';if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>21||y>21||!(x<2||y<2||x>19||y>19))return'ปล่อยทหารในขอบสีฟ้าเท่านั้น';if(!(this.raid.army[i]>0))return'ไม่มีหน่วยนี้';E.d.pendingSiegeDeploy={id:liveRoom.id,request_id:nonce160(),kind:i,x:x,y:y};if(!E.save()){delete E.d.pendingSiegeDeploy;return'บันทึกไม่ได้';}liveSend('deploy',E.d.pendingSiegeDeploy);return'';};
 var tick200=E.tick;E.tick=function(dt){if(liveRoom&&liveRoom.v===2&&!liveRoom.finished){if(!liveRoom.host)return;this.raid.phase='battle';var own=this.raid.army;this.raid.army=own.map(function(){return 1;});tick200.call(this,dt);this.raid.army=own;return;}tick200.call(this,dt);};
@@ -512,6 +513,47 @@ var drawFighter210=drawFighter;drawFighter=function(t,enemy){ctx.save();if(t.hp>
 var orders210=siegeOrders;siegeOrders=function(b){var old=E.raid?E.raid.troops.length:0;orders210(b);if(!E.raid)return;E.raid.troops.slice(old).forEach(function(t){var o=(b.orders||[]).find(function(o){return o.id===t.order;});if(o){t.weaponResearch=o.weapon_research||0;if(!t.alien){t.hp*=1+(o.armor_research||0)*.1;t.max=t.hp;}enhanceObject(t,o.enhancement||0);}});};
 var pack210=livePack;livePack=function(){var f=pack210();if(liveRoom&&liveRoom.v===2)['troops','guards'].forEach(function(k){f[k].forEach(function(a,i){a[13]=E.raid[k][i].enhance||0;a[14]=E.raid[k][i].weaponResearch||0;});});return f;};
 var unpack210=liveUnpack;liveUnpack=function(f){unpack210(f);if(f&&f.buildings)['troops','guards'].forEach(function(k){E.raid[k].forEach(function(t,i){t.enhance=f[k][i][13]||0;t.weaponResearch=f[k][i][14]||0;});});};
+
+// Lightweight battle transport; durable purchases and final results retain full transactions.
+var transportRefresh=false,lastLayoutAck='',lastEconomyReply=0;
+var send212=liveSend;liveSend=function(mode,data){
+ data=Object.assign({},data||{});
+ if(!transportRefresh&&liveRoom&&liveRoom.v===2&&!liveRoom.finished&&(mode==='frame'||mode==='status')){
+  data.id=liveRoom.id;data.transport=1;data.known_epoch=siegeEpoch;data.known_seq=liveRoom.seq||0;
+ }
+ if(data.layout&&JSON.stringify(data.layout)===lastLayoutAck)delete data.layout;
+ if(!transportRefresh&&mode==='status'&&!liveRoom&&!data.layout&&Date.now()-lastEconomyReply<7500)data.transport=2;
+ return send212(mode,data);
+};
+var event212=warEvent;warEvent=function(event,message){
+ if(message.request_id&&message.request_id!==warActive)return;
+ var req=lastWarRequest&&lastWarRequest.payload;
+ if(event==='war'&&req&&req.live){
+  transportRefresh=!!message.data.refresh;
+  if(message.data.online)lastEconomyReply=Date.now();
+  if(req.layout&&!message.data.refresh)lastLayoutAck=JSON.stringify(req.layout);
+  var b=message.data.battle;
+  if(b&&liveRoom&&b.id===liveRoom.id){if(!b.target)b.target=liveRoom.target;if(!b.roster)b.roster=liveRoom.roster;}
+ }
+ event212(event,message);
+};
+// Interpolate rendering only. Authoritative positions/HP and host simulation are untouched.
+var interpolationAt=0,interpolationSpan=1500;
+function visualUnit212(t,at){
+ var a=t.visualFrom;if(!a)return t;
+ var k=Math.max(0,Math.min(1,(at-interpolationAt)/interpolationSpan));
+ return Object.assign({},t,{x:a.x+(t.x-a.x)*k,y:a.y+(t.y-a.y)*k});
+}
+var unpack212=liveUnpack;liveUnpack=function(f){
+ if(!f||!f.buildings)return;
+ var at=Date.now(),old={troops:new Map(),guards:new Map()},interpolate=liveRoom&&liveRoom.v===2&&!liveRoom.host;
+ if(interpolate&&E.raid)['troops','guards'].forEach(function(k){E.raid[k].forEach(function(t,i){old[k].set(k==='troops'?t.order:i,visualUnit212(t,at));});});
+ unpack212(f);
+ if(interpolate){interpolationSpan=Math.max(100,Math.min(2000,interpolationAt?at-interpolationAt:1500));interpolationAt=at;
+  ['troops','guards'].forEach(function(k){E.raid[k].forEach(function(t,i){var prev=old[k].get(k==='troops'?t.order:i);if(prev&&prev.hp>0&&t.hp>0&&Math.hypot(prev.x-t.x,prev.y-t.y)<8)t.visualFrom={x:prev.x,y:prev.y};});});
+ }
+};
+var fighter212=drawFighter;drawFighter=function(t,enemy){fighter212(liveRoom&&!liveRoom.host?visualUnit212(t,Date.now()):t,enemy);};
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 

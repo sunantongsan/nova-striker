@@ -1,0 +1,31 @@
+const {PGlite}=require('@electric-sql/pglite'),fs=require('fs'),assert=require('assert');
+(async()=>{const db=new PGlite();await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`);for(const file of ['nova_war.sql','nova_160.sql','nova_170.sql','nova_infrastructure_fix.sql','nova_economy_180.sql','nova_war_browse.sql','nova_live.sql','nova_siege_200.sql','nova_enhance_210.sql','nova_transport_212.sql'])await db.exec(fs.readFileSync('backend/'+file,'utf8'));
+const a='10000000-0000-4000-8000-000000000001',b='10000000-0000-4000-8000-000000000002',c='10000000-0000-4000-8000-000000000003';await db.query('insert into auth.users values($1),($2),($3)',[a,b,c]);let n=0;const id=()=>`20000000-0000-4000-8000-${String(++n).padStart(12,'0')}`;
+async function call(uid,action,payload={}){await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role authenticated');try{return(await db.query('select public.nova_war_command($1,$2) result',[action,JSON.stringify(payload)])).rows[0].result;}finally{await db.exec('reset role');}}
+const live=(uid,mode,p={})=>call(uid,'attack',{live:'siege_'+mode,...p}),layout=[{type:'hq',x:10,y:10,lv:7},{type:'mine',x:11,y:10,lv:3}],army=[4,0,0,0,0,0,0,0,0,0,0];for(const uid of[a,b,c])await call(uid,'enroll',{layout});
+
+await db.exec("update public.nova_war_players set shield_until=now()-interval '1 second'");
+let idle=await live(a,'status',{transport:2});assert.equal(idle.transport,2);assert(idle.clock);assert(!idle.online);
+let room=(await live(a,'start',{target:b,army,request_id:id()})).battle;
+assert((await live(b,'status',{transport:2})).refresh,'home detects incoming battle without settlement');
+await live(a,'deploy',{id:room.id,request_id:id(),kind:0,x:0,y:10});
+room=(await live(a,'status')).battle;
+const order=room.orders[0],frame={buildings:[[100,0,0],[100,0,0]],troops:[[0,0,10,150,150,0,0,0,0,0,order.id,'',false]],guards:[],army,fx:[],time:170};
+const transport={id:room.id,transport:1,known_epoch:1,known_seq:0};
+let before=(await db.query('select resource_gold,resource_at,produced_at from public.nova_war_players where user_id=$1',[a])).rows[0];
+let r=await live(a,'frame',{...transport,epoch:1,seq:1,ack:order.id,frame});
+assert.equal(r.transport,1);assert(!r.online);assert(!r.battle.frame);assert(!r.battle.target);assert(!r.battle.roster);assert(r.clock);
+assert.deepEqual((await db.query('select resource_gold,resource_at,produced_at from public.nova_war_players where user_id=$1',[a])).rows[0],before,'transport never writes economy');
+let d=await live(b,'status',transport);assert(d.clock.locked);assert.deepEqual(d.battle.frame,frame);
+let repeated=await live(b,'status',{...transport,known_seq:1});assert(!repeated.battle.frame);
+await assert.rejects(()=>live(c,'status',transport),/ไม่พบห้องรบ/);
+await assert.rejects(()=>live(b,'frame',{...transport,epoch:1,seq:2,ack:order.id,frame}),/ผู้ควบคุม/);
+await assert.rejects(()=>live(a,'frame',{...transport,epoch:1,seq:2,ack:order.id,frame:{...frame,troops:[[0,0,10,150,150,0,0,0,0,0,999,'',false]]}}),/กองทัพ/);
+await db.query("update nova_private.sieges set heartbeat=now()-interval '11 seconds' where id=$1",[room.id]);
+await db.query("update nova_private.siege_members set seen=now()-interval '11 seconds' where room=$1",[room.id]);
+let failover=await live(b,'status',transport);assert(failover.battle.host);assert.equal(failover.battle.epoch,2);assert(failover.battle.frame);assert(failover.battle.target);assert(failover.battle.roster);
+await assert.rejects(()=>live(a,'frame',{...transport,epoch:1,seq:2,ack:order.id,frame}),/ผู้ควบคุม/);
+await db.query("update nova_private.sieges set ends_at=now()-interval '1 second' where id=$1",[room.id]);
+let finished=await live(b,'status',transport);assert(finished.battle.finished);assert(finished.online);assert(!finished.clock.locked);
+await db.exec('set role authenticated');await assert.rejects(()=>db.query("select nova_private.siege_command_before_transport('{}')"));await db.exec('reset role');
+console.log('PASS transport: no economy writes, compact host reply, spectator frames, duplicate suppression, authorization, frame validation, failover snapshot, expiry settlement, private alias');await db.close();})().catch(e=>{console.error(e);process.exit(1)});

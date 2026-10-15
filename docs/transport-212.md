@@ -1,0 +1,11 @@
+# Patch 12: lighter online transport
+
+Combat remains simulated on the elected participant device. Spectators interpolate unit display positions between server snapshots without changing authoritative HP, positions, or host simulation. Purchases, deployment commands, finishing, loot and receipts retain the existing transaction paths.
+
+Active `siege_frame` and room-specific `siege_status` requests use transport v1: no resource snapshot, no economy settlement, no mercenary settlement, and no global expiry sweep. They acquire the existing global gate in shared mode and lock only their room row. Different room transports can execute concurrently; legacy clients and economic transactions still use the exclusive gate. This is incremental scaling, not removal of all global contention.
+
+Responses omit cached target/roster when the epoch matches. Host responses omit the frame echo; spectator responses omit an unchanged sequence. A changed host epoch always gets the complete takeover snapshot. Expired battles use the full settlement path. A finish racing a shared-gate acquisition requests a full refresh without lock upgrade.
+
+Home heartbeat keeps 1.5-second incoming-battle checks; quiet home economy snapshots occur about every 7.5 seconds instead of every 1.5 seconds. Incoming battles request a full refresh on the next heartbeat. Identical layouts are not republished. Full status and preview reuse their already-computed economy rather than settling twice. Redundant 30-second economy polling defers to recent successful heartbeats.
+
+Validation: PGlite integration covers permissions, nonparticipant rejection, host/epoch validation, invalid deployment IDs, zero economy writes in transport, full failover state, expiry settlement and home alerts. VM tests cover compact response merging, omitted snapshots and display interpolation without simulation mutation. Existing enhancement recovery, construction and UI regression tests pass. No physical multi-device or high-concurrency load benchmark has been performed. Frames still persist to PostgreSQL every 1.5 seconds; a future large-scale service can replace that transport with a dedicated real-time relay while retaining the transaction boundary.
