@@ -10,7 +10,7 @@ android {
         versionCode 19
         versionName '1.7.2'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
-        buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '""'
+        buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'
         buildConfigField 'boolean', 'NOVA_WAR_ENABLED', 'true'
         buildConfigField 'String', 'NOVA_CLOUD_URL', '"https://uzinxxeadejmzxqmqqtx.supabase.co"'
