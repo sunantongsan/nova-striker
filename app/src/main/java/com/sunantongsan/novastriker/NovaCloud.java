@@ -94,15 +94,35 @@ final class NovaCloud {
     @JavascriptInterface public void deleteSave(){if(!available())return;worker.execute(()->{try{JSONObject s=session();request("/rest/v1/nova_rts_saves?user_id=eq."+s.getJSONObject("user").getString("id"),"DELETE",null,s.getString("access_token"));emit("deleted",new JSONObject());}catch(Exception e){status("ลบข้อมูลออนไลน์ไม่สำเร็จ");}});}
     @JavascriptInterface public void logout(){worker.execute(()->{try{JSONObject s=read();request("/auth/v1/logout?scope=local","POST",null,s.getString("access_token"));}catch(Exception ignored){}prefs.edit().clear().commit();emit("signed_out",new JSONObject());});}
     @JavascriptInterface public boolean warAvailable(){return available() && BuildConfig.NOVA_WAR_ENABLED;}
-    @JavascriptInterface public void war(String action,String payload){
-        if(!warAvailable()){status("สงครามออนไลน์ยังไม่เปิดให้บริการ");return;}
-        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave","infrastructure","forge","station","research","fund","cancel","test_status","test_claim","test_exchange","test_targets","test_cancel").contains(action))return;
+    @JavascriptInterface public void war(String action,String payload){runWar(action,payload,"");}
+    @JavascriptInterface public void warRequest(String action,String payload,String requestId){runWar(action,payload,requestId);}
+    private void warReply(String event,String action,String requestId,JSONObject data){
+        try{data.put("action",action);if(requestId!=null&&!requestId.isEmpty())data.put("request_id",requestId);emit(event,data);}catch(Exception ignored){}
+    }
+    private void warError(String action,String requestId,String message){
+        try{warReply("war_error",action,requestId,new JSONObject().put("message",message));}catch(Exception ignored){}
+    }
+    private void runWar(String action,String payload,String requestId){
+        if(!warAvailable()){warError(action,requestId,"ระบบออนไลน์ยังไม่พร้อม กรุณาอัปเดตเกม");return;}
+        if(action==null||payload==null||payload.length()>32768||requestId==null||requestId.length()>80||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave","infrastructure","forge","station","research","fund","cancel","test_status","test_claim","test_exchange","test_targets","test_cancel").contains(action)){
+            warError(action,requestId,"คำสั่งออนไลน์ไม่ถูกต้อง กรุณาอัปเดตเกมแล้วลองใหม่");return;
+        }
         worker.execute(()->{try{
             JSONObject s;
-            try{s=session();}catch(Exception e){emit("war_login",new JSONObject());return;}
+            try{s=session();}catch(Exception e){
+                String reason=e.getMessage();
+                if(e instanceof java.io.IOException){warError(action,requestId,"เชื่อมต่อบัญชีไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่");}
+                else if(reason!=null&&(reason.startsWith("http_5")||reason.equals("http_429"))){warError(action,requestId,"เซิร์ฟเวอร์บัญชีไม่พร้อม กรุณาลองใหม่ภายหลัง");}
+                else warReply("war_login",action,requestId,new JSONObject());
+                return;
+            }
             JSONObject data=new JSONObject(request(action.startsWith("test_")?"/rest/v1/rpc/nova_test_command":"/rest/v1/rpc/nova_war_command","POST",new JSONObject().put("action",action).put("payload",new JSONObject(payload)),s.getString("access_token")));
-            emit("war",new JSONObject().put("action",action).put("data",data));
-        }catch(Exception e){try{emit("war_error",new JSONObject().put("message",e.getMessage()!=null&&e.getMessage().startsWith("game:")?e.getMessage().substring(5):"ทำรายการไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ รายการแลกที่ค้างตรวจซ้ำได้ในศูนย์เพชรทดสอบ"));}catch(Exception ignored){}}});
+            warReply("war",action,requestId,new JSONObject().put("data",data));
+        }catch(Exception e){String reason=e.getMessage();
+            if("http_401".equals(reason)){warReply("war_login",action,requestId,new JSONObject());return;}
+            String message=reason!=null&&reason.startsWith("game:")?reason.substring(5):"ทำรายการไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ ระบบจะตรวจรายการเดิมก่อน ไม่หักเพชรซ้ำ";
+            warError(action,requestId,message);
+        }});
     }
     private String beginEmailLink(boolean recovery)throws Exception {
         byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes);
