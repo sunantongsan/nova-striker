@@ -1,4 +1,3 @@
--- Prepared and locally tested; production application requires approval.
 CREATE OR REPLACE FUNCTION nova_private.command(action text, payload jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -55,7 +54,7 @@ begin
        kind:=payload->>'kind';if kind not in ('crystalplant','crystalstore','garrison') or kind is null then raise exception 'ไม่พบอาคาร';end if;
        if not exists(select 1 from jsonb_array_elements(me.layout) b where b->>'type'=kind) then raise exception 'สร้างและส่งผังอาคารก่อน';end if;
        lev:=(me.infra->>kind)::integer;if lev>=15 then raise exception 'อาคารระดับสูงสุด';end if;
-       price:=50*lev;
+       if kind='garrison' and lev>=me.tier then raise exception 'อัปเกรดระดับกองกำลังออนไลน์ก่อน';end if;price:=50*lev;
        me.infra:=jsonb_set(me.infra,array[kind],to_jsonb(lev+1));
      elsif action='forge' then
        ix:=(payload->>'kind')::integer;if ix is null or ix<0 or ix>10 then raise exception 'ไม่พบหน่วย';end if;
@@ -134,3 +133,4 @@ begin
  end if;
  return result;
 end $function$
+
