@@ -1,0 +1,31 @@
+const {PGlite}=require('@electric-sql/pglite'),fs=require('fs'),assert=require('assert');
+(async()=>{const db=new PGlite();await db.exec(`create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`);for(const file of ['nova_war.sql','nova_160.sql','nova_170.sql','nova_infrastructure_fix.sql','nova_economy_180.sql','nova_war_browse.sql','nova_live.sql','nova_siege_200.sql'])await db.exec(fs.readFileSync('backend/'+file,'utf8'));
+const a='10000000-0000-4000-8000-000000000001',b='10000000-0000-4000-8000-000000000002',c='10000000-0000-4000-8000-000000000003';await db.query('insert into auth.users values($1),($2),($3)',[a,b,c]);let n=0;const id=()=>`20000000-0000-4000-8000-${String(++n).padStart(12,'0')}`;
+async function call(uid,action,payload={}){await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role authenticated');try{return(await db.query('select public.nova_war_command($1,$2) result',[action,JSON.stringify(payload)])).rows[0].result;}finally{await db.exec('reset role');}}
+const live=(uid,mode,p={})=>call(uid,'attack',{live:'siege_'+mode,...p}),layout=[{type:'hq',x:10,y:10,lv:7},{type:'mine',x:11,y:10,lv:3}],army=[4,0,0,0,0,0,0,0,0,0,0];for(const uid of[a,b,c])await call(uid,'enroll',{layout});
+await db.exec("update public.nova_war_players set shield_until=now()-interval '1 second',crystals=10000,resource_gold=10000,resource_power=10000");
+let one=await live(a,'start',{target:b,army,request_id:id()}),room=one.battle;
+let two=await live(c,'start',{target:b,army,request_id:id()});assert.equal(two.battle.id,room.id);assert.equal(two.battle.members.length,2);assert.equal(two.battle.host,false);assert.equal((await live(b,'status')).battle.role,'defender');assert((await live(b,'status')).clock.locked);
+await assert.rejects(()=>call(b,'publish',{layout}),/ถูกโจมตี/);await assert.rejects(()=>call(b,'attack',{live:'shield',hours:1,request_id:id()}),/ซื้อโล่/);
+let dn=id();let deployed=await live(c,'deploy',{id:room.id,request_id:dn,kind:0,x:0,y:10});assert.equal(deployed.battle.army[0],3);assert.equal((await live(c,'deploy',{id:room.id,request_id:dn,kind:0,x:0,y:10})).battle.army[0],3);
+await live(a,'deploy',{id:room.id,request_id:id(),kind:0,x:0,y:11});let host=(await live(a,'status')).battle;assert.equal(host.orders.length,2);
+const frame={buildings:[[0,0,0],[0,0,0]],troops:host.orders.map(o=>[o.kind,o.x,o.y,150,150,0,0,0,0,0,o.id,o.owner,false]),guards:[],army,fx:[],time:120};let ack=Math.max(...host.orders.map(o=>o.id));
+await assert.rejects(()=>live(c,'frame',{id:room.id,epoch:host.epoch,ack,seq:1,frame}),/ผู้ควบคุม/);
+let done=await live(a,'finish',{id:room.id,epoch:host.epoch,ack,seq:1,frame});assert(done.battle.finished);assert.equal(done.battle.result.loot,3000);assert.equal(done.battle.result.army[0],3);let def=await live(b,'status');assert.equal(def.battle.result.loot,6000);assert(!def.clock.locked);let ally=await live(c,'status');assert.equal(ally.battle.result.loot,3000);
+assert.equal((await live(a,'finish',{id:room.id,epoch:host.epoch,ack,seq:1,frame})).online.crystals,done.online.crystals);
+assert.equal((await live(b,'status',{seen:[room.id]})).battle,undefined);
+await db.exec("update nova_private.sieges set ends_at=now()-interval '2 days',finished_at=now()-interval '2 days'");assert.equal((await live(c,'status')).battle.id,room.id);
+await call(c,'publish',{layout:layout.concat({type:'mercenary',x:12,y:12,lv:5})});await live(c,'status');await db.query("update nova_private.mercenaries set produced_at=now()-interval '5 minutes' where owner=$1",[c]);let merc=(await live(c,'status',{seen:[room.id]})).merc;assert.equal(merc.total,12);assert.equal(merc.attack,6);assert.equal(merc.guard,6);
+// Frozen server production, odd split, reconnect host lease and stale epoch rejection.
+await db.query("update nova_private.mercenaries set total=13,produced_at=now() where owner=$1",[c]);
+let raid2=(await live(a,'start',{target:c,army,request_id:id()})).battle;assert.equal(raid2.target.merc_guard,7);
+await live(b,'start',{target:c,army,request_id:id()});
+await db.query("update nova_private.sieges set heartbeat=now()-interval '20 seconds' where id=$1",[raid2.id]);await db.query("update nova_private.siege_members set seen=now()-interval '20 seconds' where room=$1",[raid2.id]);
+let takeover=(await live(b,'status')).battle;assert(takeover.host);assert(takeover.epoch>raid2.epoch);
+await assert.rejects(()=>live(a,'frame',{id:raid2.id,epoch:raid2.epoch,ack:0,seq:1,frame}),/ผู้ควบคุม/);
+let frozen=(await live(c,'status')).online.crystals;await db.query("update public.nova_war_players set produced_at=now()-interval '1 hour',resource_at=now()-interval '1 hour',gold_rate=3600 where user_id=$1",[c]);assert.equal((await live(c,'status')).online.crystals,frozen);
+let balance=(await db.query("select nova_private.resource_balance(p,'gold') v,resource_gold from public.nova_war_players p where user_id=$1",[c])).rows[0];assert.equal(balance.v,balance.resource_gold);
+let mf=(await live(c,'status')).merc.total;assert.equal(mf,13);await assert.rejects(()=>call(c,'infrastructure',{kind:'crystalplant',request_id:id()}),/ถูกโจมตี/);
+await db.query("update nova_private.sieges set ends_at=now()-interval '1 second' where id=$1",[raid2.id]);let expired=await live(c,'status');assert(expired.battle.finished);assert(!expired.clock.locked);
+await db.exec('set role authenticated');await assert.rejects(()=>db.query('select * from nova_private.sieges'));await assert.rejects(()=>db.query("select nova_private.command_before_siege('status','{}')"));await db.exec('reset role');
+console.log('PASS siege: shared 3-player world, deployments, replay, host authority, loot conservation, role reports, offline reports, freeze, shield, merc production and access');await db.close();})().catch(e=>{console.error(e);process.exit(1)});

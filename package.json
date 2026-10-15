@@ -3,7 +3,7 @@
   "version": "1.7.2",
   "private": true,
   "scripts": {
-    "test": "node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs && node tests/online170.cjs && node tests/ui170.cjs && node tests/fixes171.cjs && node tests/patch172.cjs && node tests/upgrade-simple.cjs && node tests/economy180.cjs && node tests/live190.cjs"
+    "test": "node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs && node tests/online170.cjs && node tests/ui170.cjs && node tests/fixes171.cjs && node tests/patch172.cjs && node tests/upgrade-simple.cjs && node tests/economy180.cjs && node tests/live190.cjs && node tests/siege200.cjs && node tests/siege-ui200.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
