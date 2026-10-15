@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         int gap=(int)(24*getResources().getDisplayMetrics().density);panel.setPadding(gap,gap,gap,gap);
         panel.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0xff38b9ef,0xff1375bd,0xff123f77}));
         ImageView art=new ImageView(this);art.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        try(java.io.InputStream in=getAssets().open("assets/nova-hero.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
+        try(java.io.InputStream in=getAssets().open("assets/garrison.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
         panel.addView(art,new LinearLayout.LayoutParams(-1,0,1));
         TextView title=new TextView(this);title.setText("NOVA STRIKER");title.setTextColor(0xffffdf72);title.setTextSize(30);title.setGravity(Gravity.CENTER);title.setTypeface(null,android.graphics.Typeface.BOLD);panel.addView(title);
         updateStatus=new TextView(this);updateStatus.setText("กำลังตรวจสอบข้อมูลเกม…");updateStatus.setTextColor(Color.WHITE);updateStatus.setTextSize(17);updateStatus.setGravity(Gravity.CENTER);updateStatus.setPadding(0,gap,0,gap);panel.addView(updateStatus,new LinearLayout.LayoutParams(-1,-2));
@@ -142,3 +142,4 @@ public class MainActivity extends Activity {
     @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
+

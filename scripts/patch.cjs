@@ -14,8 +14,10 @@ function build(source=root,output=path.join(root,'patch-dist')){
  for(const f of files)fs.copyFileSync(path.join(source,f.path),path.join(output,'objects',f.sha256));
  const dir=path.join(output,'patches',config.channel,'native-'+config.nativeVersion);fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify(manifest));
+ for(const version of config.compatibleNativeVersions||[]){if(!Number.isSafeInteger(version)||version<19)throw Error('Invalid compatible native version');const compatible={...manifest,nativeVersion:version};delete compatible.id;compatible.id=hash(Buffer.from(JSON.stringify(compatible)));const compatDir=path.join(output,'patches',config.channel,'native-'+version);fs.mkdirSync(compatDir,{recursive:true});fs.writeFileSync(path.join(compatDir,'manifest.json'),JSON.stringify(compatible));}
  fs.writeFileSync(path.join(output,'index.html'),'<!doctype html><meta charset="utf-8"><title>Nova Striker Updates</title><p>Nova Striker game content delivery</p>');
  return manifest;
 }
 if(require.main===module){const m=build();if(process.argv.includes('--android')){const d=path.join(root,'app/build/generated/patchAssets');fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,'patch-bundled.json'),JSON.stringify(m));}console.log('Patch',m.label,m.id,m.files.length,'verified content files');}
 module.exports={build,hash};
+

@@ -21,8 +21,5 @@ console.log('PASS: one tap upgrade after restart, account sync, duplicate taps, 
 E.d.buildings.push({id:300,type:'storage',lv:5,x:3,y:3});E.d.gold=100000;E.d.power=100000;E.d.raidDeltas={owner:'account-a',gold_delta:0,power_delta:0};
 event('status',{...online,resources:{gold_delta:-6000,power_delta:4000,seq:8}});assert.equal(E.d.gold,94000);assert.equal(E.d.power,104000);
 event('status',{...online,resources:{gold_delta:-6000,power_delta:4000,seq:8}});assert.equal(E.d.gold,94000);assert.equal(E.d.power,104000);
-let gems=E.d.gems;G.sellResource('gold',1);assert.equal(E.d.gold,44000);assert.equal(E.d.gems,gems+1);
-event('status',{...online,crystals:20000});G.sellResource('crystals',1);let sale=requests.at(-1);assert.equal(sale.action,'fund');assert.equal(sale.payload.kind,'sell_crystals');gems=E.d.gems;
-event('fund',{...online,crystals:10000,receipt:{id:sale.payload.request_id,kind:'sell_crystals',gems:1,cost:10000}});assert.equal(E.d.gems,gems+1);
-event('fund',{...online,crystals:10000,receipt:{id:sale.payload.request_id,kind:'sell_crystals',gems:1,cost:10000}});assert.equal(E.d.gems,gems+1);
-console.log('PASS: raid-delta reconciliation, duplicate replies, local and online reverse exchange');
+let gems=E.d.gems;G.sellResource('gold',1);assert.equal(E.d.gold,94000);assert.equal(E.d.gems,gems);let count=requests.length;G.sellResource('crystals',1);assert.equal(requests.length,count);assert.equal(E.d.gems,gems);
+console.log('PASS: raid reconciliation and reverse exchange disabled');
