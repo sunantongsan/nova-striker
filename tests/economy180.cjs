@@ -19,4 +19,10 @@ await call(b,'status',{resourceSnapshot:snapshot(1,999999,999999)});balance=(awa
 await call(b,'status',{resourceSnapshot:snapshot(3,100000-lost,200000-powerLost,-lost,-powerLost)});balance=(await db.query('select resource_gold from public.nova_war_players where user_id=$1',[b])).rows[0];assert.equal(Number(balance.resource_gold),100000-lost,'acknowledged loss not deducted twice');
 const wallet=await call(a,'test_status');assert.equal(wallet.test_gems,9900,'raids cannot steal gems');
 await db.exec('set role anon');await assert.rejects(()=>db.query("select public.nova_war_command('status')"));await db.exec('reset role');await db.exec('set role authenticated');await assert.rejects(()=>db.query('update public.nova_war_players set resource_gold=999999'));await db.exec('reset role');
+await db.exec(fs.readFileSync('backend/nova_war_browse.sql','utf8'));
+await db.query('update public.nova_war_players set tier=15 where user_id=$1',[b]);
+let allTargets=(await call(a,'targets')).targets;assert.equal(allTargets.length,1);assert.equal(allTargets[0].tier,15);assert.equal(allTargets[0].can_attack,false);assert.equal((await call(a,'targets',{after:b})).targets.length,0);
+await db.exec("delete from public.nova_war_reports;update public.nova_war_players set shield_until=now()-interval '1 second',raid_after=now()-interval '1 second'");
+assert.equal((await call(a,'targets')).targets[0].can_attack,true);assert((await call(a,'attack',{target:b,tactic:'siege',request_id:nonce()})).report);
+console.log('PASS browse: all levels, shield visibility, pagination, cross-level attack');
 console.log('PASS economy: 10x production, new/duplicate exchanges, reverse conversion, three-resource 60% raid, replay, stale snapshots, exact loss reconciliation, no gem theft, access control');await db.close();})().catch(e=>{console.error(e);process.exit(1)});
