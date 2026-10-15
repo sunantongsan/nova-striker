@@ -134,7 +134,7 @@ Engine.prototype.scoutPlayer=function(target){
  if(!buildings.some(function(b){return b.type==='hq';}))return false;
  var g=buildings.find(function(b){return b.type==='garrison';}),guards=[];
  if(g)(target.garrison||[]).slice(0,U.length).forEach(function(count,kind){for(var n=0;n<Math.min(40-guards.length,Math.max(0,count));n++){var u=U[kind];guards.push({id:guards.length+1,kind:kind,x:g.x,y:g.y,hp:u.hp,max:u.hp,cool:0,route:[]});}});
- var mb=buildings.find(function(b){return b.type==='mercenary';});if(mb)for(var mi=0;mi<(target.merc_guard||0);mi++)guards.push({id:guards.length+1,kind:2,alien:true,x:mb.x,y:mb.y,hp:480*(1+mb.lv*.1),max:480*(1+mb.lv*.1),cool:0,route:[]});
+ var mb=buildings.find(function(b){return b.type==='mercenary';});if(mb)for(var mi=0;mi<(target.merc_guard||0);mi++)guards.push({id:guards.length+1,kind:target.merc_version===2?5:2,alien:true,x:mb.x,y:mb.y,hp:target.merc_version===2?330:480*(1+mb.lv*.1),max:target.merc_version===2?330:480*(1+mb.lv*.1),cool:0,route:[]});
  this.raid={stage:1,player:true,practice:true,name:target.callsign,defenderResearch:target.research||{weapon:0,armor:0},mapSize:22,phase:'scout',time:180,buildings:buildings,guards:guards,troops:[],fx:[],deployed:0,result:null,army:[12,3,2,2,2,2,1,1,1,1,1]};return true;
 };
 // Pause progression against a server-confirmed timeline, including reconnects.
@@ -146,11 +146,11 @@ function plusLevel(map,key){return Math.max(0,Math.min(10,+(map||{})[key]||0));}
 function plusFactor(n){return 1+.1*n;}
 function enhanceObject(o,n){o.enhance=n;o.hp*=plusFactor(n);o.max*=plusFactor(n);return o;}
 function baseDamage(kind,lv){return ({hq:8,gun:15,tesla:48,missileturret:70,cannonturret:90}[kind]||0)*lv;}
-Engine.prototype.enhanceStats=function(key,lv){var unit=key.indexOf('unit:')===0,id=key.slice(key.indexOf(':')+1),alien=id==='alien',u=unit?U[alien?2:+id]:B[id];if(!u)return null;lv=lv||1;var research=this.d.research||{},n=plusLevel(this.d.enhancements,key),hp=unit?u.hp*(alien?1+this.level('mercenary')*.1:1+(research.armor||0)*.1):u.hp*(1+(lv-1)*.45),damage=unit?u.damage*(1+(research.weapon||0)*.1):baseDamage(id,lv);return{level:n,baseHP:hp,hp:hp*plusFactor(n),baseDamage:damage,damage:damage*plusFactor(n),cost:n<10?100*(n+1)*(n+1):0,heal:unit&&+id===3};};
+Engine.prototype.enhanceStats=function(key,lv){var unit=key.indexOf('unit:')===0,id=key.slice(key.indexOf(':')+1),alien=id==='alien',u=unit?U[alien?5:+id]:B[id];if(!u)return null;lv=lv||1;var research=this.d.research||{},n=plusLevel(this.d.enhancements,key),hp=unit?u.hp*(1+(research.armor||0)*.1):u.hp*(1+(lv-1)*.45),damage=unit?u.damage*(1+(research.weapon||0)*.1):baseDamage(id,lv);return{level:n,baseHP:hp,hp:hp*plusFactor(n),baseDamage:damage,damage:damage*plusFactor(n),cost:n<10?100*(n+1)*(n+1):0,heal:unit&&+id===3};};
 var hit210=hit;hit=function(scene,target,damage,source,weapon){return hit210(scene,target,damage*plusFactor(source&&source.enhance||0),source,weapon);};
 var deploy210=Engine.prototype.deploy;Engine.prototype.deploy=function(i,x,y){var before=this.raid&&this.raid.troops.length,error=deploy210.call(this,i,x,y);if(!error&&this.raid&&this.raid.troops.length>before)enhanceObject(this.raid.troops[this.raid.troops.length-1],plusLevel(this.d.enhancements,'unit:'+i));return error;};
 var defenders210=makeDefenders;makeDefenders=function(e){var units=defenders210(e);units.forEach(function(t){enhanceObject(t,plusLevel(e.d.enhancements,'unit:'+t.kind));});return units;};
-var scout210=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scout210.call(this,target);if(ok){var map=target.enhancements||{};this.raid.buildings.forEach(function(b){enhanceObject(b,plusLevel(map,'building:'+b.type));});this.raid.guards.forEach(function(t){if(!t.alien){t.hp*=1+((target.research||{}).armor||0)*.1;t.max=t.hp;}enhanceObject(t,plusLevel(map,t.alien?'unit:alien':'unit:'+t.kind));});}return ok;};
+var scout210=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scout210.call(this,target);if(ok){var map=target.enhancements||{};this.raid.buildings.forEach(function(b){enhanceObject(b,plusLevel(map,'building:'+b.type));});this.raid.guards.forEach(function(t){if(!t.alien||t.kind===5){t.hp*=1+((target.research||{}).armor||0)*.1;t.max=t.hp;}enhanceObject(t,plusLevel(map,t.alien?'unit:alien':'unit:'+t.kind));});}return ok;};
 var defense210=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=defense210.call(this);if(!error){var map=this.d.enhancements||{};this.defense.buildings.forEach(function(b){enhanceObject(b,plusLevel(map,'building:'+b.type));});}return error;};
 
 root.NovaRTS={weaponMount:weaponMount,weaponFX:weaponFX,updateMotion:updateMotion,isTracked:isTracked,hit:hit,spaces:spaces,Engine:Engine,buildings:B,units:U,route:route,duration:duration};if(typeof document==='undefined')return;
@@ -465,7 +465,7 @@ var liveSend200=liveSend;
 liveSend=function(mode,data){data=Object.assign({},data||{});if(mode==='shield')return liveSend200(mode,data);if(liveRoom&&!liveRoom.v&&['frame','finish'].includes(mode))return liveSend200(mode,data);data.live='siege_'+mode;data.awake=!document.hidden;if(mode==='status')data.seen=(E.d.liveReceipts||[]).slice(-20);data.clock_from=new Date(E.d.economyConfirmedAt||Date.now()).toISOString();return liveSend200(data.live,data);};
 var pack200=livePack;livePack=function(){var f=pack200();if(!liveRoom||liveRoom.v!==2)return f;function units(a){return a.map(function(t){return[t.kind,+t.x.toFixed(3),+t.y.toFixed(3),Math.max(0,Math.round(t.hp)),Math.round(t.max),+(t.aim||0).toFixed(2),+(t.heading||0).toFixed(2),+((t.walk||0)%7).toFixed(2),+(t.dead||0).toFixed(2),+(t.recoil||0).toFixed(2),t.order||0,'',!!t.alien];});}f.troops=units(E.raid.troops);f.guards=units(E.raid.guards);return f;};
 var unpack200=liveUnpack;liveUnpack=function(f){unpack200(f);if(!f||!f.buildings)return;['troops','guards'].forEach(function(k){E.raid[k].forEach(function(t,i){var a=f[k][i];t.order=a[10];t.owner=a[11];t.alien=!!a[12];});});};
-function siegeOrders(b){var r=E.raid;if(!r||!b.host)return;(b.orders||[]).forEach(function(o){if(o.id<=siegeAck)return;var u=U[o.kind],hp=u.hp*(o.alien?1+o.level*.1:1);r.troops.push({id:o.id,order:o.id,owner:o.owner,alien:o.alien,kind:o.kind,x:+o.x,y:+o.y,hp:hp,max:hp,cool:0,route:[],target:null});r.deployed++;siegeAck=Math.max(siegeAck,o.id);});}
+function siegeOrders(b){var r=E.raid;if(!r||!b.host)return;(b.orders||[]).forEach(function(o){if(o.id<=siegeAck)return;var u=U[o.kind],hp=u.hp*(o.alien&&o.kind===2?1+o.level*.1:1);r.troops.push({id:o.id,order:o.id,owner:o.owner,alien:o.alien,kind:o.kind,x:+o.x,y:+o.y,hp:hp,max:hp,cool:0,route:[],target:null});r.deployed++;siegeAck=Math.max(siegeAck,o.id);});}
 function siegeSummary(b){var r=b.result||{},attack=b.role==='attacker',sign=attack?'+':'−',title=attack?'ผลการโจมตี • ได้รับ':'ผลการป้องกัน • สูญเสีย';return '<h2>'+title+'</h2><p>ทำลาย '+(r.destruction||0)+'%</p><p>ผลึก '+sign+(r.loot||0).toLocaleString()+'<br>ทอง '+sign+(r.loot_gold||0).toLocaleString()+'<br>พลังงาน '+sign+(r.loot_power||0).toLocaleString()+'</p><p>เพชรไม่ถูกปล้น<br>ทหารรับจ้างเสีย '+(r.merc_lost||0)+' นาย'+(attack?'<br>ทหารรับจ้างกลับ '+(r.merc_returned||0)+' นาย<br>ทหารปกติใช้ในการรบ '+(r.deployed||0)+' นาย<br>ทหารยังไม่ส่งกลับ '+(r.army||[]).reduce(function(a,n){return a+n;},0)+' นาย':'')+'</p><button class="wide green" onclick="Game.home()">กลับฐาน</button>';}
 var accept200=acceptLive;acceptLive=function(b){if(!b||b.v!==2){accept200(b);return;}if((E.d.liveReceipts||[]).includes(b.id))return;var changed=!liveRoom||liveRoom.id!==b.id,hostChanged=siegeEpoch!==b.epoch;liveRoom=b;liveSeq=b.seq||0;E.d.liveBattle={id:b.id,role:b.role,army:b.roster};
  if(b.role==='attacker'){delete E.d.pendingLiveStart;}
@@ -487,7 +487,7 @@ liveHeartbeat=function(){if(!warBusy&&E.d.onlineCrystal){if(E.d.pendingLiveStart
  if(liveRoom&&!liveRoom.finished&&Date.now()-liveAlarmAt>5000){liveAlarm(liveRoom.role==='attacker');liveAlarmAt=Date.now();}setTimeout(liveHeartbeat,1500);
 };
 // The previously scheduled callback enters the new loop on its next iteration.
-Game.mercenaries=function(){var m=E.d.mercenaries||{},lv=E.level('mercenary');open('<h2>ฐานทหารรับจ้างต่างดาว</h2><p>ระดับ '+lv+' • มี '+(m.total||0)+' / '+(m.capacity||10+2*lv)+' นาย<br>ออกบุก '+(m.attack||0)+' • เฝ้าฐาน '+(m.guard||0)+'</p><p>ผลิตอัตโนมัติ 1 นายทุก '+(lv?Math.round(120/lv):120)+' วินาที<br>ทหารเฝ้าฐานออกสกัดศัตรูทั่วฐานทันที<br>การผลิตพักระหว่างถูกโจมตี</p><button class="wide" onclick="Game.refreshMercenaries()">อัปเดตกำลังพล</button><button class="wide" onclick="Game.close()">กลับ</button>');};
+Game.mercenaries=function(){Game.training();};
 Game.refreshMercenaries=function(){if(!E.d.onlineCrystal){Game.findWar();return;}liveSend('status',{layout:liveLayout()});};
 Game.battleReports=function(){var rows=(E.d.battleReports||[]).slice().reverse();open('<h2>รายงานการรบ</h2>'+rows.map(function(b){var r=b.result,sign=b.role==='attacker'?'+':'−';return '<p>'+(b.role==='attacker'?'โจมตี':'ป้องกัน')+' • '+new Date(b.at).toLocaleString('th-TH')+'<br>ผลึก '+sign+r.loot+' • ทอง '+sign+r.loot_gold+' • พลังงาน '+sign+r.loot_power+'<br>ทหารรับจ้างเสีย '+(r.merc_lost||0)+' นาย</p>';}).join('')+(rows.length?'':'<p>ยังไม่มีรายงาน</p>')+'<button class="wide" onclick="Game.close()">กลับ</button>');};
 var activities200=Game.activities;Game.activities=function(){activities200();modal.innerHTML=modal.innerHTML.replace('</h2>','</h2><button class="wide" onclick="Game.battleReports()">รายงานการรบ</button><button class="wide" onclick="Game.mercenaries()">ทหารรับจ้างต่างดาว</button>');};
@@ -510,7 +510,7 @@ function enhancementGlow(o,n,large){if(n<5||o.hp!==undefined&&o.hp<=0)return;var
 function plusShadow(n){if(n>=5){ctx.shadowColor=['#58ff85','#56e9ff','#648cff','#bf70ff','#ffdc64','#ff8d27'][Math.min(5,n-5)];ctx.shadowBlur=8*zoom;}}
 var drawBuilding210=drawBuilding;drawBuilding=function(b,enemy){var n=b.enhance===undefined&&!enemy?plusLevel(E.d.enhancements,'building:'+b.type):b.enhance||0;ctx.save();if(b.hp===undefined||b.hp>0)plusShadow(n);drawBuilding210(b,enemy);ctx.restore();enhancementGlow(b,n,true);};
 var drawFighter210=drawFighter;drawFighter=function(t,enemy){ctx.save();if(t.hp>0)plusShadow(t.enhance||0);drawFighter210(t,enemy);ctx.restore();enhancementGlow(t,t.enhance||0,false);};
-var orders210=siegeOrders;siegeOrders=function(b){var old=E.raid?E.raid.troops.length:0;orders210(b);if(!E.raid)return;E.raid.troops.slice(old).forEach(function(t){var o=(b.orders||[]).find(function(o){return o.id===t.order;});if(o){t.weaponResearch=o.weapon_research||0;if(!t.alien){t.hp*=1+(o.armor_research||0)*.1;t.max=t.hp;}enhanceObject(t,o.enhancement||0);}});};
+var orders210=siegeOrders;siegeOrders=function(b){var old=E.raid?E.raid.troops.length:0;orders210(b);if(!E.raid)return;E.raid.troops.slice(old).forEach(function(t){var o=(b.orders||[]).find(function(o){return o.id===t.order;});if(o){t.weaponResearch=o.weapon_research||0;if(!t.alien||t.kind===5){t.hp*=1+(o.armor_research||0)*.1;t.max=t.hp;}enhanceObject(t,o.enhancement||0);}});};
 var pack210=livePack;livePack=function(){var f=pack210();if(liveRoom&&liveRoom.v===2)['troops','guards'].forEach(function(k){f[k].forEach(function(a,i){a[13]=E.raid[k][i].enhance||0;a[14]=E.raid[k][i].weaponResearch||0;});});return f;};
 var unpack210=liveUnpack;liveUnpack=function(f){unpack210(f);if(f&&f.buildings)['troops','guards'].forEach(function(k){E.raid[k].forEach(function(t,i){t.enhance=f[k][i][13]||0;t.weaponResearch=f[k][i][14]||0;});});};
 
@@ -554,6 +554,34 @@ var unpack212=liveUnpack;liveUnpack=function(f){
  }
 };
 var fighter212=drawFighter;drawFighter=function(t,enemy){fighter212(liveRoom&&!liveRoom.host?visualUnit212(t,Date.now()):t,enemy);};
+
+// Manual alien recruitment: one receipt delivers one troop, never timer production.
+var mercRetryAt=0;
+function mercCard213(){var m=E.d.mercenaries||{},lv=E.level('mercenary'),lock=lv<1||E.level('tech')<2,full=(m.total||0)>=(m.capacity||10+2*lv);return '<section id="mercRecruit"><h3>ทหารรับจ้างต่างดาว</h3><p>มี '+(m.total||0)+' / '+(lv?(m.capacity||10+2*lv):0)+' นาย • บุก '+(m.attack||0)+' / เฝ้าฐาน '+(m.guard||0)+'</p><p>150 พลังงาน / นาย • ได้ทันที<br>เลือด 330 • โจมตี 48 • ความสามารถเท่าเครื่องบินขับไล่<br>อัปเกรดฐานเพิ่มความจุ 2 นายต่อระดับ</p><button class="wide green" onclick="Game.buyMercenary()" '+(lock||full||E.d.pendingMerc?'disabled':'')+'>'+(E.d.pendingMerc?'กำลังซื้อ…':lock?'ปลดล็อก: ฐานทหารรับจ้าง 1 / ศูนย์วิจัย 2':full?'ฐานทหารรับจ้างเต็ม':'ซื้อ +1 นาย • 150 พลังงาน')+'</button><button class="wide" onclick="Game.enhanceInfo(\'unit:alien\',1)">ข้อมูล / ตีบวก</button></section>';}
+var training213=Game.training;Game.training=function(){training213();modal.innerHTML=modal.innerHTML.replace('<p id="queue">',mercCard213()+'<p id="queue">');};
+Game.buyMercenary=function(){
+ if(warBusy)return;
+ if(!E.d.onlineCrystal){toast('กรุณาเข้าร่วมออนไลน์ก่อน');return;}
+ if(!E.d.pendingMerc){
+  if(E.level('mercenary')<1||E.level('tech')<2){toast('ต้องมีฐานทหารรับจ้างระดับ 1 และศูนย์วิจัยระดับ 2');return;}
+  if(E.d.siegeLocked||liveRoom&&!liveRoom.finished){toast('รอการรบสิ้นสุดก่อนซื้อทหาร');return;}
+  E.d.pendingMerc={owner:E.d.onlineCrystal.owner,request_id:nonce160()};if(!E.save()){delete E.d.pendingMerc;toast('บันทึกไม่ได้');return;}
+ }
+ if(E.d.pendingMerc.owner!==E.d.onlineCrystal.owner){toast('กรุณาใช้บัญชีเดิม');return;}
+ mercRetryAt=Date.now()+15000;liveSend('recruit',Object.assign({layout:liveLayout()},E.d.pendingMerc));
+};
+var event213=warEvent;warEvent=function(event,message){
+ if(message.request_id&&message.request_id!==warActive)return;
+ var req=lastWarRequest&&lastWarRequest.payload,isBuy=req&&req.live==='siege_recruit';
+ event213(event,message);
+ if(isBuy&&E.d.pendingMerc){
+  var r=event==='war'&&message.data.receipt,permanent=event==='war_error'&&/พลังงานไม่พอ|ฐานทหารรับจ้างเต็ม|ต้องมีฐานทหารรับจ้าง|รอการรบสิ้นสุด|รหัสรายการไม่ถูกต้อง|เข้าร่วมออนไลน์/.test(message.message||'');
+  if(r&&r.id===E.d.pendingMerc.request_id&&r.action==='merc_recruit'||permanent){var before=E.d.pendingMerc;delete E.d.pendingMerc;if(!E.save()){E.d.pendingMerc=before;return;}if(r)toast('ซื้อทหารรับจ้างแล้ว');if(modal.innerHTML.indexOf('mercRecruit')>=0)Game.training();}
+ }
+};
+var heartbeat213=liveHeartbeat;liveHeartbeat=function(){
+ if(E.d.pendingMerc&&E.d.onlineCrystal&&E.d.pendingMerc.owner===E.d.onlineCrystal.owner&&!warBusy&&Date.now()>=mercRetryAt&&Date.now()-(E.d.economyConfirmedAt||0)<4000){Game.buyMercenary();setTimeout(liveHeartbeat,1500);return;}heartbeat213();
+};
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 
