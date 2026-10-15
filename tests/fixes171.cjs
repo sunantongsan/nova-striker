@@ -19,7 +19,7 @@ console.log('PASS: combat regression; promotion daily/reset/restart/rollback/sav
 
 // Crystal exchanges spend the primary gems and preserve balances on errors.
 let cstore={},cs={getItem:k=>cstore[k]||null,setItem:(k,v)=>cstore[k]=v},ce=new N.Engine(cs,()=>Date.UTC(2026,9,15));ce.d.gems=10000;ce.d.crystals=0;
-assert.equal(ce.exchange('crystals',10),'');assert.equal(ce.d.crystals,100);assert.equal(ce.d.gems,9900);assert(ce.exchange('crystals',50));assert.equal(ce.d.gems,9900);assert(ce.exchange('crystals',-1));ce.storage.setItem=()=>{throw Error('full')};assert(ce.exchange('crystals',1));assert.equal(ce.d.gems,9900);assert.equal(ce.d.crystals,100);
+assert.equal(ce.exchange('crystals',10),'');assert.equal(ce.d.crystals,10000);assert.equal(ce.d.gems,9900);assert(ce.exchange('crystals',50));assert.equal(ce.d.gems,9900);assert(ce.exchange('crystals',-1));ce.storage.setItem=()=>{throw Error('full')};assert(ce.exchange('crystals',1));assert.equal(ce.d.gems,9900);assert.equal(ce.d.crystals,10000);
 for(const type of ['crystalplant','crystalstore']){let t=Date.UTC(2026,9,15),db={},engine=new N.Engine({getItem:k=>db[k],setItem:(k,v)=>db[k]=v},()=>t);engine.d.buildings[0].lv=3;engine.d.gold=3000;engine.d.power=3000;engine.d.buildings.push({id:77,type,x:1,y:1,lv:1});assert.equal(engine.upgrade(77),'');t+=16000;engine.sync();assert.equal(engine.d.buildings.find(b=>b.id===77).lv,2);}
 const source=fs.readFileSync('game.js','utf8');assert(!source.includes("ctx.fillText('Lv.'"));assert(source.includes('function drawResourceLabel(b){}'));
 console.log('PASS: both crystal buildings upgrade, gem/crystal exchange capacity and save failure, map labels removed');

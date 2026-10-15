@@ -17,3 +17,12 @@ const receipt={id:originalId,kind:'upgrade',level:5,cost:20};event('fund',{...on
 hq.until=null;G.upgrade();const pending=E.d.pendingCrystal,paidGold=E.d.gold;
 sandbox.novaCloudEvent('war_error',{message:'ผลึกไม่พอ'});assert.equal(requests.at(-1).action,'cancel');event('cancel',{...online,crystals:0,receipt:{id:pending.request_id,cancelled:true}});assert(!E.d.pendingCrystal);assert.equal(E.d.gold,paidGold+pending.gold);assert(!hq.until);
 console.log('PASS: one tap upgrade after restart, account sync, duplicate taps, network retry, idempotent completion, automatic cancellation/refund');
+// Incoming raid losses/credits must survive duplicate replies and restart saves.
+E.d.buildings.push({id:300,type:'storage',lv:5,x:3,y:3});E.d.gold=100000;E.d.power=100000;E.d.raidDeltas={owner:'account-a',gold_delta:0,power_delta:0};
+event('status',{...online,resources:{gold_delta:-6000,power_delta:4000,seq:8}});assert.equal(E.d.gold,94000);assert.equal(E.d.power,104000);
+event('status',{...online,resources:{gold_delta:-6000,power_delta:4000,seq:8}});assert.equal(E.d.gold,94000);assert.equal(E.d.power,104000);
+let gems=E.d.gems;G.sellResource('gold',1);assert.equal(E.d.gold,44000);assert.equal(E.d.gems,gems+1);
+event('status',{...online,crystals:20000});G.sellResource('crystals',1);let sale=requests.at(-1);assert.equal(sale.action,'fund');assert.equal(sale.payload.kind,'sell_crystals');gems=E.d.gems;
+event('fund',{...online,crystals:10000,receipt:{id:sale.payload.request_id,kind:'sell_crystals',gems:1,cost:10000}});assert.equal(E.d.gems,gems+1);
+event('fund',{...online,crystals:10000,receipt:{id:sale.payload.request_id,kind:'sell_crystals',gems:1,cost:10000}});assert.equal(E.d.gems,gems+1);
+console.log('PASS: raid-delta reconciliation, duplicate replies, local and online reverse exchange');
