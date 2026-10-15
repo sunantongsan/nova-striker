@@ -1,6 +1,6 @@
-# Proposed economy balance
+# Economy balance
 
-Status: prepared and locally tested; production migration was blocked by automatic approval review. Do not publish content until the migration is explicitly approved and verified.
+Status: user explicitly approved production publication on 15 October 2026. Migration applied successfully; live checks confirm level-1 production 1,200/hour, capacity 100,000, RLS enabled and anonymous RPC access denied. Released in content patch 6.
 
 ## Rates
 
