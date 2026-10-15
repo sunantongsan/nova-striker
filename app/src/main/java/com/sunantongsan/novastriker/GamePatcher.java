@@ -93,10 +93,9 @@ final class GamePatcher {
             if(target==null)target=pending;
             if(target==null){select(previous);status("ออฟไลน์ • ใช้ข้อมูลเกมที่พร้อมแล้ว",100);listener.ready();return;}
             if(target.getLong("contentVersion")<Math.max(bundled.getLong("contentVersion"),previous.getLong("contentVersion"))||target.getString("id").equals(prefs.getString("rejected","")))target=previous;
-            if(!complete(target))save("pending.json",target);
             int retries=0;
             while(!stopped){
-                try{download(target);break;}
+                try{if(!complete(target))save("pending.json",target);download(target);break;}
                 catch(Exception e){
                     if(stopped)return;
                     retries++;int seconds=Math.min(15,3+retries*2);
