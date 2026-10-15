@@ -81,6 +81,7 @@ final class GamePatcher {
             try(InputStream in=context.getAssets().open("patch-bundled.json")){bundled=parse(read(in,256*1024));}
             JSONArray base=bundled.getJSONArray("files");for(int i=0;i<base.length();i++){JSONObject f=base.getJSONObject(i);bundledHashes.put(f.getString("path"),f.getString("sha256"));}
             previous=load("active.json");if(!complete(previous))previous=bundled;
+            if(BuildConfig.NOVA_PATCH_ORIGIN.isEmpty()){select(previous);status("กำลังเตรียมฐานทัพ…",100);listener.ready();return;}
             JSONObject pending=load("pending.json"),target=null;
             {
                 for(int attempt=0;attempt<2&&!stopped;attempt++){
