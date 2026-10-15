@@ -59,7 +59,12 @@ final class NovaCloud {
         try{if(body!=null){c.setDoOutput(true);try(java.io.OutputStream out=c.getOutputStream()){out.write(body.toString().getBytes(StandardCharsets.UTF_8));}}
             int code=c.getResponseCode();java.io.InputStream input=code>=200&&code<300?c.getInputStream():c.getErrorStream();
             java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();if(input!=null)try(java.io.InputStream in=input){byte[] bytes=new byte[4096];int n;while((n=in.read(bytes))!=-1){buffer.write(bytes,0,n);if(buffer.size()>262144)throw new Exception("response_too_large");}}
-            if(code<200||code>=300)throw new Exception("http_"+code);
+            if(code<200||code>=300){
+                String business=null;
+                try{JSONObject err=new JSONObject(buffer.toString("UTF-8"));if("P0001".equals(err.optString("code")))business=err.optString("message");}catch(Exception ignored){}
+                if(business!=null&&business.length()<200)throw new Exception("game:"+business);
+                throw new Exception("http_"+code);
+            }
             return buffer.toString("UTF-8");
         }finally{c.disconnect();}
     }
@@ -91,13 +96,13 @@ final class NovaCloud {
     @JavascriptInterface public boolean warAvailable(){return available() && BuildConfig.NOVA_WAR_ENABLED;}
     @JavascriptInterface public void war(String action,String payload){
         if(!warAvailable()){status("สงครามออนไลน์ยังไม่เปิดให้บริการ");return;}
-        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave","infrastructure","forge","station","research","fund","cancel").contains(action))return;
+        if(payload==null||payload.length()>32768||!java.util.Arrays.asList("status","enroll","publish","targets","attack","upgrade","history","leave","infrastructure","forge","station","research","fund","cancel","test_status","test_claim","test_exchange","test_targets","test_cancel").contains(action))return;
         worker.execute(()->{try{
             JSONObject s;
             try{s=session();}catch(Exception e){emit("war_login",new JSONObject());return;}
-            JSONObject data=new JSONObject(request("/rest/v1/rpc/nova_war_command","POST",new JSONObject().put("action",action).put("payload",new JSONObject(payload)),s.getString("access_token")));
+            JSONObject data=new JSONObject(request(action.startsWith("test_")?"/rest/v1/rpc/nova_test_command":"/rest/v1/rpc/nova_war_command","POST",new JSONObject().put("action",action).put("payload",new JSONObject(payload)),s.getString("access_token")));
             emit("war",new JSONObject().put("action",action).put("data",data));
-        }catch(Exception e){try{emit("war_error",new JSONObject().put("message","ทำรายการไม่สำเร็จ ตรวจเครือข่าย โล่ และเวลาพัก แล้วลองใหม่ด้วยรายการเดิม"));}catch(Exception ignored){}}});
+        }catch(Exception e){try{emit("war_error",new JSONObject().put("message",e.getMessage()!=null&&e.getMessage().startsWith("game:")?e.getMessage().substring(5):"ทำรายการไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ รายการแลกที่ค้างตรวจซ้ำได้ในศูนย์เพชรทดสอบ"));}catch(Exception ignored){}}});
     }
     private String beginEmailLink(boolean recovery)throws Exception {
         byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes);
@@ -124,4 +129,5 @@ final class NovaCloud {
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }
+
 
