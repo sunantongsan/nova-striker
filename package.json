@@ -3,7 +3,7 @@
   "version": "1.7.4",
   "private": true,
   "scripts": {
-    "test": "node tests/performance219.cjs && node tests/audio218.cjs && node tests/welcome217.cjs && node tests/combat216.cjs && node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs && node tests/online170.cjs && node tests/ui170.cjs && node tests/fixes171.cjs && node tests/patch172.cjs && node tests/upgrade-simple.cjs && node tests/economy180.cjs && node tests/live190.cjs && node tests/siege200.cjs && node tests/siege-ui200.cjs && node tests/enhance210.cjs && node tests/enhance-ui210.cjs && node tests/enhance-recovery211.cjs && node tests/transport212.cjs && node tests/transport-ui212.cjs && node tests/recruit213.cjs && node tests/recruit-ui213.cjs && node tests/recruit-scroll214.cjs && node tests/disabled215.cjs && node tests/performance215.cjs"
+    "test": "node tests/home220.cjs && node tests/performance219.cjs && node tests/audio218.cjs && node tests/welcome217.cjs && node tests/combat216.cjs && node tests/rts.cjs && node tests/expansion.cjs && node tests/online160.cjs && node tests/online170.cjs && node tests/ui170.cjs && node tests/fixes171.cjs && node tests/patch172.cjs && node tests/upgrade-simple.cjs && node tests/economy180.cjs && node tests/live190.cjs && node tests/siege200.cjs && node tests/siege-ui200.cjs && node tests/enhance210.cjs && node tests/enhance-ui210.cjs && node tests/enhance-recovery211.cjs && node tests/transport212.cjs && node tests/transport-ui212.cjs && node tests/recruit213.cjs && node tests/recruit-ui213.cjs && node tests/recruit-scroll214.cjs && node tests/disabled215.cjs && node tests/performance215.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14"
