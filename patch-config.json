@@ -1,1 +1,12 @@
-{"schema":1,"channel":"test","nativeVersion":21,"compatibleNativeVersions":[19,20],"contentVersion":22,"label":"1.7.4-air-assault","maxBytes":67108864}
+{
+  "schema": 1,
+  "channel": "test",
+  "nativeVersion": 21,
+  "compatibleNativeVersions": [
+    19,
+    20
+  ],
+  "contentVersion": 23,
+  "label": "1.7.4-defense-range",
+  "maxBytes": 67108864
+}
