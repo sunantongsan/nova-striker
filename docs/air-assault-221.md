@@ -1,6 +1,6 @@
-# Air assault and ground rocket battery — content patch 21
+# Air assault and ground rocket battery — content patch 22
 
-- Combat music bus is muted in raid/defense scenes, including the tail of a home note; no drums or other music voices are scheduled during combat. Weapon/explosion SFX remain active. Home melody resumes after returning.
+- Combat music bus is muted in raid/defense scenes, including the tail of a home note; no drums or other music voices are scheduled during combat. The repeating online alert (including four bass pulses) is also silent. Weapon/explosion SFX remain active. Home melody resumes after returning.
 - Existing `missileturret` is now the ground rocket battery: HQ1 unlock, 350 gold/150 energy, 30-second construction, range 7, ground-only targeting and splash, 2.4-second fire interval, arcing visual trajectory. Existing building IDs, levels and HP survive. The existing server layout whitelist already accepts this building ID; no schema migration or economy RPC changes.
 - Unit 5 is an attack helicopter (same roster/training/online slot), original transparent body art with animated rotor and existing missile weapon. Unit 7 retains the bomber slot with original larger art (72px versus 48px helicopter at zoom 1).
 - Bomber damage per direct hit changes from 115 to 149.5 (+30%). Bomber flight physically moves through approach, bombing pass and a half-circle turn; it retargets after target destruction and follows moving targets on the next pass. Existing movement speed remains 1.5; the complete flight cycle determines the effective interval rather than stationary two-second shooting. Splash multiplier remains .55. Bomb blast radius visual grows to 38px, with a longer/deeper impact sound. Gameplay splash radius remains 1.5 cells.
