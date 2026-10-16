@@ -1,0 +1,24 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
+const source=fs.readFileSync('game.js','utf8');
+function boot(cloud,oldData={}){
+ const elements={},data={novaRTSIntro:'1',...oldData},calls=[];
+ const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=>{})});
+ const el=id=>elements[id]||(elements[id]={hidden:false,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
+ const s={console,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame(){},NovaCloud:cloud};
+ vm.createContext(s);vm.runInContext(source,s);return {s,el,data,calls};
+}
+let calls=[],cloud={available:()=>true,hasAccount:()=>false,emailAuth:(...a)=>calls.push(a),login:()=>calls.push(['google']),load:()=>calls.push(['load'])};
+let a=boot(cloud);assert.equal(a.el('welcome').hidden,false);assert.match(a.el('welcomeSubmit').textContent,/สร้างบัญชี/);
+const before=JSON.parse(a.data.novaRTS1);a.s.novaBack();assert.equal(a.el('welcome').hidden,false);
+a.el('welcomeEmail').value='player@example.com';a.el('welcomePassword').value='longpassword';a.s.Game.welcomeSubmit({preventDefault(){}});assert.deepEqual(calls.at(-1),['signup','player@example.com','longpassword']);assert.equal(a.el('welcomePassword').value,'');a.s.Game.welcomeSubmit({preventDefault(){}});assert.equal(calls.length,1);
+a.s.novaCloudEvent('status',{message:'ตรวจกล่องอีเมลเพื่อยืนยัน'});assert.equal(a.el('welcome').hidden,false);assert.equal(a.el('welcomeSubmit').disabled,false);assert.match(a.el('welcomeStatus').textContent,/ยืนยัน/);
+a.s.Game.welcomeSwitch();assert.equal(a.el('welcomePassword').minLength,1);a.s.Game.welcomeForm('recover');assert.equal(a.el('welcomePasswordRow').hidden,true);a.s.novaBack();assert.equal(a.el('welcomePasswordRow').hidden,false);
+a.s.Game.welcomeGoogle();assert.deepEqual(calls.at(-1),['google']);a.s.novaCloudEvent('signed_in',{id:'account-a'});assert.equal(a.el('welcome').hidden,true);assert.deepEqual(calls.at(-1),['load']);assert.deepEqual(JSON.parse(a.data.novaRTS1).buildings,before.buildings,'registration preserves existing base');
+a.s.novaCloudEvent('signed_out',{});assert.equal(a.el('welcome').hidden,false);assert.equal(a.data.novaAccountReady,undefined);
+let registered=boot({...cloud,hasAccount:()=>true});assert.equal(registered.el('welcome').hidden,true,'registered users enter offline without signing up');
+let guest=boot(cloud,{novaRTS1:a.data.novaRTS1,novaAccountReady:'1'});assert.equal(guest.el('welcome').hidden,false,'native session absence takes precedence over stale UI cache');assert.deepEqual(JSON.parse(guest.data.novaRTS1).buildings,before.buildings);
+let legacy=boot({...cloud,hasAccount:undefined});assert.equal(legacy.el('welcome').hidden,false);legacy.s.novaCloudEvent('loaded',{id:'old-account',save:null});assert.equal(legacy.el('welcome').hidden,true);assert.equal(legacy.el('modal').style.display,'none');
+let offline=boot({...cloud,hasAccount:undefined},{novaAccountReady:'1'});assert.equal(offline.el('welcome').hidden,true,'previously registered legacy user can return offline');
+let failed=boot({...cloud,hasAccount:undefined});failed.s.novaCloudEvent('status',{message:'ตรวจอินเทอร์เน็ต'});assert.equal(failed.el('welcome').hidden,false);assert.equal(failed.el('welcomeSubmit').disabled,false);
+let browser=boot(undefined);browser.s.Game.welcomeGoogle();assert.match(browser.el('welcomeStatus').textContent,/แอป Nova/);
+console.log('PASS welcome: new/existing guest, registration verification, login/recovery, duplicate submits, back guard, saved account/offline, legacy session, logout, save preservation and unavailable bridge');
