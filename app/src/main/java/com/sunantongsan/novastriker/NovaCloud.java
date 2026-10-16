@@ -71,6 +71,8 @@ final class NovaCloud {
     private JSONObject session()throws Exception {
         JSONObject s=read();if(s.optLong("expires_at")*1000<System.currentTimeMillis()+60000){s=new JSONObject(request("/auth/v1/token?grant_type=refresh_token","POST",new JSONObject().put("refresh_token",s.getString("refresh_token")),null));keep(s);}return s;
     }
+    // Local account presence only; online operations still refresh and validate their tokens.
+    @JavascriptInterface public boolean hasAccount(){try{return read().optJSONObject("user")!=null;}catch(Exception e){return false;}}
     @JavascriptInterface public boolean available(){return BuildConfig.NOVA_CLOUD_ENABLED;}
     @JavascriptInterface public void login(){
         if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}
@@ -149,5 +151,6 @@ final class NovaCloud {
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }
+
 
 
