@@ -13,3 +13,6 @@ s.Game.toggleMusic();assert.equal(s.check218.mix().music.gain.value,0);assert.eq
 s.document.hidden=true;events.visibilitychange.forEach(f=>f());assert.equal(s.check218.audio().state,'suspended');s.document.hidden=false;s.Game.toggleSound();s.Game.toggleMusic();assert.equal(s.check218.audio().state,'running');
 for(let i=0;i<100;i++){s.check218.audio().currentTime++;s.check218.draw({weapon:'missile',x:1,y:1,tx:3,ty:3,life:.4,maxLife:.48});}assert(s.check218.voices()<=24,'voice cap');drain();assert.equal(s.check218.voices(),0,'voice cleanup');
 console.log('PASS original music, weapon sound variants, once-per-effect sound, all render phases, separate mute persistence, background suspension, voice limit and cleanup');
+
+s.Game.scout(1);s.check218.audio().currentTime++;let battleStarted=started;s.check218.music();assert.equal(started,battleStarted,'no music/percussion voices during battle');assert.equal(s.check218.mix().music.gain.value,0,'mute the tail of base music immediately');s.check218.draw({weapon:'bomb',x:1,y:1,tx:3,ty:3,life:.4,maxLife:.48});assert(started>battleStarted,'weapons remain audible during battle');drain();s.Game.home();s.check218.audio().currentTime++;s.check218.music();assert(s.check218.mix().music.gain.value>0,'base music resumes at home');
+console.log('PASS combat has weapon/explosion audio only, no music or drums; home music resumes');
