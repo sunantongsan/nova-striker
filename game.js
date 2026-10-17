@@ -10,6 +10,28 @@ function localize(document){if(!document||!document.createTreeWalker)return;if(d
 root.NovaI18n={language:language,translate:translate,localize:localize,source:function(v){return reverse[v]||v;},setLanguage:function(v){if(v!=='en'&&v!=='th')return false;language=v;this.language=v;localize(root.document);return true;}};
 localize(root.document);
 })(typeof globalThis === 'object' ? globalThis : this);
+/* Presentation only: preserve gems balances, save keys and server contracts. */
+(function(root){'use strict';
+function label(value){return value.replace(/เพชร/g,' NOVA ').replace(/\bdiamonds?\b/gi,'NOVA').replace(/\bgems?\b/gi,'NOVA').replace(/ {2,}/g,' ');}
+function paint(node){
+ if(!node)return;
+ if(node.nodeType===3){
+  if(!node.parentNode||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(node.parentNode.tagName)||node.parentNode.isContentEditable)return;
+  var text=label(node.nodeValue);
+  if(text.indexOf('💎')<0){if(text!==node.nodeValue)node.nodeValue=text;return;}
+  var parts=text.split('💎'),fragment=root.document.createDocumentFragment();
+  parts.forEach(function(part,i){if(i){var img=root.document.createElement('img');img.src='assets/nova-core.webp';img.className='nova-core-icon';img.alt='NOVA';img.width=24;img.height=24;fragment.appendChild(img);}if(part)fragment.appendChild(root.document.createTextNode(part));});
+  node.parentNode.replaceChild(fragment,node);return;
+ }
+ if(node.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(node.tagName)||node.isContentEditable)return;
+ ['title','aria-label','alt'].forEach(function(key){var value=node.getAttribute(key);if(value){var next=label(value).replace(/💎/g,'NOVA');if(value!==next)node.setAttribute(key,next);}});
+ Array.prototype.slice.call(node.childNodes).forEach(paint);
+}
+root.NovaCurrency={label:label,paint:paint};
+if(!root.document||!root.document.body)return;
+paint(root.document.body);
+if(root.MutationObserver)new root.MutationObserver(function(records){records.forEach(function(record){if(record.type==='characterData')paint(record.target);else Array.prototype.forEach.call(record.addedNodes,paint);});}).observe(root.document.body,{subtree:true,childList:true,characterData:true});
+})(typeof globalThis==='object'?globalThis:this);
 /* locale232:end */
 /* Nova Striker 1.5: offline base building and tactical deployment. */
 (function(root){'use strict';
@@ -1071,6 +1093,7 @@ var settings234=Game.settings;
 Game.settings=function(){settings234();var sheet=$('modal').querySelector&&$('modal').querySelector('.sheet');if(sheet)sheet.insertAdjacentHTML('beforeend','<button class="wide" onclick="Game.share234()">'+tr('ชวนเพื่อนเล่น')+'</button>');};
 Game.share234=function(){var url='https://t.me/NovaStrikerRTS_bot',text='🚀 NOVA STRIKER — Build. Command. Conquer.\nBuild your sci-fi base, train your army and lead your next raid. Join me on Telegram!';var link='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);if(root.Telegram&&root.Telegram.WebApp&&root.Telegram.WebApp.openTelegramLink)root.Telegram.WebApp.openTelegramLink(link);else open('<h2>'+tr('ชวนเพื่อนเล่น')+'</h2><p>'+escapeHTML(text)+'</p><p><a target="_blank" rel="noopener" href="'+link+'">'+tr('แชร์บน Telegram')+'</a></p><button class="wide" onclick="Game.close()">'+tr('กลับ')+'</button>');};
 })(typeof globalThis!=='undefined'?globalThis:this);
+
 
 
 
