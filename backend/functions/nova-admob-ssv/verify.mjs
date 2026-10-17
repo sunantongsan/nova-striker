@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-// Verify the exact encoded callback query without URLSearchParams reserialization.
+// Verify Google's form-decoded query without reordering or reserializing parameters.
 export function parseCallback(url) {
  const raw=new URL(url).search.slice(1);
  if(raw.length>8192)throw Error('query');
@@ -7,7 +7,7 @@ export function parseCallback(url) {
  if(!match)throw Error('signature');
  const p=new URLSearchParams(raw),seen=new Set();
  for(const [k] of p){if(seen.has(k))throw Error('duplicate');seen.add(k);}
- return {p,content:match[1],signature:Buffer.from(decodeURIComponent(match[2]),'base64url'),keyId:match[3]};
+ return {p,content:decodeURIComponent(match[1].replace(/\+/g,' ')),signature:Buffer.from(decodeURIComponent(match[2]),'base64url'),keyId:match[3]};
 }
 export function derToRaw(bytes){
  if(bytes[0]!==48||bytes[1]!==bytes.length-2)throw Error('DER sequence');

@@ -13,10 +13,6 @@ Deno.serve(async req=>{
  let parsed;try{parsed=parseCallback(req.url);}catch{return new Response('Invalid signature',{status:400});}
  let pem;try{pem=await key(parsed.keyId);}catch{return new Response('Verification temporarily unavailable',{status:503});}
  let p;try{
-  if(parsed.p.get('user_id')==='nova-setup-probe'&&parsed.p.get('custom_data')==='nova-setup-probe'){
-   const tr=await fetch('https://www.gstatic.com/admob/reward/verifier-keys-test.json',{signal:AbortSignal.timeout(8000)});
-   if(tr.ok){const td=await tr.json();const tk=td.keys?.find((k:{keyId:number})=>String(k.keyId)===parsed.keyId);if(tk){await verifyCallback(parsed,tk.pem);return new Response('Verified test key; no reward');}}
-  }
   p=await verifyCallback(parsed,pem);
  }catch(e){console.warn('nova_ssv_signature',String(e));return new Response('Invalid signature',{status:403});}
  // Explicit signed dashboard probe: never reaches the reward database.
