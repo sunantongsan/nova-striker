@@ -1,0 +1,5 @@
+# Game audio patch 51
+
+User-supplied recordings: xtremefreddy-game-music-loop-6-144641.mp3 (base loop) and universfield-game-bonus-144751.mp3 (construction complete). Original uploads preserved. Converted to mono MP3 32 kHz / 64 kbps and embedded as data audio in game.js so existing Android patch allowlists need no native change. Source attribution follows supplied filenames; no independent license verification claimed.
+
+Deployment acknowledgement is synthesized locally with the installed Flite RMS voice: “Ready for action”, with a radio band-pass. No external voice service. Weapon sounds are procedural: machine-gun bursts, rocket launch hiss, layered explosion bass/debris. Construction acknowledgement uses the SFX setting; base music uses Music. Base music pauses in battle, hidden pages and known rewarded-ad flows; gesture starts playback and rejected autoplay is retried only on another gesture. Online troop acknowledgement waits for matching server receipt. Simultaneous troop voices are limited to one per 1.1 seconds; existing Web Audio voice limit remains 24.
