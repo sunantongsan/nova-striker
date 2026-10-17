@@ -1,0 +1,25 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('game.js','utf8'),catalog=require('../localization/en.json');
+function boot(data={},platform='android'){
+ const elements={},errors=[],requests=[];let reloads=0,frame;
+ const ctx=new Proxy({measureText:t=>({width:String(t).length*8}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
+ const el=id=>elements[id]||(elements[id]={hidden:true,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
+ const storage={getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]};
+ const s={crypto:require('node:crypto').webcrypto,console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,warAvailable:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
+ if(platform==='telegram'){s.Telegram={WebApp:{}};s.window=s;}
+ vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v,select:id=>selected=id,clearBusy:()=>{warBusy=false;warActive=null;},setOnline:()=>{E.d.onlineCrystal={owner:"a"};E.d.admob230=true;}};})(typeof globalThis!=='),s);
+ return {s,el,data,errors,requests,reloads:()=>reloads,frame:n=>frame(n)};
+}
+for(const platform of ['android','telegram']){
+ const a=boot({novaRTSIntro:'1'},platform),G=a.s.Game,e=a.s.test232.e;
+ const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
+ a.s.test232.clearBusy();G.treasury();assert.equal(a.requests.at(-1).a,'test_status');reply({owner:'a',test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});assert(!a.el('modal').innerHTML.includes('10,000'));assert.match(a.el('modal').innerHTML,/Start at 20/);
+ const gems=e.d.gems;G.checkin();const count=a.requests.length;G.checkin();assert.equal(a.requests.length,count,'double tap sends one claim');reply({owner:'a',test_gems:20,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20);
+ G.refreshCheckin233();reply({owner:'a',test_gems:20,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20,'refresh does not credit twice');
+ a.s.test232.setOnline();a.s.NovaAds={rewardVerified(){}};e.d.gold=0;e.d.power=0;a.s.test232.select(e.d.buildings.find(b=>b.type==='hq').id);G.upgrade();assert.match(a.el('modal').innerHTML,/Not enough resources/);assert.match(a.el('modal').innerHTML,/Game.resourceOffer233/);
+ G.resourceOffer233('gold',350);assert.equal(a.requests.at(-1).p.resource233,'quote');const base={owner:'a',enrolled:false,resource233:true,wallet_gems:20};reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});assert.match(a.el('modal').innerHTML,/Watch an ad/);assert.match(a.el('modal').innerHTML,/Confirm exchange/);
+ const before=e.d.gems;G.buyResource233();const pending=e.d.pendingResource233;assert(pending);assert.equal(e.d.gems,before-5);const n=a.requests.length;G.buyResource233();assert.equal(a.requests.length,n);a.s.novaCloudEvent('war_error',{request_id:a.requests.at(-1).id,message:'network'});assert(e.d.pendingResource233);G.retryResource233();assert.equal(a.requests.at(-1).p.request_id,pending.request_id);reply({...base,wallet_gems:15,resource_receipt:{id:pending.request_id,kind:'gold',amount:350,cost:5,cancelled:false}});assert.equal(e.d.pendingResource233,undefined);assert.equal(e.d.gems,before-5);
+ G.resourceOffer233('gold',350);reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});G.buyResource233();const cancel=e.d.pendingResource233;a.s.test232.clearBusy();G.retryResource233(true);reply({...base,resource_receipt:{id:cancel.request_id,kind:'gold',amount:0,cost:0,cancelled:true}});assert.equal(e.d.gems,before-5,'cancel refunds only its reserved amount');
+ a.s.localStorage.setItem=()=>{throw Error('full')};G.resourceOffer233('gold',350);reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});G.buyResource233();assert.equal(e.d.gems,before-5);assert.equal(e.d.pendingResource233,undefined,'failed local save never starts purchase');
+}
+console.log('PASS economy233 UI: no giveaway, explicit/duplicate check-in, upgrade shortfall, choice UI, durable debit/retry/cancel, no auto-upgrade and save-failure safety on Android/Telegram');

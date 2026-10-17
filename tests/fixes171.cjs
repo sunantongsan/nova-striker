@@ -8,14 +8,14 @@ let timers=new Map(),seq=0,requests=[],elements={},data={novaRTSIntro:'1'};
 const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=>{})});const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
 const sandbox={console,crypto:require('crypto').webcrypto,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:(fn,ms)=>{timers.set(++seq,{fn,ms});return seq;},clearTimeout:id=>timers.delete(id),Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame(){},NovaCloud:{warAvailable:()=>true,available:()=>true,warRequest:(action,payload,request_id)=>requests.push({action,payload:JSON.parse(payload),request_id})}};
 sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);const G=sandbox.Game,emit=(event,data)=>sandbox.novaCloudEvent(event,data),reply=(r,d)=>emit('war',{...r,data:d});
-// Promotion uses the same local save and balance as daily check-in, without a network request.
-G.treasury();assert(!el('modal').innerHTML.includes('ทดสอบ'));assert(el('modal').innerHTML.includes('Game.promoClaim()'));
-const before=requests.length;G.promoClaim();let saved=JSON.parse(data.novaRTS1);assert.equal(saved.gems,10030);assert.equal(requests.length,before);assert(el('modal').innerHTML.includes('รับโปรโมชั่นวันนี้แล้ว'));G.promoClaim();assert.equal(JSON.parse(data.novaRTS1).gems,10030);G.checkin();assert.equal(JSON.parse(data.novaRTS1).gems,10040);
-// Previous online balances and redemptions remain available, with no second promotion claim.
-G.legacyGems();let r=requests.at(-1);reply(r,{owner:'a',test_gems:500,can_claim:true});assert(el('modal').innerHTML.includes('500 เพชร'));assert(!el('modal').innerHTML.includes('Game.testClaim()'));assert(!el('modal').innerHTML.includes('ทดสอบ'));
+// Retired offline promotion cannot mint currency; check-in is now server-confirmed.
+G.treasury();assert(!el('modal').innerHTML.includes('Game.promoClaim()'));assert.equal(requests.at(-1).action,'test_status');
+let r=requests.at(-1);reply(r,{owner:'a',test_gems:500,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});
+const before=JSON.parse(data.novaRTS1).gems;G.checkin();r=requests.at(-1);assert.equal(r.action,'test_claim');assert.equal(r.payload.checkin233,true);assert.equal(JSON.parse(data.novaRTS1).gems,before);
+reply(r,{owner:'a',test_gems:520,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(JSON.parse(data.novaRTS1).gems,before+20);
 let time=Date.UTC(2026,9,15,16,59,59),state={},fail=false,storage={getItem:k=>state[k]||null,setItem:(k,v)=>{if(fail)throw Error('full');state[k]=v;}},e=new N.Engine(storage,()=>time);
-assert.equal(e.claimPromo(),10000);assert.equal(e.claimPromo(),0);e=new N.Engine(storage,()=>time);assert.equal(e.claimPromo(),0,'restart cannot repeat claim');time+=1000;assert.equal(e.claimPromo(),10000,'Thai midnight resets');time-=86400000;assert.equal(e.claimPromo(),0,'clock rollback cannot repeat claim');time+=2*86400000;let gems=e.d.gems;fail=true;assert.equal(e.claimPromo(),-1);assert.equal(e.d.gems,gems);fail=false;assert.equal(e.claimPromo(),10000,'retry after failed save');assert.equal(e.claim(),10,'normal check-in remains independent');
-console.log('PASS: combat regression; promotion daily/reset/restart/rollback/save failure; no network; legacy wallet retained');
+let gems=e.d.gems;assert.equal(e.claimPromo(),0);time+=86400000;assert.equal(e.claimPromo(),0);assert.equal(e.claim(),0);assert.equal(e.d.gems,gems);
+console.log('PASS: combat regression; retired local promotion, server-confirmed check-in, unchanged prior balances');
 
 // Crystal exchanges spend the primary gems and preserve balances on errors.
 let cstore={},cs={getItem:k=>cstore[k]||null,setItem:(k,v)=>cstore[k]=v},ce=new N.Engine(cs,()=>Date.UTC(2026,9,15));ce.d.gems=10000;ce.d.crystals=0;
