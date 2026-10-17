@@ -24,6 +24,11 @@ const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/st
  delete window.show_12052624;const failed=window.NovaAds.rewardVerified('owner','receipt');scripts.at(-1).onerror();await failed;assert.equal(statuses.at(-1),'load_failed236','failure is not overwritten by closed');
  const retry=window.NovaAds.rewardVerified('owner','receipt');window.show_12052624=async()=>{adCalls++;};scripts.at(-1).onload();await retry;assert.equal(adCalls,3,'failed SDK can reload on next click');
  assert.equal(calls.filter(c=>/verify231/.test(c.url)).length,0);
+ let scoutDone=0,scoutShows=0;const beforeEarned=earned;
+ window.show_12052624=async options=>{assert.equal(options.requestVar,'scout');scoutShows++;};
+ await window.NovaAds.scout(()=>scoutDone++,()=>true);assert.equal(scoutShows,1);assert.equal(scoutDone,1);assert.equal(earned,beforeEarned,'scout never emits currency reward');
+ window.show_12052624=async()=>{throw Error('no fill');};await window.NovaAds.scout(()=>scoutDone++,()=>true);assert.equal(scoutDone,2,'no fill allows play');
+ window.show_12052624=async()=>{scoutShows++;};await window.NovaAds.scout(()=>scoutDone++,()=>false);assert.equal(scoutShows,1,'cancelled scout never starts late ad');
  const native={window:{NovaCloud:{native:true}}};vm.runInNewContext(fs.readFileSync('web/telegram.js','utf8'),native);assert.equal(native.window.NovaCloud.native,true);
  console.log('PASS Telegram bridge: login, zone, receipt mapping, request correlation, wrong-owner rejection, server-only reward verification, native isolation');
 })().catch(e=>{console.error(e);process.exit(1)});

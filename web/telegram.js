@@ -63,6 +63,16 @@
   }).finally(()=>{adsTask236=null;});return adsTask236;
  }
  root.NovaAds={
+  provider:'monetag',
+  scout:async(done,isActive)=>{
+   if(showing||!session||!tg||!tg.initData){done();return;}
+   showing=true;
+   try{
+    await loadAds();
+    if(isActive())await root.show_12052624({requestVar:'scout'});
+   }catch(e){/* A missing ad never blocks online scouting. */}
+   finally{showing=false;done();}
+  },
   rewardVerified:async(owner,id)=>{
    if(showing)return;
    if(!session||owner!==session.user.id){root.novaRewardStatus?.('unavailable');return;}
