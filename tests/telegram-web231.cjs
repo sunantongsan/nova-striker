@@ -1,0 +1,24 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
+(async()=>{
+ const calls=[],events=[],nodes={},scripts=[];let domReady;
+ const document={getElementById:id=>nodes[id]||null,createElement:()=>({dataset:{}}),head:{appendChild:s=>scripts.push(s)},addEventListener:(event,fn)=>{domReady=fn;}};
+ const window={Telegram:{WebApp:{initData:'signed-data',ready(){},expand(){},isVersionAtLeast:()=>true,disableVerticalSwipes(){}}},novaCloudEvent:(...x)=>events.push(x)};
+ const context={window,document,console,AbortSignal,fetch:async(url,options)=>{calls.push({url,...options});let data;
+  if(url.includes('nova-telegram-auth'))data={access_token:'access',refresh_token:'refresh',expires_at:Date.now()/1000+3600,user:{id:'owner'}};
+  else if(url.includes('nova_telegram_command'))data={monetag231:true,owner:'owner'};
+  else data=[];
+  return {ok:true,status:200,text:async()=>JSON.stringify(data)};
+ }};
+ vm.runInNewContext(fs.readFileSync('web/telegram.js','utf8'),context);await window.NovaCloud.login();
+ assert.equal(events[0][0],'signed_in');assert.equal(scripts[0].dataset.zone,'12052624');
+ window.NovaCloud.warRequest('research',JSON.stringify({admob230:'prepare',request_id:'receipt',owner:'owner'}),'request-1');
+ await new Promise(r=>setImmediate(r));
+ const rpc=calls.find(c=>c.url.includes('nova_telegram_command'));assert.equal(JSON.parse(rpc.body).payload.monetag231,'prepare');assert.equal(JSON.parse(rpc.body).payload.admob230,undefined);
+ assert.equal(events.at(-1)[1].request_id,'request-1');assert.equal(events.at(-1)[1].data.admob230,true);
+ let adCalls=0,earned=0;window.show_12052624=async({ymid})=>{adCalls++;assert.equal(ymid,'receipt');};window.novaRewardEarned=()=>earned++;
+ await window.NovaAds.rewardVerified('different-account','receipt');assert.equal(adCalls,0);
+ await window.NovaAds.rewardVerified('owner','receipt');assert.equal(adCalls,1);assert.equal(earned,1);
+ assert.equal(calls.filter(c=>/verify231/.test(c.url)).length,0);
+ const native={window:{NovaCloud:{native:true}}};vm.runInNewContext(fs.readFileSync('web/telegram.js','utf8'),native);assert.equal(native.window.NovaCloud.native,true);
+ console.log('PASS Telegram bridge: login, zone, receipt mapping, request correlation, wrong-owner rejection, server-only reward verification, native isolation');
+})().catch(e=>{console.error(e);process.exit(1)});
