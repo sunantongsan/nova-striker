@@ -55,3 +55,11 @@ console.log('PASS one-tap check-in: status fetch continues to receipt preparatio
 {
  const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e;a.s.test232.clearBusy();const b=e.d.buildings.find(b=>b.type==='hq');a.s.test232.select(b.id);e.d.gold=100000;e.d.power=100000;e.d.crystals=100000;const count=a.requests.length;G.upgrade();assert(b.until||b.lv>1,'sufficient resources upgrade directly');assert.equal(a.requests.length,count,'no unnecessary resource quote when affordable');assert(!a.el('modal').innerHTML.includes('Game.buyShortfall238()'));
 }
+{
+ const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game,e=a.s.test232.e;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};a.s.test232.clearBusy();a.s.test232.setOnline();G.quickAd237('gold');
+ const first=a.requests.at(-1);a.s.novaCloudEvent('war_error',{request_id:first.id,message:'รอ 2 นาทีก่อนดูครั้งต่อไป'});
+ assert.equal(e.d.pendingAd230.error239,'รอ 2 นาทีก่อนดูครั้งต่อไป');assert(!a.el('modal').innerHTML.includes('Preparing your ad'));assert.match(a.el('modal').innerHTML,/Game.retryAd239/);assert(!a.el('modal').innerHTML.includes('Check / Retry original'));
+ G.retryAd239();const second=a.requests.at(-1);assert.equal(second.p.request_id,first.p.request_id,'retry uses same receipt ID');assert.equal(shown,0);assert(!e.d.pendingAd230.error239);assert.match(a.el('modal').innerHTML,/Preparing your ad/);
+ a.s.novaCloudEvent('war',{action:second.a,request_id:second.id,data:{owner:'a',enrolled:false,ad_reward:{id:second.p.request_id,kind:'gold',amount:1080,expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1,'retry opens prepared ad without another tap');
+}
+console.log('PASS ad cooldown: persistent reason, simple retry, original receipt and automatic ad launch');
