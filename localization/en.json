@@ -925,5 +925,9 @@
   "รายการโฆษณาหมดอายุแล้ว": "This ad request has expired.",
   "เริ่มโฆษณาใหม่": "Start a new ad",
   "วันนี้": "Today",
-  " • ดูโฆษณารับรางวัล</button>": " • Watch ad for reward</button>"
+  " • ดูโฆษณารับรางวัล</button>": " • Watch ad for reward</button>",
+  "เช็คอินเคลมเพชร": "Check in & claim diamonds",
+  "ของไม่พอ": "Not enough resources",
+  "จ่ายด้วยเพชร": "Pay with diamonds",
+  "พื้นที่คลังหรือกำลังผลิตไม่พอ": "Not enough storage space or production capacity"
 }
