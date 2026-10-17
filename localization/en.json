@@ -968,5 +968,16 @@
   "ยืนยันเร่งผลิต": "Confirm production boost",
   "กำลังค้นหาฐาน": "Finding a base",
   "อาจมีโฆษณาก่อนแสดงฐาน หากไม่พร้อมสามารถสำรวจต่อได้": "An ad may appear before the base. You can continue if it is unavailable.",
-  "สำรวจฐานต่อ": "Continue scouting"
+  "สำรวจฐานต่อ": "Continue scouting",
+  "โบนัสต้อนรับผู้บัญชาการใหม่": "New Commander Welcome Bonus",
+  "สำหรับบัญชีใหม่ รับได้ครั้งเดียวต่อบัญชี": "For new accounts. Claim once per account.",
+  "รับโบนัสต้อนรับแล้ว": "Welcome bonus claimed",
+  "รับ 500 NOVA": "Claim 500 NOVA",
+  "กำลังตรวจสิทธิ์โบนัส": "Checking bonus eligibility",
+  "ยินดีด้วย ผู้บัญชาการ!": "Congratulations, Commander!",
+  "รับโบนัสต้อนรับเรียบร้อยแล้ว": "Your welcome bonus has arrived!",
+  "เริ่มสร้างอาณาจักร": "Build your empire",
+  "โบนัสนี้สำหรับบัญชีใหม่ที่สมัครหลังเริ่มกิจกรรม": "This bonus is for accounts created after the promotion began.",
+  "ใช้บัญชีเดิมเพื่อรับโบนัส": "Use the same account to claim this bonus.",
+  "คำสั่งโบนัสไม่ถูกต้อง": "Invalid bonus request"
 }
