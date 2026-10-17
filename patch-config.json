@@ -1,12 +1,13 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 21,
+  "nativeVersion": 22,
   "compatibleNativeVersions": [
     19,
-    20
+    20,
+    21
   ],
-  "contentVersion": 29,
-  "label": "1.7.8-economy-preparation",
+  "contentVersion": 30,
+  "label": "1.7.9-verified-rewards",
   "maxBytes": 67108864
 }

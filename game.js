@@ -901,6 +901,42 @@ Game.rewardAd=function(){
  var names={gold:'🪙 ทอง',power:'⚡ พลังงาน',crystals:'🔮 ผลึก'};
  open('<h2>🎁 รางวัลโฆษณา</h2><p>กำลังเตรียมเปิดให้บริการ • ยังไม่มีการดูโฆษณาหรือหักเพชรในหน้านี้</p><p>สมัครใจดูทีละครั้ง ไม่จำกัดจำนวนครั้งต่อวัน<br>ดู 1 ครั้ง เร่งงานที่เลือก 25 นาที<br>ใช้ 15 💎 เร่งได้ 30 นาที</p><h3>ตัวอย่างรางวัลตามฐานของคุณ</h3>'+['gold','power','crystals'].map(function(k){var q=E.rewardQuote229(k,false),p=E.rewardQuote229(k,true);return '<p>'+names[k]+'<br>โฆษณา: '+q.amount.toLocaleString()+' • แพ็ก 15 💎: '+p.amount.toLocaleString()+(q.base===0?'<br>ต้องมีอาคารผลิตที่สร้างเสร็จก่อน':'')+'</p>';}).join('')+'<p>จำนวนถูกจำกัดตามพื้นที่คลังว่าง แพ็กทรัพยากรใหม่นี้ยังไม่เปิดแลก</p><h3>💎 ร้านเพชร</h3><p>ยังไม่เปิดขายเงินจริง กำลังเตรียมแพ็กและราคา</p><button class="wide" onclick="Game.treasury()">กลับศูนย์เพชร</button>');
 };
+// Verified rewarded ads: receipt polling never grants from a native callback alone.
+var rewardPreview230=Game.rewardAd,rewardPollAfter230=0;
+var rewardSync230=syncCrystal;syncCrystal=function(d){rewardSync230(d);if(d&&d.enrolled&&E.d.onlineCrystal&&d.owner===E.d.onlineCrystal.owner){E.d.admob230=d.admob230===true;E.save();}};
+Game.rewardAd=function(){
+ if(E.d.pendingAd230){Game.rewardStatus230();return;}
+ if(!E.d.admob230||!root.NovaAds||!root.NovaAds.rewardVerified){rewardPreview230();return;}
+ open('<h2>รางวัลโฆษณา</h2><p>เลือกของรางวัลก่อนดู • สมัครใจ • รอ 2 นาทีระหว่างครั้ง<br>ไม่มีเพดานรายวัน ขึ้นอยู่กับโฆษณาที่มีให้บริการ</p>'+[['gold','ทอง'],['power','พลังงาน'],['crystals','ผลึก']].map(function(a){return '<button class="wide" onclick="Game.prepareAd230(\''+a[0]+'\')">'+a[1]+' • ตรวจจำนวนรางวัล</button>';}).join('')+(E.d.serverUpgrades225||[]).map(function(j){return '<button class="wide" onclick="Game.prepareAd230(\'speed\',\''+escapeHTML(j.id)+'\')">เร่ง '+escapeHTML(upgradeLabel225(j))+' สูงสุด 25 นาที</button>';}).join('')+'<button class="wide" onclick="Game.close()">กลับฐาน</button>');
+};
+Game.prepareAd230=function(kind,job){
+ if(warBusy||E.d.pendingAd230||!E.d.admob230||!E.d.onlineCrystal)return;
+ var p={owner:E.d.onlineCrystal.owner,request_id:nonce160(),kind:kind,job:job||null};E.d.pendingAd230=p;
+ if(!E.save()){delete E.d.pendingAd230;toast('บันทึกไม่ได้ ยังไม่เริ่มโฆษณา');return;}
+ Game.checkAd230('prepare');
+};
+Game.checkAd230=function(mode){var p=E.d.pendingAd230;if(!p||warBusy)return;if(!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner){toast('ใช้บัญชีเดิมเพื่อตรวจรางวัล');return;}rewardPollAfter230=Date.now()+15000;warRequest('research',Object.assign({},p,{admob230:mode||'claim'}));};
+Game.rewardStatus230=function(){var p=E.d.pendingAd230;if(!p)return;var r=p.receipt;
+ open('<h2>รางวัลโฆษณา</h2><p>'+(r?'รางวัล '+(r.kind==='speed'?duration(r.amount):r.amount.toLocaleString()+' '+({gold:'ทอง',power:'พลังงาน',crystals:'ผลึก'}[r.kind]||''))+'<br>เมื่อดูครบ ระบบจะรอ Google ยืนยันก่อนรับรางวัล<br>หากคลังเต็มหรืองานเสร็จแล้ว จำนวนที่รับอาจลดลง':'กำลังตรวจจำนวนรางวัลจากเซิร์ฟเวอร์')+'</p>'+(r&&!p.showRequested&&!r.verified&&!r.claimed&&Date.parse(r.expires_at)>Date.now()?'<button class="wide green" onclick="Game.showAd230()">ดูโฆษณาเพื่อรับรางวัลนี้</button>':'')+(!p.showRequested?'<button class="wide" onclick="Game.checkAd230(\'cancel\')">ยกเลิกก่อนดู</button>':'')+'<button class="wide" onclick="Game.checkAd230(\''+(r?'claim':'prepare')+'\')">ตรวจ / ลองรายการเดิม</button><button class="wide" onclick="Game.close()">กลับฐาน</button>');
+};
+Game.showAd230=function(){var p=E.d.pendingAd230,r=p&&p.receipt;if(!r||p.showRequested||r.verified||r.claimed||r.cancelled||Date.parse(r.expires_at)<=Date.now())return;if(!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;p.showRequested=true;if(!E.save())return;if(root.NovaAds&&root.NovaAds.rewardVerified)root.NovaAds.rewardVerified(p.owner,p.request_id);};
+var rewardNativeStatus230=root.novaRewardStatus;root.novaRewardStatus=function(status){var p=E.d.pendingAd230;if(p&&['loading','ready','closed','unavailable','disabled','cooldown','unconfigured'].includes(status)){p.showRequested=false;E.save();}rewardNativeStatus230(status);};
+var legacyReward230=root.novaRewardEarned;
+root.novaRewardEarned=function(id){if(!root.NovaAds||!root.NovaAds.rewardVerified){legacyReward230(id);return;}if(E.d.pendingAd230){Game.checkAd230('claim');toast('ดูครบแล้ว กำลังรอการยืนยันรางวัล');}if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);};
+var rewardEvent230=warEvent;warEvent=function(event,message){
+ if(message.request_id&&message.request_id!==warActive)return;
+ var req=lastWarRequest&&lastWarRequest.payload;
+ if(req&&req.admob230&&(event==='war'||event==='war_error')){
+  clearTimeout(warTimer);warBusy=false;warActive=null;
+  if(event==='war_error'){toast(message.message||'ยังไม่ทราบผลรางวัล');Game.rewardStatus230();return;}
+  var d=message.data,p=E.d.pendingAd230,r=d&&d.ad_reward;
+  if(!p||!r||p.owner!==d.owner||r.id!==p.request_id)return;
+  warState=d;syncCrystal(d);if(E.saveFailed){toast('บันทึกไม่ได้ กรุณาตรวจรายการเดิม');return;}
+  if(r.claimed||r.cancelled){delete E.d.pendingAd230;if(!E.save()){E.d.pendingAd230=p;return;}toast(r.cancelled?'ยกเลิกรายการแล้ว':'รับรางวัลแล้ว '+r.granted+(r.kind==='speed'?' วินาที':''));close();hud();return;}
+  p.receipt=r;E.save();Game.rewardStatus230();return;
+ }
+ rewardEvent230(event,message);
+};
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 

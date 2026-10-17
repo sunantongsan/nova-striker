@@ -29,7 +29,9 @@ final class GameAds {
     @JavascriptInterface public void acknowledgeReward(String id) {
         activity.runOnUiThread(() -> { if(id.equals(prefs.getString("rewardPending", ""))) prefs.edit().remove("rewardPending").apply(); });
     }
-    @JavascriptInterface public void reward() {
+    @JavascriptInterface public void reward() { rewardStatus("unconfigured"); }
+    @JavascriptInterface public void rewardVerified(String owner, String intent) {
+        if(owner==null || intent==null || !owner.matches("[0-9a-fA-F-]{36}") || !intent.matches("[0-9a-fA-F-]{36}")) return;
         activity.runOnUiThread(() -> {
             if(destroyed || showing) return;
             if(!prefs.getString("rewardPending", "").isEmpty()) { deliverPending(); return; }
@@ -48,7 +50,9 @@ final class GameAds {
                 }); return;
             }
             if(!foreground) return;
-            RewardedAd ad=rewardReady;rewardReady=null;showing=true;final boolean[] earned={false};
+            RewardedAd ad=rewardReady;rewardReady=null;
+            ad.setServerSideVerificationOptions(new ServerSideVerificationOptions.Builder().setUserId(owner).setCustomData(intent).build());
+            showing=true;final boolean[] earned={false};
             ad.setFullScreenContentCallback(new FullScreenContentCallback(){
                 @Override public void onAdDismissedFullScreenContent(){showing=false;if(!earned[0])rewardStatus("closed");deliverPending();}
                 @Override public void onAdFailedToShowFullScreenContent(AdError error){showing=false;rewardStatus("unavailable");}
