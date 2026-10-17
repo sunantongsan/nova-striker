@@ -923,5 +923,7 @@
   "กำลังโหลดโฆษณา": "Loading ad…",
   "โหลดระบบโฆษณาไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วกดลองอีกครั้ง": "Could not load the ad service. Check your connection and try again.",
   "รายการโฆษณาหมดอายุแล้ว": "This ad request has expired.",
-  "เริ่มโฆษณาใหม่": "Start a new ad"
+  "เริ่มโฆษณาใหม่": "Start a new ad",
+  "วันนี้": "Today",
+  " • ดูโฆษณารับรางวัล</button>": " • Watch ad for reward</button>"
 }
