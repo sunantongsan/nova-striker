@@ -57,11 +57,11 @@ begin
  if uid is null or not exists(select 1 from nova_private.telegram_accounts231 where user_id=uid) then raise exception 'กรุณาเข้าสู่ระบบ';end if;
  perform pg_advisory_xact_lock(153014,1);
  select s.enabled into enabled from nova_private.monetag_settings231 s where id;
- if mode is null then return nova_private.command(action,payload)||jsonb_build_object('monetag231',enabled,'admob230',false);end if;
+ if mode is null then return public.nova_war_command(action,payload)||jsonb_build_object('monetag231',enabled,'admob230',false);end if;
  if action<>'research' or mode not in ('prepare','claim','status','cancel') then raise exception 'คำสั่งรางวัลไม่ถูกต้อง';end if;
  if payload->>'owner' is distinct from uid::text then raise exception 'ใช้บัญชีเดิมเพื่อตรวจรางวัล';end if;
  rid:=(payload->>'request_id')::uuid;if rid is null then raise exception 'ไม่มีรหัสรางวัล';end if;
- result:=nova_private.command('status',payload-'monetag231');
+ result:=public.nova_war_command('status',payload-'monetag231');
  select * into p from public.nova_war_players where user_id=uid;
  if p.user_id is null then raise exception 'เชื่อมต่อฐานออนไลน์ก่อนรับรางวัล';end if;
  select * into r from nova_private.monetag_intents231 where owner=uid and id=rid for update;
@@ -108,7 +108,7 @@ begin
   end if;
   update nova_private.monetag_intents231 set claimed_at=now(),granted=monetag231.amount where owner=uid and id=rid returning * into r;
  end if;
- return nova_private.command('status','{}')||jsonb_build_object('monetag231',enabled,'admob230',false,'ad_reward',jsonb_build_object('id',r.id,'kind',r.kind,'job',r.job,'amount',r.amount,'expires_at',r.expires_at,'verified',r.verified_at is not null,'claimed',r.claimed_at is not null,'granted',r.granted,'cancelled',r.cancelled));
+ return public.nova_war_command('status','{}')||jsonb_build_object('monetag231',enabled,'admob230',false,'ad_reward',jsonb_build_object('id',r.id,'kind',r.kind,'job',r.job,'amount',r.amount,'expires_at',r.expires_at,'verified',r.verified_at is not null,'claimed',r.claimed_at is not null,'granted',r.granted,'cancelled',r.cancelled));
 end $$;
 revoke all on function public.nova_telegram_command(text,jsonb) from public,anon;
 grant execute on function public.nova_telegram_command(text,jsonb) to authenticated;

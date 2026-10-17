@@ -10,6 +10,7 @@ const secret='a'.repeat(64);await db.query("update nova_private.monetag_settings
 let serial=0;const nonce=()=>`20000000-0000-4000-8000-${String(++serial).padStart(12,'0')}`;
 async function call(action,payload={},who=uid){await db.query("select set_config('request.jwt.claim.sub',$1,false)",[who]);await db.exec('set role authenticated');try{return(await db.query('select public.nova_telegram_command($1,$2) result',[action,JSON.stringify(payload)])).rows[0].result;}finally{await db.exec('reset role');}}
 async function verify(id,opts={}){return(await db.query('select public.nova_monetag_verify231($1,$2,$3,$4,$5,$6) ok',[opts.secret||secret,id,opts.tg||tg,opts.zone||'12052624',opts.event||'impression',opts.reward||'valued'])).rows[0].ok;}
+let profile=await call('status',{profile:'status'});assert.equal(profile.profile,true);assert.equal(profile.owner,uid);
 let r=await call('enroll',{layout:[{type:'hq',lv:15,x:10,y:10},{type:'mine',lv:1,x:9,y:10},{type:'tech',lv:10,x:8,y:10},{type:'crystalplant',lv:1,x:7,y:10}]});assert.equal(r.monetag231,false);assert.equal(r.admob230,false);
 const payload={monetag231:'prepare',owner:uid,request_id:nonce(),kind:'gold'};
 await assert.rejects(()=>call('research',payload),/ยังไม่เปิด/);
