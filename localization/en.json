@@ -908,5 +908,9 @@
   "ขาด": "Missing",
   "เติมแล้วกดอัปเกรดอีกครั้ง ระบบจะตรวจราคาและทรัพยากรใหม่": "After filling resources, tap Upgrade again to check the latest cost",
   "กรุณาเปิดเกมใหม่เพื่อใช้อัตราแลกใหม่": "Reopen the game to use the new exchange rates",
-  "รหัสรายการถูกใช้แล้ว": "Transaction ID already used"
+  "รหัสรายการถูกใช้แล้ว": "Transaction ID already used",
+  "ดูโฆษณาและรับเพชร": "Watch an ad & claim diamonds",
+  "เมื่อดูครบ ระบบจะรอผู้ให้บริการยืนยันก่อนรับรางวัล": "After completion, wait for the ad provider to verify your reward",
+  "ชวนเพื่อนเล่น": "Invite friends",
+  "แชร์บน Telegram": "Share on Telegram"
 }

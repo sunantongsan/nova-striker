@@ -11,8 +11,7 @@ sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.cre
 // Retired offline promotion cannot mint currency; check-in is now server-confirmed.
 G.treasury();assert(!el('modal').innerHTML.includes('Game.promoClaim()'));assert.equal(requests.at(-1).action,'test_status');
 let r=requests.at(-1);reply(r,{owner:'a',test_gems:500,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});
-const before=JSON.parse(data.novaRTS1).gems;G.checkin();r=requests.at(-1);assert.equal(r.action,'test_claim');assert.equal(r.payload.checkin233,true);assert.equal(JSON.parse(data.novaRTS1).gems,before);
-reply(r,{owner:'a',test_gems:520,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(JSON.parse(data.novaRTS1).gems,before+20);
+const before=JSON.parse(data.novaRTS1).gems,count=requests.length;G.checkin();assert.equal(requests.length,count,'unavailable rewarded provider cannot start claim');assert.equal(JSON.parse(data.novaRTS1).gems,before);
 let time=Date.UTC(2026,9,15,16,59,59),state={},fail=false,storage={getItem:k=>state[k]||null,setItem:(k,v)=>{if(fail)throw Error('full');state[k]=v;}},e=new N.Engine(storage,()=>time);
 let gems=e.d.gems;assert.equal(e.claimPromo(),0);time+=86400000;assert.equal(e.claimPromo(),0);assert.equal(e.claim(),0);assert.equal(e.d.gems,gems);
 console.log('PASS: combat regression; retired local promotion, server-confirmed check-in, unchanged prior balances');

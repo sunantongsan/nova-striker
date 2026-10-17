@@ -13,8 +13,12 @@ function boot(data={},platform='android'){
 for(const platform of ['android','telegram']){
  const a=boot({novaRTSIntro:'1'},platform),G=a.s.Game,e=a.s.test232.e;
  const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
- a.s.test232.clearBusy();G.treasury();assert.equal(a.requests.at(-1).a,'test_status');reply({owner:'a',test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});assert(!a.el('modal').innerHTML.includes('10,000'));assert.match(a.el('modal').innerHTML,/Start at 20/);
- const gems=e.d.gems;G.checkin();const count=a.requests.length;G.checkin();assert.equal(a.requests.length,count,'double tap sends one claim');reply({owner:'a',test_gems:20,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20);
+ a.s.test232.clearBusy();G.treasury();assert.equal(a.requests.at(-1).a,'test_status');reply({owner:'a',admob230:true,test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});assert(!a.el('modal').innerHTML.includes('10,000'));assert.match(a.el('modal').innerHTML,/Start at 20/);
+ const gems=e.d.gems;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};G.checkin();const count=a.requests.length;G.checkin();assert.equal(a.requests.length,count,'double tap sends one prepare');assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.equal(a.requests.at(-1).p.kind,'checkin');
+ const receipt={id:e.d.pendingAd230.request_id,kind:'checkin',amount:20,day:'2026-10-17',expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false};
+ reply({owner:'a',admob230:true,test_gems:0,ad_reward:receipt});assert.equal(shown,1,'user claim automatically opens prepared ad');assert.equal(e.d.gems,gems);
+ a.s.novaRewardEarned(receipt.id);assert.equal(a.requests.at(-1).p.completed234,true);reply({owner:'a',admob230:true,test_gems:0,ad_reward:receipt});assert.equal(e.d.gems,gems,'earned callback alone cannot credit');
+ G.checkAd230('claim');reply({owner:'a',test_gems:20,ad_reward:{...receipt,verified:true,claimed:true,granted:20},checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20);assert(!e.d.pendingAd230);
  G.refreshCheckin233();reply({owner:'a',test_gems:20,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20,'refresh does not credit twice');
  a.s.test232.setOnline();a.s.NovaAds={rewardVerified(){}};e.d.gold=0;e.d.power=0;a.s.test232.select(e.d.buildings.find(b=>b.type==='hq').id);G.upgrade();assert.match(a.el('modal').innerHTML,/Not enough resources/);assert.match(a.el('modal').innerHTML,/Game.resourceOffer233/);
  G.resourceOffer233('gold',350);assert.equal(a.requests.at(-1).p.resource233,'quote');const base={owner:'a',enrolled:false,resource233:true,wallet_gems:20};reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});assert.match(a.el('modal').innerHTML,/Watch an ad/);assert.match(a.el('modal').innerHTML,/Confirm exchange/);
@@ -23,3 +27,5 @@ for(const platform of ['android','telegram']){
  a.s.localStorage.setItem=()=>{throw Error('full')};G.resourceOffer233('gold',350);reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});G.buyResource233();assert.equal(e.d.gems,before-5);assert.equal(e.d.pendingResource233,undefined,'failed local save never starts purchase');
 }
 console.log('PASS economy233 UI: no giveaway, explicit/duplicate check-in, upgrade shortfall, choice UI, durable debit/retry/cancel, no auto-upgrade and save-failure safety on Android/Telegram');
+
+assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="Game.settings\(\)"[^>]*><span[^>]*>⚙/);
