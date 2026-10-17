@@ -912,5 +912,11 @@
   "ดูโฆษณาและรับเพชร": "Watch an ad & claim diamonds",
   "เมื่อดูครบ ระบบจะรอผู้ให้บริการยืนยันก่อนรับรางวัล": "After completion, wait for the ad provider to verify your reward",
   "ชวนเพื่อนเล่น": "Invite friends",
-  "แชร์บน Telegram": "Share on Telegram"
+  "แชร์บน Telegram": "Share on Telegram",
+  "เลือกวิธีรับทรัพยากร": "Choose how to get resources",
+  "ดูโฆษณา": "Watch an ad",
+  "ใช้เพชร": "Use diamonds",
+  "ดูโฆษณาจบและรอยืนยันเพื่อรับ": "Complete the ad and wait for verification to receive",
+  "กลับไปเลือกวิธีรับ": "Back to options",
+  "รายการไม่สำเร็จ คืนเพชรที่พักไว้แล้ว": "Purchase declined. Reserved diamonds have been returned."
 }
