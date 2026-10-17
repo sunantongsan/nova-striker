@@ -20,7 +20,7 @@ final class GameAds {
     private RewardedAd rewardReady;
     private boolean rewardLoading;
     private long rewardLoadedAt;
-    private static final String REWARD_UNIT = ""; // Set to a real rewarded unit only after AdMob setup.
+    private static final String REWARD_UNIT = "ca-app-pub-4585492700643566/9387691342"; // Nova optional reward; UI remains gated until verified rewards are ready.
     private void rewardStatus(String status) { if(!destroyed) activity.rewardStatus(status); }
     void deliverPending() {
         String pending=prefs.getString("rewardPending", "");
