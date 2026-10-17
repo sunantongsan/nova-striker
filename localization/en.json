@@ -934,5 +934,7 @@
   "ลองอีกครั้ง": "Try again",
   "เร่งการผลิต 30 นาที": "Boost production by 30 minutes",
   "กรุณารับรางวัลรายการก่อนให้เสร็จ": "Please finish collecting your previous reward first.",
-  "ยังดูโฆษณาไม่ครบ": "The ad was closed before completion."
+  "ยังดูโฆษณาไม่ครบ": "The ad was closed before completion.",
+  "เลือกภาษาที่แสดงในเกม": "Choose the game language",
+  "<h2>ตั้งค่า</h2><button class=\"wide\" onclick=\"Game.languages()\">🌐 ภาษา</button>": "<h2>Settings</h2><button class=\"wide\" onclick=\"Game.languages()\">🌐 Language</button>"
 }
