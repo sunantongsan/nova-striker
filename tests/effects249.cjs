@@ -1,0 +1,15 @@
+const vm=require('vm'),fs=require('fs'),assert=require('assert');
+const elements={},data={novaRTSIntro:'1'},events={},ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=>{})});
+const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
+let frame,started=0,stopped=[];const param=()=>({value:0,setValueAtTime(){},linearRampToValueAtTime(){},exponentialRampToValueAtTime(){}});
+class AudioContext{constructor(){this.state='running';this.currentTime=1;this.sampleRate=22050;this.destination={};}resume(){this.state='running';}suspend(){this.state='suspended';}createGain(){return {gain:param(),connect(){},disconnect(){}};}createDynamicsCompressor(){return {threshold:param(),ratio:param(),connect(){}};}createBuffer(){return {getChannelData:()=>new Float32Array(22050)};}createBiquadFilter(){return {frequency:param(),connect(){},disconnect(){}};}createOscillator(){return {frequency:param(),connect(){},disconnect(){},start(){started++;},stop(){stopped.push(this);}};}createBufferSource(){return this.createOscillator();}}
+const s={console,Date,Math,Uint8Array,AudioContext,performance:{now:()=>0},setTimeout:()=>0,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener:(n,f)=>(events[n]??=[]).push(f),hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f};
+vm.createContext(s);vm.runInContext(fs.readFileSync('game.js','utf8').replace("})(typeof globalThis!==","root.fx249test={e:E,monitor:monitorBuild249,bursts:()=>bursts249,building:drawBuilding,builders:drawHomeBuilders228,draw:draw,burst:burst249};})(typeof globalThis!=="),s);
+
+const t=s.fx249test,e=t.e,b=e.d.buildings[1];
+t.monitor();b.until=Date.now()+60000;b.constructing=true;t.monitor();assert.equal(t.bursts().length,0);
+t.builders();t.building(b,false);delete b.until;delete b.constructing;t.monitor();assert.equal(t.bursts().length,1);t.monitor();assert.equal(t.bursts().length,1,'completion emitted once');t.draw();
+e.d.serverUpgrades225=[{id:'server',category:'infrastructure',item:b.type,finishes_at:new Date(Date.now()-1000).toISOString()}];t.monitor();t.building(b,false);t.monitor();assert.equal(t.bursts().length,1,'expired server deadline cannot celebrate unconfirmed upgrade');b.lv++;e.d.serverUpgrades225=[];t.monitor();assert.equal(t.bursts().length,2);
+b.until=Date.now()+10000;t.monitor();delete b.until;t.monitor();assert.equal(t.bursts().length,2,'cancel without level change is not completion');
+const target={id:77,type:'mine',lv:1,x:5,y:5,hp:100,max:100};t.building(target,false);target.hp=0;t.building(target,false);assert.equal(t.bursts().length,3);t.building(target,false);assert.equal(t.bursts().length,3,'wreck does not replay explosion');for(let i=0;i<50;i++)t.burst(target,'destroy');assert.equal(t.bursts().length,18,'bounded cosmetic burst queue');
+console.log('PASS FX249: build completion once, server confirmation, cancellation, destruction once, bounded effects and construction render');
