@@ -1,9 +1,9 @@
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 (async()=>{
  const calls=[],events=[],nodes={},scripts=[];let domReady;
- const document={getElementById:id=>nodes[id]||null,createElement:()=>({dataset:{}}),head:{appendChild:s=>scripts.push(s)},addEventListener:(event,fn)=>{domReady=fn;}};
+ const document={getElementById:id=>nodes[id]||null,createElement:()=>({dataset:{},remove(){}}),head:{appendChild:s=>scripts.push(s)},addEventListener:(event,fn)=>{domReady=fn;}};
  const window={Telegram:{WebApp:{initData:'signed-data',ready(){},expand(){},isVersionAtLeast:()=>true,disableVerticalSwipes(){}}},novaCloudEvent:(...x)=>events.push(x)};
- const context={window,document,console,AbortSignal,fetch:async(url,options)=>{calls.push({url,...options});let data;
+ const context={window,document,console,AbortSignal,setTimeout:()=>1,clearTimeout(){},fetch:async(url,options)=>{calls.push({url,...options});let data;
   if(url.includes('nova-telegram-auth'))data={access_token:'access',refresh_token:'refresh',expires_at:Date.now()/1000+3600,user:{id:'owner'}};
   else if(url.includes('nova_telegram_command'))data={monetag231:true,owner:'owner'};
   else data=[];
@@ -18,6 +18,11 @@ const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/st
  let adCalls=0,earned=0;window.show_12052624=async({ymid})=>{adCalls++;assert.equal(ymid,'receipt');};window.novaRewardEarned=()=>earned++;
  await window.NovaAds.rewardVerified('different-account','receipt');assert.equal(adCalls,0);
  await window.NovaAds.rewardVerified('owner','receipt');assert.equal(adCalls,1);assert.equal(earned,1);
+ const statuses=[];window.novaRewardStatus=s=>statuses.push(s);delete window.show_12052624;
+ const loading=window.NovaAds.rewardVerified('owner','receipt');assert.equal(statuses.at(-1),'loading');
+ window.show_12052624=async()=>{adCalls++;};scripts[0].onload();await loading;assert.equal(adCalls,2,'waits for SDK then opens ad');
+ delete window.show_12052624;const failed=window.NovaAds.rewardVerified('owner','receipt');scripts.at(-1).onerror();await failed;assert.equal(statuses.at(-1),'load_failed236','failure is not overwritten by closed');
+ const retry=window.NovaAds.rewardVerified('owner','receipt');window.show_12052624=async()=>{adCalls++;};scripts.at(-1).onload();await retry;assert.equal(adCalls,3,'failed SDK can reload on next click');
  assert.equal(calls.filter(c=>/verify231/.test(c.url)).length,0);
  const native={window:{NovaCloud:{native:true}}};vm.runInNewContext(fs.readFileSync('web/telegram.js','utf8'),native);assert.equal(native.window.NovaCloud.native,true);
  console.log('PASS Telegram bridge: login, zone, receipt mapping, request correlation, wrong-owner rejection, server-only reward verification, native isolation');

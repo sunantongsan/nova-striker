@@ -29,7 +29,7 @@
   }
   return session;
  }
- async function login(){try{await authenticate();emit('signed_in',{id:session.user.id});loadAds();}catch(e){status(e.message);}}
+ async function login(){try{await authenticate();emit('signed_in',{id:session.user.id});loadAds().catch(()=>{});}catch(e){status(e.message);}}
  function run(task){task().catch(e=>status(e.message));}
  root.NovaCloud={
   available:()=>true,warAvailable:()=>true,hasAccount:()=>!!session,
@@ -49,15 +49,29 @@
    emit('war',{action,request_id,data});
   })().catch(e=>emit('war_error',{action,request_id,message:e.message}));}
  };
- function loadAds(){if(document.getElementById('novaMonetag'))return;const script=document.createElement('script');script.id='novaMonetag';script.src='https://libtl.com/sdk.js';script.dataset.zone='12052624';script.dataset.sdk='show_12052624';document.head.appendChild(script);}
+ let adsTask236=null;
+ function loadAds(){
+  if(typeof root.show_12052624==='function')return Promise.resolve();
+  if(adsTask236)return adsTask236;
+  adsTask236=new Promise((resolve,reject)=>{
+   const old=document.getElementById('novaMonetag');if(old)old.remove();
+   const script=document.createElement('script');script.id='novaMonetag';script.src='https://libtl.com/sdk.js';script.dataset.zone='12052624';script.dataset.sdk='show_12052624';
+   const timer=setTimeout(()=>{script.remove();reject(Error('sdk_timeout'));},15000);
+   script.onload=()=>{clearTimeout(timer);if(typeof root.show_12052624==='function')resolve();else {script.remove();reject(Error('sdk_missing'));}};
+   script.onerror=()=>{clearTimeout(timer);script.remove();reject(Error('sdk_network'));};
+   document.head.appendChild(script);
+  }).finally(()=>{adsTask236=null;});return adsTask236;
+ }
  root.NovaAds={
   rewardVerified:async(owner,id)=>{
    if(showing)return;
-   if(!session||owner!==session.user.id||typeof root.show_12052624!=='function'){root.novaRewardStatus?.('unavailable');return;}
+   if(!session||owner!==session.user.id){root.novaRewardStatus?.('unavailable');return;}
    showing=true;
-   try{await root.show_12052624({ymid:id});root.novaRewardEarned?.(id);}
-   catch{root.novaRewardStatus?.('unavailable');}
-   finally{showing=false;root.novaRewardStatus?.('closed');}
+   try{
+    if(typeof root.show_12052624!=='function'){root.novaRewardStatus?.('loading');await loadAds();}
+    await root.show_12052624({ymid:id});root.novaRewardEarned?.(id);
+   }catch(e){root.novaRewardStatus?.(/^sdk_/.test(e?.message||'')?'load_failed236':'unavailable');}
+   finally{showing=false;}
   },acknowledgeReward:()=>{}
  };
  document.addEventListener('DOMContentLoaded',()=>{
