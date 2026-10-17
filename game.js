@@ -1095,8 +1095,8 @@ Game.share234=function(){var url='https://t.me/NovaStrikerRTS_bot',text='🚀 NO
 // Online scouting is unlocked only by a completed video, without currency rewards.
 var scoutAd243=null;
 var scout243=Game.warScout;
-function scoutPrompt243(message){open('<h2>'+tr('ดูวิดีโอเพื่อสำรวจฐาน')+'</h2><p>'+tr(message||'ดูวิดีโอให้จบเพื่อแสดงฐานที่สุ่มได้')+'</p><button class="wide green" onclick="Game.watchScout243()">'+tr('ดูวิดีโอ')+'</button><button class="wide" onclick="Game.cancelScout243()">'+tr('กลับฐาน')+'</button>');}
-Game.warScout=function(index){if(!warState||!warState.targets||!warState.targets[index])return;if(E.d.pendingAd230){toast(tr('กรุณาจัดการรายการโฆษณาเดิมก่อน'));return;}scoutAd243={index:index,target:warState.targets[index],owner:warState.owner||(E.d.onlineCrystal&&E.d.onlineCrystal.owner),intent:nonce160(),showing:false};scoutPrompt243();};
+function scoutPrompt243(message){open('<h2>'+tr('ดูวิดีโอเพื่อสำรวจฐาน')+'</h2><p>'+tr(message||'ดูวิดีโอให้จบเพื่อแสดงฐานที่สุ่มได้')+'</p><button class="wide green" onclick="Game.watchScout243()">'+tr('ลองอีกครั้ง')+'</button><button class="wide" onclick="Game.cancelScout243()">'+tr('กลับฐาน')+'</button>');}
+Game.warScout=function(index){if(!warState||!warState.targets||!warState.targets[index])return;if(E.d.pendingAd230){toast(tr('กรุณาจัดการรายการโฆษณาเดิมก่อน'));return;}scoutAd243={index:index,target:warState.targets[index],owner:warState.owner||(E.d.onlineCrystal&&E.d.onlineCrystal.owner),intent:nonce160(),showing:false};open('<h2>'+tr('กำลังโหลดโฆษณา')+'</h2><button class="wide" onclick="Game.cancelScout243()">'+tr('กลับฐาน')+'</button>');Game.watchScout243();};
 Game.cancelScout243=function(){scoutAd243=null;Game.home();close();};
 Game.watchScout243=function(){var p=scoutAd243;if(!p||p.showing)return;if(!p.owner||!root.NovaAds||!root.NovaAds.rewardVerified){scoutPrompt243('ไม่มีโฆษณาพร้อมในขณะนี้');return;}p.showing=true;try{root.NovaAds.rewardVerified(p.owner,p.intent);}catch(e){p.showing=false;scoutPrompt243('ไม่มีโฆษณาพร้อมในขณะนี้');}};
 var earned243=root.novaRewardEarned,status243=root.novaRewardStatus;
