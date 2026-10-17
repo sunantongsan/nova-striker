@@ -4,10 +4,12 @@ Published client changes:
 - Remove the bottom Resources button and the selected-building Move button. Drag is the only movement input; tapping cannot reposition a pending preview. Confirming/canceling clears selection and its range ring. The existing siege lock applies to drag initiation.
 - All enhancements +5–10 emit flames: green, cyan, blue, violet, gold, orange-red. Small bounded Canvas paths with no blur, dead/offscreen culling, and a six-frame-per-second home refresh only when enhanced buildings are visible. Combat retains its existing cadence.
 - Offline research now uses one minute times target-level squared. Crystal-cost wall upgrades use existing building durations. Ordinary building upgrades already have durations.
-- Online timer UI is capability-gated by active_upgrades in the server response. The existing online behavior is preserved until the pending migration is explicitly approved and applied. No inaccurate countdown is displayed on the legacy backend.
+- Online timer UI is capability-gated by active_upgrades in the server response. The production backend now supplies this capability, enabling server-authoritative countdowns in content 25.
 
-Pending server activation (not applied):
-`backend/nova_upgrade_timers_225.sql` targets Nova's existing Supabase project `uzinxxeadejmzxqmqqtx`. Automated approval review rejected the production migration because it replaces/renames privileged economy functions and changes access permissions. It requires explicit approval for this project; do not use another tool or SQL route to bypass the rejection.
+Production activation completed on 2026-10-17:
+`backend/nova_upgrade_timers_225.sql` was applied successfully to Nova's existing Supabase project `uzinxxeadejmzxqmqqtx` as `nova_upgrade_timers_225`, after the user explicitly authorized this project migration. The earlier automated approval rejection was resolved by that explicit approval and the tested rollback plan.
+
+Post-application checks confirmed the jobs table exists with RLS enabled, authenticated callers can execute the timer-aware command, the old implementation alias cannot be executed by authenticated callers, direct job-table access is denied, and the command returns the active_upgrades capability.
 
 The migration retains existing validation/debit rules, stores one paid job per item, delays the granted levels until the server deadline, preserves receipt replay and blocks double charging. It covers enhancements, infrastructure, research, and online force tier. Infra durations match ordinary building upgrades; other durations are 60 × target level² seconds. Battle snapshots stay frozen; due jobs settle after active combat. Private tables have RLS and no direct client privileges. New private implementation aliases are revoked from public/anon/authenticated.
 
