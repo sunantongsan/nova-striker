@@ -64,6 +64,7 @@ public class MainActivity extends Activity {
     }
     void rewardStatus(String status) { game.evaluateJavascript("window.novaRewardStatus && window.novaRewardStatus("+org.json.JSONObject.quote(status)+")",null); }
     void rewardEarned(String id) { game.evaluateJavascript("window.novaRewardEarned && window.novaRewardEarned("+org.json.JSONObject.quote(id)+")",null); }
+    void testRewardEarned248(String owner,String intent) { game.evaluateJavascript("window.novaTestRewardEarned248 && window.novaTestRewardEarned248("+org.json.JSONObject.quote(owner)+","+org.json.JSONObject.quote(intent)+")",null); }
     void adFinished() { game.evaluateJavascript("window.novaAdDone && window.novaAdDone()", null); }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -142,5 +143,6 @@ public class MainActivity extends Activity {
     @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
+
 
 

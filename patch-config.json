@@ -1,13 +1,14 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 22,
+  "nativeVersion": 23,
   "compatibleNativeVersions": [
     19,
     20,
-    21
+    21,
+    22
   ],
-  "contentVersion": 48,
-  "label": "1.9.6-welcome-nova",
+  "contentVersion": 49,
+  "label": "1.9.7-test-checkin",
   "maxBytes": 67108864
 }

@@ -65,6 +65,40 @@ final class GameAds {
             }); } catch(RuntimeException error){showing=false;rewardStatus("unavailable");}
         });
     }
+    // Explicit demo-ad path. It never emits a production rewarded/SSV callback.
+    private boolean testLoading248;
+    private void deliverTest248() {
+        String intent=prefs.getString("testIntent248", ""), owner=prefs.getString("testOwner248", "");
+        if(!destroyed&&!intent.isEmpty())activity.testRewardEarned248(owner,intent);
+    }
+    @JavascriptInterface public void acknowledgeTest248(String intent) {
+        activity.runOnUiThread(()->{if(intent.equals(prefs.getString("testIntent248","")))prefs.edit().remove("testIntent248").remove("testOwner248").apply();});
+    }
+    @JavascriptInterface public void rewardTest248(String owner,String intent) {
+        if(owner==null||intent==null||!owner.matches("[0-9a-fA-F-]{36}")||!intent.matches("[0-9a-fA-F-]{36}"))return;
+        activity.runOnUiThread(()->{
+            if(destroyed)return;
+            if(!prefs.getString("testIntent248","").isEmpty()){deliverTest248();return;}
+            if(showing||testLoading248){rewardStatus("loading");return;}
+            if(!enabled()||!consent.canRequestAds()){rewardStatus("disabled");return;}
+            testLoading248=true;rewardStatus("loading");final int gen=generation;
+            RewardedAd.load(activity,"ca-app-pub-3940256099942544/5224354917",new AdRequest.Builder().build(),new RewardedAdLoadCallback(){
+                @Override public void onAdFailedToLoad(LoadAdError error){testLoading248=false;if(!destroyed)rewardStatus("unavailable");}
+                @Override public void onAdLoaded(RewardedAd ad){
+                    testLoading248=false;if(destroyed)return;
+                    if(!enabled()||!consent.canRequestAds()||generation!=gen||!foreground||showing){rewardStatus("unavailable");return;}
+                    showing=true;final boolean[] earned={false};rewardStatus("test_showing248");
+                    ad.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        @Override public void onAdDismissedFullScreenContent(){showing=false;if(!earned[0])rewardStatus("closed");else deliverTest248();}
+                        @Override public void onAdFailedToShowFullScreenContent(AdError error){showing=false;rewardStatus("unavailable");}
+                    });
+                    try{ad.show(activity,item->{if(earned[0]||destroyed)return;earned[0]=true;prefs.edit().putString("testIntent248",intent).putString("testOwner248",owner).commit();deliverTest248();});}
+                    catch(RuntimeException error){showing=false;rewardStatus("unavailable");}
+                }
+            });
+        });
+    }
+
     private boolean initialized, loading, showing, destroyed, foreground;
     private long lastShown = SystemClock.elapsedRealtime();
     private int generation;
@@ -74,6 +108,7 @@ final class GameAds {
         consent = UserMessagingPlatform.getConsentInformation(activity);
     }
     void begin() {
+        deliverTest248();
         deliverPending();
         if (!prefs.contains("enabled")) settings();
         else if (enabled()) requestConsent();
@@ -148,5 +183,6 @@ final class GameAds {
     void pause() { foreground=false; }
     void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; }
 }
+
 
 

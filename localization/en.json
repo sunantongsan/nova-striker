@@ -979,5 +979,14 @@
   "เริ่มสร้างอาณาจักร": "Build your empire",
   "โบนัสนี้สำหรับบัญชีใหม่ที่สมัครหลังเริ่มกิจกรรม": "This bonus is for accounts created after the promotion began.",
   "ใช้บัญชีเดิมเพื่อรับโบนัส": "Use the same account to claim this bonus.",
-  "คำสั่งโบนัสไม่ถูกต้อง": "Invalid bonus request"
+  "คำสั่งโบนัสไม่ถูกต้อง": "Invalid bonus request",
+  "เช็กอินด้วยโฆษณาทดสอบ": "Check in with a test ad",
+  "โฆษณาทดสอบ Google ไม่มีรายได้โฆษณาจริง": "Google test ads — no real advertising revenue",
+  "ดูโฆษณาให้ครบเพื่อรับเช็กอินวันนี้": "Finish the ad to receive today’s check-in",
+  "กรุณาอัปเดตแอป Android เพื่อใช้โฆษณาทดสอบ": "Update the Android app to use test ads",
+  "เปิดโฆษณาในการตั้งค่าก่อน แล้วลองอีกครั้ง": "Enable ads in settings, then try again",
+  "ยังดูไม่ครบ กรุณาลองใหม่": "The ad was not completed. Please try again",
+  "ยังไม่มีโฆษณาทดสอบ กรุณาลองอีกครั้ง": "No test ad is available. Please try again",
+  "ตรวจรายการเช็กอินเรียบร้อยแล้ว": "Check-in receipt checked",
+  "กำลังโหลดโฆษณาทดสอบ": "Loading a test ad"
 }
