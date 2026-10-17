@@ -4,7 +4,7 @@ const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=
 const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
 let frame;
 const sandbox={console,crypto,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>0,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,NovaCloud:{warAvailable:()=>true,available:()=>true,war:(action,payload)=>requests.push({action,payload:JSON.parse(payload)})}};
-vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);
+sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);
 const G=sandbox.Game,event=(action,d)=>sandbox.novaCloudEvent('war',{action,data:d}),wallet={owner:'account-a',test_gems:10000,can_claim:false};
 G.treasury();assert(el('modal').innerHTML.includes('10,000'));G.legacyGems();assert.equal(requests.at(-1).action,'test_status');event('test_status',wallet);assert(el('modal').innerHTML.includes('10,000 เพชร'));
 G.testQuote('gold');assert(el('modal').innerHTML.includes("Game.testExchange('gold',10)"));G.testExchange('gold',1);const r=requests.at(-1);assert.equal(r.action,'test_exchange');event('test_exchange',{...wallet,test_gems:9990,receipt:{id:r.payload.request_id,kind:'gold',amount:500}});let save=JSON.parse(data.novaRTS1);assert.equal(save.gold,1400);assert(!save.pendingTest);event('test_exchange',{...wallet,receipt:{id:r.payload.request_id,kind:'gold',amount:500}});assert.equal(JSON.parse(data.novaRTS1).gold,1400);
@@ -26,3 +26,4 @@ G.shieldShop();assert(el('modal').innerHTML.includes('โล่ 24 ชั่ว�
 console.log('PASS live UI: battlefield preview, manual attack, unused-army return once, shield shop');
 const defenderRoom={id:'defense-session',role:'defender',target,roster:[1,0,0,0,0,0,0,0,0,0,0],frame:{buildings:[[0,0,0],[300,0,0]],troops:[[0,11,10,100,150,0,0,0,0,0]],guards:[],army:[0,0,0,0,0,0,0,0,0,0,0],fx:[],time:120},seq:5,finished:false,remaining:120};event('attack',{live:'status',online,battle:defenderRoom});assert(el('mode').textContent.includes('ฐานกำลังถูกโจมตี'));assert.equal(el('deploy').innerHTML,'');frame(400);G.retreat();assert(el('mode').textContent.includes('ฐานกำลังถูกโจมตี'));
 console.log('PASS defender UI: incoming room opens shared battlefield, spectator controls, drawing frame');
+

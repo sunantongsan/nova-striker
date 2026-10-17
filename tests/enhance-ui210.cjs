@@ -4,7 +4,7 @@ const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=
 const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
 let frame;
 const sandbox={console,crypto,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>0,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,NovaCloud:{warAvailable:()=>true,available:()=>true,war:(action,payload)=>requests.push({action,payload:JSON.parse(payload)})}};
-vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);
+sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);
 const G=sandbox.Game,event=(action,d)=>sandbox.novaCloudEvent('war',{action,data:d}),wallet={owner:'account-a',test_gems:10000,can_claim:false};
 
 const online={enrolled:true,owner:'a',tier:3,crystals:50000,capacity:100000,rate:0,research:{weapon:0,armor:0},enhancements:{'unit:0':5,'building:hq':10}};
@@ -12,3 +12,4 @@ G.war();event('status',online);G.enhanceInfo('unit:0',1);assert(el('modal').inne
 let data2={},e=new sandbox.NovaRTS.Engine({getItem:k=>data2[k]||null,setItem:(k,v)=>data2[k]=v},()=>100000);e.d.enhancements={'unit:0':10,'building:hq':10};let stats=e.enhanceStats('unit:0',1);assert.equal(stats.baseHP,150);assert.equal(stats.hp,300);assert.equal(stats.baseDamage,23);assert.equal(stats.damage,46);e.scout(1);assert.equal(e.deploy(0,0,0),'');assert.equal(e.raid.troops[0].hp,300);let dummy={x:0,y:0,hp:100,max:100};sandbox.NovaRTS.hit({buildings:[],fx:[]},dummy,23,e.raid.troops[0],'machine');assert.equal(dummy.hp,54);
 e.scoutPlayer({callsign:'x',layout:[{type:'hq',x:10,y:10,lv:1},{type:'garrison',x:12,y:10,lv:1}],garrison:[1],research:{armor:2,weapon:0},enhancements:{'building:hq':10,'unit:0':5}});assert.equal(e.raid.buildings[0].hp,3200);assert.equal(e.raid.guards[0].hp,270);assert.equal(e.raid.guards[0].enhance,5);assert.equal(e.enhanceStats('building:mine',1).damage,0);
 G.war();event('status',online);G.home();frame(200);assert.equal(el('boot').style.display,'none');console.log('PASS enhancements UI/combat: stats before/after, receipt delivery, troop HP/damage, defender research + enhancements, building HP, nonweapon buildings');
+

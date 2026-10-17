@@ -4,7 +4,7 @@ const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=
 const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
 let frame;
 const sandbox={console,crypto,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>0,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,NovaCloud:{warAvailable:()=>true,available:()=>true,war:(action,payload)=>requests.push({action,payload:JSON.parse(payload)})}};
-vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8').replace("})(typeof globalThis!==","root.__engine=E;})(typeof globalThis!=="),sandbox);
+sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8').replace("})(typeof globalThis!==","root.__engine=E;})(typeof globalThis!=="),sandbox);
 const G=sandbox.Game,event=(action,d)=>sandbox.novaCloudEvent('war',{action,data:d}),wallet={owner:'account-a',test_gems:10000,can_claim:false};
 
 const online={enrolled:true,owner:'a',tier:3,crystals:50000,capacity:100000,rate:0,research:{weapon:0,armor:0},enhancements:{'unit:0':5,'building:hq':10}};
@@ -18,3 +18,4 @@ G.buyMercenary();let pending=e.d.pendingMerc.request_id;sandbox.novaCloudEvent('
 const stats=e.enhanceStats('unit:alien',1);assert.equal(stats.baseHP,330);assert.equal(stats.baseDamage,48);e.d.buildings.find(b=>b.type==='mercenary').lv=10;assert.equal(e.enhanceStats('unit:alien',1).baseHP,330,'base upgrades change capacity only');
 e.scoutPlayer({callsign:'x',merc_version:2,merc_guard:1,layout:[{type:'hq',x:10,y:10,lv:1},{type:'mercenary',x:12,y:10,lv:10}],research:{armor:0,weapon:0}});assert.equal(e.raid.guards[0].kind,5);assert.equal(e.raid.guards[0].hp,330);
 console.log('PASS recruitment UI: shop, durable nonce, resource reconciliation, duplicate reply, permanent/transient errors, fighter stats and no base-level stat inflation');
+

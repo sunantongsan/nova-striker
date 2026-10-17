@@ -5,7 +5,7 @@ function boot(cloud,oldData={}){
  const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=>{})});
  const el=id=>elements[id]||(elements[id]={hidden:false,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
  const s={console,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame(){},NovaCloud:cloud};
- vm.createContext(s);vm.runInContext(source,s);return {s,el,data,calls};
+ s.localStorage && s.localStorage.setItem('novaLanguage','th');vm.createContext(s);vm.runInContext(source,s);return {s,el,data,calls};
 }
 let calls=[],cloud={available:()=>true,hasAccount:()=>false,emailAuth:(...a)=>calls.push(a),login:()=>calls.push(['google']),load:()=>calls.push(['load'])};
 let a=boot(cloud);assert.equal(a.el('welcome').hidden,false);assert.match(a.el('welcomeSubmit').textContent,/สร้างบัญชี/);
@@ -22,3 +22,4 @@ let offline=boot({...cloud,hasAccount:undefined},{novaAccountReady:'1'});assert.
 let failed=boot({...cloud,hasAccount:undefined});failed.s.novaCloudEvent('status',{message:'ตรวจอินเทอร์เน็ต'});assert.equal(failed.el('welcome').hidden,false);assert.equal(failed.el('welcomeSubmit').disabled,false);
 let browser=boot(undefined);browser.s.Game.welcomeGoogle();assert.match(browser.el('welcomeStatus').textContent,/แอป Nova/);
 console.log('PASS welcome: new/existing guest, registration verification, login/recovery, duplicate submits, back guard, saved account/offline, legacy session, logout, save preservation and unavailable bridge');
+
