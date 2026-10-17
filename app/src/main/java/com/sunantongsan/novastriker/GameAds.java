@@ -38,8 +38,6 @@ final class GameAds {
             String unit=BuildConfig.DEBUG?"ca-app-pub-3940256099942544/5224354917":REWARD_UNIT;
             if(unit.isEmpty()) { rewardStatus("unconfigured"); return; }
             if(!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
-            long now=System.currentTimeMillis();
-            if(now-prefs.getLong("rewardLast",0)<120000L) { rewardStatus("cooldown"); return; }
             if(rewardReady==null || SystemClock.elapsedRealtime()-rewardLoadedAt>3500000L) {
                 if(rewardLoading) { rewardStatus("loading"); return; }
                 rewardReady=null; rewardLoading=true; rewardStatus("loading"); final int gen=generation;
@@ -150,4 +148,5 @@ final class GameAds {
     void pause() { foreground=false; }
     void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; }
 }
+
 

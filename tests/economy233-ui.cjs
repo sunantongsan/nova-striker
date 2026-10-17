@@ -41,7 +41,7 @@ assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="
  reply({owner:'a',enrolled:false,ad_reward:r});assert.equal(shown,1,'resource ad opens after server preparation without a second confirmation');
  a.s.novaRewardStatus('loading');assert(e.d.pendingAd230.showRequested,'SDK loading keeps double tap guard');
  a.s.novaRewardStatus('load_failed236');assert(!e.d.pendingAd230.showRequested);assert.match(a.el('modal').innerHTML,/Could not load the ad service/);G.showAd230();assert.equal(shown,2,'user can retry same receipt after SDK failure');
- e.d.pendingAd230.receipt.expires_at=new Date(Date.now()-1000).toISOString();G.rewardStatus230();assert.match(a.el('modal').innerHTML,/Start a new ad/);G.restartAd236();assert.equal(a.requests.at(-1).p.admob230,'cancel');reply({owner:'a',enrolled:false,ad_reward:{...r,cancelled:true}});assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.notEqual(e.d.pendingAd230.request_id,r.id);assert.equal(e.d.pendingAd230.kind,'gold');
+ e.d.pendingAd230.receipt.expires_at=new Date(Date.now()-1000).toISOString();G.rewardStatus230();assert.match(a.el('modal').innerHTML,/Start a new ad/);G.restartAd236();assert.equal(a.requests.at(-1).p.admob230,'cancel');reply({owner:'a',enrolled:false,ad_reward:{...r,cancelled:true}});assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.notEqual(e.d.pendingAd230.request_id,r.id);assert.equal(e.d.pendingAd230.kind,'production');
 
 }
 console.log('PASS resource ad loading: explicit choice, single-click launch, loading guard and retryable visible SDK failures');
@@ -63,3 +63,10 @@ console.log('PASS one-tap check-in: status fetch continues to receipt preparatio
  a.s.novaCloudEvent('war',{action:second.a,request_id:second.id,data:{owner:'a',enrolled:false,ad_reward:{id:second.p.request_id,kind:'gold',amount:1080,expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1,'retry opens prepared ad without another tap');
 }
 console.log('PASS ad cooldown: persistent reason, simple retry, original receipt and automatic ad launch');
+{
+ const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game,e=a.s.test232.e;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};a.s.test232.clearBusy();a.s.test232.setOnline();G.production240();
+ let req=a.requests.at(-1);a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',wallet_gems:0,resource_quote:{kind:'bundle',production240:{gold:2160,power:3240,crystals:120},available:false}}});
+ assert.match(a.el('modal').innerHTML,/Boost production by 30 minutes/);for(const n of ['2,160','3,240','120'])assert(a.el('modal').innerHTML.includes(n));G.adShortfall238();req=a.requests.at(-1);assert.equal(req.p.kind,'production');
+ a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',enrolled:false,ad_reward:{id:req.p.request_id,kind:'production',amount:5520,production240:{gold:2160,power:3240,crystals:120},expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1);
+}
+console.log('PASS production UI: all rewards visible before ad and single-tap production request');
