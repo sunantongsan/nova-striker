@@ -36,9 +36,8 @@ final class GameAds {
             String unit=BuildConfig.DEBUG?"ca-app-pub-3940256099942544/5224354917":REWARD_UNIT;
             if(unit.isEmpty()) { rewardStatus("unconfigured"); return; }
             if(!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
-            long now=System.currentTimeMillis(), day=(now+25200000L)/86400000L;
+            long now=System.currentTimeMillis();
             if(now-prefs.getLong("rewardLast",0)<120000L) { rewardStatus("cooldown"); return; }
-            if(day==prefs.getLong("rewardDay",-1)&&prefs.getInt("rewardCount",0)>=5) { rewardStatus("limit"); return; }
             if(rewardReady==null || SystemClock.elapsedRealtime()-rewardLoadedAt>3500000L) {
                 if(rewardLoading) { rewardStatus("loading"); return; }
                 rewardReady=null; rewardLoading=true; rewardStatus("loading"); final int gen=generation;
@@ -82,7 +81,7 @@ final class GameAds {
         activity.runOnUiThread(() -> {
             if (destroyed || showing) return;
             new AlertDialog.Builder(activity).setTitle("โฆษณาและความเป็นส่วนตัว")
-                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบบรับรางวัลเพื่อรับเพชรได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
+                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบบรับรางวัลเพื่อรับรางวัลที่แสดงในเกมได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
                 .setPositiveButton("อายุ 18+ และเปิดโฆษณา", (d,w) -> {
                     prefs.edit().putBoolean("enabled", true).apply(); requestConsent();
                 })
