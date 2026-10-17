@@ -1,14 +1,14 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('game.js','utf8'),catalog=require('../localization/en.json');
 function boot(data={},platform='android'){
- const elements={},errors=[],requests=[];let reloads=0,frame;
+ const elements={},errors=[],requests=[];let reloads=0,frame,timerId=0;const timers=new Map();
  const ctx=new Proxy({measureText:t=>({width:String(t).length*8}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
  const el=id=>elements[id]||(elements[id]={hidden:true,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
  const storage={getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]};
- const s={crypto:require('node:crypto').webcrypto,console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,warAvailable:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
+ const s={crypto:require('node:crypto').webcrypto,console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:(f,ms)=>{timers.set(++timerId,{f,ms});return timerId;},clearTimeout:id=>timers.delete(id),Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,warAvailable:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
  if(platform==='telegram'){s.Telegram={WebApp:{}};s.window=s;}
  vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v,select:id=>selected=id,clearBusy:()=>{warBusy=false;warActive=null;},setOnline:()=>{E.d.onlineCrystal={owner:"a"};E.d.admob230=true;}};})(typeof globalThis!=='),s);
- return {s,el,data,errors,requests,reloads:()=>reloads,frame:n=>frame(n)};
+ return {s,el,data,errors,requests,timers,reloads:()=>reloads,frame:n=>frame(n)};
 }
 for(const platform of ['android','telegram']){
  const a=boot({novaRTSIntro:'1'},platform),G=a.s.Game,e=a.s.test232.e;
@@ -41,7 +41,7 @@ assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="
  reply({owner:'a',enrolled:false,ad_reward:r});assert.equal(shown,1,'resource ad opens after server preparation without a second confirmation');
  a.s.novaRewardStatus('loading');assert(e.d.pendingAd230.showRequested,'SDK loading keeps double tap guard');
  a.s.novaRewardStatus('load_failed236');assert(!e.d.pendingAd230.showRequested);assert.match(a.el('modal').innerHTML,/Could not load the ad service/);G.showAd230();assert.equal(shown,2,'user can retry same receipt after SDK failure');
- e.d.pendingAd230.receipt.expires_at=new Date(Date.now()-1000).toISOString();G.rewardStatus230();assert.match(a.el('modal').innerHTML,/Start a new ad/);G.restartAd236();assert.equal(a.requests.at(-1).p.admob230,'cancel');reply({owner:'a',enrolled:false,ad_reward:{...r,cancelled:true}});assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.notEqual(e.d.pendingAd230.request_id,r.id);assert.equal(e.d.pendingAd230.kind,'production');
+ e.d.pendingAd230.showRequested=false;e.d.pendingAd230.receipt.expires_at=new Date(Date.now()-1000).toISOString();G.rewardStatus230();assert.match(a.el('modal').innerHTML,/Start a new ad/);G.restartAd236();assert.equal(a.requests.at(-1).p.admob230,'cancel');reply({owner:'a',enrolled:false,ad_reward:{...r,cancelled:true}});assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.notEqual(e.d.pendingAd230.request_id,r.id);assert.equal(e.d.pendingAd230.kind,'production');
 
 }
 console.log('PASS resource ad loading: explicit choice, single-click launch, loading guard and retryable visible SDK failures');
@@ -70,3 +70,12 @@ console.log('PASS ad cooldown: persistent reason, simple retry, original receipt
  a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',enrolled:false,ad_reward:{id:req.p.request_id,kind:'production',amount:5520,production240:{gold:2160,power:3240,crystals:120},expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1);
 }
 console.log('PASS production UI: all rewards visible before ad and single-tap production request');
+{
+ const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game,e=a.s.test232.e;a.s.NovaAds={rewardVerified(){}};a.s.test232.clearBusy();a.s.test232.setOnline();G.quickAd237('production');
+ const reply=d=>{const req=a.requests.at(-1);a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:d});};
+ const r={id:e.d.pendingAd230.request_id,kind:'production',amount:2,production240:{gold:1,power:1,crystals:0},expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false};reply({owner:'a',enrolled:false,ad_reward:r});assert.equal(a.el('modal').style.display,'none');
+ a.s.novaRewardEarned(r.id);assert.equal(a.el('modal').style.display,'none','completion returns to base immediately');reply({owner:'a',enrolled:false,ad_reward:r});assert.equal(a.el('modal').style.display,'none');
+ const timer=[...a.timers.entries()].find(([id,t])=>t.ms===4000);assert(timer,'pending verification polls automatically');a.timers.delete(timer[0]);timer[1].f();assert.equal(a.requests.at(-1).p.admob230,'claim');assert.equal(a.el('modal').style.display,'none','poll does not open transaction menu');
+ reply({owner:'a',enrolled:false,ad_reward:{...r,verified:true,claimed:true,granted:2}});assert(!e.d.pendingAd230);assert(![...a.timers.values()].some(t=>t.ms===4000),'successful claim stops polling');
+}
+console.log('PASS automatic reward finish: no post-ad menu, delayed verification retries silently and stops after delivery');
