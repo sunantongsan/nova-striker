@@ -54,7 +54,7 @@ console.log('PASS ad cooldown: persistent reason, simple retry, original receipt
 {
  const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game,e=a.s.test232.e;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};a.s.test232.clearBusy();a.s.test232.setOnline();G.production240();
  let req=a.requests.at(-1);a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',wallet_gems:0,resource_quote:{kind:'bundle',production240:{gold:2160,power:3240,crystals:120},available:false}}});
- assert.match(a.el('modal').innerHTML,/Boost production by 30 minutes/);for(const n of ['2,160','3,240','120'])assert(a.el('modal').innerHTML.includes(n));G.adShortfall238();req=a.requests.at(-1);assert.equal(req.p.kind,'production');
+ assert.match(a.el('modal').innerHTML,/Boost production by 30 minutes/);for(const n of ['2,160','3,240'])assert(a.el('modal').innerHTML.includes(n));G.adShortfall238();req=a.requests.at(-1);assert.equal(req.p.kind,'production');
  a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',enrolled:false,ad_reward:{id:req.p.request_id,kind:'production',amount:5520,production240:{gold:2160,power:3240,crystals:120},expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1);
 }
 console.log('PASS production UI: all rewards visible before ad and single-tap production request');

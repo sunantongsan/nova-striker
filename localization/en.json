@@ -991,5 +991,9 @@
   "กำลังโหลดโฆษณาทดสอบ": "Loading a test ad",
   "ตีบวกด้วย NOVA": "Enhance with NOVA",
   "NOVA ไม่พอ": "Not enough NOVA",
-  "เลือดและพลัง": "Health and power"
+  "เลือดและพลัง": "Health and power",
+  "เร่งอัปเกรด": "Speed up upgrade",
+  "ใช้ NOVA ตีบวกจากข้อมูลหน่วยหรืออาคาร": "Use NOVA to enhance units or buildings",
+  "อาคารนี้ถูกนำออกแล้ว": "This building has been removed",
+  "ส่งผังฐานปัจจุบัน": "Publish current base layout"
 }
