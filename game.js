@@ -1325,20 +1325,38 @@ var help251=Game.help;Game.help=function(){Game.droneGuide251();};
 // Depth-sorted mining mechs. Cosmetic only, with bounded movement work and no battle entities.
 function minerSpot251(){for(var k=0;k<30;k++){var x=1+Math.random()*19,y=1+Math.random()*19;if(!E.d.buildings.some(function(b){return Math.abs(b.x-x)<.9&&Math.abs(b.y-y)<.9;}))return{x:x,y:y};}return{x:1,y:1};}
 function updateRobots251(){if(screen!=='home')return;var active=mineActive251(),count=active?1+Math.min(20,mine251.active_team):1,now=Date.now(),dt=Math.min(.15,(now-(robotTick251||now))/1000);robotTick251=now;while(robots251.length<count){var p=minerSpot251();robots251.push({x:p.x,y:p.y,target:minerSpot251(),rest:now+Math.random()*1500,phase:Math.random()*6,facing:1,walk:0});}robots251.length=count;
- robots251.forEach(function(r){r.mining=false;r.moving=false;if(!active)return;if(now<r.rest){r.mining=!r.blocked;return;}r.blocked=false;var dx=r.target.x-r.x,dy=r.target.y-r.y,d=Math.hypot(dx,dy);if(d<.08){r.rest=now+1800+Math.random()*3200;r.target=minerSpot251();r.mining=true;return;}var nx=r.x+dx/d*dt*.65,ny=r.y+dy/d*dt*.65;if(E.d.buildings.some(function(b){return Math.abs(b.x-nx)<.65&&Math.abs(b.y-ny)<.65;})){r.target=minerSpot251();r.rest=now+300;r.blocked=true;return;}r.facing=dx-dy<0?-1:1;r.walk=(r.walk||0)+dt*9;r.moving=true;r.x=nx;r.y=ny;});}
+ robots251.forEach(function(r){r.mining=false;r.moving=false;if(!active)return;if(now<r.rest){r.mining=!r.blocked;return;}r.blocked=false;var dx=r.target.x-r.x,dy=r.target.y-r.y,d=Math.hypot(dx,dy);if(d<.08){r.rest=now+1800+Math.random()*3200;r.target=minerSpot251();r.mining=true;return;}var nx=r.x+dx/d*dt*.65,ny=r.y+dy/d*dt*.65;if(E.d.buildings.some(function(b){return Math.abs(b.x-nx)<.65&&Math.abs(b.y-ny)<.65;})){r.target=minerSpot251();r.rest=now+300;r.blocked=true;return;}r.facing=dx-dy<0?-1:1;r.walk=(r.walk||0)+Math.hypot(nx-r.x,ny-r.y)*10;r.moving=true;r.x=nx;r.y=ny;});}
 // Original battle-mech art, twice the troop size. Tools and bounded local debris are cosmetic.
+// Split the existing mech at its hips: feet step independently while the torso stays level.
+function drawMiningMech254(r){
+ if(!art){sprite(U[2].sprite,{x:0,y:0},68);return;}
+ var cell=atlas.naturalWidth/4,unit=68/192,sx=cell*2,sy=cell*2,
+ phase=r.walk||0,moving=!!r.moving;
+ function part(x,y,w,h,dx,dy){ctx.drawImage(atlas,sx+x*cell/192,sy+y*cell/192,w*cell/192,h*cell/192,dx,dy,w*unit,h*unit);}
+ // Each foot lifts only on its forward swing; the other foot remains planted.
+ for(var leg=0;leg<2;leg++){
+  var a=phase+leg*Math.PI,swing=moving?Math.sin(a):0,lift=moving?Math.max(0,Math.cos(a)):0,
+  x=leg?96:28,w=leg?58:68,hipX=-34+(leg?121:74)*unit,hipY=-54.4+123*unit;
+  ctx.save();ctx.translate(hipX+swing*2.5,hipY-lift*1.8);ctx.rotate(swing*.13);
+  part(x,123,w,65,-34+x*unit-hipX,0);ctx.restore();
+ }
+ // Original head, arms, torso and hips overlap the moving leg roots.
+ part(0,0,192,126,-34,-54.4);
+ part(0,126,28,66,-34,-54.4+126*unit);
+ part(154,126,38,66,-34+154*unit,-54.4+126*unit);
+}
 function drawMiner251(r){
  var p=point(r.x,r.y),t=Date.now()/1000+r.phase,drilling=!!r.mining,
  pulse=drilling?Math.max(0,Math.sin(t*7)):0,recoil=drilling?Math.sin(t*75)*.65*pulse:0,
- bob=r.moving?Math.sin(r.walk||0)*1.6:0,lean=drilling?.10+pulse*.035:0;
+ bob=0,lean=drilling?.10:0;
  ctx.save();ctx.translate(p.x,p.y);ctx.scale(zoom*(r.facing||1),zoom);
  ctx.fillStyle='rgba(0,20,40,.30)';ctx.beginPath();ctx.ellipse(0,8,24,7,0,0,Math.PI*2);ctx.fill();
  if(drilling){ctx.fillStyle='rgba(30,224,255,.13)';ctx.beginPath();ctx.ellipse(34,12,14,5,0,0,Math.PI*2);ctx.fill();}
- ctx.save();ctx.translate(0,7+bob+recoil);ctx.rotate(lean);ctx.translate(0,-7);
+ ctx.save();ctx.translate(0,7+bob);ctx.rotate(lean);ctx.translate(0,-7);
  // Reinforced tool pack carried behind the shoulder.
  ctx.lineJoin='round';ctx.lineWidth=2;ctx.strokeStyle='#17334d';ctx.fillStyle='#294e6b';ctx.fillRect(-28,-39,14,24);ctx.strokeRect(-28,-39,14,24);
  ctx.fillStyle='#d7a84d';ctx.fillRect(-27,-36,4,18);ctx.fillStyle='#76e5ff';ctx.fillRect(-22,-34,5,3);ctx.fillRect(-22,-28,5,3);
- sprite(U[2].sprite,{x:0,y:0},68);
+ drawMiningMech254(r);
  // Hydraulic hose and articulated gauntlet connect the carried drill to the mech.
  var angle=drilling?1.18:-.55,hx=18,hy=-24,tipX=hx+Math.cos(angle)*38,tipY=hy+Math.sin(angle)*38;
  ctx.strokeStyle='#18334b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-23,-23);ctx.quadraticCurveTo(-8,0,hx,hy+3);ctx.stroke();
