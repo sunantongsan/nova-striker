@@ -959,7 +959,7 @@ var rewardSync230=syncCrystal;syncCrystal=function(d){rewardSync230(d);if(d&&d.e
 Game.rewardAd=function(){
  if(E.d.pendingAd230){Game.rewardStatus230();return;}
  if(!E.d.admob230||!root.NovaAds||!root.NovaAds.rewardVerified){rewardPreview230();return;}
- open(tr('<h2>รางวัลโฆษณา</h2><p>เลือกของรางวัลก่อนดู • สมัครใจ • รอ 2 นาทีระหว่างครั้ง<br>ไม่มีเพดานรายวัน ขึ้นอยู่กับโฆษณาที่มีให้บริการ</p>')+[['gold',tr('ทอง')],['power',tr('พลังงาน')]].map(function(a){return '<button class="wide" onclick="Game.quickAd237(\''+a[0]+'\')">'+a[1]+tr(' • ดูโฆษณารับรางวัล</button>');}).join('')+(E.d.serverUpgrades225||[]).map(function(j){return '<button class="wide" onclick="Game.quickAd237(\'speed\',\''+escapeHTML(j.id)+tr('\')">เร่ง ')+escapeHTML(upgradeLabel225(j))+tr(' สูงสุด 25 นาที</button>');}).join('')+tr('<button class="wide" onclick="Game.close()">กลับฐาน</button>'));
+ open(tr('<h2>รางวัลโฆษณา</h2><p>เลือกของรางวัลก่อนดู • สมัครใจ • รอ 2 นาทีระหว่างครั้ง<br>ไม่มีเพดานรายวัน ขึ้นอยู่กับโฆษณาที่มีให้บริการ</p>')+[['gold',tr('ทอง')],['power',tr('พลังงาน')]].map(function(a){return '<button class="wide" onclick="Game.quickAd237(\''+a[0]+'\')">'+a[1]+tr(' • ดูโฆษณารับรางวัล</button>');}).join('')+(E.d.serverUpgrades225||[]).map(function(j){return '<button class="wide" onclick="Game.quickAd237(\'speed\',\''+escapeHTML(j.id)+tr('\')">เร่ง ')+escapeHTML(upgradeLabel225(j))+tr(' สูงสุด 8 นาที 20 วินาที</button>');}).join('')+tr('<button class="wide" onclick="Game.close()">กลับฐาน</button>'));
 };
 Game.prepareAd230=function(kind,job){
  if(warBusy){toast(tr('กำลังตรวจรายการ กรุณารอสักครู่'));return;}
@@ -1556,7 +1556,82 @@ liveHeartbeat=function(){
  heartbeat262();
 };
 var speedConfirm262=Game.speedConfirm;
-Game.speedConfirm=function(){speedConfirm262();var b=E.d.buildings.find(function(b){return b.id===selected;});if(b&&b.until)$('modal').innerHTML=$('modal').innerHTML.replace(/<\/div>$/,'<p class="muted">'+mt251('1 NOVA = 10 วินาที • ดูโฆษณาเร่งได้สูงสุด 25 นาที','1 NOVA = 10 seconds • Ads speed up by up to 25 minutes')+'</p></div>');};
+Game.speedConfirm=function(){speedConfirm262();var b=E.d.buildings.find(function(b){return b.id===selected;});if(b&&b.until)$('modal').innerHTML=$('modal').innerHTML.replace(/<\/div>$/,'<p class="muted">'+mt251('1 NOVA = 10 วินาที • ดูโฆษณาเร่งได้สูงสุด 8 นาที 20 วินาที','1 NOVA = 10 seconds • Ads speed up by up to 8 minutes 20 seconds')+'</p></div>');};
+
+// One video = 50 NOVA = 500 seconds. Local timers are bound to the selected job snapshot.
+var speedBusy264=null,speedSerial264=0,speedTimer264=null,speedShowing264=false,speedAttempts264=0;
+function speedNote264(){return mt251('ADS 1 ครั้ง = 50 NOVA • ลดเวลาสูงสุด 8 นาที 20 วินาที','1 AD = 50 NOVA • Up to 8m 20s');}
+function speedButton264(kind,id){return '<button class="wide" onclick="Game.speedAd264(\''+kind+'\',\''+escapeHTML(String(id||''))+'\')">▶ ADS • '+mt251('ดู 1 ครั้ง','Watch once')+'</button><small>'+speedNote264()+'</small>';}
+Game.speedConfirm=function(){
+ E.sync();var b=E.d.buildings.find(function(b){return b.id===selected;});if(!b||!b.until)return;
+ if(E.d.siegeLocked){toast(tr('ฐานกำลังถูกโจมตี รอการรบสิ้นสุด'));return;}
+ var price=E.speedCost(b.id);open('<h2>'+mt251('เร่งก่อสร้าง','Speed up construction')+'</h2><p>'+B[b.type].name+' • '+duration((b.until-E.now())/1000)+'</p><button class="wide green" onclick="Game.speed('+b.id+','+price+')">'+mt251('เสร็จทันที • ','Finish now • ')+price+' NOVA</button>'+speedButton264('building',b.id));
+};
+Game.speedQueue=function(){E.sync();if(!E.d.queue.length){toast(tr('คิวฝึกว่าง'));return;}var cost=Math.ceil((Math.max.apply(null,E.d.queue.map(function(q){return q.until;}))-E.now())/10000);open('<h2>'+mt251('เร่งผลิตกองทัพ','Speed up troop production')+'</h2><button class="wide green" onclick="Game.finishQueue('+cost+')">'+mt251('เสร็จทันที • ','Finish now • ')+cost+' NOVA</button>'+speedButton264('training',''));};
+var upgradeSpeed264=Game.speedUpgrade228;Game.speedUpgrade228=function(id){upgradeSpeed264(id);if(supportQuote228&&supportQuote228.job_id===id&&!E.d.pendingSupport228)modal.innerHTML=modal.innerHTML.replace(/<\/div>$/,speedButton264(id.indexOf('local:')===0?'research':'server',id)+'</div>');};
+function speedSnapshot264(kind,id){
+ E.sync();if(kind==='building'){var b=E.d.buildings.find(function(b){return b.id===Number(id);});return b&&b.until?{kind:kind,id:b.id,started:b.started||0,level:b.lv,constructing:!!b.constructing}:null;}
+ if(kind==='training'){if(!E.d.queue.length)return null;return{kind:kind,keys:E.d.queue.map(function(q){return q.speedKey264||(q.speedKey264=nonce160());})};}
+ if(kind==='research'){var k=id.replace(/^local:/,''),j=(E.d.researchJobs225||{})[k];return j?{kind:kind,id:k,level:j.level}:null;}
+ return kind==='server'&&(E.d.serverUpgrades225||[]).some(function(j){return j.id===id;})?{kind:kind,id:id}:null;
+}
+Game.speedAd264=function(kind,id){
+ if(speedBusy264||speedShowing264||raidShowing260||mineShow251||testShowing248||E.d.pendingAd230&&E.d.pendingAd230.showRequested)return;
+ if(E.d.siegeLocked||liveRoom&&!liveRoom.finished){toast(tr('รอการรบสิ้นสุดก่อน'));return;}
+ var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner;if(!owner){resourceAccount233();return;}
+ var p=E.d.pendingSpeed264;
+ if(p&&p.owner!==owner){toast(tr('ใช้บัญชีเดิมเพื่อตรวจรายการ'));return;}
+ if(!p){var target=speedSnapshot264(kind,id);if(!target){toast(tr('งานนี้เสร็จแล้ว'));return;}p={owner:owner,request_id:nonce160(),target:target};E.d.pendingSpeed264=p;if(!E.save()){delete E.d.pendingSpeed264;return;}}
+ speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');
+};
+Game.retrySpeed264=function(){var p=E.d.pendingSpeed264;if(p){speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');}};
+function speedError264(message){speedShowing264=false;open('<h2>'+mt251('เร่งเวลาด้วย ADS','Speed up with ADS')+'</h2><p>'+escapeHTML(message||mt251('รางวัลยังถูกเก็บไว้ ลองอีกครั้ง','Your reward is saved. Retry.'))+'</p><button class="wide green" onclick="Game.retrySpeed264()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');}
+function speedSend264(mode){
+ var p=E.d.pendingSpeed264;if(!p||speedBusy264||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;
+ if(!root.NovaCloud||!root.NovaCloud.warRequest){speedError264(mt251('เชื่อมต่อไม่ได้','Could not connect'));return;}
+ var id='speed264-'+(++speedSerial264);speedBusy264={id:id,mode:mode};clearTimeout(speedTimer264);speedTimer264=setTimeout(function(){speedBusy264=null;speedError264(mt251('เชื่อมต่อไม่ได้ รางวัลยังถูกเก็บไว้','Connection timed out. Your reward is saved.'));},25000);
+ open('<h2>'+mt251(mode==='claim'?'กำลังเร่งเวลา…':'กำลังเตรียมโฆษณา…',mode==='claim'?'Applying speed-up…':'Preparing video…')+'</h2>');
+ try{root.NovaCloud.warRequest(mode==='claim'?'test_claim':'test_status',JSON.stringify(Object.assign({},p,{speed264:mode})),id);}catch(e){clearTimeout(speedTimer264);speedBusy264=null;speedError264();}
+}
+function speedAdShow264(p){var a=root.NovaAds;speedShowing264=true;try{if(p.provider==='test'&&a&&a.rewardTest248)a.rewardTest248(p.owner,p.request_id);else if(p.provider!=='test'&&a&&a.rewardVerified&&((p.provider==='monetag')===(a.provider==='monetag')))a.rewardVerified(p.owner,p.request_id);else throw Error('unavailable');}catch(e){speedError264(mt251('โฆษณายังไม่พร้อม กรุณาลองใหม่','Ads unavailable. Please retry.'));}}
+function speedEarn264(owner,id,provider){var p=E.d.pendingSpeed264;if(!p||p.owner!==owner||p.request_id!==id||p.provider!==provider||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return false;p.completed=true;if(!E.save())return true;speedShowing264=false;speedSend264('claim');return true;}
+var testSpeed264=root.novaTestRewardEarned248;root.novaTestRewardEarned248=function(owner,id){if(speedEarn264(owner,id,'test')){if(root.NovaAds.acknowledgeTest248)root.NovaAds.acknowledgeTest248(id);return;}testSpeed264(owner,id);};
+var earnedSpeed264=root.novaRewardEarned;root.novaRewardEarned=function(id){var p=E.d.pendingSpeed264;if(p&&p.provider!=='test'&&speedEarn264(p.owner,p.provider==='admob'&&speedShowing264?p.request_id:id,p.provider)){if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);return;}earnedSpeed264(id);};
+var statusSpeed264=root.novaRewardStatus;root.novaRewardStatus=function(status){if(speedShowing264){if(status==='ready'){var p=E.d.pendingSpeed264;if(p&&p.provider==='admob')speedAdShow264(p);return;}if(['loading','showing','test_showing248'].includes(status))return;speedError264(mt251('ยังดูไม่ครบหรือโฆษณาไม่พร้อม กรุณาลองใหม่','Video incomplete or unavailable. Please retry.'));return;}statusSpeed264(status);};
+var mediaSpeed264=mediaAllowed250;mediaAllowed250=function(){return !speedShowing264&&mediaSpeed264();};
+function applySpeed264(p,r){
+ var before=JSON.stringify(E.d),now=E.d.onlineCrystal?Math.min(E.now(),E.d.economyConfirmedAt||E.now()):E.now(),ms=Math.max(0,Math.min(500,r.seconds))*1000,used=0,t=p.target;
+ if((E.d.speedReceipts264||[]).includes(p.request_id))return 0;
+ if(t.kind==='building'){var b=E.d.buildings.find(function(b){return b.id===t.id&&b.lv===t.level&&!!b.constructing===!!t.constructing;});if(b&&b.until){used=Math.min(ms,Math.max(0,b.until-now));b.until=Math.max(now,b.until-ms);}}
+ else if(t.kind==='training')E.d.queue.forEach(function(q){if(t.keys.includes(q.speedKey264)){used=Math.max(used,Math.min(ms,Math.max(0,q.until-now)));q.until=Math.max(now,q.until-ms);}});
+ else if(t.kind==='research'){var j=(E.d.researchJobs225||{})[t.id];if(j&&j.level===t.level){used=Math.min(ms,Math.max(0,j.until-now));j.until=Math.max(now,j.until-ms);}}
+ else if(t.kind==='server')used=ms;
+ E.d.speedReceipts264=(E.d.speedReceipts264||[]).concat(p.request_id).slice(-500);delete E.d.pendingSpeed264;
+ if(!E.save()){E.d=JSON.parse(before);return null;}E.sync();return Math.ceil(used/1000);
+}
+var cloudSpeed264=root.novaCloudEvent;root.novaCloudEvent=function(event,data){data=data||{};
+ if(data.request_id&&data.request_id.indexOf('speed264-')===0){
+  if(!speedBusy264||data.request_id!==speedBusy264.id)return;var mode=speedBusy264.mode;speedBusy264=null;clearTimeout(speedTimer264);
+  if(event!=='war'||!data.data||!data.data.speed264){speedError264(data.message);return;}
+  var d=data.data,p=E.d.pendingSpeed264,r=d.receipt;if(!p||d.owner!==p.owner||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner||!r||r.id!==p.request_id||JSON.stringify(r.target)!==JSON.stringify(p.target)){
+   // JSON object key order is not semantic (Postgres jsonb sorts keys).
+   if(!p||d.owner!==p.owner||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner||!r||r.id!==p.request_id)return;
+   if(r.target.kind!==p.target.kind||r.target.id!==p.target.id||r.target.level!==p.target.level||r.target.started!==p.target.started||r.target.constructing!==p.target.constructing||JSON.stringify(r.target.keys)!==JSON.stringify(p.target.keys))return;
+  }
+  if(!Number.isInteger(r.seconds)||r.seconds<0||r.seconds>500||!r.target)return;
+  p.provider=r.provider;p.expires_at=r.expires_at;if(!E.save())return;
+  if(r.claimed){
+   if(d.locked||E.d.siegeLocked){speedTimer264=setTimeout(function(){speedSend264('claim');},5000);return;}
+   if(d.online)syncCrystal(d.online);var seconds=applySpeed264(p,r);if(seconds===null){speedError264(tr('บันทึกไม่ได้'));return;}speedShowing264=false;completionAudio250();hud();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย!','Congratulations!')+'</h2><p>'+mt251('เร่งเวลาแล้ว ','Sped up by ')+duration(seconds)+'</p><button class="wide green" onclick="Game.close()">'+mt251('ตกลง','OK')+'</button></section>');return;
+  }
+  if(p.completed){if(speedAttempts264++<24)speedTimer264=setTimeout(function(){speedSend264('claim');},5000);else speedError264(mt251('รอยืนยันรางวัล ลองใหม่โดยไม่ต้องดูวิดีโอซ้ำ','Confirmation pending. Retry without another video.'));return;}
+  if(Date.parse(p.expires_at)<=Date.now()){p.request_id=nonce160();delete p.provider;delete p.expires_at;E.save();speedSend264('prepare');return;}
+  speedAdShow264(p);return;
+ }
+ if(event==='signed_in'||event==='signed_out'){speedBusy264=null;speedShowing264=false;clearTimeout(speedTimer264);}
+ cloudSpeed264(event,data);
+};
+var heartbeatSpeed264=liveHeartbeat;liveHeartbeat=function(){var p=E.d.pendingSpeed264;if(p&&p.completed&&!speedBusy264&&!speedTimer264&&!document.hidden&&E.d.onlineCrystal&&p.owner===E.d.onlineCrystal.owner){speedSend264('claim');}heartbeatSpeed264();};
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 
