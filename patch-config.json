@@ -2,8 +2,13 @@
   "schema": 1,
   "channel": "test",
   "nativeVersion": 23,
-  "compatibleNativeVersions": [19, 20, 21, 22],
-  "contentVersion": 56,
-  "label": "1.9.7-jet-miners",
+  "compatibleNativeVersions": [
+    19,
+    20,
+    21,
+    22
+  ],
+  "contentVersion": 57,
+  "label": "1.9.7-nova-enhance",
   "maxBytes": 67108864
 }

@@ -4,7 +4,7 @@ const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=
 const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
 let frame;
 const sandbox={console,crypto,Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>0,clearTimeout(){},Image:class{},localStorage:{getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v},document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,NovaCloud:{warAvailable:()=>true,available:()=>true,war:(action,payload)=>requests.push({action,payload:JSON.parse(payload)})}};
-sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8'),sandbox);
+sandbox.localStorage && sandbox.localStorage.setItem('novaLanguage','th');vm.createContext(sandbox);vm.runInContext(fs.readFileSync('game.js','utf8').replace('var enhancementSelection=null;', 'E.d.gems=50000;var enhancementSelection=null;'),sandbox);
 const G=sandbox.Game,event=(action,d)=>sandbox.novaCloudEvent('war',{action,data:d}),wallet={owner:'account-a',test_gems:10000,can_claim:false};
 
 const online={enrolled:true,owner:'a',tier:3,crystals:50000,capacity:100000,rate:0,research:{weapon:0,armor:0},enhancements:{'unit:0':5,'building:hq':10}};

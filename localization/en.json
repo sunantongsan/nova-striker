@@ -988,5 +988,8 @@
   "ยังดูไม่ครบ กรุณาลองใหม่": "The ad was not completed. Please try again",
   "ยังไม่มีโฆษณาทดสอบ กรุณาลองอีกครั้ง": "No test ad is available. Please try again",
   "ตรวจรายการเช็กอินเรียบร้อยแล้ว": "Check-in receipt checked",
-  "กำลังโหลดโฆษณาทดสอบ": "Loading a test ad"
+  "กำลังโหลดโฆษณาทดสอบ": "Loading a test ad",
+  "ตีบวกด้วย NOVA": "Enhance with NOVA",
+  "NOVA ไม่พอ": "Not enough NOVA",
+  "เลือดและพลัง": "Health and power"
 }
