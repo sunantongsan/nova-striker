@@ -13,13 +13,7 @@ function boot(data={},platform='android'){
 for(const platform of ['android','telegram']){
  const a=boot({novaRTSIntro:'1'},platform),G=a.s.Game,e=a.s.test232.e;
  const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
- a.s.test232.clearBusy();G.treasury();assert.equal(a.requests.at(-1).a,'test_status');reply({owner:'a',admob230:true,test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20}});assert(!a.el('modal').innerHTML.includes('10,000'));assert.match(a.el('modal').innerHTML,/Start at 20/);assert.equal((a.el('modal').innerHTML.match(/role="listitem"/g)||[]).length,7);assert(!a.el('modal').innerHTML.includes('Game.refreshCheckin233()'));
- const gems=e.d.gems;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};G.checkin();const count=a.requests.length;G.checkin();assert.equal(a.requests.length,count,'double tap sends one prepare');assert.equal(a.requests.at(-1).p.admob230,'prepare');assert.equal(a.requests.at(-1).p.kind,'checkin');
- const receipt={id:e.d.pendingAd230.request_id,kind:'checkin',amount:20,day:'2026-10-17',expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false};
- reply({owner:'a',admob230:true,test_gems:0,ad_reward:receipt});assert.equal(shown,1,'user claim automatically opens prepared ad');assert.equal(e.d.gems,gems);
- a.s.novaRewardEarned(receipt.id);assert.equal(a.requests.at(-1).p.completed234,true);reply({owner:'a',admob230:true,test_gems:0,ad_reward:receipt});assert.equal(e.d.gems,gems,'earned callback alone cannot credit');
- G.checkAd230('claim');reply({owner:'a',test_gems:20,ad_reward:{...receipt,verified:true,claimed:true,granted:20},checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20);assert(!e.d.pendingAd230);
- G.refreshCheckin233();reply({owner:'a',test_gems:20,checkin233:{day:'2026-10-17',claimed:true,streak:1,reward:20,next_reward:25}});assert.equal(e.d.gems,gems+20,'refresh does not credit twice');
+ // Daily mining/ad transitions are tested by mining251-ui.cjs.
  a.s.test232.setOnline();a.s.NovaAds={rewardVerified(){}};e.d.gold=0;e.d.power=0;a.s.test232.select(e.d.buildings.find(b=>b.type==='hq').id);G.upgrade();assert.match(a.el('modal').innerHTML,/Not enough resources/);assert.match(a.el('modal').innerHTML,/Game.buyShortfall238/);assert.equal(a.requests.at(-1).p.kind,'bundle');reply({owner:'a',wallet_gems:20,resource_quote:{kind:'bundle',cost:8,amount:1000,available:true,ad_kind:'gold',ad_amount:1080}});assert.match(a.el('modal').innerHTML,/Pay with diamonds 8/);assert.match(a.el('modal').innerHTML,/Ads/);
  G.resourceOffer233('gold',350);assert.equal(a.requests.at(-1).p.resource233,'quote');const base={owner:'a',enrolled:false,resource233:true,wallet_gems:20};reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});assert.match(a.el('modal').innerHTML,/Watch an ad/);assert.match(a.el('modal').innerHTML,/Use diamonds/);assert(!a.el('modal').innerHTML.includes('Game.buyResource233()'));G.resourceMode235('diamonds');assert.match(a.el('modal').innerHTML,/Confirm exchange/);assert(!a.el('modal').innerHTML.includes('Game.shortfallAd233()'));
  const before=e.d.gems;G.buyResource233();const pending=e.d.pendingResource233;assert(pending);assert.equal(e.d.gems,before-5);const n=a.requests.length;G.buyResource233();assert.equal(a.requests.length,n);a.s.novaCloudEvent('war_error',{request_id:a.requests.at(-1).id,message:'network'});assert(e.d.pendingResource233);G.retryResource233();assert.equal(a.requests.at(-1).p.request_id,pending.request_id);reply({...base,wallet_gems:15,resource_receipt:{id:pending.request_id,kind:'gold',amount:350,cost:5,cancelled:false}});assert.equal(e.d.pendingResource233,undefined);assert.equal(e.d.gems,before-5);
@@ -29,7 +23,7 @@ for(const platform of ['android','telegram']){
  reply({...base,resource_receipt:{id:denied.request_id,kind:'gold',amount:0,cost:0,cancelled:true}});assert.equal(e.d.gems,beforeDenied);assert(!e.d.pendingResource233,'definitive rejection is cleared after server confirms cancellation');
  a.s.localStorage.setItem=()=>{throw Error('full')};G.resourceOffer233('gold',350);reply({...base,resource_quote:{kind:'gold',ad_amount:1080,paid_base:1296,amount:350,cost:5}});G.resourceMode235('diamonds');G.buyResource233();assert.equal(e.d.gems,before-5);assert.equal(e.d.pendingResource233,undefined,'failed local save never starts purchase');
 }
-console.log('PASS economy233 UI: no giveaway, explicit/duplicate check-in, upgrade shortfall, choice UI, durable debit/retry/cancel, no auto-upgrade and save-failure safety on Android/Telegram');
+console.log('PASS economy233 UI: upgrade shortfall, choice UI, durable debit/retry/cancel, no auto-upgrade and save-failure safety on Android/Telegram');
 
 assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="Game.settings\(\)"[^>]*><span[^>]*>⚙/);
 {
@@ -45,13 +39,7 @@ assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="
 
 }
 console.log('PASS resource ad loading: explicit choice, single-click launch, loading guard and retryable visible SDK failures');
-{
- const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};a.s.test232.clearBusy();G.treasury();G.checkin();
- let req=a.requests.at(-1);assert.equal(req.a,'test_status');a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',admob230:true,test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:8,reward:0,next_reward:60}}});
- req=a.requests.at(-1);assert.equal(req.p.admob230,'prepare','a claim click during status loading continues without another tap');assert.equal(req.p.kind,'checkin');
- a.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:{owner:'a',admob230:true,ad_reward:{id:req.p.request_id,kind:'checkin',amount:60,expires_at:new Date(Date.now()+60000).toISOString(),verified:false,claimed:false}}});assert.equal(shown,1);
-}
-console.log('PASS one-tap check-in: status fetch continues to receipt preparation and ad launch');
+// Replaced daily check-in flow is covered by mining251-ui.cjs.
 {
  const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e;a.s.test232.clearBusy();const b=e.d.buildings.find(b=>b.type==='hq');a.s.test232.select(b.id);e.d.gold=100000;e.d.power=100000;e.d.crystals=100000;const count=a.requests.length;G.upgrade();assert(b.until||b.lv>1,'sufficient resources upgrade directly');assert.equal(a.requests.length,count,'no unnecessary resource quote when affordable');assert(!a.el('modal').innerHTML.includes('Game.buyShortfall238()'));
 }
@@ -79,3 +67,4 @@ console.log('PASS production UI: all rewards visible before ad and single-tap pr
  reply({owner:'a',enrolled:false,ad_reward:{...r,verified:true,claimed:true,granted:2}});assert(!e.d.pendingAd230);assert(![...a.timers.values()].some(t=>t.ms===4000),'successful claim stops polling');
 }
 console.log('PASS automatic reward finish: no post-ad menu, delayed verification retries silently and stops after delivery');
+
