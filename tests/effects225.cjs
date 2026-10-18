@@ -16,5 +16,5 @@ console.log('PASS support UI: reserve once, retry same ID, cancellation persiste
 // Wall upgrade opens the single/row/all selector and finishes immediately.
 s.t225.e.d.buildings[0].lv=20;s.t225.e.d.gold=s.t225.e.d.power=1e7;
 s.t225.e.d.buildings.push({id:991,type:'wall',lv:5,x:1,y:1},{id:992,type:'wall',lv:5,x:8,y:8});
-G.inspectBuilding261(991,true);assert(el('modal').innerHTML.includes('กำแพงทั้งหมดในฐาน'));assert(el('modal').innerHTML.includes('แถวแนว'));G.wallConfirm('all');assert(el('modal').innerHTML.includes('อัปเกรดทันที'));G.wallApply();assert.equal(s.t225.e.d.buildings.find(b=>b.id===991).lv,6);assert.equal(s.t225.e.d.buildings.find(b=>b.id===992).lv,6);assert(!s.t225.e.d.buildings.find(b=>b.id===991).until);
+G.inspectBuilding261(991,true);assert(el('selection').innerHTML.includes('ทั้งหมด'));assert(el('selection').innerHTML.includes('แถว'));G.wallConfirm('all');assert(el('modal').innerHTML.includes('อัปเกรดทันที'));G.wallApply();assert.equal(s.t225.e.d.buildings.find(b=>b.id===991).lv,6);assert.equal(s.t225.e.d.buildings.find(b=>b.id===992).lv,6);assert(!s.t225.e.d.buildings.find(b=>b.id===991).until);
 console.log('PASS instant wall UI: upgrade selector, row/all choices, confirmation and completion');
