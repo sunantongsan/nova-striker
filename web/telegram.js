@@ -32,6 +32,7 @@
  async function login(){try{await authenticate();emit('signed_in',{id:session.user.id});loadAds().catch(()=>{});}catch(e){status(e.message);}}
  function run(task){task().catch(e=>status(e.message));}
  root.NovaCloud={
+  provider:'telegram',
   available:()=>true,warAvailable:()=>true,hasAccount:()=>!!session,
   login,
   load:()=>run(async()=>{const s=await account(),rows=await request('/rest/v1/nova_rts_saves?select=revision,payload,updated_at&user_id=eq.'+s.user.id,'GET',undefined,s.access_token);emit('loaded',{id:s.user.id,save:rows[0]||null});if(initialLoad&&!rows.length){initialLoad=false;root.Game?.close();}}),
@@ -95,3 +96,4 @@
   login();
  });
 })(window);
+
