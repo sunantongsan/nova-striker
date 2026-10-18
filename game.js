@@ -1015,7 +1015,7 @@ var rewardSync230=syncCrystal;syncCrystal=function(d){rewardSync230(d);if(d&&d.e
 Game.rewardAd=function(){
  if(E.d.pendingAd230){Game.rewardStatus230();return;}
  if(!E.d.admob230||!root.NovaAds||!root.NovaAds.rewardVerified){rewardPreview230();return;}
- open(tr('<h2>รางวัลโฆษณา</h2><p>เลือกของรางวัลก่อนดู • สมัครใจ • รอ 2 นาทีระหว่างครั้ง<br>ไม่มีเพดานรายวัน ขึ้นอยู่กับโฆษณาที่มีให้บริการ</p>')+[['gold',tr('ทอง')],['power',tr('พลังงาน')]].map(function(a){return '<button class="wide" onclick="Game.quickAd237(\''+a[0]+'\')">'+a[1]+tr(' • ดูโฆษณารับรางวัล</button>');}).join('')+(E.d.serverUpgrades225||[]).map(function(j){return '<button class="wide" onclick="Game.quickAd237(\'speed\',\''+escapeHTML(j.id)+tr('\')">เร่ง ')+escapeHTML(upgradeLabel225(j))+tr(' สูงสุด 8 นาที 20 วินาที</button>');}).join('')+tr('<button class="wide" onclick="Game.close()">กลับฐาน</button>'));
+ open(tr('<h2>รางวัลโฆษณา</h2><p>เลือกของรางวัลก่อนดู • สมัครใจ • รอ 2 นาทีระหว่างครั้ง<br>ไม่มีเพดานรายวัน ขึ้นอยู่กับโฆษณาที่มีให้บริการ</p>')+[['gold',tr('ทอง')],['power',tr('พลังงาน')]].map(function(a){return '<button class="wide" onclick="Game.quickAd237(\''+a[0]+'\')">'+a[1]+tr(' • ดูโฆษณารับรางวัล</button>');}).join('')+(E.d.serverUpgrades225||[]).map(function(j){return '<button class="wide" onclick="Game.quickAd237(\'speed\',\''+escapeHTML(j.id)+tr('\')">เร่ง ')+escapeHTML(upgradeLabel225(j))+tr(' • ดูโฆษณา</button>');}).join('')+tr('<button class="wide" onclick="Game.close()">กลับฐาน</button>'));
 };
 Game.prepareAd230=function(kind,job){
  if(warBusy){toast(tr('กำลังตรวจรายการ กรุณารอสักครู่'));return;}
@@ -1611,13 +1611,9 @@ liveHeartbeat=function(){
  }
  heartbeat262();
 };
-var speedConfirm262=Game.speedConfirm;
-Game.speedConfirm=function(){speedConfirm262();var b=E.d.buildings.find(function(b){return b.id===selected;});if(b&&b.until)$('modal').innerHTML=$('modal').innerHTML.replace(/<\/div>$/,'<p class="muted">'+mt251('1 NOVA = 10 วินาที • ดูโฆษณาเร่งได้สูงสุด 8 นาที 20 วินาที','1 NOVA = 10 seconds • Ads speed up by up to 8 minutes 20 seconds')+'</p></div>');};
-
 // One video = 50 NOVA = 500 seconds. Local timers are bound to the selected job snapshot.
 var speedBusy264=null,speedSerial264=0,speedTimer264=null,speedShowing264=false,speedAttempts264=0;
-function speedNote264(){return mt251('ADS 1 ครั้ง = 50 NOVA • ลดเวลาสูงสุด 8 นาที 20 วินาที','1 AD = 50 NOVA • Up to 8m 20s');}
-function speedButton264(kind,id){return '<button class="wide" onclick="Game.speedAd264(\''+kind+'\',\''+escapeHTML(String(id||''))+'\')">▶ ADS • '+mt251('ดู 1 ครั้ง','Watch once')+'</button><small>'+speedNote264()+'</small>';}
+function speedButton264(kind,id){return '<button class="wide" onclick="Game.speedAd264(\''+kind+'\',\''+escapeHTML(String(id||''))+'\')">▶ '+mt251('ดูโฆษณาเร่งเวลา','Watch ad to speed up')+'</button>';}
 Game.speedConfirm=function(){
  E.sync();var b=E.d.buildings.find(function(b){return b.id===selected;});if(!b||!b.until)return;
  if(E.d.siegeLocked){toast(tr('ฐานกำลังถูกโจมตี รอการรบสิ้นสุด'));return;}
