@@ -14,7 +14,7 @@ function boot(data={},platform='android'){
 
 
 const a=boot({novaRTSIntro:'1',novaLanguage:'th'}),G=a.s.Game,e=a.s.test232.e;
-G.build();let html=a.el('modal').innerHTML;assert(html.includes('build-row260'));assert(!html.includes('Game.place(\'hq\')'));assert(!html.includes('Game.place(\'factory\')'),'locked HQ level cannot build');assert(html.includes('Game.buildUpgrade260(\'hq\')'));assert(html.includes('Game.buildEnhance260(\'hq\')'));assert(!html.includes('class="grid"'));
+G.build();let html=a.el('modal').innerHTML;assert(html.includes('build-card261'));assert(!html.includes('Game.place(\'hq\')'));assert(!html.includes('Game.place(\'factory\')'),'locked HQ level cannot build');assert(html.includes('Game.buildUpgrade260(\'hq\')'));assert(html.includes('Game.buildEnhance260(\'hq\')'));assert(!html.includes('class="grid"'));
 const battle='20000000-0000-4000-8000-000000000099',owner='10000000-0000-4000-8000-000000000001';
 const pending=[{battle,gold:100,power:50,nova:40}];let ads=0;
 a.s.NovaAds={rewardTest248(who,id){assert.equal(who,owner);ads++;},acknowledgeTest248(){}};
