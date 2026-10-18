@@ -9,4 +9,4 @@ const assert=require('assert');
 function search(x){x.G.findWar();x.box.novaCloudEvent('war',{action:'targets',data:{...x.online,targets:[x.target]}});}
 function peeks(x){return x.requests.filter(r=>r.payload.live==='siege_peek').length;}
 for(const provider of ['native','monetag','missing']){const x=setup();let ads=0;if(provider!=='missing')x.box.NovaAds={provider:provider,levelComplete(){ads++;},scout(){ads++;},rewardVerified(){ads++;}};search(x);assert.equal(peeks(x),1);assert.equal(ads,0,'scouting must never load ads');}
-console.log('PASS free scouting: native, Telegram and missing bridge');
+console.log('PASS scouting without ads: native, Telegram and missing bridge');
