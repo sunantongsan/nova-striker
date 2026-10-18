@@ -2,13 +2,8 @@
   "schema": 1,
   "channel": "test",
   "nativeVersion": 23,
-  "compatibleNativeVersions": [
-    19,
-    20,
-    21,
-    22
-  ],
-  "contentVersion": 55,
-  "label": "1.9.7-nova-wallet",
+  "compatibleNativeVersions": [19, 20, 21, 22],
+  "contentVersion": 56,
+  "label": "1.9.7-jet-miners",
   "maxBytes": 67108864
 }
