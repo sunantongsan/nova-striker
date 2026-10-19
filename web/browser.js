@@ -50,7 +50,16 @@
  const callback=()=>root.location.origin+root.location.pathname;
  root.NovaCloud={
   provider:'web',available:()=>true,warAvailable:()=>true,hasAccount:()=>!!session,
-  login:()=>{root.Game?.welcomeForm('login');document.getElementById('welcome').hidden=false;status('เข้าสู่ระบบด้วยอีเมล เพื่อเล่นต่อได้จากทุกเครื่อง');},
+  login:()=>run(async()=>{
+   if(authBusy)return;authBusy=true;
+   const button=document.getElementById('welcomeGoogle');if(button)button.disabled=true;
+   status('กำลังเปิด Facebook เพื่อยืนยันบัญชี…');
+   try{
+    const code_challenge=await challenge('facebook');
+    const params=new URLSearchParams({provider:'facebook',redirect_to:callback(),scopes:'email',code_challenge,code_challenge_method:'s256'});
+    root.location.assign(API+'/auth/v1/authorize?'+params.toString());
+   }catch(e){authBusy=false;if(button)button.disabled=false;throw e;}
+  }),
   emailAuth:(action,email,password)=>run(async()=>{
    if(authBusy)return;
    if(!['login','signup','recover','update'].includes(action))throw Error('คำสั่งบัญชีไม่ถูกต้อง');
@@ -84,8 +93,21 @@
  };
  root.NovaAds={provider:'unavailable',scout:async(done)=>done(),rewardVerified:()=>root.novaRewardStatus?.('unavailable'),acknowledgeReward:()=>{}};
  document.addEventListener('DOMContentLoaded',()=>run(async()=>{
-  const google=document.getElementById('welcomeGoogle');if(google)google.hidden=true;
+  function facebookWelcome(){
+   const button=document.getElementById('welcomeGoogle');
+   if(button){button.hidden=false;button.textContent='เล่นด้วย Facebook';button.onclick=root.NovaCloud.login;}
+   const form=document.getElementById('welcomeEmail')?.closest('form');if(form)form.hidden=true;
+   const links=document.getElementById('welcomeSwitch')?.closest('.welcome-links');if(links)links.hidden=true;
+   const title=document.getElementById('welcomeTitle');if(title)title.textContent='เริ่มภารกิจ NOVA';
+   const hint=document.getElementById('welcomeHint');if(hint)hint.textContent='เล่นผ่านเว็บ ไม่ต้องติดตั้ง • ผู้เล่นใหม่ตั้งชื่อฐานก่อนเริ่ม';
+   const message=document.getElementById('welcomeStatus');if(message)message.textContent='ยืนยันบัญชี Facebook ครั้งแรก แล้วระบบจะพาไปตั้งชื่อฐาน';
+  }
+  const welcomeForm=root.Game?.welcomeForm;
+  if(welcomeForm)root.Game.welcomeForm=function(...args){welcomeForm.apply(this,args);facebookWelcome();};
+  if(root.Game)root.Game.welcomeGoogle=root.NovaCloud.login;
+  facebookWelcome();
   const params=new URLSearchParams(root.location.search),code=params.get('code');
+  if(params.has('error')){root.history.replaceState(null,'',root.location.pathname);sessionStorage.removeItem(PKCE);status('ยังไม่ได้ยืนยันกับ Facebook กรุณากดเล่นด้วย Facebook เพื่อลองใหม่');return;}
   if(code){
    root.history.replaceState(null,'',root.location.pathname);
    const saved=JSON.parse(sessionStorage.getItem(PKCE)||'null');sessionStorage.removeItem(PKCE);

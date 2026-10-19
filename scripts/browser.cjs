@@ -5,7 +5,7 @@ function build(source=path.resolve(__dirname,'..'),output=path.join(source,'patc
  let html=fs.readFileSync(path.join(source,'web/index.html'),'utf8')
   .replace('<script src="https://telegram.org/js/telegram-web-app.js"></script>','')
   .replace('<script src="telegram.js"></script>','<script src="browser.js"></script>')
-  .replace('<title>Nova Striker • RTS</title>','<title>NOVA — เล่นบนเว็บ</title><meta name="description" content="สร้างฐาน จัดกองทัพ และออกบุกใน NOVA เล่นผ่านเว็บโดยไม่ต้องติดตั้ง"><meta property="og:title" content="NOVA — สร้างฐานและบัญชาการกองทัพ"><meta property="og:description" content="เข้าเล่นผ่านเว็บ สมัครบัญชีแล้วเริ่มภารกิจได้เลย"><meta property="og:type" content="website">');
+  .replace('<title>Nova Striker • RTS</title>','<title>NOVA — เล่นบนเว็บ</title><meta name="description" content="สร้างฐาน จัดกองทัพ และออกบุกใน NOVA เล่นผ่านเว็บโดยไม่ต้องติดตั้ง"><meta property="og:title" content="NOVA — สร้างฐานและบัญชาการกองทัพ"><meta property="og:description" content="เล่นผ่านเว็บด้วยบัญชี Facebook ตั้งชื่อฐานแล้วเริ่มภารกิจ"><meta property="og:type" content="website">');
  fs.writeFileSync(path.join(dest,'index.html'),html);
  // Existing engine accepts Storage; scope all engine storage to this web account.
  fs.writeFileSync(path.join(dest,'game.js'),fs.readFileSync(path.join(source,'game.js'),'utf8').replace(/\blocalStorage\b/g,'NovaWebStorage'));
