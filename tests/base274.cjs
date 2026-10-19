@@ -19,4 +19,9 @@ assert(d.buildings[0].hp<10000,'far-edge attacker reaches the base');
 // The same wave scales up with the current base, without changing saved buildings.
 function stats(lv){const e=battle();e.defense=null;e.d.defenseLevel=1;e.d.buildings=[{id:1,type:'hq',lv,x:10,y:10},{id:2,type:'gun',lv,x:11,y:10},{id:3,type:'tesla',lv,x:9,y:10}];assert.equal(e.startDefense(),'');return e.defense;}
 const low=stats(1),high=stats(20);assert(high.enemyHP274>low.enemyHP274*3);assert(high.enemyDamage274>low.enemyDamage274*3);assert(high.enemySpeed274>=low.enemySpeed274);assert(high.enemySpeed274<=1.5);
+// Sustained turret hits must not permanently push melee attackers away.
+e=battle();d=e.defense;d.buildings.push({id:2,type:'gun',lv:1,x:18,y:15,hp:10000,max:10000,cool:0});
+d.enemies=[{x:21,y:15,hp:10000,max:10000,cool:0,speed:1.1,knockbackMass274:4}];
+for(let i=0;i<200;i++)e.tickDefense(.1);
+assert(d.buildings[1].hp<10000,'attacker advances through repeated turret knockback');
 console.log('PASS base274: knockback recovery, blocked defenders, wall attack, distant targets, current-base scaling');
