@@ -41,7 +41,7 @@ r=await call('attack',{...launch,resourceSnapshot:{seq:999}});assert.equal(r.bat
 await assert.rejects(()=>call('attack',{...launch,request_id:nonce(),ship:2,cargo:[0,0,0,1,0,0,0,0,0,0,0]}),/หน่วยบิน/);
 await assert.rejects(()=>call('attack',{...launch,request_id:nonce(),ship:2,cargo:[4,0,0,0,0,0,0,0,0,0,0],x:10,y:10}),/ลงจอด/);
 await assert.rejects(()=>call('attack',{...launch,request_id:nonce(),ship:2},other),/สิทธิ์/);
-const air={live:'siege_logistics277',id:room.id,request_id:nonce(),action:'air',kind:7,count:1,target:0,x:10,y:10};let ar=await call('attack',air);let rest=ar.battle.army[7];ar=await call('attack',{...air,request_id:nonce(),retarget:true});assert.equal(ar.battle.army[7],rest,'retarget does not deploy another plane');
+const air={live:'siege_logistics277',id:room.id,request_id:nonce(),action:'air',kind:7,count:1,target:0,x:4.75,y:7.25};let ar=await call('attack',air);const exact=(await db.query("select y,logistics277 from nova_private.siege_orders where kind=7 order by id desc limit 1")).rows[0];assert.equal(+exact.y,7.25);assert.equal(+exact.logistics277.x,4.75,'empty-ground coordinate survives authoritative reservation');let rest=ar.battle.army[7];ar=await call('attack',{...air,request_id:nonce(),retarget:true});assert.equal(ar.battle.army[7],rest,'retarget does not deploy another plane');
 const unload={live:'siege_logistics277',id:room.id,request_id:nonce(),action:'unload',ship:1};r=await call('attack',unload);assert(r.battle.logisticsOrders277.some(c=>c.payload.action==='unload'));
 const orders=r.battle.orders,ack=Math.max(...orders.map(o=>o.id));
 // One survivor on the ground, remaining cargo lost: return survivor plus unlaunched reserve.
