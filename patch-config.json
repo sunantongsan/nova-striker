@@ -1,14 +1,15 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 23,
+  "nativeVersion": 24,
   "compatibleNativeVersions": [
     19,
     20,
     21,
-    22
+    22,
+    23
   ],
-  "contentVersion": 73,
-  "label": "1.9.23-painted-defenses",
+  "contentVersion": 74,
+  "label": "1.9.24-base-and-referrals",
   "maxBytes": 67108864
 }

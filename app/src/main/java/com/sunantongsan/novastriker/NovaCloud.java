@@ -72,6 +72,33 @@ final class NovaCloud {
         JSONObject s=read();if(s.optLong("expires_at")*1000<System.currentTimeMillis()+60000){s=new JSONObject(request("/auth/v1/token?grant_type=refresh_token","POST",new JSONObject().put("refresh_token",s.getString("refresh_token")),null));keep(s);}return s;
     }
     // Local account presence only; online operations still refresh and validate their tokens.
+
+    /** User-initiated referral sharing; no account tokens leave the bridge. */
+    @JavascriptInterface public void shareInvite274(String text,String link,String channel){
+        if(text==null||text.length()>1000||link==null||!link.matches("https://t\\.me/NovaStrikerRTS_bot\\?startapp=ref_[a-f0-9]{32}"))return;
+        activity.runOnUiThread(()->{
+            if(closed)return;
+            try {
+                if("copy".equals(channel)){
+                    android.content.ClipboardManager cb=(android.content.ClipboardManager)activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                    cb.setPrimaryClip(android.content.ClipData.newPlainText("NOVA",text+"\n"+link));
+                    android.widget.Toast.makeText(activity,"คัดลอกลิงก์แล้ว",android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String target=null;
+                if("line".equals(channel))target="https://line.me/R/share?text="+Uri.encode(text+"\n"+link);
+                else if("facebook".equals(channel))target="https://www.facebook.com/sharer/sharer.php?u="+Uri.encode(link);
+                else if("telegram".equals(channel))target="https://t.me/share/url?url="+Uri.encode(link)+"&text="+Uri.encode(text);
+                else if("whatsapp".equals(channel))target="https://api.whatsapp.com/send?text="+Uri.encode(text+"\n"+link);
+                if(target!=null)activity.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(target)));
+                else {
+                    Intent share=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,text+"\n"+link);
+                    activity.startActivity(Intent.createChooser(share,"ชวนเพื่อนเล่น NOVA"));
+                }
+            }catch(android.content.ActivityNotFoundException e){status("ไม่พบแอปสำหรับแชร์ กรุณาคัดลอกลิงก์");}
+        });
+    }
+
     @JavascriptInterface public boolean hasAccount(){try{return read().optJSONObject("user")!=null;}catch(Exception e){return false;}}
     @JavascriptInterface public boolean available(){return BuildConfig.NOVA_CLOUD_ENABLED;}
     @JavascriptInterface public void login(){
@@ -151,6 +178,7 @@ final class NovaCloud {
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }
+
 
 
 
