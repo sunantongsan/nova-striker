@@ -2,7 +2,14 @@ const vm=require('vm'),fs=require('fs'),assert=require('assert');require('../gam
 // Heavy tracked vehicles never hop or get shoved by a blast, while infantry still react.
 for(const kind of [1,9]){let t={kind,x:4,y:4,hp:1000,max:1000},scene={buildings:[],fx:[],mapSize:22};N.hit(scene,t,50,{x:3,y:4},'cannon');assert.equal(t.hop,0);assert.equal(t.x,4);assert.equal(t.y,4);}
 let foot={kind:0,x:4,y:4,hp:1000};N.hit({buildings:[],fx:[]},foot,50,{x:3,y:4},'cannon');assert(foot.hop>0);
-for(const type of ['tank','gun','missileturret','cannonturret'])for(let i=0;i<32;i++){const angle=i*Math.PI/16,source=type==='tank'?{kind:1,x:4,y:4}:{type,x:4,y:4},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};let fx=N.weaponFX(source,target,'cannon'),mount=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.51;assert(Math.abs(mount.x*dy-(mount.y+mount.height)*dx)<1e-8,'muzzle and target have same bearing');assert.deepEqual(fx.muzzle,mount);}
+for(const type of ['tank','gun','missileturret'])for(let i=0;i<32;i++){const angle=i*Math.PI/16,source=type==='tank'?{kind:1,x:4,y:4}:{type,x:4,y:4},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};let fx=N.weaponFX(source,target,'cannon'),mount=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.51;assert(Math.abs(mount.x*dy-(mount.y+mount.height)*dx)<1e-8,'muzzle and target have same bearing');assert.deepEqual(fx.muzzle,mount);}
+// The elevated mortar uses four authored views, not a planar rotating gun part.
+// Each emitted projectile must originate at that view's painted muzzle.
+for(let i=0;i<32;i++){const angle=i*Math.PI/16,source={type:'cannonturret',x:4,y:4,lv:12},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};
+ const fx=N.weaponFX(source,target,'energy276'),m=N.weaponMount(source),a=Math.atan2((Math.cos(source.aim)+Math.sin(source.aim))*.51,Math.cos(source.aim)-Math.sin(source.aim));
+ const index=Math.cos(a)>=0?(Math.sin(a)<0?0:1):(Math.sin(a)>=0?2:3),mouth=[[.83,.24],[.82,.64],[.20,.57],[.19,.20]][index],size=84.1*(1+11*.008);
+ assert.equal(m.index,index);assert(Math.abs(m.x-(mouth[0]-.5)*size)<1e-8);assert(Math.abs(m.y-((mouth[1]-.88)*size+source.recoil*8))<1e-8);assert.deepEqual(fx.muzzle,m);
+}
 // Real UI request lifecycle: login continuation, timeout, stale replies, retry and successful claim.
 let timers=new Map(),seq=0,requests=[],elements={},data={novaRTSIntro:'1'};
 const ctx=new Proxy({measureText:t=>({width:t.length*8})},{get:(o,k)=>o[k]||(()=>{})});const el=id=>elements[id]||(elements[id]={style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:600}),querySelectorAll:()=>[]});
@@ -22,4 +29,5 @@ assert(ce.exchange('crystals',10));assert.equal(ce.d.crystals,0);assert.equal(ce
 for(const type of ['crystalplant','crystalstore'])assert(ce.build(type,1,1));
 const source=fs.readFileSync('game.js','utf8');assert(!source.includes("ctx.fillText('Lv.'"));assert(source.includes('function drawResourceLabel(b){}'));
 console.log('PASS: both crystal buildings upgrade, gem/crystal exchange capacity and save failure, map labels removed');
+
 
