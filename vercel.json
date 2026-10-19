@@ -1,7 +1,7 @@
 {
   "framework": null,
   "installCommand": "npm ci --ignore-scripts --no-audit --no-fund",
-  "buildCommand": "npm test && node scripts/patch.cjs && node scripts/telegram.cjs",
+  "buildCommand": "npm test && node scripts/patch.cjs && node scripts/telegram.cjs && node scripts/browser.cjs",
   "outputDirectory": "patch-dist",
   "headers": [
     {
@@ -46,6 +46,24 @@
           "value": "no-referrer"
         }
       ]
+    },
+    {
+      "source": "/web/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
     }
   ]
 }
+
