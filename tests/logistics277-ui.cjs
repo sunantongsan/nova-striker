@@ -13,8 +13,8 @@ function boot(data={},platform='android'){
 
 
 const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e;
-G.manifest277();assert(a.el('modal').innerHTML.includes('data-ship277="1"'));assert(a.el('modal').innerHTML.includes('data-unit277="0"'));assert(a.el('modal').innerHTML.includes('unitgrid277'));
-assert.equal(e.assign277(1,0,0,4),'');G.manifest277();assert(a.el('modal').innerHTML.includes('4/12'));G.saveManifest277();e.assign277(0,0,1,2);G.loadManifest277();assert.equal(e.d.logistics277.ships[0].cargo[0],4);
+G.manifest277();assert(a.el('modal').innerHTML.includes('data-ship278="1"'));assert(a.el('modal').innerHTML.includes('data-kind278="0"'));assert(a.el('modal').innerHTML.includes('row278'));
+assert.equal(e.assign277(1,0,0,4),'');G.manifest277();assert(a.el('modal').innerHTML.includes('4 / 12'));G.saveManifest277();e.assign277(0,0,1,2);G.loadManifest277();assert.equal(e.d.logistics277.ships[0].cargo[0],4);
 G.readyManifest277();e.scoutPlayer({callsign:'QA',layout:[{type:'hq',lv:8,x:10,y:10},{type:'gun',lv:1,x:11,y:10}],garrison:[],research:{}});e.enableLogistics277();e.raid.liveMode='attacker';e.d.onlineCrystal={owner:'a'};
 const room={v:2,id:'room',role:'attacker',host:true};a.s.test232.setRoom(room);
 const orders=[{id:1,kind:0,x:0,y:10,owner:'a',logistics277:{ship:1,lv:1}},{id:2,kind:1,x:0,y:10,owner:'a',logistics277:{ship:1,lv:1}}];
