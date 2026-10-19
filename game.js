@@ -294,28 +294,19 @@ function drawPart171(part,p,scale,rotation){var ratio=combatParts.naturalWidth/1
 function drawGunPart171(o,p){var g=gunGeometry171(o),a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim);drawPart171(combatGuns171[g.index],{x:p.x-Math.cos(a)*g.recoil*zoom,y:p.y-g.height*zoom-Math.sin(a)*g.recoil*zoom},g.scale,g.rotation);if(o.recoil>.13){var m=weaponMount(o);disk(p.x+m.x*zoom,p.y+m.y*zoom,3*zoom,o.kind===9||o.type==='gun'?'#a9faff':'#ffe3a0');}}
 function drawTank(t,p){if(!combatParts.complete||!combatParts.naturalWidth){sprite(U[t.kind].sprite,p,40*zoom);return;}ctx.save();if(t.hp<=0)ctx.globalAlpha*=.5;var a=t.heading===undefined?-Math.PI/2:t.heading;drawPart171(combatHulls171[bearingIndex(a)],{x:p.x,y:p.y-14*zoom},.14,0);drawGunPart171(t,p);ctx.restore();if(t.moving){var rear=screenBearing(a),dust={x:p.x-Math.cos(rear)*18*zoom,y:p.y-Math.sin(rear)*10*zoom};ctx.save();ctx.globalAlpha=.12;disk(dust.x,dust.y,4*zoom,'#e6dcaa');ctx.restore();}}
 // Level-scaled weapon heads reuse the painted chassis and keep canvas cost bounded.
+var defenseArt273=new Image();
+defenseArt273.onload=function(){if(typeof previewCache265!=='undefined')previewCache265.clear();drawNeeded=true;};
+defenseArt273.src='assets/defense-painted273.webp';
 function drawWeapon272(b,p){
- var g=weaponStage272(b),lv=Math.max(1,Math.min(20,b.lv||1)),z=zoom,size=tile*z*2.25;
- ctx.save();ctx.beginPath();ctx.rect(p.x-size*.6,p.y-15*z,size*1.2,38*z);ctx.clip();
- if(!evolvedArt265(b,p,size)){if(B[b.type].sprite>=23)newBuildingArt(b,p,size);else sprite(B[b.type].sprite,p,size);}ctx.restore();
- ctx.save();ctx.translate(p.x,p.y);ctx.scale(z,z);
- var h=b.type==='tesla'?40+g*7:29+g*2;
- box(-6-g,-h,12+g*2,h-8,'#233f51');box(-5-g,-h,4,h-8,'#9bbcc9');
- for(var j=0;j<6+g;j++){var yy=-14-j*(h-14)/(6+g);ctx.fillStyle=j%2?'#36536a':'#829ba9';ctx.beginPath();ctx.ellipse(0,yy,8+g,3.5+g*.3,0,0,Math.PI*2);ctx.fill();box(-3,yy-3,3,3,'#89eaff');}
- if(b.type==='tesla'){
-  var r=9+g*2+(lv-1)*.12;var glow=ctx.createRadialGradient(-r*.3,-h-r*.3,1,0,-h,r);glow.addColorStop(0,'#f6ffff');glow.addColorStop(.45,'#77edff');glow.addColorStop(1,'#30559d');disk(0,-h,r,glow);
-  ctx.strokeStyle='#d9b96e';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,-h,r+3,r*.55,-.35,0,Math.PI*2);ctx.stroke();
-  for(var i=0;i<4;i++){var a=i*Math.PI/2;ctx.strokeStyle='#829dad';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(Math.cos(a)*(r+6),-h+7);ctx.lineTo(Math.cos(a)*(r+6),-h-7-g*2);ctx.stroke();disk(Math.cos(a)*(r+6),-h-7-g*2,2,'#dcfaff');}
- }else{
-  var sides=weaponSides272(b),angle=screenBearing(b.aim===undefined?-Math.PI/2:b.aim),length=25+g*3,width=4+g*.8+(lv-1)*.08;
-  for(var i=0;i<sides;i++){ctx.save();ctx.translate(0,-h);ctx.scale(1,.65);ctx.rotate(angle+i*Math.PI*2/sides);ctx.translate(-(b.recoil||0)*10,0);
-   if(b.type==='gun'){box(3,-width-2,12,width*2+4,'#405b70');box(5,-width,length-5,width*2,'#183849');box(6,-width,length-7,width*.7,'#adcbd5');box(11,-width*.3,length-13,width*.45,'#51d9ed');box(length-4,-width-1,5,width*2+2,'#56778a');box(length-1,-width*.65,2,width*1.3,'#101f2f');}
-   else{var rows=2+g;box(4,-rows*3.5-2,length-3,rows*7+4,'#264253');for(var n=0;n<rows;n++){var y=(n-(rows-1)/2)*7;box(6,y-2.7,length-5,5.4,'#a7bbc3');box(8,y-2.5,length-10,1.4,'#ecf2e8');box(length-3,y-2.7,4,5.4,'#df8d40');disk(length,y,1.8,'#172f40');}}
-   if(b.recoil>.13&&i===0)disk(length+2,0,4,'#d8ffff');ctx.restore();
-  }
-  disk(0,-h,10+g,'#294e65');disk(-2,-h-2,7+g,'#a6c6d2');disk(0,-h,4+g*.4,b.type==='gun'?'#66eaff':'#ffd77b');
+ var g=weaponStage272(b),column=Math.max(0,g-1),row=['gun','missileturret','tesla'].indexOf(b.type),size=tile*zoom*(2.45+g*.08);
+ if(row<0)return;
+ if(!defenseArt273.complete||!defenseArt273.naturalWidth){
+  // Keep the original painted building while the atlas loads; no geometric substitute.
+  if(B[b.type].sprite>=23)newBuildingArt(b,p,size);else sprite(B[b.type].sprite,p,size);return;
  }
- ctx.restore();
+ var w=defenseArt273.naturalWidth,h=defenseArt273.naturalHeight,cw=w/4,bounds=[0,.3125,.63,1],sy=(row===2&&column<2?.66:bounds[row])*h,sh=bounds[row+1]*h-sy;
+ var dh=size*sh/cw,recoil=(b.recoil||0)*3*zoom;
+ var sw=column===2?cw*.91:cw;ctx.save();ctx.drawImage(defenseArt273,column*cw,sy,sw,sh,p.x-size/2,p.y-dh*.94+recoil,size*sw/cw,dh);ctx.restore();
 }
 function drawCraters272(scene){
  if(!scene)return;var now=Date.now();scene.craters272=scene.craters272||[];
