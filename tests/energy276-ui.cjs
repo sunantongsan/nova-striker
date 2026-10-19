@@ -15,8 +15,8 @@ function boot(data={},platform='android'){
 const a=boot({novaRTSIntro:'1'}),e=a.s.test232.e;
 e.scoutPlayer({callsign:'QA',layout:[{type:'hq',lv:8,x:10,y:10},{type:'cannonturret',lv:1,x:11,y:10}],infra:{},inventory:{},garrison:{},research:{}});
 assert(e.raid);const r=e.raid,gun=r.buildings.find(b=>b.type==='cannonturret');
-r.energy276=[{remaining:.4,x:13,y:10,damage:90,source:gun}];r.fx=[{x:11,y:10,tx:13,ty:10,weapon:'energy276',highArc:true,life:.4,maxLife:.85,color:'#35dfff'}];
-const packet=a.s.test232.pack();assert.equal(packet.energy276.length,1);assert.equal(packet.fx[0].life,.4);assert.equal(packet.fx[0].maxLife,.85);
+r.energy276=[{remaining:.4,x:13,y:10,damage:90,source:gun}];r.fx=[{x:11,y:10,tx:13,ty:10,weapon:'energy276',orb281:1.855,highArc:true,life:.4,maxLife:.85,color:'#35dfff'}];
+const packet=a.s.test232.pack();assert.equal(packet.energy276.length,1);assert.equal(packet.fx[0].life,.4);assert.equal(packet.fx[0].maxLife,.85);assert.equal(packet.fx[0].orb281,1.855);
 r.energy276=[];a.s.test232.unpack(JSON.parse(JSON.stringify(packet)));assert.equal(r.energy276.length,1);assert.equal(r.energy276[0].source,gun);assert.equal(r.energy276[0].remaining,.4);
 packet.energy276.push([999,1,1,90,gun.id],[.4,99,1,90,gun.id],[.4,1,1,-1,gun.id],[.4,1,1,90,99999]);a.s.test232.unpack(packet);assert.equal(r.energy276.length,1,'invalid handover projectiles ignored');
 console.log('PASS energy276 UI: live flight timing and pending projectile host-handover serialization');

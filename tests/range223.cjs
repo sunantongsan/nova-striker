@@ -6,9 +6,11 @@ s.localStorage && s.localStorage.setItem('novaLanguage','th');vm.createContext(s
 const t=s.rangeTest,r=s.NovaRTS.defenseRange,b={id:99,type:'missileturret',x:8,y:8,lv:1};
 t.select(b);t.draw();assert.equal(rings.length,1);assert.equal(r('missileturret'),7);const center=t.point(8,8),edge=t.point(8+7/Math.SQRT2,8-7/Math.SQRT2);assert(Math.abs(rings[0][2]-(edge.x-center.x))<1e-8,'world-circle projection matches real distance');assert.equal(rings[0][0],center.x);t.hud();assert(el('selection').innerHTML.includes('7 ช่อง'));
 t.move();b.x=10;t.draw();assert.equal(rings.at(-1)[0],t.point(10,8).x,'moving building moves range');
-for(const type of ['hq','gun','tesla','cannonturret']){t.select({...b,type});rings.length=0;t.draw();assert.equal(rings.length,2);assert.notEqual(r(type),r(type,'wave'));t.hud();assert(el('selection').innerHTML.includes('วงประส้ม'));}
+for(const type of ['hq','gun','tesla']){t.select({...b,type});rings.length=0;t.draw();assert.equal(rings.length,2);assert.notEqual(r(type),r(type,'wave'));t.hud();assert(el('selection').innerHTML.includes('วงประส้ม'));}
+t.select({...b,type:'cannonturret'});rings.length=0;t.draw();assert.equal(rings.length,1);assert.equal(r('cannonturret'),r('missileturret'));assert.equal(r('cannonturret','wave'),r('missileturret','wave'));
 t.select({...b,type:'shield'});rings.length=0;t.draw();assert.equal(rings.length,1);assert.equal(r('shield'),3.5);
 for(const type of ['mine','wall','garrison']){t.select({...b,type});rings.length=0;t.draw();assert.equal(rings.length,0);}
 for(const action of ['place','raid','clear']){t.select(b);t[action]();rings.length=0;t.draw();assert.equal(rings.length,0);}
 console.log('PASS range geometry, combat range values, dual-mode labels, shield, move, non-defense and deselection');
+
 
