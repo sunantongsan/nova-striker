@@ -9,3 +9,4 @@ function localize(document){if(!document||!document.createTreeWalker)return;if(d
 root.NovaI18n={language:language,translate:translate,localize:localize,source:function(v){return reverse[v]||v;},setLanguage:function(v){if(v!=='en'&&v!=='th')return false;language=v;this.language=v;localize(root.document);return true;}};
 localize(root.document);
 })(typeof globalThis === 'object' ? globalThis : this);
+
