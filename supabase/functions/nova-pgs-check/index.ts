@@ -2,7 +2,12 @@
 const headers = {'Content-Type':'application/json','Cache-Control':'no-store'};
 Deno.serve(async (req: Request) => {
   const role = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!role || req.headers.get('authorization') !== 'Bearer ' + role)
+  let keys: string[] = [];
+  try { keys = Object.values(JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}')); } catch {}
+  const bearer = req.headers.get('authorization')?.replace(/^Bearer /i, '');
+  const apiKey = req.headers.get('apikey');
+  const authorized = (role && bearer === role) || keys.some(k => typeof k === 'string' && k.length > 20 && (apiKey === k || bearer === k));
+  if (!authorized)
     return new Response(JSON.stringify({error:'forbidden'}), {status:403,headers});
   if (req.method !== 'POST')
     return new Response(JSON.stringify({error:'method_not_allowed'}), {status:405,headers});

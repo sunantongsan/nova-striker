@@ -12,7 +12,7 @@ Keep the working Supabase Google OAuth client separate: Nova game, 997621124511-
 This first integration initializes PGS v2 without prompting users to create a game profile at launch. It intentionally does not replace, clear, or derive a Supabase session from a client-supplied player ID. Google login and Telegram are unchanged. No Facebook branch changes are included.
 
 Remaining release gates:
-- Configure server-side Recall API access before restoring game accounts through Play Games. The web server OAuth credential is saved, but it does NOT authorize Recall: Recall requires a service account, not three-legged OAuth. No service-account key or server Recall permissions have been verified. Store credentials only in backend secrets, never the APK, source tree, or chat.
+- Configure server-side Recall API access before restoring game accounts through Play Games. The web server OAuth credential is saved, but it does NOT authorize Recall: Recall requires a service account, not three-legged OAuth. The service-account key is saved in backend secrets and Google accepted its signed JWT token exchange on 2026-10-20. Actual player Recall access has not yet been verified. Store credentials only in backend secrets, never the APK, source tree, or chat.
   - Official setup: https://developer.android.com/games/pgs/recall/recall-setup
   - Use authenticated Recall session IDs and encrypted opaque persona/token values. Preserve existing links on conflicts; do not silently overwrite another account's association.
 - Implement secure account binding/restore; never merge accounts based on display name or local PGS player ID.
@@ -34,3 +34,16 @@ requests are rejected, stale callbacks are ignored, and destruction cancels deli
 This is preparation, not a released alternate login. No Play Games button is
 enabled until server credential access, binding/restore, and device testing pass.
 The existing Google provider, NovaCloud.java, and game-save formats are unchanged.
+
+## Server diagnostic verified 2026-10-20
+
+`nova-pgs-check` v2 is deployed with gateway JWT verification disabled only for this diagnostic, following explicit owner approval. Its handler requires a server secret key or the service-role bearer before it reads configuration or contacts Google. Do not place either credential in the APK or JavaScript.
+
+Observed live results:
+- An authorized diagnostic request returned `key_valid: true` and `google_token_accepted: true`.
+- The deliberately invalid Recall session returned HTTP 500 and `player_access_verified: false`. This is NOT a successful player-login test and does not establish a real Recall outage or permission failure.
+- A request using an invalid diagnostic key returned HTTP 403 with `error: forbidden`.
+
+No Supabase users, identities, account associations, or saves were changed. The working Google provider is unchanged. PR #12 remains draft. A complete game-account creation/binding/recovery implementation and a Play-signed device test are still required before an alternate login can be released.
+
+Build delivery: the existing `android.yml` workflow supports `workflow_dispatch` and attaches builds to GitHub Releases, independently of Actions artifact quota. The validation build on run 39430071422 compiled successfully but its artifact upload failed from quota. A debug-signed APK is not a substitute for a Play-signed Recall test.
