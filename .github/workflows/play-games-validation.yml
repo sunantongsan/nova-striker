@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'app/**'
+      - 'tests/java/**'
       - '.github/workflows/play-games-validation.yml'
 permissions:
   contents: read
@@ -25,6 +26,11 @@ jobs:
       - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node tests/welcome217.cjs && node tests/platform-isolation.cjs
+      - name: Verify Play Games callback lifecycle
+        run: |
+          mkdir -p /tmp/nova-pgs-tests
+          javac -d /tmp/nova-pgs-tests app/src/main/java/com/sunantongsan/novastriker/PlayGamesRequestGate.java tests/java/com/sunantongsan/novastriker/PlayGamesRequestGateTest.java
+          java -cp /tmp/nova-pgs-tests com.sunantongsan.novastriker.PlayGamesRequestGateTest
       - run: gradle :app:verifySdkVersions :app:assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:

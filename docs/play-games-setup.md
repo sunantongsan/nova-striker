@@ -23,3 +23,14 @@ Remaining release gates:
 The debug artifact is a compilation test only: its signing certificate does not match the registered Play signing certificate, so it cannot prove live PGS authentication. Do not distribute it as a working Play Games login release.
 
 Validation recorded before server-credential setup: CI run 39426243145 passed the welcome/platform-isolation tests and Gradle verification/debug compilation. Artifact upload failed because of GitHub artifact storage quota; the overall workflow did not pass and no downloadable APK was produced by that run.
+
+## Native bridge prepared
+NovaPlayGames now checks platform status without a profile prompt. A native-only
+requestRecall method obtains a Recall session ID for the future backend caller;
+the WebView cannot access that ID. Platform status never emits signed_in and
+never changes NovaCloud storage. Requests are bounded to 20 seconds, duplicate
+requests are rejected, stale callbacks are ignored, and destruction cancels delivery.
+
+This is preparation, not a released alternate login. No Play Games button is
+enabled until server credential access, binding/restore, and device testing pass.
+The existing Google provider, NovaCloud.java, and game-save formats are unchanged.
