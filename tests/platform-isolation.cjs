@@ -7,8 +7,8 @@ try {
  fs.mkdirSync(path.join(source,'assets'),{recursive:true});fs.mkdirSync(path.join(source,'web'));
  for(const p of ['index.html','game.js','patch-config.json','web/index.html','web/telegram.js'])fs.copyFileSync(path.join(__dirname,'..',p),path.join(source,p));
  const vm=require('node:vm'),game=fs.readFileSync(path.join(source,'game.js'),'utf8');
- const cloud=game.split('\n').find(line=>line.startsWith('Game.cloud=function'));
- let menu='';const ctx={Game:{},root:{NovaCloud:{provider:'telegram',available:()=>true}},tr:s=>s,mt251:s=>s,open:s=>menu=s};
+ const cloud=game.slice(game.indexOf('var accountId282='),game.indexOf('Game.emailForm=function'));
+ let menu='';const ctx={Game:{},root:{NovaCloud:{provider:'telegram',available:()=>true}},tr:s=>s,mt251:s=>s,escapeHTML:s=>s,open:s=>menu=s};
  vm.runInNewContext(cloud,ctx);ctx.Game.cloud();
  assert(menu.includes('Telegram'));assert(!menu.includes('Google'));assert(!menu.includes('emailForm'));
  ctx.root.NovaCloud={available:()=>true};ctx.Game.cloud();assert(menu.includes('Google'));assert(menu.includes('emailForm'));
