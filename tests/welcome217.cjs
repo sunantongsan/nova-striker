@@ -22,8 +22,6 @@ let offline=boot({...cloud,hasAccount:undefined},{novaAccountReady:'1'});assert.
 let failed=boot({...cloud,hasAccount:undefined});failed.s.novaCloudEvent('status',{message:'ตรวจอินเทอร์เน็ต'});assert.equal(failed.el('welcome').hidden,false);assert.equal(failed.el('welcomeSubmit').disabled,false);
 let browser=boot(undefined);browser.s.Game.welcomeGoogle();assert.match(browser.el('welcomeStatus').textContent,/แอป Nova/);
 console.log('PASS welcome: new/existing guest, registration verification, login/recovery, duplicate submits, back guard, saved account/offline, legacy session, logout, save preservation and unavailable bridge');
-
-
 // Account management is independent of a successful backup request.
 const account=boot({...cloud,hasAccount:()=>true,accountInfo:()=>JSON.stringify({id:'account-a',email:'player@example.com',provider:'google'}),logout:()=>calls.push(['logout'])});
 account.s.Game.cloud();
@@ -43,3 +41,32 @@ const oldNative=boot({...cloud,hasAccount:()=>true});
 oldNative.s.Game.cloud();
 assert.match(oldNative.el('modal').innerHTML,/Game.accountLogout282/,'old native bridge can log out without loading a backup');
 console.log('PASS account management: details, escaping, logout confirmation, offline controls, legacy bridge and clear sign-in screen');
+
+
+// Facebook uses a separate native entry point and must not hijack Google.
+calls=[];
+const fb=boot({...cloud,loginFacebook:()=>calls.push(['facebook'])});
+assert.equal(fb.el('welcomeFacebook').hidden,false);
+fb.s.Game.welcomeFacebook();
+assert.deepEqual(calls,[['facebook']]);
+fb.s.Game.welcomeGoogle();
+assert.deepEqual(calls,[['facebook']],'pending Facebook prevents concurrent Google PKCE flow');
+fb.s.novaCloudEvent('status',{message:'cancelled'});
+fb.s.Game.welcomeGoogle();
+assert.deepEqual(calls.at(-1),['google'],'Google remains available after cancelled Facebook');
+fb.s.novaCloudEvent('status',{message:'cancelled'});
+fb.s.Game.cloud();
+assert.match(fb.el('modal').innerHTML,/Game.facebookLogin/);
+fb.s.Game.facebookLogin();
+assert.deepEqual(calls.at(-1),['facebook']);
+assert.deepEqual(JSON.parse(fb.data.novaRTS1).buildings,before.buildings,'Facebook does not reset local progress');
+const noFb=boot(cloud);
+assert.equal(noFb.el('welcomeFacebook').hidden,true);
+noFb.s.Game.cloud();
+assert.ok(!noFb.el('modal').innerHTML.includes('Game.facebookLogin'),'old APK has no dead Facebook button');
+const telegramFb=boot({...cloud,provider:'telegram',loginFacebook:()=>{throw Error('cross-platform auth');}});
+assert.equal(telegramFb.el('welcomeFacebook').hidden,true);
+telegramFb.s.Game.facebookLogin();
+telegramFb.s.Game.cloud();
+assert.ok(!telegramFb.el('modal').innerHTML.includes('Game.facebookLogin'));
+console.log('PASS Facebook: provider isolation, duplicate authorization guard, Google recovery, legacy APK and save preservation');
