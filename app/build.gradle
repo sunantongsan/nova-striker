@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 24
-        versionName '1.9.24'
+        versionCode 25
+        versionName '1.9.25'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
         buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'

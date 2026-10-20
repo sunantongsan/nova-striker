@@ -23,3 +23,23 @@ let failed=boot({...cloud,hasAccount:undefined});failed.s.novaCloudEvent('status
 let browser=boot(undefined);browser.s.Game.welcomeGoogle();assert.match(browser.el('welcomeStatus').textContent,/แอป Nova/);
 console.log('PASS welcome: new/existing guest, registration verification, login/recovery, duplicate submits, back guard, saved account/offline, legacy session, logout, save preservation and unavailable bridge');
 
+
+// Account management is independent of a successful backup request.
+const account=boot({...cloud,hasAccount:()=>true,accountInfo:()=>JSON.stringify({id:'account-a',email:'player@example.com',provider:'google'}),logout:()=>calls.push(['logout'])});
+account.s.Game.cloud();
+assert.match(account.el('modal').innerHTML,/player@example.com/);
+assert.match(account.el('modal').innerHTML,/Game.accountLogout282/);
+account.s.Game.accountLogout282();
+assert.notDeepEqual(calls.at(-1),['logout'],'confirmation does not sign out');
+account.s.Game.accountLogoutNow282();
+assert.deepEqual(calls.at(-1),['logout']);
+account.s.novaCloudEvent('signed_out',{});
+assert.equal(account.el('modal').style.display,'none','logout leaves the sign-in page unobstructed');
+assert.equal(account.el('welcome').hidden,false);
+const escaped=boot({...cloud,hasAccount:()=>true,accountInfo:()=>JSON.stringify({id:'a',email:'<img src=x onerror=alert(1)>'})});
+escaped.s.Game.cloud();
+assert.ok(!escaped.el('modal').innerHTML.includes('<img src=x'),'account details are escaped');
+const oldNative=boot({...cloud,hasAccount:()=>true});
+oldNative.s.Game.cloud();
+assert.match(oldNative.el('modal').innerHTML,/Game.accountLogout282/,'old native bridge can log out without loading a backup');
+console.log('PASS account management: details, escaping, logout confirmation, offline controls, legacy bridge and clear sign-in screen');

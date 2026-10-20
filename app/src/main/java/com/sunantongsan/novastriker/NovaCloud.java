@@ -100,13 +100,23 @@ final class NovaCloud {
     }
 
     @JavascriptInterface public boolean hasAccount(){try{return read().optJSONObject("user")!=null;}catch(Exception e){return false;}}
+    /** Display-only account details. Never expose access or refresh tokens to the WebView. */
+    @JavascriptInterface public String accountInfo(){
+        try{
+            JSONObject user=read().getJSONObject("user"),out=new JSONObject();
+            out.put("id",user.getString("id")).put("email",user.optString("email",""));
+            JSONObject metadata=user.optJSONObject("app_metadata");
+            out.put("provider",metadata==null?"":metadata.optString("provider",""));
+            return out.toString();
+        }catch(Exception e){return "{}";}
+    }
     @JavascriptInterface public boolean available(){return BuildConfig.NOVA_CLOUD_ENABLED;}
     @JavascriptInterface public void login(){
         if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}
         activity.runOnUiThread(()->{try{
             byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes),challenge=encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
             prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",false).commit();
-            Uri uri=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider","google").appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256").build();
+            Uri uri=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider","google").appendQueryParameter("prompt","select_account").appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256").build();
             activity.startActivity(new Intent(Intent.ACTION_VIEW,uri));
         }catch(Exception e){status("เปิดหน้าล็อกอินไม่ได้ กรุณาลองใหม่");}});
     }
