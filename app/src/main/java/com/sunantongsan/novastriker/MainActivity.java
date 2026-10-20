@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
     private WebView game;
     private GameAds ads;
     private NovaCloud cloud;
+    private NovaPlayGames playGames;
     void cloudEvent(String event, org.json.JSONObject data) { game.evaluateJavascript("window.novaCloudEvent && window.novaCloudEvent("+org.json.JSONObject.quote(event)+","+data.toString()+")",null); }
     private boolean adsStarted, gameReady, destroyed, rolledBack;
     private GamePatcher patcher;
@@ -43,7 +44,7 @@ public class MainActivity extends Activity {
             if(destroyed)return;
             if("true".equals(value)) {
                 gameReady=true;welcome.setVisibility(View.GONE);patcher.bootSucceeded();
-                if(!adsStarted){adsStarted=true;ads.begin();cloud.callback(getIntent().getData());}
+                if(!adsStarted){adsStarted=true;ads.begin();cloud.callback(getIntent().getData());playGames.check();}
             } else if(!rolledBack&&patcher.rollback()) {
                 rolledBack=true;showProgress("กำลังกู้คืนข้อมูลเกมชุดก่อนหน้า…",-1);loadPreparedGame();
             } else showProgress("เปิดเกมไม่สำเร็จ กรุณาปิดแล้วเปิดเกมอีกครั้ง",0);
@@ -81,6 +82,8 @@ public class MainActivity extends Activity {
         game.addJavascriptInterface(ads, "NovaAds");
         cloud=new NovaCloud(this);
         game.addJavascriptInterface(cloud, "NovaCloud");
+        playGames=new NovaPlayGames(this);
+        game.addJavascriptInterface(playGames, "NovaPlayGames");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 if (url.equals(GAME_URL)) finishBoot();
@@ -141,7 +144,7 @@ public class MainActivity extends Activity {
         ads.pause(); game.onPause(); super.onPause();
     }
     @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
-    @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() { destroyed=true;if(playGames!=null)playGames.destroy();game.removeJavascriptInterface("NovaPlayGames");if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
 
 
