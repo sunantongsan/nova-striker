@@ -120,6 +120,16 @@ final class NovaCloud {
             activity.startActivity(new Intent(Intent.ACTION_VIEW,uri));
         }catch(Exception e){status("เปิดหน้าล็อกอินไม่ได้ กรุณาลองใหม่");}});
     }
+    // Separate entry point: keep the proven Google authorization path unchanged.
+    @JavascriptInterface public void loginFacebook(){
+        if(!available()){status("ระบบบัญชียังไม่พร้อมใช้งาน");return;}
+        activity.runOnUiThread(()->{try{
+            byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes),challenge=encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
+            prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",false).commit();
+            Uri uri=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider","facebook").appendQueryParameter("scopes","email").appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256").build();
+            activity.startActivity(new Intent(Intent.ACTION_VIEW,uri));
+        }catch(Exception e){status("เปิดหน้าล็อกอินไม่ได้ กรุณาลองใหม่");}});
+    }
     void callback(Uri uri){
         if(!available()||uri==null||!"novastriker".equals(uri.getScheme())||!"auth".equals(uri.getHost())||!"/callback".equals(uri.getPath()))return;
         String code=uri.getQueryParameter("code"),verifier=prefs.getString("verifier","");long age=System.currentTimeMillis()-prefs.getLong("login_at",0);
@@ -188,6 +198,7 @@ final class NovaCloud {
     }
     void destroy(){closed=true;worker.shutdownNow();}
 }
+
 
 
 
