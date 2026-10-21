@@ -2277,8 +2277,8 @@ Game.walletIdle297=function(){return !guest288&&!!(accountDetails282().id||accou
 var cloudExternal297=root.novaCloudEvent;
 root.novaCloudEvent=function(event,data){cloudExternal297.apply(this,arguments);if(event==='war'&&data&&data.data)Game.applyExternal297(data.data.external297);};
 
-
 })(typeof globalThis!=='undefined'?globalThis:this);
+
 
 
 
