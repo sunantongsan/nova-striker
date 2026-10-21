@@ -29,8 +29,8 @@ var cloudEvent=root.novaCloudEvent;
 root.novaCloudEvent=function(event,data){
  data=data||{};
  if(data.request_id&&data.request_id.indexOf('admin293-')===0){var p=pending[data.request_id];if(!p)return;clearTimeout(p.timer);delete pending[data.request_id];if(p.epoch!==generation)return;
- if(event==='war'&&data.data&&data.data.admin293){if(data.data.error)p.done(Error(errorText(data.data.error)));else p.done(null,data.data);}else p.done(Error(errorText(data.message||event)));return;}
- if(event==='signed_out'||event==='signed_in'){generation++;allowed=false;current=null;Object.keys(pending).forEach(function(k){clearTimeout(pending[k].timer);delete pending[k];});close();}
+ if(event==='war'&&data.data&&data.data.admin293){if(data.data.external297&&G.applyExternal297)G.applyExternal297(data.data.external297);if(data.data.error)p.done(Error(errorText(data.data.error)));else p.done(null,data.data);}else p.done(Error(errorText(data.message||event)));return;}
+ if(event==='signed_out'||event==='signed_in'){generation++;pulseBusy=false;lastPulse=0;allowed=false;current=null;Object.keys(pending).forEach(function(k){clearTimeout(pending[k].timer);delete pending[k];});close();}
  if(cloudEvent)cloudEvent.apply(this,arguments);
  if(event==='signed_in'||event==='loaded')setTimeout(pulse,1500);
 };
@@ -73,8 +73,8 @@ function adminTools(box,data){
 function offers(){if(!account()){loginNotice();return;}var box=panel(tr('โปรโมชั่น NOVA','NOVA promotions'));el('p',tr('กำลังโหลด…','Loading…'),box);request('offers',{},function(err,d){if(!box.isConnected)return;if(err){el('p',err.message,box);return;}showOffers(d);});}
 function showOffers(d){var box=panel(tr('โปรโมชั่น NOVA','NOVA promotions'));if(d.claimed)el('p',tr('รับ NOVA สำเร็จแล้ว ยอดบัญชี: ','NOVA received. Account balance: ')+d.balance,box);if(!d.offers.length)el('p',tr('ยังไม่มีโปรโมชั่นในขณะนี้','No promotions available right now.'),box);d.offers.forEach(function(p){var row=el('article',undefined,box);el('h3',p.title,row);el('p',p.amount+' NOVA · '+tr('สิ้นสุด ','Ends ')+new Date(p.ends_at).toLocaleString(),row);var msg=el('p','',row),b=button(row,p.received?tr('รับแล้ว','Claimed'):p.remaining<=0?tr('สิทธิ์เต็มแล้ว','Fully claimed'):tr('รับ NOVA','Claim NOVA'),function(){b.disabled=true;request('claim_offer',{id:p.id},function(err,next){if(!box.isConnected)return;if(err){msg.textContent=err.message;b.disabled=false;}else{showOffers(next);}});});b.disabled=p.received||p.remaining<=0;});}
 var settings=G.settings;
-G.settings=function(){settings.apply(this,arguments);var sheet=document.querySelector('#modal .sheet');if(!sheet)return;var section=el('div',undefined,sheet);section.id='nova-support293';section.style.cssText='border-top:1px solid #81ccec;margin-top:12px;padding-top:12px';button(section,tr('ข้อเสนอแนะ/ผู้ดูแล','Feedback / Admin'),roleMenu);button(section,tr('โปรโมชั่น NOVA','NOVA promotions'),offers);};
-var lastPulse=0;
-function pulse(){if(document.hidden||!account()||Date.now()-lastPulse<45000)return;lastPulse=Date.now();request('presence',{},function(err,d){if(!err)allowed=d.is_admin===true;});}
-setTimeout(pulse,4000);setInterval(pulse,60000);document.addEventListener('visibilitychange',pulse);
+G.settings=function(){pulse();settings.apply(this,arguments);var sheet=document.querySelector('#modal .sheet');if(!sheet)return;var section=el('div',undefined,sheet);section.id='nova-support293';section.style.cssText='border-top:1px solid #81ccec;margin-top:12px;padding-top:12px';button(section,tr('ข้อเสนอแนะ/ผู้ดูแล','Feedback / Admin'),roleMenu);button(section,tr('โปรโมชั่น NOVA','NOVA promotions'),offers);};
+var lastPulse=0,pulseBusy=false;
+function pulse(){if(document.hidden||pulseBusy||!account()||(G.walletIdle297&&!G.walletIdle297())||Date.now()-lastPulse<20000)return;pulseBusy=true;lastPulse=Date.now();request('presence',{},function(err,d){pulseBusy=false;if(!err)allowed=d.is_admin===true;});}
+setTimeout(pulse,4000);setInterval(pulse,5000);document.addEventListener('visibilitychange',pulse);
 })(window);
