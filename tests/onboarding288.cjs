@@ -39,6 +39,8 @@ resumed.s.Game.guideFinish288();resumed.s.test232.tick();assert.equal(resumed.s.
 let done=boot({...resumed.data},'android',false,'th-TH');done.s.Game.beginGuide288();assert.equal(done.s.test232.guide(),null,'completed guide stays dismissed after relaunch');
 done.s.Game.help();assert.ok(done.s.test232.guide(),'help can replay');
 done.s.novaCloudEvent('signed_in',{id:'online'});assert.equal(done.s.test232.guest(),false);assert.equal(done.data.novaGuest288,undefined,'online sign-in clears guest entry marker');
+done.s.novaCloudEvent('loaded',{id:'online',save:null});
+assert.ok(!done.el('modal').innerHTML.includes('Game.cloudUpload()')||done.el('modal').style.display==='none','empty backup dialog does not block first-entry guide');
 let online=boot({novaGuest288:'1'},'android',true);assert.equal(online.s.test232.guest(),false,'native account wins over saved guest entry');
 const initialGems=online.s.test232.e.d.gems;online.s.Game.beginGuide288();assert.match(online.el('modal').innerHTML,/Name your base/);
 const profile=online.requests.find(r=>r.p.profile==='status');assert.ok(profile);
