@@ -1,16 +1,19 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 25,
+  "nativeVersion": 28,
   "compatibleNativeVersions": [
     19,
     20,
     21,
     22,
     23,
-    24
+    24,
+    25,
+    26,
+    27
   ],
-  "contentVersion": 82,
-  "label": "1.9.32-account-management",
+  "contentVersion": 83,
+  "label": "1.9.33-energy-volley",
   "maxBytes": 67108864
 }
