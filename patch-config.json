@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 29,
+  "nativeVersion": 30,
   "compatibleNativeVersions": [
     19,
     20,
@@ -12,9 +12,10 @@
     25,
     26,
     27,
-    28
+    28,
+    29
   ],
-  "contentVersion": 91,
-  "label": "1.9.41-version-info",
+  "contentVersion": 92,
+  "label": "1.9.42-patch-recovery",
   "maxBytes": 67108864
 }
