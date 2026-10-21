@@ -59,5 +59,16 @@ const {PGlite}=require('@electric-sql/pglite');
  const other={...promo,id:'20000000-0000-0000-0000-000000000002',limit_claims:2};await call(other);await call({admin293:'toggle_promo',password:pass,id:other.id,enabled:false});await as(player);await assert.rejects(()=>call({admin293:'claim_offer',id:other.id}),/promo_unavailable/);
  console.log('admin294: owner gate, first setup, password lockout, legacy bypass denial, gift idempotency, promo cap and duplicate claims passed');
 
+
+ await db.exec('reset role;');await db.exec(fs.readFileSync('backend/nova_wallet_delivery_297.sql','utf8'));
+ await as(player);let receipt=(await call({admin293:'presence'})).external297;
+ assert.deepEqual(receipt,{owner:player,credited:600});assert.deepEqual((await call({})).external297,receipt);
+ await assert.rejects(()=>db.query('select nova_private.external_credits297()'),/permission denied/);
+ await as(owner);assert.equal((await call({admin293:'presence'})).external297.credited,0);
+ const fresh={...promo,id:'20000000-0000-0000-0000-000000000003',amount:75,limit_claims:2};await call(fresh);
+ await as(player);assert.equal((await call({admin293:'claim_offer',id:fresh.id})).external297.credited,675);
+ assert.equal((await call({admin293:'claim_offer',id:fresh.id})).external297.credited,675);
+ await db.exec('reset role;');await db.query("select set_config('request.jwt.claim.sub','',false)");await db.exec('set role authenticated');await assert.rejects(()=>call({}),/login_required/);
+ console.log('wallet297 DB: historical gifts, immediate promo claim receipt, retries, account isolation and private helper passed');
  await db.close();console.log('admin293: authorization, privacy, feedback limits, settings conflicts, audit, presence expiry, legacy dispatch passed');
 })().catch(e=>{console.error(e);process.exit(1)});
