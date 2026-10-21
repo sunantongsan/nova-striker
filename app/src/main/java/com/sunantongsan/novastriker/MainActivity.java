@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import androidx.webkit.WebViewAssetLoader;
+import com.google.android.gms.games.PlayGames;
 
 public class MainActivity extends Activity {
     private WebView game;
@@ -140,7 +141,16 @@ public class MainActivity extends Activity {
         game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
         ads.pause(); game.onPause(); super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume(); }
+    @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume();
+        // PGS handles automatic sign-in. Failure must never block local play or cloud login.
+        PlayGames.getGamesSignInClient(this).isAuthenticated()
+            .addOnCompleteListener(this, task -> {
+                if (destroyed) return;
+                boolean authenticated = task.isSuccessful() && task.getResult().isAuthenticated();
+                android.util.Log.i("NovaPlayGames", authenticated
+                    ? "Platform authentication ready" : "Platform authentication unavailable; continue playing");
+            });
+    }
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
 
