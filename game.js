@@ -56,7 +56,17 @@ U[2].splash=.85;U[1].splash=.6;
 var ENERGY_RADIUS276=3,ENERGY_FLIGHT276=.85;
 function energyBearing276(o){var a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim);return Math.cos(a)>=0?(Math.sin(a)<0?0:1):(Math.sin(a)>=0?2:3);}
 function energyStage281(o){var lv=Math.max(1,Math.min(20,o.lv||1));return lv>=20?3:lv>=12?2:lv>=6?1:0;}
-function energyGeometry276(o){var stage=energyStage281(o),lv=Math.max(1,Math.min(20,o.lv||1)),a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),angle=Math.atan2(Math.sin(a)/.62,Math.cos(a)),size=72+lv*1.1,base=80+lv*.6,pivot=[.32,.25,.25,.24][stage],height=base*[.37,.43,.46,.48][stage],recoil=(o.recoil||0)*12,barrel=((o.energyShot281||1)-1)%(stage+1),side=(barrel-stage/2)*size*.24,len=(.95-pivot)*size-recoil;return{index:energyBearing276(o),stage:stage,size:size,base:base,angle:angle,pivot:pivot,recoil:recoil,height:height,muzzleDiameter:18+lv*.35,x:Math.cos(angle)*len-Math.sin(angle)*side,y:(Math.sin(angle)*len+Math.cos(angle)*side)*.62-height};}
+// Shared crop and muzzle coordinates from the approved coil-artillery sprite.
+var energyHeads284=[
+ {rect:[24,216,546,302],pivot:[.22,.5],mouths:[[.82,.5]],diameter:.43},
+ {rect:[565,124,520,436],pivot:[.22,.5],mouths:[[.84,.23],[.84,.76]],diameter:.29},
+ {rect:[1102,106,501,488],pivot:[.22,.5],mouths:[[.72,.21],[.86,.60],[.48,.82]],diameter:.27},
+ {rect:[1605,120,561,443],pivot:[.22,.5],mouths:[[.45,.23],[.84,.23],[.45,.77],[.84,.77]],diameter:.27}
+];
+function energyGeometry276(o){
+ var stage=energyStage281(o),lv=Math.max(1,Math.min(20,o.lv||1)),a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),angle=Math.atan2(Math.sin(a)/.62,Math.cos(a)),size=112+lv*1.6,base=80+lv*.6,height=base*[.37,.43,.46,.48][stage],recoil=(o.recoil||0)*12,art=energyHeads284[stage],barrel=((o.energyShot281||1)-1)%(stage+1),mouth=art.mouths[barrel],len=(mouth[0]-art.pivot[0])*size-recoil,side=(mouth[1]-art.pivot[1])*size*art.rect[3]/art.rect[2];
+ return{index:energyBearing276(o),stage:stage,size:size,base:base,angle:angle,pivot:art.pivot[0],recoil:recoil,height:height,muzzleDiameter:size*art.diameter,x:Math.cos(angle)*len-Math.sin(angle)*side,y:(Math.sin(angle)*len+Math.cos(angle)*side)*.62-height};
+}
 function fireEnergy276(scene,source,target,damage){
  source.energyShot281=(source.energyShot281||0)+1;var fx=weaponFX(source,target,'energy276');fx.orb281=energyGeometry276(source).muzzleDiameter/7.2;fx.life=fx.maxLife=ENERGY_FLIGHT276;fx.highArc=true;fx.color='#35dfff';
  scene.fx.push(fx);scene.energy276=scene.energy276||[];
@@ -1987,18 +1997,19 @@ Game.sendInvite274=function(channel){var i=invite274();if(!i)return;
 
 // Four matched viewing angles keep the barrel and its launch point facing the target.
 var energyArt276=new Image();energyArt276.onload=function(){previewCache265.clear();drawNeeded=true;};energyArt276.src='assets/energy-upgrades281.webp';
+var energyCoil284=new Image();energyCoil284.onload=function(){energyIcon281=null;previewCache265.clear();drawNeeded=true;};energyCoil284.src='assets/energy-coil284.webp';
 function drawEnergyCannon276(b,p){
  if(!energyArt276.complete||!energyArt276.naturalWidth)return false;
  var g=energyGeometry276(b),cw=energyArt276.naturalWidth/4,ch=energyArt276.naturalHeight/2,z=zoom;
+ // Keep the original pedestal art, dimensions and ground anchor unchanged.
  ctx.drawImage(energyArt276,g.stage*cw,0,cw,ch,p.x-g.base*z/2,p.y-g.base*z*.9,g.base*z,g.base*z);
- ctx.save();ctx.translate(p.x,p.y-g.height*z);ctx.scale(1,.62);ctx.rotate(g.angle);ctx.drawImage(energyArt276,g.stage*cw,ch,cw,ch,-g.pivot*g.size*z-g.recoil*z,-g.size*z*.5,g.size*z,g.size*z);// Broad armored muzzle collars share the exact projectile launch geometry.
- var end=(.95-g.pivot)*g.size-g.recoil,diameter=g.muzzleDiameter;
- for(var barrel=0;barrel<=g.stage;barrel++){
-  var side=(barrel-g.stage/2)*g.size*.24;
-  ctx.fillStyle='#173954';ctx.strokeStyle='#e9f6ff';ctx.lineWidth=2*z;
-  ctx.beginPath();ctx.ellipse(end*z,side*z,diameter*.36*z,diameter*.5*z,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle='#25dfff';ctx.beginPath();ctx.ellipse(end*z,side*z,diameter*.23*z,diameter*.36*z,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#092b46';ctx.beginPath();ctx.ellipse((end+1)*z,side*z,diameter*.14*z,diameter*.25*z,0,0,Math.PI*2);ctx.fill();
+ ctx.save();ctx.translate(p.x,p.y-g.height*z);ctx.scale(1,.62);ctx.rotate(g.angle);
+ if(energyCoil284.complete&&energyCoil284.naturalWidth){
+  var art=energyHeads284[g.stage],r=art.rect,h=g.size*r[3]/r[2];
+  ctx.drawImage(energyCoil284,r[0],r[1],r[2],r[3],-art.pivot[0]*g.size*z-g.recoil*z,-art.pivot[1]*h*z,g.size*z,h*z);
+ }else{
+  // Original painted head while the new asset is loading; never flat overlays.
+  ctx.drawImage(energyArt276,g.stage*cw,ch,cw,ch,-.25*g.size*z-g.recoil*z,-g.size*z*.5,g.size*z,g.size*z);
  }
  ctx.restore();return true;
 }
@@ -2009,7 +2020,7 @@ var energyFX276=drawFX;drawFX=function(f){
  ctx.save();
  if(f.weapon==='energy276'){
   a.x+=(f.muzzle?f.muzzle.x:0)*z;a.y+=(f.muzzle?f.muzzle.y:-35)*z;
-  var orb=Math.max(1,Math.min(4,f.orb281||1)),arc=55*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc;
+  var orb=Math.max(1,Math.min(10,f.orb281||1)),arc=55*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc;
   for(var j=8;j>=1;j--){var u=Math.max(0,t-j*.025);ctx.globalAlpha=(1-j/9)*.4;disk(a.x+dx*u,a.y+dy*u-Math.sin(u*Math.PI)*arc,(7-j*.5)*z*orb,'#32c9ff');}
   ctx.globalAlpha=1;var glow=ctx.createRadialGradient(x,y,0,x,y,15*z*orb);glow.addColorStop(0,'#edffff');glow.addColorStop(.28,'#70f6ff');glow.addColorStop(.48,'#169dff');glow.addColorStop(1,'#169dff00');disk(x,y,15*z*orb,glow);disk(x,y,7.2*z*orb,'#42dfff');disk(x-z,y-z,4*z*orb,'#f0ffff');
   if(t<.18){ctx.globalAlpha=(1-t/.18)*.55;disk(a.x,a.y,14*z,'#85f7ff');}

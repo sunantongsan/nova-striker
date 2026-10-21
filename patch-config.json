@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 28,
+  "nativeVersion": 29,
   "compatibleNativeVersions": [
     19,
     20,
@@ -11,9 +11,10 @@
     24,
     25,
     26,
-    27
+    27,
+    28
   ],
-  "contentVersion": 83,
-  "label": "1.9.33-energy-volley",
+  "contentVersion": 84,
+  "label": "1.9.34-heavy-energy-artillery",
   "maxBytes": 67108864
 }
