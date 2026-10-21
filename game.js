@@ -92,7 +92,7 @@ function tickEnergy276(scene,dt,group){
   // Capture targets before hit() applies knockback; evaluate each unit once.
   var victims=(scene[group]||[]).filter(function(t){return t.hp>0&&!air277(t)&&Math.hypot(t.x-shot.x,t.y-shot.y)<=ENERGY_RADIUS276+1e-8;});
   victims.forEach(function(t){hit(scene,t,shot.damage,shot.source,'energy276');});
-  scene.fx.push({x:shot.x,y:shot.y,tx:shot.x,ty:shot.y,weapon:'energyRing276',life:.65,maxLife:.65,color:'#44ddff',radius:ENERGY_RADIUS276});
+  scene.fx.push({x:shot.x,y:shot.y,tx:shot.x,ty:shot.y,weapon:'energyRing276',life:1.15,maxLife:1.15,color:'#44ddff',radius:ENERGY_RADIUS276});
  });
 }
 
@@ -2023,23 +2023,39 @@ function drawEnergyCannon276(b,p){
  ctx.restore();return true;
 }
 var energyIcon281=null,energyCard276=cardSprite;cardSprite=function(i){if(i!==29)return energyCard276(i);if(!energyIcon281&&energyArt276.complete&&energyArt276.naturalWidth&&document.createElement){var c=document.createElement('canvas');if(c.getContext&&c.toDataURL){c.width=120;c.height=120;var old=ctx,z=zoom;try{ctx=c.getContext('2d');zoom=1.2;drawEnergyCannon276({lv:1,aim:0},{x:50,y:105});energyIcon281=c.toDataURL('image/png');}finally{ctx=old;zoom=z;}}}return energyIcon281?'<img class="icon" style="object-fit:contain;background:none" src="'+energyIcon281+'" alt="">':energyCard276(i);};
+// Approved A2 projectile and B2 impact: cached transparent art, animated at render time.
+var energyShell286=new Image(),energyBlast286=new Image();
+energyShell286.onload=energyBlast286.onload=function(){drawNeeded=true;};
+energyShell286.src='assets/energy-shell286.webp';energyBlast286.src='assets/energy-blast286.webp';
 var energyFX276=drawFX;drawFX=function(f){
  if(f.weapon!=='energy276'&&f.weapon!=='energyRing276'&&!(f.weapon==='impact'&&f.effect==='energy276')){energyFX276(f);return;}
  weaponAudio218(f);var t=Math.max(0,Math.min(1,1-f.life/(f.maxLife||ENERGY_FLIGHT276))),a=point(f.x,f.y),b=point(f.tx,f.ty),z=zoom;
  ctx.save();
  if(f.weapon==='energy276'){
   a.x+=(f.muzzle?f.muzzle.x:0)*z;a.y+=(f.muzzle?f.muzzle.y:-35)*z;
-  var orb=Math.max(1,Math.min(10,f.orb281||1)),arc=55*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc;
-  for(var j=8;j>=1;j--){var u=Math.max(0,t-j*.025);ctx.globalAlpha=(1-j/9)*.4;disk(a.x+dx*u,a.y+dy*u-Math.sin(u*Math.PI)*arc,(7-j*.5)*z*orb,'#32c9ff');}
-  ctx.globalAlpha=1;var glow=ctx.createRadialGradient(x,y,0,x,y,15*z*orb);glow.addColorStop(0,'#edffff');glow.addColorStop(.28,'#70f6ff');glow.addColorStop(.48,'#169dff');glow.addColorStop(1,'#169dff00');disk(x,y,15*z*orb,glow);disk(x,y,7.2*z*orb,'#42dfff');disk(x-z,y-z,4*z*orb,'#f0ffff');
-  if(t<.18){ctx.globalAlpha=(1-t/.18)*.55;disk(a.x,a.y,14*z,'#85f7ff');}
+  var orb=Math.max(1,Math.min(10,f.orb281||1)),arc=55*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc,diameter=14.4*z*orb;
+  // Short tail leaves the solid armored sphere visible even at small game scale.
+  for(var j=4;j>=1;j--){var u=Math.max(0,t-j*.02);ctx.globalAlpha=(1-j/5)*.24;disk(a.x+dx*u,a.y+dy*u-Math.sin(u*Math.PI)*arc,(3-j*.4)*z*orb,'#32c9ff');}
+  ctx.globalAlpha=1;
+  if(energyShell286.complete&&energyShell286.naturalWidth){
+   ctx.save();ctx.translate(x,y);ctx.rotate(t*.65);var sw=energyShell286.naturalWidth,sh=energyShell286.naturalHeight;
+   ctx.drawImage(energyShell286,sw*.085,sh*.085,sw*.84,sh*.84,-diameter/2,-diameter/2,diameter,diameter);ctx.restore();
+  }else{var glow=ctx.createRadialGradient(x,y,0,x,y,7.2*z*orb);glow.addColorStop(0,'#a6f6ff');glow.addColorStop(.45,'#199fe9');glow.addColorStop(1,'#123b87');disk(x,y,7.2*z*orb,glow);}
+  if(t<.12){ctx.globalAlpha=(1-t/.12)*.45;disk(a.x,a.y,14*z,'#85f7ff');}
  }else if(f.weapon==='energyRing276'){
-  // Project the actual world-space circle: x and y axes have the same tile distance.
-  var radius=ENERGY_RADIUS276*Math.SQRT2*tile*z,ease=1-Math.pow(1-Math.min(1,t/.72),3),r=Math.max(1,radius*ease);
-  ctx.translate(b.x,b.y);ctx.scale(1,.62);var glow=ctx.createRadialGradient(0,0,0,0,0,r);glow.addColorStop(0,'#b4ffff88');glow.addColorStop(.55,'#26bbff55');glow.addColorStop(1,'#35e9ff00');ctx.globalAlpha=1-t;disk(0,0,r,glow);
-  for(var j=0;j<3;j++){var rr=r*(1-j*.17);ctx.strokeStyle=j===0?'#b9ffff':'#38cfff';ctx.lineWidth=(j===0?3:1.6)*z;ctx.beginPath();ctx.arc(0,0,rr,0,Math.PI*2);ctx.stroke();}
-  if(t<.22){ctx.globalAlpha=(1-t/.22)*.9;disk(0,0,(10+t*28)*z,'#e3ffff');}
- }else{ctx.globalAlpha=1-t;disk(b.x,b.y-8*z,(3+6*t)*z,'#65eaff');}
+  var radius=ENERGY_RADIUS276*Math.SQRT2*tile*z,ease=1-Math.pow(1-Math.min(1,t/.55),3),r=Math.max(1,radius*ease);
+  // Ground shockwave retains the actual gameplay radius. Sprite is already isometric.
+  ctx.save();ctx.translate(b.x,b.y);ctx.scale(1,.62);ctx.globalAlpha=Math.max(0,1-t*2)*.65;
+  ctx.strokeStyle='#70e4ff';ctx.lineWidth=2*z;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();ctx.restore();
+  var grow=.24+.76*(1-Math.pow(1-Math.min(1,t/.36),3)),width=radius*2*grow,height=width*.86;
+  ctx.globalAlpha=t<.5?1:Math.pow((1-t)/.5,1.4);
+  if(energyBlast286.complete&&energyBlast286.naturalWidth){ctx.drawImage(energyBlast286,b.x-width/2,b.y-height*.76-t*8*z,width,height);}
+  else{ctx.fillStyle='#279dde';for(var n=0;n<7;n++)disk(b.x+Math.cos(n)*r*.6,b.y-Math.sin(n)*r*.25-height*.25,Math.max(1,width*.12),'#279dde');}
+  // Bounded blue dust and fragments spread outward, then dissipate; no gameplay hits here.
+  for(var k=0;k<10;k++){var angle=k*2.39996,reach=radius*(.2+.8*t),px=b.x+Math.cos(angle)*reach,py=b.y+Math.sin(angle)*reach*.62-Math.sin(t*Math.PI)*(12+k%3*7)*z;
+   ctx.globalAlpha=Math.pow(1-t,2)*.65;ctx.fillStyle=k%2?'#3cb5ef':'#2475c5';ctx.beginPath();ctx.moveTo(px-2*z,py);ctx.lineTo(px,py-4*z);ctx.lineTo(px+3*z,py+2*z);ctx.closePath();ctx.fill();}
+  if(t<.10){ctx.globalAlpha=(1-t/.10)*.65;disk(b.x,b.y,12*z,'#c5faff');}
+ }else{ctx.globalAlpha=(1-t)*.5;disk(b.x,b.y-8*z,(2+3*t)*z,'#65eaff');}
  ctx.restore();
 };
 var energyPack276=livePack;livePack=function(){var f=energyPack276();f.energy276=(E.raid.energy276||[]).slice(-16).map(function(s){return[s.remaining,s.x,s.y,s.damage,s.source.id];});
