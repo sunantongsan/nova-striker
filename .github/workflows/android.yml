@@ -27,6 +27,7 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm test
+          node tests/native-packaging.cjs
       - name: Test patch integrity on JVM
         run: |
           mkdir -p /tmp/nova-patch-tests
@@ -56,6 +57,11 @@ jobs:
           trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
           gradle :app:bundleRelease --no-daemon
+      - name: Verify packaged content before publishing
+        run: |
+          for bundle in app/build/outputs/bundle/release/*.aab; do
+            python3 scripts/verify-bundle.py "$bundle"
+          done
       - name: Attach unsigned bundle for local signing
         env:
           GH_TOKEN: ${{ github.token }}
