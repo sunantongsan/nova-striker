@@ -940,7 +940,8 @@ var hud200=hud;hud=function(){hud200();if(liveRoom&&liveRoom.v===2&&!liveRoom.fi
 var warEvent200=warEvent;warEvent=function(event,message){if(message.request_id&&message.request_id!==warActive)return;var req=lastWarRequest&&lastWarRequest.payload;if(req&&/^siege_/.test(req.live||'')){if(event==='war'){var d=message.data;if(d.clock)E.applySiegeClock(d.clock);if(d.merc)E.d.mercenaries=d.merc;if(d.receipt&&E.d.pendingSiegeDeploy&&d.receipt.id===E.d.pendingSiegeDeploy.request_id){delete E.d.pendingSiegeDeploy;E.save();}if(d.live==='siege_peek')d.live='peek';}else if(event==='war_error'){var msg=message.message||'';if(/ไม่มีหน่วยนี้|ปล่อยทหาร|สูงสุด|ไม่มีสิทธิ์ส่งกำลัง/.test(msg)){delete E.d.pendingSiegeDeploy;E.save();}if(/สนามรบเต็ม/.test(msg)&&E.d.pendingLiveStart){E.d.pendingLiveStart.army.forEach(function(n,i){E.d.army[i]+=n;});delete E.d.pendingLiveStart;E.save();}if(/ผู้ควบคุมสนามเปลี่ยน/.test(msg)&&liveRoom)liveRoom.host=false;}}
  warEvent200(event,message);
 };
-liveHeartbeat=function(){if(!warBusy&&E.d.onlineCrystal){if(E.d.pendingLiveStart)liveSend('start',E.d.pendingLiveStart);else if(E.d.pendingShield)liveSend('shield',E.d.pendingShield);else if(E.d.pendingSiegeDeploy)liveSend('deploy',E.d.pendingSiegeDeploy);else if(liveRoom&&liveRoom.v===2&&!liveRoom.finished&&liveRoom.host&&!document.hidden&&E.raid)liveSend(E.raid.result?'finish':'frame',{id:liveRoom.id,epoch:siegeEpoch,ack:siegeAck,seq:++liveSeq,frame:livePack()});else if(liveRoom&&!liveRoom.v&&!liveRoom.finished&&liveRoom.role==='attacker'&&E.raid)liveSend(E.raid.result?'finish':'frame',{id:liveRoom.id,seq:++liveSeq,frame:livePack()});else{var data={};if(++liveTicks%5===0&&!liveRoom&&!E.d.siegeLocked)data.layout=liveLayout();liveSend('status',data);}}
+var liveIdleAt297=0;
+liveHeartbeat=function(){if(!warBusy&&E.d.onlineCrystal){if(E.d.pendingLiveStart)liveSend('start',E.d.pendingLiveStart);else if(E.d.pendingShield)liveSend('shield',E.d.pendingShield);else if(E.d.pendingSiegeDeploy)liveSend('deploy',E.d.pendingSiegeDeploy);else if(liveRoom&&liveRoom.v===2&&!liveRoom.finished&&liveRoom.host&&!document.hidden&&E.raid)liveSend(E.raid.result?'finish':'frame',{id:liveRoom.id,epoch:siegeEpoch,ack:siegeAck,seq:++liveSeq,frame:livePack()});else if(liveRoom&&!liveRoom.v&&!liveRoom.finished&&liveRoom.role==='attacker'&&E.raid)liveSend(E.raid.result?'finish':'frame',{id:liveRoom.id,seq:++liveSeq,frame:livePack()});else if(!document.hidden&&(!mineBusy251&&!speedBusy264)&&((liveRoom&&!liveRoom.finished)||E.d.siegeLocked||E.d.pendingEnhance||E.d.pendingMerc||Date.now()-liveIdleAt297>=6000)){liveIdleAt297=Date.now();var data={};if(++liveTicks%5===0&&!liveRoom&&!E.d.siegeLocked)data.layout=liveLayout();liveSend('status',data);}}
  if(liveRoom&&!liveRoom.finished&&Date.now()-liveAlarmAt>5000){liveAlarm(liveRoom.role==='attacker');liveAlarmAt=Date.now();}setTimeout(liveHeartbeat,1500);
 };
 // The previously scheduled callback enters the new loop on its next iteration.
@@ -2257,6 +2258,25 @@ Game.help=function(){Game.beginGuide288(true);};
 if($('welcomeHint'))$('welcomeHint').textContent=tr('เริ่มเล่นได้ทันที หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ');
 if(root.NovaCloud&&root.NovaCloud.provider==='telegram'){if($('welcomeEmailDetails'))$('welcomeEmailDetails').hidden=true;if(document.querySelector){var guestNote288=document.querySelector('.guest-note288');if(guestNote288)guestNote288.textContent=mt251('บันทึกในเครื่องนี้ • เชื่อมบัญชี Telegram ภายหลังได้','Saved on this device • Connect Telegram later');}}
 setTimeout(function(){if(!$('welcome').hidden)return;guideAutoPending288=true;guideTick288();},1600);
+
+// External grants are a separate cumulative receipt, never a replacement wallet balance.
+Game.applyExternal297=function(receipt){
+ var owner=accountDetails282().id||accountId282;
+ if(!receipt||guest288||!owner||receipt.owner!==owner)return false;
+ if(E.d.onlineCrystal&&E.d.onlineCrystal.owner!==receipt.owner)return false;
+ var total=receipt.credited,credits=E.d.externalCredits297||{},old=credits[receipt.owner]||0;
+ if(!Number.isSafeInteger(total)||total<0||!Number.isSafeInteger(old)||old<0)return false;
+ if(total<=old)return true;
+ var delta=total-old,balance=E.d.gems;
+ if(!Number.isSafeInteger(balance)||!Number.isSafeInteger(balance+delta))return false;
+ E.d.gems=balance+delta;E.d.externalCredits297=Object.assign({},credits);E.d.externalCredits297[receipt.owner]=total;
+ if(!E.save()){E.d.gems=balance;E.d.externalCredits297=credits;return false;}
+ hud();toast(mt251('ได้รับ NOVA จากแอดมิน/โปรโมชั่น +','Admin / promotion NOVA received +')+delta.toLocaleString());return true;
+};
+Game.walletIdle297=function(){return !guest288&&!!(accountDetails282().id||accountId282)&&!warBusy&&!mineBusy251&&!speedBusy264&&!(liveRoom&&!liveRoom.finished);};
+var cloudExternal297=root.novaCloudEvent;
+root.novaCloudEvent=function(event,data){cloudExternal297.apply(this,arguments);if(event==='war'&&data&&data.data)Game.applyExternal297(data.data.external297);};
+
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 
