@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 29
-        versionName '1.9.29'
+        versionCode 30
+        versionName '1.9.30'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
         buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'
@@ -35,17 +35,12 @@ android {
     }
     sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets'), layout.buildDirectory.dir('generated/patchAssets')] }
 }
-tasks.register('copyGame', Copy) {
-    from(rootProject.file('index.html'))
-    from(rootProject.file('game.js'))
-    from(rootProject.file('assets')) { include '*.webp'; into 'assets' }
-    into(layout.buildDirectory.dir('generated/gameAssets'))
-}
+// One task writes both content and its manifest from the same verified bytes.
 tasks.register('generatePatchManifest', Exec) {
     workingDir rootProject.projectDir
-    commandLine 'node', 'scripts/patch.cjs', '--android'
+    commandLine 'node', 'scripts/patch.cjs', '--android', '--native-version', android.defaultConfig.versionCode.toString()
 }
-tasks.named('preBuild').configure { dependsOn 'copyGame', 'generatePatchManifest' }
+tasks.named('preBuild').configure { dependsOn 'generatePatchManifest' }
 dependencies {
     implementation 'com.google.android.gms:play-services-games-v2:22.1.0'
     implementation 'androidx.fragment:fragment:1.8.9'
