@@ -2206,7 +2206,7 @@ var deployBefore280=E.deploy;E.deploy=function(i,x,y){var r=this.raid;if(!r||!r.
 function marker280(x,y,label,color,selected280){var p=point(x,y),z=zoom,pulse=(Math.sin(Date.now()/190)+1)/2;ctx.save();ctx.translate(p.x,p.y);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=(selected280?2.5:1.5)*z;ctx.globalAlpha=.65+pulse*.3;ctx.beginPath();ctx.ellipse(0,0,(19+pulse*5)*z,(10+pulse*3)*z,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(-29*z,0);ctx.lineTo(-13*z,0);ctx.moveTo(13*z,0);ctx.lineTo(29*z,0);ctx.moveTo(0,-17*z);ctx.lineTo(0,-8*z);ctx.moveTo(0,8*z);ctx.lineTo(0,17*z);ctx.stroke();ctx.globalAlpha=1;ctx.font='bold '+Math.max(10,12*z)+'px sans-serif';ctx.textAlign='center';ctx.lineWidth=3*z;ctx.strokeStyle='#09283e';ctx.strokeText(label,0,-23*z);ctx.fillText(label,0,-23*z);ctx.restore();}
 var drawBefore280=draw;draw=function(){drawBefore280();var r=E.raid;if(screen!=='raid'||!r||!r.logistics277||r.result)return;var owner=(E.d.onlineCrystal||{}).owner;(r.transports277||[]).forEach(function(s){if(s.hp<=0||s.state==='away'||s.owner&&s.owner!==owner)return;var chosen=selectedShip277===s.id;marker280(s.lx,s.ly,'▼ '+s.id,chosen?'#fff08b':'#55e5ff',chosen);if(chosen)marker280(s.x,s.y,'✦ '+s.id,'#fff08b',true);});var groups={};ownAir280(7).forEach(function(t){var p=t.attackPoint280;if(!p)return;var k=p.x+':'+p.y;if(!groups[k])groups[k]={p:p,n:0};groups[k].n++;});Object.keys(groups).forEach(function(k){var g=groups[k];marker280(g.p.x,g.p.y,'✈ ×'+g.n,'#ffca70',selectedShip277===null&&deployKind===7);});};
 // Beginner flow: start after entry, persist per owner, and keep the next action visible.
-var guide288=null,guideSession288={},guideTickAt288=0;
+var guide288=null,guideSession288={},guideTickAt288=0,guideAutoPending288=false;
 function guideOwner288(){return guest288?'guest':baseProfile224&&baseProfile224.owner||null;}
 function guideNamed288(){return guest288?!!E.d.guestName288:!!baseProfile224;}
 function guideSave288(done){var key=guideOwner288();if(!key)return;var old=E.d.onboarding288;E.d.onboarding288=Object.assign({},old||{});E.d.onboarding288[key]={step:guide288?guide288.step:0,done:!!done};if(!E.save())E.d.onboarding288=old;}
@@ -2230,7 +2230,7 @@ Game.beginGuide288=function(force){if(!$('welcome').hidden||screen!=='home'||doc
  if(!force&&(saved&&saved.done||guideSession288[key||'pending']))return;
  // Existing developed bases are not interrupted by the new tutorial.
  if(!force&&!saved&&guideNamed288()&&(E.hq()>1||Number(E.d.guideStep251)>0))return;
- guideSession288[key||'pending']=true;guide288={step:force?0:saved?Math.min(7,Math.max(0,saved.step||0)):0};if(guideNamed288()&&guide288.step===0)guide288.step=1;guideSave288(false);guideRender288();if(guide288.step===1&&!guest288)mineSend251('status');};
+ guideAutoPending288=false;guideSession288[key||'pending']=true;guide288={step:force?0:saved?Math.min(7,Math.max(0,saved.step||0)):0};if(guideNamed288()&&guide288.step===0)guide288.step=1;guideSave288(false);guideRender288();if(guide288.step===1&&!guest288)mineSend251('status');};
 Game.guideNext288=function(){if(!guide288)return;if(guide288.step===0&&!guideNamed288()){Game.guideAction288();return;}if(guide288.step>=7){Game.guideFinish288();return;}guide288.step++;guideSave288(false);guideClearFocus288();guideRender288();};
 Game.guideFinish288=function(){guideSave288(true);guide288=null;guideClearFocus288();$('guideDock288').hidden=true;close();};
 Game.guideRefresh288=function(){mineSend251('status');};
@@ -2247,16 +2247,16 @@ Game.guideAction288=function(){if(!guide288)return;var n=guide288.step;close();
 var guestClaim288=Game.claimBaseName;Game.claimBaseName=function(event){if(!guest288)return guestClaim288(event);event.preventDefault();var name=$('baseNameInput').value.normalize('NFC').trim().replace(/\s+/gu,' ');if(!name||Array.from(name).length>40||/[\u0000-\u001f\u007f<>\u202a-\u202e\u2066-\u2069]/u.test(name)){nameMessage224(tr('กรุณาตั้งชื่อ 1–40 ตัวอักษร ไม่ใช้สัญลักษณ์ควบคุมหรือ < >'));return;}var old=E.d.guestName288;E.d.guestName288=name;if(!E.save()){E.d.guestName288=old;nameMessage224(tr('บันทึกไม่ได้ กรุณาลองอีกครั้ง'));return;}Game.closeDroneName251();hud();};
 var welcomeForm288=Game.welcomeForm;Game.welcomeForm=function(mode){welcomeForm288(mode);if($('welcomeEmailDetails'))$('welcomeEmailDetails').open=true;$('welcomeHint').textContent=tr('เริ่มเล่นได้ทันที หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ');};
 Game.welcomeLanguage288=function(lang){if(lang!=='th'&&lang!=='en')return;if(lang===root.NovaI18n.language){try{localStorage.setItem('novaLanguage',lang);}catch(e){}}else Game.setLanguage(lang);close();$('welcomeHint').textContent=tr('เริ่มเล่นได้ทันที หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ');};
-var guideCloud288=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(event==='signed_in'||event==='signed_out'){guide288=null;guideSession288={};$('guideDock288').hidden=true;guideClearFocus288();}guideCloud288(event,data);if(guide288&&guide288.step===1&&modal.innerHTML.indexOf('data-guide288="1"')>=0&&data&&data.data&&data.data.welcome247)guideRender288();};
+var guideCloud288=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(event==='signed_in'||event==='signed_out'){guide288=null;guideSession288={};guideAutoPending288=false;if(event==='signed_in')setTimeout(function(){guideAutoPending288=true;guideTick288();},1600);$('guideDock288').hidden=true;guideClearFocus288();}guideCloud288(event,data);if(guide288&&guide288.step===1&&modal.innerHTML.indexOf('data-guide288="1"')>=0&&data&&data.data&&data.data.welcome247)guideRender288();};
 function guideTick288(){var dock=$('guideDock288');if(guest288&&E.d.guestName288&&screen==='home')$('mode').textContent=E.d.guestName288+' • Lv.'+E.hq();if(!$('welcome').hidden||screen!=='home'||document.hidden){dock.hidden=true;return;}
  if(guide288&&guide288.step===0&&guideNamed288()&&$('baseNameGate').hidden){guide288.step=1;guideSave288(false);guideRender288();if(!guest288)mineSend251('status');return;}
- if(!guide288){dock.hidden=true;if(modal.style.display!=='flex'&&$('baseNameGate').hidden&&Date.now()-guideTickAt288>1000){guideTickAt288=Date.now();Game.beginGuide288();}return;}
+ if(!guide288){dock.hidden=true;if(guideAutoPending288&&modal.style.display!=='flex'&&$('baseNameGate').hidden&&Date.now()-guideTickAt288>1000){guideTickAt288=Date.now();Game.beginGuide288();}return;}
  dock.hidden=modal.style.display==='flex'||!$('baseNameGate').hidden;if(dock.hidden)return;var l=lessons288[guide288.step];setHTML219(dock,'<b>🛸 '+mt251(l[0],l[1])+'</b><p>'+mt251(l[2],l[3])+'</p><button onclick="Game.guideShow288()">'+mt251('ดูคำแนะนำ','Show guide')+'</button><button class="green" onclick="Game.guideNext288()">'+mt251('ขั้นถัดไป','Next step')+'</button><button onclick="Game.guideFinish288()">'+mt251('ข้าม','Skip')+'</button>');}
 var guideHud288=hud;hud=function(){guideHud288();guideTick288();};
 Game.droneGuide251=function(step){if(!guide288)Game.beginGuide288(true);if(guide288&&Number.isInteger(step)){guide288.step=step===0?0:Math.min(7,step+1);guideSave288(false);guideRender288();}};
 Game.help=function(){Game.beginGuide288(true);};
 if($('welcomeHint'))$('welcomeHint').textContent=tr('เริ่มเล่นได้ทันที หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ');
-setTimeout(function(){if(!$('welcome').hidden)return;Game.beginGuide288();},1600);
+setTimeout(function(){if(!$('welcome').hidden)return;guideAutoPending288=true;guideTick288();},1600);
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 
