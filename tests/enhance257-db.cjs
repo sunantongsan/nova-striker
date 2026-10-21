@@ -29,6 +29,8 @@ await db.exec(fs.readFileSync('backend/nova_raids_255.sql','utf8'));
 await db.exec('update public.nova_war_players set crystals=50000,produced_at=now()');
 const old=nonce();let r=await call('research',{enhance:'unit:1',enhance_path245:'attack',request_id:old});
 await db.exec(fs.readFileSync('backend/nova_enhance_nova_257.sql','utf8'));
+await db.exec(fs.readFileSync('backend/nova_balance_285.sql','utf8'));
+await db.exec(fs.readFileSync('backend/nova_balance_285.sql','utf8')); // idempotent
 await db.query('insert into nova_private.test_wallets(user_id,gems) values($1,50000) on conflict(user_id) do update set gems=50000',[uid]);
 const wallet=async()=>+(await db.query('select gems from nova_private.test_wallets where user_id=$1',[uid])).rows[0].gems;
 await call('research',{enhance:'unit:1',enhance_path245:'attack',request_id:old});assert.equal(await wallet(),50000);
@@ -45,6 +47,7 @@ await db.exec('update nova_private.test_wallets set gems=99');
 await assert.rejects(()=>call('research',{...q,request_id:nonce(),enhance:'unit:2'}),/NOVA ไม่พอ/);assert.equal(await wallet(),99);
 await db.exec('update nova_private.test_wallets set gems=10000');
 await db.exec("update public.nova_war_players set enhancements=jsonb_set(enhancements,'{building:mine}','9')");
-r=await call('research',{...q,enhance:'building:mine',enhance_path245:'production',request_id:nonce(),quoted_level257:9,quoted_cost257:10000});assert.equal(await wallet(),0);assert.equal(r.receipt.level,10);
+r=await call('research',{...q,enhance:'building:mine',enhance_path245:'production',request_id:nonce(),quoted_level257:9,quoted_cost257:5500});assert.equal(await wallet(),4500);assert.equal(r.receipt.level,10);
 await db.exec('set role authenticated');await assert.rejects(()=>db.query("select nova_private.command_before_timers225('status','{}')"));await db.exec('reset role');
 console.log('PASS NOVA enhancements: zero crystals, atomic charge, quotes, insufficient funds, cap price, legacy jobs, instant paths, replay and private ACL');await db.close();})().catch(e=>{console.error(e);process.exit(1)});
+
