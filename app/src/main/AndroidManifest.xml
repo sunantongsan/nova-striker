@@ -3,7 +3,7 @@
 <application android:name=".NovaApplication" android:label="Nova Striker" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@android:style/Theme.Material.NoActionBar" android:allowBackup="false" android:usesCleartextTraffic="false" android:supportsRtl="true">
 <meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/game_services_project_id"/>
 <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-4585492700643566~3184363195"/>
-<activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait" android:launchMode="singleTask">
+<activity android:name=".MainActivity" android:exported="true" android:screenOrientation="sensorLandscape" android:launchMode="singleTask">
 <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
 <intent-filter><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.DEFAULT"/><category android:name="android.intent.category.BROWSABLE"/><data android:scheme="novastriker" android:host="auth" android:path="/callback"/></intent-filter>
 </activity></application></manifest>
