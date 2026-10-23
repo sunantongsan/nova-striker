@@ -35,6 +35,19 @@ jobs:
           java -cp /tmp/nova-patch-tests com.sunantongsan.novastriker.PatchFilesTest
       - name: Build test APK
         run: gradle :app:verifySdkVersions :app:assembleDebug --no-daemon
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android 11 cold-launch smoke test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/android-launch-smoke.sh
       - name: Publish test APK to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

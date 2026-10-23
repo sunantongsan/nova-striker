@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 32,
+  "nativeVersion": 33,
   "compatibleNativeVersions": [
     19,
     20,
@@ -15,7 +15,8 @@
     28,
     29,
     30,
-    31
+    31,
+    32
   ],
   "contentVersion": 104,
   "label": "1.9.54-hud-insets",
