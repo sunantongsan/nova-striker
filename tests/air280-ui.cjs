@@ -40,3 +40,12 @@ V.orders({...room,orders:[],logisticsOrders277:[{id:2,owner:'a',payload:{action:
 const packet=JSON.parse(JSON.stringify(V.pack()));delete plane.attackPoint280;V.unpack(packet);assert.equal(f.raid.troops[0].attackPoint280.y,8.2);
 assert(!a.errors.length);assert(!b.errors.length);
 console.log('PASS air280: exact point, legacy roster launch, repeated sorties, selected count retarget, highlights, dead ship removal, duplicate orders, independent air commands and host handover');
+
+
+// 301: each air type enters from the closest map edge; retargets do not teleport.
+for (const [kind,x,y,axis,side] of [[3,20,10,'x',24],[5,10,1,'y',-3],[7,10,20,'y',24]]) {
+ const c=boot({novaRTSIntro:'1'}),Q=c.s.test232,z=Q.e;z.d.army[kind]=3;z.d.stage=100;z.scout(12);z.enableLogistics277();z.raid.airAllowed278[kind]=3;Q.setScreen('raid');c.s.Game.selectAir277(kind);c.s.Game.airNumber277(1,true);
+ assert.equal(z.deploy(kind,x,y),'');const air=z.raid.troops.at(-1);assert.equal(air[axis],side);
+ if(kind===7){air.x=x;air.y=y;air.sortie277=null;Q.bomber(z.raid,air,z.raid.buildings,.05,0);assert(Number.isFinite(air.sortie277.outX)&&Number.isFinite(air.sortie277.outY));}
+}
+console.log('PASS nearest drone/helicopter/bomber entry and zero-distance bomber target');
