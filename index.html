@@ -117,7 +117,7 @@ header{padding:4px 7px 5px;border-width:1px;border-radius:0 0 10px 10px;box-shad
 /* 303: dimensional resource art and full-bleed world; safe HUD only. */
 .resourceArt303{display:inline-block;width:28px;height:28px;vertical-align:middle;background-image:url('assets/resources303.webp');background-size:300% 100%;background-repeat:no-repeat;filter:drop-shadow(0 1px 2px #081e35aa);flex-shrink:0}
 html,body,#app{width:100%;max-width:none;margin:0}#app{height:100%}
-header{padding-left:max(6px,var(--safe-left303,env(safe-area-inset-left)));padding-right:max(6px,var(--safe-right303,env(safe-area-inset-right)));padding-top:max(4px,var(--safe-top303,env(safe-area-inset-top)))}
+header{padding-left:max(6px,var(--safe-left303,0px));padding-right:max(6px,var(--safe-right303,0px));padding-top:max(4px,var(--safe-top303,0px))}
 #homebar{padding-left:var(--safe-left303,0px);padding-right:var(--safe-right303,0px)}
 #app>nav{margin-bottom:var(--safe-bottom303,0px)}
 #modal{padding-right:max(4px,var(--safe-right303,0px))}
