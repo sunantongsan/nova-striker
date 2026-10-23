@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('game.js','utf8');
-const snippet=source.slice(source.indexOf('// External grants are a separate cumulative receipt'),source.lastIndexOf('})(typeof globalThis'));
+const snippet=source.slice(source.indexOf('// External grants are a separate cumulative receipt'),source.indexOf('// 299: selection is separate'));
 let persisted,fail=false,notices=0;
 const ctx={accountDetails282(){return {}},Game:{},root:{novaCloudEvent(){}},guest288:false,accountId282:'player',E:{d:{gems:11056,onlineCrystal:{owner:'player'}},save(){if(fail)return false;persisted=JSON.stringify(this.d);return true;}},hud(){},toast(){notices++},mt251(a){return a},warBusy:false,mineBusy251:null,speedBusy264:null,liveRoom:null};vm.createContext(ctx);vm.runInContext(snippet,ctx);
 ctx.accountId282='';ctx.accountDetails282=()=>({id:'player'});
