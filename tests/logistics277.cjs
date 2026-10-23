@@ -6,3 +6,7 @@ e.scout(1);e.enableLogistics277();assert.match(e.launch277(1,6,6),/ว่าง/
 // Ground-only mortar ignores airborne transport, hits landed transport on impact.
 ({e}=fresh());e.assign277(1,0,0,2);e.scout(1);e.enableLogistics277();e.launch277(1,0,5);const r=e.raid,ship=r.transports277[0];r.guards=[];r.buildings=[{id:0,type:'hq',x:10,y:10,hp:10000,max:10000,cool:999},{id:1,type:'cannonturret',x:2,y:5,hp:1000,max:1000,cool:0,lv:1}];ship.x=0;ship.state='landing';let hp=ship.hp;e.tick(.1);assert.equal(ship.hp,hp);ship.state='landed';ship.height=0;ship.elapsed=0;for(let i=0;i<12;i++)e.tick(.1);assert(ship.hp<hp,'landed ship damaged');
 console.log('PASS logistics277: cargo capacity, no duplication, transfer, aircraft exclusion, HQ fleet cap, build timer, approach/landing/manual release, destroyed cargo, surviving returns and ground targeting');
+
+// 300: six passengers leave within 1.3s while the 150-unit field cap still holds.
+({e}=fresh());e.assign277(1,0,0,6);e.scout(1);e.enableLogistics277();e.launch277(1,0,5);const fast=e.raid.transports277[0];e.raid.guards=[];e.raid.buildings.forEach(b=>b.cool=1e5);fast.state='landed';fast.height=0;fast.elapsed=0;fast.unload=true;for(let i=0;i<13;i++)e.tick(.1);assert.equal(fast.cargo.length,0);assert.equal(e.raid.troops.length,6);assert.equal(fast.state,'takeoff');
+console.log('PASS rapid unloading: six troops within 1.3 seconds');
