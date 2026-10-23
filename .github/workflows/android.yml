@@ -34,6 +34,7 @@ jobs:
           npx playwright install --with-deps chromium
           node tests/layout306-browser.cjs
       - name: Save mobile layout screenshots
+        continue-on-error: true
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -63,7 +64,7 @@ jobs:
       - name: Publish test APK to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "android-${{ github.run_number }}" app/build/outputs/apk/debug/*.apk --target "$GITHUB_SHA" --prerelease --title "Nova Striker Android build ${{ github.run_number }}" --notes 'Test APK. Production package com.sunantongsan.novastriker. Signed releases use the new Nova upload key.'
+        run: gh release create "android-${{ github.run_number }}" app/build/outputs/apk/debug/*.apk qa306/*.png --target "$GITHUB_SHA" --prerelease --title "Nova Striker Android build ${{ github.run_number }}" --notes 'Test APK. Production package com.sunantongsan.novastriker. Signed releases use the new Nova upload key.'
       - name: Build signed Play bundle when signing is configured
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
