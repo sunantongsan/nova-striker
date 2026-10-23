@@ -69,6 +69,7 @@ public class MainActivity extends Activity {
     void adFinished() { game.evaluateJavascript("window.novaAdDone && window.novaAdDone()", null); }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        immersive303();
         game = new WebView(this);
         game.setBackgroundColor(0xff07021a);
         game.getSettings().setJavaScriptEnabled(true);
@@ -84,7 +85,7 @@ public class MainActivity extends Activity {
         game.addJavascriptInterface(cloud, "NovaCloud");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
-                if (url.equals(GAME_URL)) finishBoot();
+                if (url.equals(GAME_URL)) { finishBoot(); game.getRootView().requestApplyInsets(); immersive303(); }
             }
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse response=null;
@@ -103,25 +104,23 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
-        // Resize the WebView viewport itself; WebView padding does not protect fixed HTML overlays.
+        // Render the world to every edge; reserve cutout space for HUD controls only.
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xff07021a);
         root.addView(game, new FrameLayout.LayoutParams(-1, -1));
         welcome=createWelcome();root.addView(welcome,new FrameLayout.LayoutParams(-1,-1));
         root.setOnApplyWindowInsetsListener((v, insets) -> {
-            int left, top, right, bottom;
-            if (android.os.Build.VERSION.SDK_INT >= 30) {
-                android.graphics.Insets safe = insets.getInsets(
-                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-                left = safe.left; top = safe.top; right = safe.right; bottom = safe.bottom;
-            } else {
-                left = insets.getSystemWindowInsetLeft(); top = insets.getSystemWindowInsetTop();
-                right = insets.getSystemWindowInsetRight(); bottom = insets.getSystemWindowInsetBottom();
+            int left=0,top=0,right=0,bottom=0;
+            if(android.os.Build.VERSION.SDK_INT>=28 && insets.getDisplayCutout()!=null){
+                android.view.DisplayCutout c=insets.getDisplayCutout();
+                left=c.getSafeInsetLeft();top=c.getSafeInsetTop();right=c.getSafeInsetRight();bottom=c.getSafeInsetBottom();
             }
-            FrameLayout.LayoutParams layout = (FrameLayout.LayoutParams) game.getLayoutParams();
-            layout.setMargins(left, top, right, bottom);
-            game.setLayoutParams(layout);
-            FrameLayout.LayoutParams splash=(FrameLayout.LayoutParams)welcome.getLayoutParams();splash.setMargins(left,top,right,bottom);welcome.setLayoutParams(splash);
+            float density=getResources().getDisplayMetrics().density;
+            String js="document.documentElement.style.setProperty('--safe-left303','"+(left/density)+"px');"
+                +"document.documentElement.style.setProperty('--safe-right303','"+(right/density)+"px');"
+                +"document.documentElement.style.setProperty('--safe-top303','"+(top/density)+"px');"
+                +"document.documentElement.style.setProperty('--safe-bottom303','"+(bottom/density)+"px');";
+            game.evaluateJavascript(js,null);
             return insets;
         });
         setContentView(root);
@@ -141,7 +140,7 @@ public class MainActivity extends Activity {
         game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
         ads.pause(); game.onPause(); super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); if(game != null) game.onResume(); if(ads != null) ads.resume();
+    @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume();
         // PGS handles automatic sign-in. Failure must never block local play or cloud login.
         PlayGames.getGamesSignInClient(this).isAuthenticated()
             .addOnCompleteListener(this, task -> {
@@ -151,6 +150,24 @@ public class MainActivity extends Activity {
                     ? "Platform authentication ready" : "Platform authentication unavailable; continue playing");
             });
     }
+    private void immersive303() {
+        android.view.Window window=getWindow();
+        if(android.os.Build.VERSION.SDK_INT>=28){
+            android.view.WindowManager.LayoutParams p=window.getAttributes();
+            p.layoutInDisplayCutoutMode=android.os.Build.VERSION.SDK_INT>=30
+                ? android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                : android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            window.setAttributes(p);
+        }
+        if(android.os.Build.VERSION.SDK_INT>=30){
+            window.setDecorFitsSystemWindows(false);
+            android.view.WindowInsetsController c=window.getInsetsController();
+            if(c!=null){c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);c.hide(WindowInsets.Type.systemBars());}
+        }else{
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY|View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
+    }
+    @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);if(focused)immersive303();}
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
 
