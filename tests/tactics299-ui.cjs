@@ -10,6 +10,6 @@ const a=boot(null,{width:900,height:400}),t=a.t;t.setup();const r=t.e.raid;r.tro
 a.s.Game.selectAll299();assert.equal(t.selection().length,2);t.tap(4,1);assert(r.troops.every(u=>u.order299.x===4));a.s.Game.commandMode299();assert.equal(t.selection().length,0);
 r.liveMode='attacker';t.e.d.onlineCrystal={owner:'a'};a.s.Game.selectAll299();assert.deepEqual(Array.from(t.selection()),[10]);
 r.commandAck277=0;t.orders({host:true,orders:[],logisticsOrders277:[{id:1,owner:'a',payload:{action:'tactics299',units:[10,11],x:6,y:1}}]});assert.equal(r.troops[0].order299.x,6);assert.equal(r.troops[1].order299.x,4);r.troops[0].order299.x=7;t.orders({host:true,orders:[],logisticsOrders277:[{id:1,owner:'a',payload:{action:'tactics299',units:[10],x:6,y:1}}]});assert.equal(r.troops[0].order299.x,7,'already acknowledged order does not replay');
-const f=t.pack();assert(f.orders299.some(o=>o.owner==='a'&&o.command.x===7));
+const f=t.pack();assert.equal(typeof f.orders299,'string');assert.equal(parseInt(f.orders299.slice(0,3),36)/100,7);
 r.fx=[{weapon:'missile',highArc:true,life:.2,maxLife:.9,tx:8,ty:8}];t.craters(r);assert.equal(r.craters272.length,1);r.craters272[0].born-=100000;r.fx=[];t.craters(r);assert.equal(r.craters272.length,1,'crater survives elapsed time');
 console.log('PASS selection/deployment separation, own-unit filtering, host commands, acknowledgement replay, frame orders and persistent craters');

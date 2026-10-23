@@ -18,7 +18,6 @@ localize(root.document);
 })(typeof globalThis === 'object' ? globalThis : this);
 
 
-
 /* Presentation only: preserve gems balances, save keys and server contracts. */
 (function(root){'use strict';
 function label(value){return value.replace(/เพชร/g,' NOVA ').replace(/\bdiamonds?\b/gi,'NOVA').replace(/\bgems?\b/gi,'NOVA').replace(/ {2,}/g,' ');}
@@ -41,7 +40,6 @@ if(!root.document||!root.document.body)return;
 paint(root.document.body);
 if(root.MutationObserver)new root.MutationObserver(function(records){records.forEach(function(record){if(record.type==='characterData')paint(record.target);else Array.prototype.forEach.call(record.addedNodes,paint);});}).observe(root.document.body,{subtree:true,childList:true,characterData:true});
 })(typeof globalThis==='object'?globalThis:this);
-
 
 /* locale232:end */
 /* Nova Striker 1.5: offline base building and tactical deployment. */
@@ -2343,8 +2341,8 @@ var draw299=draw;draw=function(){draw299();if(screen!=='raid'||!E.raid)return;ct
 var home299=Game.home;Game.home=function(){commandMode299=false;selectedUnits299=[];commandMark299=null;return home299.apply(Game,arguments);};
 var scoutUI299=Game.scout;Game.scout=function(n){commandMode299=false;selectedUnits299=[];scoutUI299(n);if(E.raid&&E.raid.campaign299){zoom=.85;panY=-110;hud();}};
 var orders299=siegeOrders;siegeOrders=function(b){var r=E.raid,ack=r&&r.commandAck277||0;orders299(b);if(!r||!b.host)return;(b.logisticsOrders277||[]).forEach(function(c){if(c.id<=ack||c.payload.action!=='tactics299')return;var p=c.payload;issueOrder299(r,p.units,{x:+p.x,y:+p.y,target:p.target==null?undefined:+p.target},c.owner);});};
-var pack299=livePack;livePack=function(){var f=pack299();f.orders299=E.raid.troops.filter(function(t){return t.order299;}).map(function(t){return{order:t.order||t.id,owner:t.owner,command:t.order299};});return f;};
-var unpack299=liveUnpack;liveUnpack=function(f){unpack299(f);if(!E.raid)return;(f.orders299||[]).forEach(function(o){var t=E.raid.troops.find(function(t){return t.order===o.order&&t.owner===o.owner;});if(t)t.order299=o.command;});};
+var pack299=livePack;livePack=function(){var f=pack299();function code(n,w){return Math.round(n).toString(36).padStart(w,'0');}f.orders299=E.raid.troops.slice(0,f.troops.length).map(function(t){var o=t.order299;return o?code(o.x*100,3)+code(o.y*100,3)+code(o.target==null?0:o.target+1,2):'--------';}).join('');return f;};
+var unpack299=liveUnpack;liveUnpack=function(f){unpack299(f);if(!E.raid)return;E.raid.troops.forEach(function(t,i){delete t.order299;var v=typeof f.orders299==='string'?f.orders299.slice(i*8,i*8+8):'';if(v.length!==8||v==='--------')return;var x=parseInt(v.slice(0,3),36)/100,y=parseInt(v.slice(3,6),36)/100,target=parseInt(v.slice(6),36);if(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(target)&&x>=0&&x<=21&&y>=0&&y<=21)t.order299={x:x,y:y,target:target?target-1:null};});};
 function blast299(p,r,t,blue){
  t=Math.max(0,Math.min(1,t));var spread=Math.min(1,t/.3),fade=Math.pow(1-t,1.1);ctx.save();ctx.translate(p.x,p.y);ctx.scale(1,.62);ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;
  var extent=Math.max(1,r*(.12+.88*spread)),g=ctx.createRadialGradient(0,0,0,0,0,extent);g.addColorStop(0,'#ffffff');g.addColorStop(blue?.48:.2,blue?'#efffff':'#fff6ba');g.addColorStop(.72,blue?'#72dcff':'#ffad32');g.addColorStop(.9,blue?'#267dffbb':'#f74519aa');g.addColorStop(1,blue?'#208cff00':'#fe571000');disk(0,0,extent,g);
