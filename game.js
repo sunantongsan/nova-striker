@@ -542,7 +542,7 @@ function buildingGeneration265(lv){return Math.min(4,Math.floor((Math.max(1,Math
 function evolvedArt265(b,p,size){
  var g=buildingGeneration265(b.lv);if(!g)return false;
  for(var k=0;k<evolutionTypes265.length;k++){var row=evolutionTypes265[k].indexOf(b.type),im=evolutionImages265[k];if(row<0)continue;if(!im.complete||!im.naturalWidth)return false;
-  size*=1.14+g*.025;var cell=im.naturalWidth/4;ctx.drawImage(im,(g-1)*cell,row*cell,cell,cell,p.x-size/2,p.y-size*.86,size,size);return true;
+  var cell=im.naturalWidth/4;ctx.drawImage(im,(g-1)*cell,row*cell,cell,cell,p.x-size/2,p.y-size*.86,size,size);return true;
  }return false;
 }
 function buildingStructure265(b,p,size,front){
