@@ -53,14 +53,14 @@ public class MainActivity extends Activity {
     private FrameLayout createWelcome() {
         FrameLayout scene=new FrameLayout(this);scene.setBackgroundColor(0xff08214b);
         ImageView art=new ImageView(this);art.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        try(java.io.InputStream in=getAssets().open("assets/nova-welcome-217.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
+        try(java.io.InputStream in=getAssets().open("assets/nova-welcome-landscape306.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
         scene.addView(art,new FrameLayout.LayoutParams(-1,-1));
-        int gap=(int)(24*getResources().getDisplayMetrics().density);
-        TextView title=new TextView(this);title.setText("NOVA\nSTRIKER");title.setTextColor(0xffffdf72);title.setTextSize(38);title.setGravity(Gravity.CENTER);title.setTypeface(null,android.graphics.Typeface.BOLD_ITALIC);title.setShadowLayer(5,0,4,0xff083760);title.setPadding(0,gap,0,0);scene.addView(title,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
-        LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(gap,gap,gap,gap);panel.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00081936,0xee081936,0xff081936}));
-        updateStatus=new TextView(this);updateStatus.setText("กำลังตรวจสอบข้อมูลเกม…");updateStatus.setTextColor(Color.WHITE);updateStatus.setTextSize(16);updateStatus.setGravity(Gravity.CENTER);updateStatus.setPadding(0,gap,0,gap);panel.addView(updateStatus,new LinearLayout.LayoutParams(-1,-2));
-        updateProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);updateProgress.setMax(100);updateProgress.setIndeterminate(true);updateProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xffb8ef7d));panel.addView(updateProgress,new LinearLayout.LayoutParams(-1,gap));
-        TextView hint=new TextView(this);hint.setText("เตรียมพร้อมสู่ภารกิจ NOVA");hint.setTextColor(0xffd0efff);hint.setTextSize(13);hint.setGravity(Gravity.CENTER);hint.setPadding(0,gap,0,0);panel.addView(hint);
+        int gap=(int)(10*getResources().getDisplayMetrics().density);
+        TextView title=new TextView(this);title.setText("NOVA STRIKER");title.setTextColor(0xffffdf72);title.setTextSize(26);title.setGravity(Gravity.LEFT);title.setTypeface(null,android.graphics.Typeface.BOLD_ITALIC);title.setShadowLayer(5,0,4,0xff083760);title.setPadding(gap*2,gap,0,0);scene.addView(title,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
+        LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(gap*2,gap/2,gap*2,gap);panel.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00081936,0x77081936,0xbb081936}));
+        updateStatus=new TextView(this);updateStatus.setText("กำลังตรวจสอบข้อมูลเกม…");updateStatus.setTextColor(Color.WHITE);updateStatus.setTextSize(12);updateStatus.setGravity(Gravity.CENTER);updateStatus.setPadding(0,0,0,gap/2);panel.addView(updateStatus,new LinearLayout.LayoutParams(-1,-2));
+        updateProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);updateProgress.setMax(100);updateProgress.setIndeterminate(true);updateProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xffb8ef7d));panel.addView(updateProgress,new LinearLayout.LayoutParams(-1,Math.max(4,gap/2)));
+        TextView hint=new TextView(this);hint.setText("เตรียมพร้อมสู่ภารกิจ NOVA");hint.setTextColor(0xffd0efff);hint.setTextSize(10);hint.setGravity(Gravity.CENTER);hint.setPadding(0,gap/2,0,0);panel.addView(hint);
         scene.addView(panel,new FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM));return scene;
     }
     void rewardStatus(String status) { game.evaluateJavascript("window.novaRewardStatus && window.novaRewardStatus("+org.json.JSONObject.quote(status)+")",null); }

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 33,
+  "nativeVersion": 34,
   "compatibleNativeVersions": [
     19,
     20,
@@ -16,9 +16,10 @@
     29,
     30,
     31,
-    32
+    32,
+    33
   ],
-  "contentVersion": 105,
-  "label": "1.9.55-hidden-traps",
+  "contentVersion": 106,
+  "label": "1.9.56-compact-welcome",
   "maxBytes": 67108864
 }
