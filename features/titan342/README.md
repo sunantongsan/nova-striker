@@ -16,3 +16,9 @@ HQ10; reserve 10m gold and 10m power in installments; one 72h job; completed gua
 Real skinned GLB animation; manual joystick only while selected; automatic combat otherwise. Sword, palm, dash, shield, nova with energy, cooldowns, delayed hits and enemy-only damage. Ground collision uses existing building geometry. Ally shield lasts5s. Controls expire when disconnected. Network frames preserve tier, skills, animation and cooldown state; titan deployments are excluded from ordinary unit refunds.
 
 Run `node features/titan342/build.cjs`, `node tests/titan342.cjs`, `node tests/titan342-db.cjs`, then the existing regression suite. Browser QA must cover all three models, moving/selecting, skills, panel sizing, and entry/exit. Validate on actual target Android devices before asserting measured phone FPS.
+
+## Order flow (345)
+
+One order debits available required resources atomically, preserving previously reserved amounts. Missing resources cost 1 NOVA per 10,000 total units (rounded up), or one verified video per 2m units, at most ten videos. Wait authorizes automatic resource reservation during account status synchronization; the 72h build starts only after both 10m resource requirements are met. Production speed-up remains 10s/NOVA; each verified video removes 25,920 seconds, at most ten from a new 72h job. The two phases have separate displayed quotes. Existing ad cooldown/verification and one-mech ownership rules remain.
+
+Guardians jump across walls only when the flight path contains no non-wall building and the landing tile is free and inside the map. Walls can still receive normal attack damage. Jump state is transmitted with battle frames. Illustrated controls use an AI-generated 12-icon atlas; progression spoilers remain hidden. The battlefield once again spans the full viewport.

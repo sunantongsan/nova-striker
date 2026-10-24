@@ -21,8 +21,8 @@
     35,
     36
   ],
-  "contentVersion": 114,
-  "label": "1.9.64-compact-guardian-ui",
+  "contentVersion": 115,
+  "label": "1.9.65-guardian-orders",
   "maxBytes": 67108864,
   "titan342": true
 }
