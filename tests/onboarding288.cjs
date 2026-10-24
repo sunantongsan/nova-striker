@@ -16,40 +16,5 @@ assert.equal(boot({},'android',false,'th-TH').s.NovaI18n.language,'th');
 assert.equal(boot({},'android',false,'en-TH').s.NovaI18n.language,'th');
 assert.equal(boot({novaLanguage:'en'},'android',false,'th-TH').s.NovaI18n.language,'en');
 assert.equal(boot({novaLanguage:'th'},'android',false,'en-US').s.NovaI18n.language,'th');
-const automatic=boot({},'android',true,'th-TH');
-for(const t of [...automatic.timers.values()])if(t.ms===1600)t.f();
-assert.match(automatic.el('guideDock288').innerHTML,/ตั้งชื่อฐาน/,'signed-in first entry starts the guide without a click');
-let a=boot({},'android',false,'th-TH');
-assert.equal(a.el('welcome').hidden,false);
-a.s.Game.welcomeGuest();
-assert.equal(a.el('welcome').hidden,true);
-assert.equal(a.s.test232.guest(),true);
-assert.equal(a.data.novaAccountReady,undefined,'guest is not a cloud account');
-assert.match(a.el('guideDock288').innerHTML,/ตั้งชื่อฐาน/);
-a.s.Game.guideName337();a.el('baseNameInput').value='ฐานทดสอบ';a.s.Game.claimBaseName({preventDefault(){}});
-assert.equal(a.s.test232.e.d.guestName288,'ฐานทดสอบ');
-assert.equal(a.s.test232.guide().step,1,'name completion advances to bonus automatically');
-// Guests have no online bonus; the next guide tick proceeds to building.
-a.s.test232.tick();
-assert.equal(a.requests.length,0,'guest name and onboarding do not call the online profile or grant online rewards');
-a.s.Game.guideNext288();assert.equal(a.s.test232.guide().step,2);
-a.s.Game.guideAction288();a.s.Game.close();a.s.test232.tick();assert.equal(a.el('guideDock288').hidden,false,'next step remains available after a hands-on action');
-a.s.test232.setScreen('raid');a.s.test232.tick();assert.equal(a.el('guideDock288').hidden,true,'guide never covers combat');a.s.test232.setScreen('home');
-let resumed=boot({...a.data},'android',false,'th-TH');resumed.s.Game.beginGuide288();assert.equal(resumed.s.test232.guide().step,2,'unfinished guide resumes');
-resumed.s.Game.guideFinish288();resumed.s.test232.tick();assert.equal(resumed.s.test232.guide(),null,'skip stays dismissed');
-let done=boot({...resumed.data},'android',false,'th-TH');done.s.Game.beginGuide288();assert.equal(done.s.test232.guide(),null,'completed guide stays dismissed after relaunch');
-done.s.Game.help();assert.ok(done.s.test232.guide(),'help can replay');
-done.s.novaCloudEvent('signed_in',{id:'online'});assert.equal(done.s.test232.guest(),false);assert.equal(done.data.novaGuest288,undefined,'online sign-in clears guest entry marker');
-done.s.novaCloudEvent('loaded',{id:'online',save:null});
-assert.ok(!done.el('modal').innerHTML.includes('Game.cloudUpload()')||done.el('modal').style.display==='none','empty backup dialog does not block first-entry guide');
-let online=boot({novaGuest288:'1'},'android',true);assert.equal(online.s.test232.guest(),false,'native account wins over saved guest entry');
-const initialGems=online.s.test232.e.d.gems;online.s.Game.beginGuide288();assert.match(online.el('guideDock288').innerHTML,/Name base/);
-const profile=online.requests.find(r=>r.p.profile==='status');assert.ok(profile);
-online.s.novaCloudEvent('war',{request_id:profile.id,data:{profile:true,owner:'new-owner',name:'New base'}});
-assert.equal(online.s.test232.guide().step,1);
-assert.equal(online.s.test232.e.d.gems,initialGems,'onboarding does not invent an online bonus');
-online.s.Game.welcomeLanguage288('en');assert.equal(online.data.novaLanguage,'en','explicit current-language choice persists');
-assert.deepEqual(a.errors,[]);assert.deepEqual(online.errors,[]);
-console.log('PASS onboarding288: device locale, explicit preference, guest entry/relaunch, local name, automatic guide, progress/skip/replay, combat guard and account transition');
-
-
+for(const account of [false,true]){const a=boot({},'android',account,'th-TH');for(const t of [...a.timers.values()])if(t.ms===1600)t.f();assert.equal(a.el('guideDock288').hidden,true);assert.equal(a.s.test232.guide(),null);a.s.Game.welcomeGuest();a.s.Game.beginGuide288(true);a.s.test232.tick();assert.equal(a.el('guideDock288').hidden,true);assert.equal(a.s.test232.guide(),null);a.s.novaCloudEvent('signed_in',{id:'online'});for(const t of [...a.timers.values()])if(t.ms===1600)t.f();assert.equal(a.s.test232.guide(),null);assert.equal(a.el('guideDock288').hidden,true);assert.deepEqual(a.errors,[]);}
+console.log('PASS onboarding288: locale preferences preserved, tutorial disabled for guest, account, restart and explicit replay');

@@ -15,12 +15,13 @@ const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e,owner='10000000-0000
 a.s.NovaAds={rewardTest248:(...args)=>shown.push(args),acknowledgeTest248(){}};
 const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
 const state={owner,test_gems:0,mining251:{server_time:new Date().toISOString(),prediction_until:new Date().toISOString(),code:'MYBASE',started:true,invited:false,referral_eligible:false,members:10,base_rate:200,active_team:0,team_total:0,credited:0,earned:125.75,unclaimed:125.75,wallet255:true,ends_at:new Date(Date.now()+800000).toISOString(),provider:'test'}};
-G.treasury();reply(state);const before=e.d.gems;assert(!a.el('modal').innerHTML.includes('🤖'));assert(!a.el('modal').innerHTML.includes('No advertising revenue'));assert(!a.el('modal').innerHTML.includes('Withdrawals'));assert(a.el('modal').innerHTML.includes('mineUnclaimed255'));assert.equal(e.d.gems,before,'unclaimed earnings never spendable');
+G.legacyBalance339();reply(state);const before=e.d.gems;assert(!a.el('modal').innerHTML.includes('🤖'));assert(!a.el('modal').innerHTML.includes('No advertising revenue'));assert(!a.el('modal').innerHTML.includes('Withdrawals'));assert(a.el('modal').innerHTML.includes('mineUnclaimed255'));assert.equal(e.d.gems,before,'unclaimed earnings never spendable');
 G.claimPanel255();a.el('mineAmount255').value='25';G.claimWallet255();let req=a.requests.at(-1);assert.equal(req.p.purpose,'wallet');assert.equal(req.p.amount,25);
 const receipt={id:req.p.request_id,purpose:'wallet',amount:25,claimed:false,provider:'test'};reply({...state,mining251:{...state.mining251,receipt}});assert.equal(shown.length,1);assert.equal(e.d.gems,before);
 a.s.novaTestRewardEarned248(owner,receipt.id);assert.equal(a.requests.at(-1).p.mining251,'claim');assert.equal(e.d.gems,before);
 const paid={...state,mining251:{...state.mining251,credited:25,unclaimed:100.75,receipt:{...receipt,claimed:true}}};reply(paid);assert.equal(e.d.gems,before+25);assert(!e.d.pendingMining251);
-G.refreshCheckin233();reply(paid);assert.equal(e.d.gems,before+25,'replay does not duplicate credit');
+G.legacyBalance339();reply(paid);assert.equal(e.d.gems,before+25,'replay does not duplicate credit');
 G.claimPanel255();a.el('mineAmount255').value='200';const previous=a.requests.at(-1);G.claimWallet255();assert.equal(a.requests.at(-1),previous,'overclaim stopped in UI');
-G.miningHelp255();assert(a.el('modal').innerHTML.includes('4-hour'));assert(!a.el('modal').innerHTML.includes('100 accounts'));
+G.miningHelp255();reply({owner,test_gems:25,checkin233:{claimed:false,streak:0,reward:20,day:'2026-10-24'}});assert(a.el('modal').innerHTML.includes('checkin-grid237'));assert(!a.el('modal').innerHTML.includes('100 accounts'));
 console.log('PASS wallet255 UI: clean mech panel, partial amount, no early credit, verified callback, replay, balance validation, separate help');
+

@@ -14,20 +14,11 @@ function boot(data={},platform='android'){
 const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e,owner='10000000-0000-4000-8000-000000000002';let shown=[];
 a.s.NovaAds={rewardTest248:(...args)=>shown.push(args),acknowledgeTest248(){}};
 const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
-const base={owner,test_gems:0,mining251:{server_time:new Date().toISOString(),code:'MYBASE',started:false,invited:false,referral_eligible:true,members:1,base_rate:200,active_team:0,team_total:0,credited:0,earned:0,ends_at:null,provider:'test'}};
-assert(a.el('baseNameGate').hidden,'no welcome naming gate');G.treasury();reply(base);assert(!a.el('modal').innerHTML.includes('checkin-grid237'));assert(a.el('modal').innerHTML.includes('NOVA MINING'));
-const before=e.d.gems;G.startMining251();let req=a.requests.at(-1);assert.equal(req.p.mining251,'prepare');G.startMining251();assert.equal(a.requests.at(-1),req);
-let receipt={id:req.p.request_id,provider:'test',claimed:false};reply({...base,mining251:{...base.mining251,receipt}});assert.equal(shown.length,1);assert.equal(e.d.gems,before);
+const base={owner,test_gems:0,test_checkin248:true,checkin233:{day:'2026-10-24',claimed:false,streak:0,reward:20}};
+G.treasury();assert.equal(a.requests.at(-1).p.checkin233,true);reply(base);assert(a.el('modal').innerHTML.includes('checkin-grid237'));assert(!a.el('modal').innerHTML.includes('NOVA MINING'));
+const before=e.d.gems;G.checkin();let req=a.requests.at(-1);assert.equal(req.p.checkin_test248,'prepare');let receipt={id:req.p.request_id,day:'2026-10-24',amount:20,claimed:false};reply({...base,test_receipt248:receipt});assert.equal(shown.length,1);assert.equal(e.d.gems,before);
 a.s.novaTestRewardEarned248('wrong',receipt.id);assert.equal(e.d.gems,before);
-a.s.novaRewardStatus('closed');assert.equal(e.d.gems,before);
-G.startMining251();reply({...base,mining251:{...base.mining251,receipt}});a.s.novaTestRewardEarned248(owner,receipt.id);assert.equal(a.requests.at(-1).p.mining251,'claim');assert.equal(e.d.gems,before);
-const active={...base,mining251:{...base.mining251,started:true,ends_at:new Date(Date.now()+86400000).toISOString(),receipt:{...receipt,claimed:true}}};reply(active);assert(!e.d.pendingMining251);
-G.refreshCheckin233();reply({...active,mining251:{...active.mining251,credited:100,earned:100}});assert.equal(e.d.gems,before+100);
-G.refreshCheckin233();reply({...active,mining251:{...active.mining251,credited:100,earned:100}});assert.equal(e.d.gems,before+100,'credit replay does not duplicate');
-const b=boot({...a.data});b.s.Game.refreshCheckin233();const br=b.requests.at(-1);b.s.novaCloudEvent('war',{action:br.a,request_id:br.id,data:{...active,mining251:{...active.mining251,credited:100,earned:100}}});assert.equal(b.s.test232.e.d.gems,before+100,'restart preserves credit marker');
-G.referrals251();assert(a.el('modal').innerHTML.includes('MYBASE'));
-G.droneGuide251();assert(a.el('guideDock288').innerHTML.includes('Learn by doing'));G.openDroneName251();assert(!a.el('baseNameGate').hidden);G.closeDroneName251();assert(a.el('baseNameGate').hidden);
-console.log('PASS mining251 UI: platform callbacks, no early credit, replay/restart, no checkin grid, drone naming');
-
-
-
+a.s.novaTestRewardEarned248(owner,receipt.id);assert.equal(a.requests.at(-1).p.checkin_test248,'claim');assert.equal(e.d.gems,before);
+const claimed={...base,checkin233:{...base.checkin233,claimed:true,streak:1},test_receipt248:{...receipt,claimed:true,granted:20}};reply(claimed);assert.equal(e.d.gems,before+20);G.refreshCheckin233();reply(claimed);assert.equal(e.d.gems,before+20,'daily credit replay cannot duplicate');
+G.droneGuide251();assert.equal(a.el('guideDock288').hidden,true);assert.deepEqual(a.errors,[]);
+console.log('PASS daily339 UI: daily panel, ad completion, server confirmation, idempotent credit, no mining or guide');
