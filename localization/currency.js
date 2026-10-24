@@ -21,3 +21,4 @@ paint(root.document.body);
 if(root.MutationObserver)new root.MutationObserver(function(records){records.forEach(function(record){if(record.type==='characterData')paint(record.target);else Array.prototype.forEach.call(record.addedNodes,paint);});}).observe(root.document.body,{subtree:true,childList:true,characterData:true});
 })(typeof globalThis==='object'?globalThis:this);
 
+
