@@ -16,6 +16,8 @@ function localize(document){if(!document||!document.createTreeWalker)return;if(d
 root.NovaI18n={language:language,translate:translate,localize:localize,source:function(v){return reverse[v]||v;},setLanguage:function(v){if(v!=='en'&&v!=='th')return false;language=v;this.language=v;localize(root.document);return true;}};
 localize(root.document);
 })(typeof globalThis === 'object' ? globalThis : this);
+
+
 /* Presentation only: preserve gems balances, save keys and server contracts. */
 (function(root){'use strict';
 function label(value){return value.replace(/เพชร/g,' NOVA ').replace(/\bdiamonds?\b/gi,'NOVA').replace(/\bgems?\b/gi,'NOVA').replace(/ {2,}/g,' ');}
@@ -38,6 +40,7 @@ if(!root.document||!root.document.body)return;
 paint(root.document.body);
 if(root.MutationObserver)new root.MutationObserver(function(records){records.forEach(function(record){if(record.type==='characterData')paint(record.target);else Array.prototype.forEach.call(record.addedNodes,paint);});}).observe(root.document.body,{subtree:true,childList:true,characterData:true});
 })(typeof globalThis==='object'?globalThis:this);
+
 /* locale232:end */
 /* Nova Striker 1.5: offline base building and tactical deployment. */
 (function(root){'use strict';
