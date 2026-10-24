@@ -61,3 +61,14 @@ assert.match(oldFb.el('welcomeStatus').textContent,/Google Play/);
 assert.equal(oldFb.el('welcomeFacebook').disabled,false);
 oldFb.s.Game.welcomeSwitch();assert.equal(oldFb.el('welcomeEmailDetails').open,true);
 console.log('PASS Facebook: duplicate taps, cancel/retry, account entry, old Android guard and email expansion');
+
+let pgsCalls=[];
+const pgs=boot({...cloud,loginPlayGames:()=>pgsCalls.push('pgs'),loginFacebook:()=>pgsCalls.push('facebook')});
+assert.deepEqual(pgsCalls,[],'no authentication before a choice');
+pgs.s.Game.welcomePlayGames();pgs.s.Game.welcomePlayGames();pgs.s.Game.welcomeFacebook();
+assert.deepEqual(pgsCalls,['pgs']);
+assert.equal(pgs.el('welcomePlayGames').disabled,true);
+pgs.s.novaCloudEvent('status',{message:'ยกเลิก'});
+assert.equal(pgs.el('welcomePlayGames').disabled,false);
+pgs.s.Game.welcomeFacebook();assert.deepEqual(pgsCalls,['pgs','facebook']);
+console.log('PASS Play Games choice: no autostart, duplicate prevention, cancellation and switching provider');

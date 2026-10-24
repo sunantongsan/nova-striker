@@ -106,12 +106,38 @@ final class NovaCloud {
             JSONObject user=read().getJSONObject("user"),out=new JSONObject();
             out.put("id",user.getString("id")).put("email",user.optString("email",""));
             JSONObject metadata=user.optJSONObject("app_metadata");
-            out.put("provider",metadata==null?"":metadata.optString("provider",""));
+            boolean playGames=metadata!=null&&!metadata.optString("nova_pgs_subject","").isEmpty();
+            out.put("provider",playGames?"playgames":metadata==null?"":metadata.optString("provider",""));
+            if(playGames)out.put("email","Play Games");
             return out.toString();
         }catch(Exception e){return "{}";}
     }
     @JavascriptInterface public boolean available(){return BuildConfig.NOVA_CLOUD_ENABLED;}
     @JavascriptInterface public void login(){loginProvider("google");}
+    static final int PLAY_GAMES_REQUEST=7308;
+    private final java.util.concurrent.atomic.AtomicBoolean playGamesPending=new java.util.concurrent.atomic.AtomicBoolean(false);
+    @JavascriptInterface public void loginPlayGames(){
+        if(!available()||!playGamesPending.compareAndSet(false,true))return;
+        worker.execute(()->{try{
+            JSONObject config=new JSONObject(request("/functions/v1/nova-playgames-auth","POST",new JSONObject().put("action","config"),null));
+            String clientId=config.getString("client_id");
+            if(!clientId.endsWith(".apps.googleusercontent.com"))throw new Exception("invalid_config");
+            activity.runOnUiThread(()->{
+                if(closed){playGamesPending.set(false);return;}
+                try{activity.startActivityForResult(new Intent(activity,PlayGamesLoginActivity.class).putExtra("client_id",clientId),PLAY_GAMES_REQUEST);}
+                catch(Exception e){playGamesPending.set(false);status("เปิด Play Games ไม่สำเร็จ กรุณาลองใหม่");}
+            });
+        }catch(Exception e){playGamesPending.set(false);status("Play Games ยังไม่พร้อม กรุณาลองใหม่ภายหลัง");}});
+    }
+    void playGamesResult(String code){
+        if(!playGamesPending.get())return;
+        if(code==null||code.isEmpty()){playGamesPending.set(false);status("ยกเลิกการเข้า Play Games แล้ว");return;}
+        worker.execute(()->{try{
+            JSONObject s=new JSONObject(request("/functions/v1/nova-playgames-auth","POST",new JSONObject().put("code",code),null));
+            if(closed)return;
+            keep(s);emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));
+        }catch(Exception e){status("เข้า Play Games ไม่สำเร็จ กรุณาลองใหม่");}finally{playGamesPending.set(false);}});
+    }
     @JavascriptInterface public void loginFacebook(){loginProvider("facebook");}
     private void loginProvider(String provider){
         if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}
