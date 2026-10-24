@@ -120,7 +120,7 @@ function gunGeometry171(o){var angle=o.aim===undefined?-Math.PI/2:o.aim,index=be
 // Directional weapons use one model for rendering and the projectile origin.
 function isTracked(o){return o.kind===1||o.kind===9;}
 function turnAngle(from,to,step){var delta=Math.atan2(Math.sin(to-from),Math.cos(to-from));return from+Math.max(-step,Math.min(step,delta));}
-function weaponMount(o){if(o.type==='cannonturret')return energyGeometry276(o);if(['gun','tesla','missileturret'].includes(o.type)&&(o.lv||1)>1){var g=weaponStage272(o),a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),len=o.type==='tesla'?0:25+g*3,h=o.type==='tesla'?40+g*7:29+g*2;return{x:Math.cos(a)*len,y:Math.sin(a)*len*.65-h,height:h};}if(o.type==='missileturret'){var a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),l=22-(o.recoil||0)/.18*2;return{x:Math.cos(a)*l,y:Math.sin(a)*l-26,height:26};}if(isTracked(o)||['gun','cannonturret','missileturret'].includes(o.type))return gunGeometry171(o);var angle=o.aim===undefined?-Math.PI/2:o.aim,h=o.kind===7?40:o.type?(o.type==='hq'?30:o.type==='tesla'?35:25):isTracked(o)?13:17,l=(o.type?22:isTracked(o)?22:13)-(o.recoil||0)/.18*3;return{x:Math.cos(angle)*l-Math.sin(angle)*l,y:(Math.cos(angle)*l+Math.sin(angle)*l)*.51-h,height:h};}
+function weaponMount(o){if(o.guard339)return{x:24*(o.facing||1),y:-36-(o.height340||0),height:36+(o.height340||0)};if(o.type==='cannonturret')return energyGeometry276(o);if(['gun','tesla','missileturret'].includes(o.type)&&(o.lv||1)>1){var g=weaponStage272(o),a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),len=o.type==='tesla'?0:25+g*3,h=o.type==='tesla'?40+g*7:29+g*2;return{x:Math.cos(a)*len,y:Math.sin(a)*len*.65-h,height:h};}if(o.type==='missileturret'){var a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim),l=22-(o.recoil||0)/.18*2;return{x:Math.cos(a)*l,y:Math.sin(a)*l-26,height:26};}if(isTracked(o)||['gun','cannonturret','missileturret'].includes(o.type))return gunGeometry171(o);var angle=o.aim===undefined?-Math.PI/2:o.aim,h=o.kind===7?40:o.type?(o.type==='hq'?30:o.type==='tesla'?35:25):isTracked(o)?13:17,l=(o.type?22:isTracked(o)?22:13)-(o.recoil||0)/.18*3;return{x:Math.cos(angle)*l-Math.sin(angle)*l,y:(Math.cos(angle)*l+Math.sin(angle)*l)*.51-h,height:h};}
 function updateMotion(scene,dt){var units=[].concat(scene.troops||[],scene.guards||[],scene.enemies||[],scene.defenders||[]),all=scene.buildings.concat(units);all.forEach(function(o){o.recoil=Math.max(0,(o.recoil||0)-dt);var dx=o.x-(o.lastX===undefined?o.x:o.lastX),dy=o.y-(o.lastY===undefined?o.y:o.lastY);o.moving=Math.hypot(dx,dy)>.0001;if(o.moving){var heading=Math.atan2(dy,dx);o.heading=turnAngle(o.heading===undefined?heading:o.heading,heading,dt*5);o.walk=(o.walk||0)+Math.hypot(dx,dy)*9;}o.lastX=o.x;o.lastY=o.y;if(o.aimTarget&&o.aimTarget.hp>0){var target=o.aimTarget;o.aim=turnAngle(o.aim===undefined?0:o.aim,Math.atan2(target.y-o.y,target.x-o.x),dt*7);}else if(o.moving)o.aim=turnAngle(o.aim===undefined?o.heading:o.aim,o.heading,dt*4);});}
 
 // 1.6 base economy. Online crystals are only a cached display of the server ledger.
@@ -373,7 +373,7 @@ Engine.prototype.buildWalls268=function(cells,quoted){
 };
 // Logistics 277. Explicit manifest, durable fleet, and physical deployment lifecycle.
 var CARGO277=[12,18,24,32,40];
-function air277(t){return t.transport277?t.state!=='landed'&&t.state!=='unloading':!!(U[t.kind]&&U[t.kind].air&&!t.alien);}
+function air277(t){if(t.guard339)return (t.height340||0)>3;return t.transport277?t.state!=='landed'&&t.state!=='unloading':!!(U[t.kind]&&U[t.kind].air&&!t.alien);}
 function transportMax277(e){return Math.min(5,1+Math.floor((e.hq()-1)/3));}
 function fleet277(e){if(!e.d.logistics277)e.d.logistics277={next:2,ships:[{id:1,lv:1,cargo:U.map(function(){return 0;})}]};var f=e.d.logistics277;f.ships.forEach(function(s){if(s.until&&s.until<=e.now()){delete s.until;if(s.upgrading){s.lv++;delete s.upgrading;}}if(!Array.isArray(s.cargo))s.cargo=U.map(function(){return 0;});});return f;}
 function logisticsBusy277(e){return !!(e.d.siegeLocked||e.d.liveBattle||e.d.pendingLiveStart||e.raid&&!e.raid.result&&e.raid.liveMode!=='preview');}
@@ -468,8 +468,21 @@ var priority299=priority278;priority278=function(r,t){if(t.order299){if(t.order2
 
 // Base support 339: dedicated parking and a permanent ground missile sentry.
 function supportPark339(buildings){return buildings.find(function(b){return b.type==='airbase'&&!b.constructing;})||buildings.find(function(b){return (b.type==='camp'||b.type==='barracks')&&!b.constructing;})||{x:2,y:2};}
-function addSentry339(scene,group){var h=scene.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};scene[group].push({id:11000,kind:2,guard339:true,x:h.x+1.4,y:h.y+1.4,hp:480,max:480,cool:0,route:[],enhance:0,phase:0});}
-function sentryTick339(d,t,dt){t.cool=Math.max(0,(t.cool||0)-dt);var target=d.enemies.filter(function(v){return v.hp>0&&canDamage285(v,t,'missile')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];if(!target)return;t.aimTarget=target;t.aim=Math.atan2(target.y-t.y,target.x-t.x);t.facing=target.x-target.y<t.x-t.y?-1:1;if(t.cool<=0){hit(d,target,48,t,'missile');d.fx.push(weaponFX(t,target,'missile'));t.cool=1.4;}}
+function addSentry339(scene,group){var h=scene.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};scene[group].push({id:11000,kind:2,guard339:true,x:h.x+1.4,y:h.y+1.4,hp:480,max:480,cool:0,route:[],enhance:0,phase:0,height340:42,patrolStep340:0});}
+function sentryMove340(t,p,dt,speed){var dx=p.x-t.x,dy=p.y-t.y,len=Math.hypot(dx,dy),step=Math.min(len,dt*speed);t.moving=len>.05;if(len){t.x+=dx/len*step;t.y+=dy/len*step;if(Math.abs(dx-dy)>.01)t.facing=dx-dy<0?-1:1;}return len-step;}
+function sentryLanding340(d,t){function clear(p){return p.x>=1&&p.y>=1&&p.x<=(d.mapSize||22)-2&&p.y<=(d.mapSize||22)-2&&!d.buildings.some(function(b){return b.hp!==0&&Math.abs(b.x-p.x)<.9&&Math.abs(b.y-p.y)<.9;});}if(clear(t))return{x:t.x,y:t.y};for(var radius=1;radius<=4;radius++)for(var i=0;i<8;i++){var p={x:t.x+Math.cos(i*Math.PI/4)*radius,y:t.y+Math.sin(i*Math.PI/4)*radius};if(clear(p))return p;}return null;}
+function sentryTick339(d,t,dt){
+ if(t.hp!==undefined&&t.hp<=0)return;t.cool=Math.max(0,(t.cool||0)-dt);t.phase=(t.phase||0)+dt;t.landFX340=Math.max(0,(t.landFX340||0)-dt);
+ var target=(d.enemies||[]).filter(function(v){return v.hp>0&&canDamage285(v,t,'missile')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
+ if(target){t.aimTarget=target;t.aim=Math.atan2(target.y-t.y,target.x-t.x);t.facing=target.x-target.y<t.x-t.y?-1:1;t.patrolTarget340=null;
+  if((t.height340||0)>0){if(!t.landing340)t.landing340=sentryLanding340(d,t);if(!t.landing340)return;if(dist(t,t.landing340)>.08){sentryMove340(t,t.landing340,dt,1.8);return;}t.height340=Math.max(0,t.height340-dt*65);if(t.height340===0){t.landFX340=.4;t.landing340=null;}return;}
+  t.moving=false;if(t.cool<=0){hit(d,target,48,t,'missile');d.fx.push(weaponFX(t,target,'missile'));t.cool=1.4;}return;
+ }
+ t.aimTarget=null;t.landing340=null;t.height340=Math.min(42,(t.height340||0)+dt*70);
+ if(t.height340<20)return;var h=d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10},corners=[[2.4,2.4],[-2.4,2.4],[-2.4,-2.4],[2.4,-2.4]];
+ if(!t.patrolTarget340||dist(t,t.patrolTarget340)<.12){var c=corners[(t.patrolStep340||0)%4];t.patrolStep340=(t.patrolStep340||0)+1;t.patrolTarget340={x:Math.max(1,Math.min((d.mapSize||22)-2,h.x+c[0])),y:Math.max(1,Math.min((d.mapSize||22)-2,h.y+c[1]))};}
+ sentryMove340(t,t.patrolTarget340,dt,1.15);
+}
 var scoutSentry339=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scoutSentry339.call(this,target);if(ok)addSentry339(this.raid,'guards');return ok;};
 var defenseSentry339=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=defenseSentry339.call(this);if(!error)addSentry339(this.defense,'defenders');return error;};
 var campaignSentry339=Engine.prototype.scout;Engine.prototype.scout=function(n){var ok=campaignSentry339.call(this,n);if(ok)this.raid.guards=this.raid.guards.filter(function(t){return !t.guard339;});return ok;};
@@ -1700,50 +1713,17 @@ var help251=Game.help;Game.help=function(){Game.droneGuide251();};
 function minerSpot251(){for(var k=0;k<40;k++){var x=1.5+Math.random()*18,y=1.5+Math.random()*18;if(!E.d.buildings.some(function(b){return Math.abs(b.x-x)<1.15&&Math.abs(b.y-y)<1.15;}))return{x:x,y:y};}return{x:1,y:1};}
 function updateRobots251(){
  if(screen!=='home')return;var now=Date.now(),dt=Math.max(0,Math.min(.1,(now-(robotTick251||now))/1000));robotTick251=now;
- if(!robots251.length){var p=minerSpot251();robots251.push({x:p.x,y:p.y,phase:0,facing:1,age256:0,height256:0,guard339:true});}robots251.length=1;
- robots251.forEach(function(r){r.mining=false;r.jet256=0;r.height256=0;r.age256+=dt;if(!r.target||dist(r,r.target)<.1)r.target=minerSpot251();r.pathAge=(r.pathAge||0)-dt;if(r.pathAge<=0){r.route339=route(r,r.target,E.d.buildings,.3,20)||[];r.pathAge=1;}var p=(r.route339||[])[0];r.moving=!!p;if(p){var dx=p.x-r.x,dy=p.y-r.y,len=Math.hypot(dx,dy),step=Math.min(len,dt*.7);if(len){r.x+=dx/len*step;r.y+=dy/len*step;r.facing=dx-dy<0?-1:1;if(step>=len)r.route339.shift();}}else {r.target=null;r.pathAge=0;}});
+ if(!robots251.length){var h=E.d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};robots251.push({x:h.x+2.4,y:h.y+2.4,phase:0,facing:1,height340:42,guard339:true});}robots251.length=1;
+ robots251.forEach(function(r){sentryTick339({enemies:[],buildings:E.d.buildings,mapSize:22},r,dt);});
 }
-function minerPose256(r){
- var c=((r.age256||0)%2.8)/2.8;
- // time, grip x/y, handle angle, torso lean, pelvis squat
- var keys=[[0,3,-24,.66,.23,3],[.18,-3,-34,-1.5,-.12,0],[.33,1,-35,-1.85,-.16,-1],[.46,12,-28,.70,.29,4],[.53,12,-28,.70,.29,4],[.72,-1,-27,.77,.38,5],[.86,0,-32,-.28,.04,1],[1,3,-24,.66,.23,3]];
- if(!r.mining)return{c:0,x:4,y:-29,angle:-.2,lean:r.moving?.06:0,squat:r.moving?Math.sin((r.age256||0)*8):0};
- var i=1;while(i<keys.length-1&&c>keys[i][0])i++;var p=keys[i-1],q=keys[i],u=(c-p[0])/(q[0]-p[0]);u=i===3?u*u:u*u*(3-2*u);var out={c:c};['x','y','angle','lean','squat'].forEach(function(k,j){out[k]=p[j+1]+(q[j+1]-p[j+1])*u;});return out;
-}
+var guardArt340=new Image(),guardLoaded340=false;guardArt340.onload=function(){guardLoaded340=true;drawNeeded=true;};guardArt340.src='assets/guard-jet-340.webp';var guardFlight340=new Image(),flightLoaded340=false;guardFlight340.onload=function(){flightLoaded340=true;drawNeeded=true;};guardFlight340.src='assets/guard-flight-340.webp';
 function drawMiner251(r){
- var p=point(r.x,r.y),pose=minerPose256(r),h=r.height256||0,t=Date.now()/1000+(r.phase||0),c=pose.c;
- ctx.save();ctx.translate(p.x,p.y);ctx.scale(zoom*(r.facing||1),zoom);ctx.lineCap='round';ctx.lineJoin='round';
- ctx.fillStyle='rgba(8,22,32,'+(.28-h*.0018)+')';ctx.beginPath();ctx.ellipse(0,10,23+h*.08,7+h*.025,0,0,Math.PI*2);ctx.fill();
- // Contact effects stay on the ground, independent of torso and tool transforms.
- if(r.mining){ctx.fillStyle='rgba(35,30,23,.25)';ctx.beginPath();ctx.ellipse(33,10,12,4,0,0,Math.PI*2);ctx.fill();
- if(c>=.46&&c<.68){var f=(c-.46)/.22;for(var j=0;j<7;j++){ctx.globalAlpha=1-f;disk(40+(j-3)*9*f,10-(13+j%3*5)*Math.sin(f*Math.PI),1.1+j%2,'#c2ac7b');}ctx.globalAlpha=(1-f)*.22;ctx.fillStyle='#dfd0a6';ctx.beginPath();ctx.ellipse(37,9-f*3,4+f*19,2+f*7,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
- if(c>.82&&c<.98){var f=(c-.82)/.16;for(var j=0;j<5;j++){ctx.globalAlpha=1-f;disk(27+f*(16+j*3),-10-12*Math.sin(f*Math.PI)+f*18,1.5,'#bba17a');}ctx.globalAlpha=1;}}
- if(r.jet256&&h<25){ctx.globalAlpha=r.jet256*(1-h/30)*.22;ctx.strokeStyle='#dbcda8';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,11,15+(t*28%15),5+(t*9%5),0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
- ctx.translate(0,-h);
- function line(ax,ay,bx,by,width,color){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();}
- function armor(ax,ay,bx,by,w){line(ax,ay,bx,by,w*.65,'#162b3b');ctx.save();ctx.translate(ax,ay);ctx.rotate(Math.atan2(by-ay,bx-ax));var len=Math.hypot(bx-ax,by-ay),v=w*.68;ctx.beginPath();ctx.moveTo(2,-v*.65);ctx.lineTo(5,-v);ctx.lineTo(len-3,-v*.8);ctx.lineTo(len,0);ctx.lineTo(len-3,v*.8);ctx.lineTo(5,v);ctx.lineTo(2,v*.65);ctx.closePath();ctx.fillStyle='#b9cdd8';ctx.strokeStyle='#173246';ctx.lineWidth=2;ctx.fill();ctx.stroke();line(5,-v*.62,len-5,-v*.52,2,'#f1f8fa');line(5,v*.55,len-4,v*.45,2.4,'#526d83');line(len*.4,-v*.7,len*.6,-v*.65,2,'#ecb34e');ctx.restore();}
- function joint(x,y,radius){disk(x,y,radius,'#142b3a');disk(x,y,radius*.65,'#54748a');disk(x-1,y-1,radius*.26,'#a5edff');}
- var hip={x:pose.lean*8,y:-12+pose.squat};
- // Planted, staggered feet; knees compress under the downstroke. Folded legs during flight.
- [-1,1].forEach(function(side){var hx=hip.x+side*7,hy=hip.y,fx=side===1?17:-16,fy=side===1?10:6,kx=side===1?hx+7:hx-6,ky=hy+10;
- if(h>1){fx=side*9-4;fy=7; kx=hx+6;ky=hy+9;}
- armor(hx,hy,kx,ky,8);joint(kx,ky,4);armor(kx,ky,fx,fy-3,7);line(fx-3,fy,fx+7,fy,9,'#17364d');line(fx-3,fy-2,fx+6,fy-2,5,'#3d8db0');line(fx+1,fy-3,fx+6,fy-3,1.5,'#8deaff');});
- // Jetpack sits behind the torso; tapered exhaust has a bright core, no walking gait.
- ctx.save();ctx.translate(hip.x,hip.y);ctx.rotate(pose.lean);ctx.fillStyle='#203e55';ctx.strokeStyle='#102637';ctx.lineWidth=2;ctx.fillRect(-24,-26,14,24);ctx.strokeRect(-24,-26,14,24);
- [-21,-12].forEach(function(x){ctx.fillStyle='#7295a9';ctx.fillRect(x-3,-12,7,13);ctx.fillStyle='#193349';ctx.fillRect(x-4,-1,9,4);if(r.jet256){var len=(17+Math.sin(t*31+x)*3)*r.jet256;ctx.fillStyle='rgba(42,169,255,.28)';ctx.beginPath();ctx.moveTo(x-7,3);ctx.quadraticCurveTo(x-9,len*.6,x+1,len+10);ctx.quadraticCurveTo(x+8,len*.6,x+6,3);ctx.fill();ctx.fillStyle='#5cdfff';ctx.beginPath();ctx.moveTo(x-4,3);ctx.lineTo(x+1,len+6);ctx.lineTo(x+4,3);ctx.fill();ctx.fillStyle='#e0ffff';ctx.beginPath();ctx.moveTo(x-2,3);ctx.lineTo(x+1,len*.6);ctx.lineTo(x+2,3);ctx.fill();}});ctx.restore();
- // Clip away baked-in arms and legs. Preserve the original painted chest/head artwork.
- ctx.save();ctx.translate(hip.x,hip.y);ctx.rotate(pose.lean);
- if(art){var cell=atlas.naturalWidth/4;ctx.beginPath();ctx.moveTo(-17,-39);ctx.lineTo(18,-39);ctx.lineTo(23,-26);ctx.lineTo(18,-15);ctx.lineTo(12,0);ctx.lineTo(-11,0);ctx.lineTo(-19,-16);ctx.closePath();ctx.clip();ctx.drawImage(atlas,cell*2,cell*2,cell,cell,-34,-42,68,68);}else{ctx.fillStyle='#d6e8ee';ctx.fillRect(-14,-30,28,28);}ctx.restore();
- function bodyPoint(x,y){return{x:hip.x+x*Math.cos(pose.lean)-y*Math.sin(pose.lean),y:hip.y+x*Math.sin(pose.lean)+y*Math.cos(pose.lean)};}
- var ca=Math.cos(pose.angle),sa=Math.sin(pose.angle);
- function grip(n){return{x:pose.x+ca*n,y:pose.y+sa*n};}
- // Two-bone arm solve keeps both hands attached to their handle grips.
- function arm(side,n){var sh=bodyPoint(side*15,-25),hand=grip(n),dx=hand.x-sh.x,dy=hand.y-sh.y,d=Math.max(.01,Math.hypot(dx,dy)),len=Math.max(18,d*.51),bend=Math.sqrt(Math.max(0,len*len-d*d/4)),ex=(sh.x+hand.x)/2-dy/d*bend,ey=(sh.y+hand.y)/2+dx/d*bend;
- armor(sh.x,sh.y,ex,ey,7);joint(ex,ey,3.6);armor(ex,ey,hand.x,hand.y,6);joint(sh.x,sh.y,5);disk(sh.x-1,sh.y-1,2,'#d4e3e9');joint(hand.x,hand.y,3.6);}
- arm(-1,-10);
- ctx.save();ctx.translate(pose.x,pose.y);ctx.rotate(pose.angle);
- var launcher=ctx.createLinearGradient(-15,-9,25,10);if(launcher){launcher.addColorStop(0,'#d8e6ef');launcher.addColorStop(.35,'#51708d');launcher.addColorStop(.7,'#172d43');launcher.addColorStop(1,'#839aaf');}ctx.fillStyle=launcher||'#51708d';ctx.strokeStyle='#091c2d';ctx.lineWidth=2;ctx.fillRect(-20,-9,50,18);ctx.strokeRect(-20,-9,50,18);line(-16,-6,25,-6,2,'#e8f6ff');line(-9,5,21,5,3,'#42d9ff');ctx.fillStyle='#0d1b29';ctx.fillRect(24,-11,10,22);ctx.fillStyle='#ffb34c';ctx.beginPath();ctx.moveTo(35,-6);ctx.lineTo(44,0);ctx.lineTo(35,6);ctx.closePath();ctx.fill();ctx.fillStyle='#718aa2';ctx.fillRect(-25,-6,6,12);ctx.restore();
- arm(1,11);ctx.restore();
+ if(!guardLoaded340)return;var p=point(r.x,r.y),h=r.height340||0,t=Date.now()/1000+(r.phase||0),facing=r.facing||1;
+ ctx.save();ctx.translate(p.x,p.y);ctx.scale(zoom,zoom);ctx.fillStyle='rgba(8,22,32,.23)';ctx.beginPath();ctx.ellipse(0,3,16+h*.08,5+h*.02,0,0,Math.PI*2);ctx.fill();
+ if(r.landFX340){var progress=1-r.landFX340/.4;ctx.globalAlpha=(1-progress)*.35;ctx.strokeStyle='#b9dded';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,3,12+progress*20,4+progress*7,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
+ ctx.translate(0,-h-(h>10?Math.sin(t*3)*1.2:0));ctx.scale(facing,1);
+ if(h>0){var strength=Math.min(1,h/12),len=(17+Math.sin(t*35)*2)*strength;[-13,-5].forEach(function(x){ctx.fillStyle='rgba(18,157,255,.32)';ctx.beginPath();ctx.moveTo(x-6,-24);ctx.quadraticCurveTo(x-8,-14,x,-24+len+10);ctx.quadraticCurveTo(x+7,-13,x+5,-24);ctx.fill();ctx.fillStyle='#44d7ff';ctx.beginPath();ctx.moveTo(x-3,-24);ctx.lineTo(x,-24+len+5);ctx.lineTo(x+3,-24);ctx.fill();ctx.fillStyle='#dfffff';ctx.beginPath();ctx.moveTo(x-1.5,-24);ctx.lineTo(x,-24+len*.7);ctx.lineTo(x+1.5,-24);ctx.fill();});}
+ var img=h>5&&flightLoaded340?guardFlight340:guardArt340,w=64*img.naturalWidth/img.naturalHeight;ctx.drawImage(img,-w/2,-58,w,64);ctx.restore();
 }
 var mineHud251=hud;hud=function(){mineHud251();if(!document.hidden&&mineOwner251&&Date.now()-minePoll251>60000&&!mineShow251){minePoll251=Date.now();mineSend251('status');}var start=$('mineStart251');if(start&&mine251){start.disabled=mineActive251()||!!mineBusy251||mineShow251;start.textContent=mineActive251()?mt251('กำลังขุด • รอบละ 24 ชั่วโมง','Mining • 24-hour session'):mt251('▶ ดูโฆษณา • เริ่มขุด 24 ชั่วโมง','▶ Watch ad • Mine for 24 hours');}var clock=$('mineClock251');if(clock&&mine251)clock.textContent=mineActive251()?mt251('เหลือเวลา ','Time left ')+duration((Date.parse(mine251.ends_at)-mineNow251())/1000):mt251('หมดรอบแล้ว กดเริ่มใหม่เพื่อสะสมต่อ','Session ended. Start again to earn.');};
 
@@ -2492,8 +2472,27 @@ guideTick288=function(){guideAutoPending288=false;guide288=null;var dock=$('guid
 Game.beginGuide288=Game.guideShow288=Game.droneGuide251=Game.guideAction288=Game.guideNext288=guideTick288;
 Game.help=function(){Game.settings();};
 guideTick288();
-var packSentry339=livePack;livePack=function(){var f=packSentry339();if(f&&f.guards)f.guards.forEach(function(a,i){a[18]=!!E.raid.guards[i].guard339;});return f;};
-var unpackSentry339=liveUnpack;liveUnpack=function(f){unpackSentry339(f);if(f&&f.guards&&E.raid)E.raid.guards.forEach(function(t,i){t.guard339=!!f.guards[i][18];});};
+var packSentry339=livePack;livePack=function(){var f=packSentry339();if(f&&f.guards)f.guards.forEach(function(a,i){a[18]=!!E.raid.guards[i].guard339;a[19]=E.raid.guards[i].height340||0;a[20]=E.raid.guards[i].facing||1;});return f;};
+var unpackSentry339=liveUnpack;liveUnpack=function(f){unpackSentry339(f);if(f&&f.guards&&E.raid)E.raid.guards.forEach(function(t,i){t.guard339=!!f.guards[i][18];t.height340=Math.max(0,Math.min(42,Number(f.guards[i][19])||0));t.facing=f.guards[i][20]===-1?-1:1;});};
+
+// Release 340: left calendar, seven-day ad-backed rewards and server-clock refresh.
+var dailyView340=false,dailyClockOffset340=0,dailyPollAt340=Date.now()+2200,dailyReady340=false,dailyPollBusy340=null;
+function dailyStatus340(d){if(d&&d.checkin233){checkinState233=d.checkin233;if(d.checkin233.server_time)dailyClockOffset340=Date.now()-Date.parse(d.checkin233.server_time);dailyPollAt340=Date.now()+60000;}}
+function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.streak||0):0,day=c&&c.claimed?((Math.max(1,streak)-1)%7)+1:(streak%7)+1,reward=c&&c.claimed?c.reward:(c&&c.next_reward|| (day===7?200:50));
+ return '<section class="daily-card340 checkin237"><div class="daily-title340"><img src="assets/checkin-calendar-340.webp" alt=""><div><h2>'+mt251('เช็คอินรายวัน','Daily check-in')+'</h2><p>'+mt251('วันที่ 1–6 รับ 50 • วันที่ 7 รับ 200 NOVA','Days 1–6: 50 • Day 7: 200 NOVA')+'</p></div></div><div class="daily-week340 checkin-grid237">'+Array.from({length:7},function(_,i){var n=i+1,done=n<day||(c&&c.claimed&&n===day);return '<div class="daily-day340 '+(n===day?'today340 ':'')+(done?'done340':'')+'"><small>'+mt251('วันที่ ','Day ')+n+'</small><b>'+(n===7?200:50)+'</b><span>NOVA</span>'+(done?'<i>✓</i>':'')+'</div>';}).join('')+'</div><p class="daily-rule340">'+mt251('ดูวิดีโอให้จบเพื่อรับรางวัล • ขาดวันเริ่มใหม่','Finish the video to collect • A missed day resets your streak')+'</p><button class="wide green" '+(!c||c.claimed||warBusy?'disabled':'')+' onclick="Game.checkin()">'+(c&&c.claimed?mt251('รับรางวัลวันนี้แล้ว','Collected today'):mt251('เช็คอินรับ ','Check in for ')+reward+' NOVA')+'</button><small>'+mt251('เริ่มวันใหม่เวลา 00:00 น. ประเทศไทย','New day at 00:00 Thailand time')+'</small></section>';
+}
+checkinPanel233=function(){return welcomePanel247()+dailyCalendarHTML340()+'<button class="wide" onclick="Game.legacyBalance339()">'+mt251('รับยอด NOVA เดิมที่ยังไม่เคลม','Recover previous unclaimed NOVA')+'</button>';};
+var treasury340=treasury;treasury=function(){if(dailyView340)open(dailyCalendarHTML340());else treasury340();};
+var wallet340=Game.treasury;Game.treasury=Game.testShop=function(){dailyView340=false;wallet340();};
+Game.openDaily340=function(){dailyView340=true;open(dailyCalendarHTML340());if(!guest288&&!warBusy)Game.refreshCheckin233();};
+var closeDaily340=Game.close;Game.close=function(){dailyView340=false;closeDaily340();};
+var cloudDaily340=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(data&&data.request_id&&data.request_id.indexOf('daily340-')===0){if(data.request_id!==dailyPollBusy340)return;dailyPollBusy340=null;if(event==='war'&&data.data&&data.data.owner){testWallet=Object.assign({},testWallet||{},data.data);dailyStatus340(data.data);if(dailyView340&&modal.innerHTML.indexOf('daily-card340')>=0)treasury();}dailyBadge340();return;}var d=data&&data.data,owner=d&&d.owner,previous=owner&&(E.d.checkinCredits233||{})[owner],pending=!!(E.d.pendingTestCheckin248||E.d.pendingAd230&&E.d.pendingAd230.kind==='checkin');if(event==='signed_in'||event==='signed_out'){checkinState233=null;dailyReady340=false;dailyPollAt340=Date.now()+2200;dailyPollBusy340=null;dailyView340=false;}cloudDaily340(event,data);if(d&&testWallet&&owner===testWallet.owner)dailyStatus340(d);dailyBadge340();if(pending&&owner&&(E.d.checkinCredits233||{})[owner]!==previous&&d.checkin233&&d.checkin233.reward>0){completionAudio250();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย!','Congratulations!')+'</h2><img src="assets/checkin-calendar-340.webp" alt="" style="width:80px;height:80px;object-fit:contain"><p><b>+'+Number(d.checkin233.reward)+' NOVA</b></p><button class="wide green" onclick="Game.close()">'+mt251('ตกลง','OK')+'</button></section>');}};
+function dailyBadge340(){var button=$('dailyCheckin340');if(!button)return;var c=checkinState233,expired=c&&c.next_reset&&Date.now()-dailyClockOffset340>=Date.parse(c.next_reset);dailyReady340=!!(c&&!c.claimed&&!expired&&!guest288);button.className='daily-calendar340'+(dailyReady340?' ready340':'');if(button.setAttribute)button.setAttribute('aria-label',dailyReady340?mt251('เช็คอินรายวัน พร้อมรับรางวัล','Daily check-in: reward available'):mt251('เช็คอินรายวัน','Daily check-in'));if(!document.hidden&&!guest288&&root.NovaCloud&&root.NovaCloud.hasAccount&&root.NovaCloud.hasAccount()&&root.NovaCloud.warAvailable&&root.NovaCloud.warAvailable()&&root.NovaCloud.warRequest&&(!c||expired)&&Date.now()>=dailyPollAt340){dailyPollBusy340='daily340-'+nonce160();dailyPollAt340=Date.now()+30000;try{root.NovaCloud.warRequest('test_status',JSON.stringify({checkin233:true}),dailyPollBusy340);}catch(e){dailyPollBusy340=null;}}}
+
+var hudDaily340=hud;hud=function(){hudDaily340();dailyBadge340();};
+setTimeout(function(){dailyPollAt340=0;dailyBadge340();},2200);
+// No separate confirmation screen before the rewarded video.
+var testPanel340=testPanel248;testPanel248=function(message){var clean=String(message||'').replace(/โฆษณาทดสอบ/g,'วิดีโอ').replace(/test ad/gi,'video');open('<h2>'+mt251('เช็คอินรายวัน','Daily check-in')+'</h2><p>'+escapeHTML(clean)+'</p><button class="wide" onclick="Game.checkin()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');};
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 
