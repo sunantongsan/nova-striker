@@ -62,7 +62,7 @@ U[3].air=true;
 ['machine','cannon','grenade','heal','sniper','missile','shock','bomb','plasma'].forEach(function(w,i){U[i].weapon=w;});
 U[2].splash=.85;U[1].splash=.6;
 // Energy mortar: a fixed landing point, with damage only when the orb arrives.
-var ENERGY_RADIUS276=3,ENERGY_FLIGHT276=.85;
+var ENERGY_RADIUS276=3,ENERGY_FLIGHT276=1.55;
 function energyBearing276(o){var a=screenBearing(o.aim===undefined?-Math.PI/2:o.aim);return Math.cos(a)>=0?(Math.sin(a)<0?0:1):(Math.sin(a)>=0?2:3);}
 function energyStage281(o){var lv=Math.max(1,Math.min(20,o.lv||1));return lv>=20?3:lv>=12?2:lv>=6?1:0;}
 // Shared crop and muzzle coordinates from the approved coil-artillery sprite.
@@ -105,7 +105,7 @@ function tickEnergy276(scene,dt,group){
  });
 }
 
-function weaponFX(a,b,weapon){a.aim=Math.atan2(b.y-a.y,b.x-a.x);a.aimTarget=b;a.recoil=.18;var muzzle=weaponMount(a),colors={machine:'#ffe793',cannon:'#ffb655',grenade:'#ff915b',heal:'#79ffb0',sniper:'#ecfaff',missile:'#ffb178',shock:'#bad0ff',bomb:'#ff7552',plasma:'#56edff',tesla:'#c1a1ff'};return{x:a.x,y:a.y,tx:b.x,ty:b.y,muzzle:muzzle,weapon:weapon,highArc:a.type==='missileturret',life:a.type==='missileturret'?.9:.48,maxLife:a.type==='missileturret'?.9:.48,color:colors[weapon]||'#ed93ff'};}
+function weaponFX(a,b,weapon){a.aim=Math.atan2(b.y-a.y,b.x-a.x);a.aimTarget=b;a.recoil=.18;var muzzle=weaponMount(a),colors={machine:'#ffe793',cannon:'#ffb655',grenade:'#ff915b',heal:'#79ffb0',sniper:'#ecfaff',missile:'#ffb178',shock:'#bad0ff',bomb:'#ff7552',plasma:'#56edff',tesla:'#c1a1ff'};return{x:a.x,y:a.y,tx:b.x,ty:b.y,muzzle:muzzle,weapon:weapon,highArc:weapon==='missile',life:weapon==='missile'?2.25:.48,maxLife:weapon==='missile'?2.25:.48,color:colors[weapon]||'#ed93ff'};}
 
 // Reference coordinates are normalized from a 1280px atlas; alpha is preserved.
 var combatHulls171=[
@@ -957,7 +957,7 @@ var liveRoom=null,liveTarget=null,liveSeq=0,liveSending=false,liveTicks=0,liveAl
 function liveAlarm(attacker){/* Combat audio is exclusively weapon fire and explosions. */}
 function liveLayout(){return E.d.buildings.filter(active).map(function(b){return{type:b.type,x:b.x,y:b.y,lv:b.lv};});}
 function liveSend(mode,data){if(warBusy)return false;warRequest('attack',Object.assign({live:mode},data||{}));return true;}
-function livePack(){var r=E.raid;function units(a){return a.slice(0,40).map(function(t){return[t.kind,+t.x.toFixed(3),+t.y.toFixed(3),Math.max(0,Math.round(t.hp)),Math.round(t.max),t.aim||0,t.heading||0,t.walk||0,t.dead||0,t.recoil||0];});}return{buildings:r.buildings.map(function(b){return[Math.max(0,Math.round(b.hp)),b.aim||0,b.recoil||0];}),troops:units(r.troops),guards:units(r.guards),army:r.army.slice(),time:r.time,fx:r.fx.slice(-12).map(function(f){return{x:f.x,y:f.y,tx:f.tx,ty:f.ty,weapon:f.weapon,highArc:!!f.highArc,muzzle:f.muzzle,effect:f.effect,radius:f.radius,life:f.highArc?Math.min(.9,f.life):.45,maxLife:f.highArc?.9:.45,color:f.color||'#ffb655'};})};}
+function livePack(){var r=E.raid;function units(a){return a.slice(0,40).map(function(t){return[t.kind,+t.x.toFixed(3),+t.y.toFixed(3),Math.max(0,Math.round(t.hp)),Math.round(t.max),t.aim||0,t.heading||0,t.walk||0,t.dead||0,t.recoil||0];});}return{buildings:r.buildings.map(function(b){return[Math.max(0,Math.round(b.hp)),b.aim||0,b.recoil||0];}),troops:units(r.troops),guards:units(r.guards),army:r.army.slice(),time:r.time,fx:r.fx.slice(-12).map(function(f){return{x:f.x,y:f.y,tx:f.tx,ty:f.ty,weapon:f.weapon,highArc:!!f.highArc,muzzle:f.muzzle,effect:f.effect,radius:f.radius,life:f.highArc?f.life:.45,maxLife:f.highArc?(f.maxLife||2.25):.45,color:f.color||'#ffb655'};})};}
 function liveUnpack(f){var r=E.raid;if(!f||!f.buildings)return;f.buildings.forEach(function(a,i){var b=r.buildings[i];if(b){b.hp=a[0];b.aim=a[1];b.recoil=a[2];}});function units(a){return(a||[]).map(function(t,i){return{id:i+1,kind:t[0],x:t[1],y:t[2],hp:t[3],max:t[4],aim:t[5],heading:t[6],walk:t[7],dead:t[8],recoil:t[9],route:[],cool:0};});}r.troops=units(f.troops);r.guards=units(f.guards);r.army=f.army.slice();r.time=f.time;r.fx=f.fx||[];drawNeeded=true;}
 function liveScene(target,mode){if(!E.scoutPlayer(target))return false;E.raid.liveMode=mode;E.raid.army=E.d.army.slice();E.raid.phase=mode==='attacker'?'battle':'spectator';screen='raid';paused=false;selected=null;placing=moving=null;zoom=.85;panX=0;panY=-110;close();hud();return true;}
 Game.warScout=function(index){targetCursor=index;liveTarget=warState.targets[index];if(!liveTarget)return;warState.target=liveTarget;liveScene(liveTarget,'preview');liveSend('peek',{target:liveTarget.id});};
@@ -1210,14 +1210,15 @@ Game.setLanguage=function(lang){if(lang!=='en'&&lang!=='th'||lang===root.NovaI18
  var labels242=[];Object.keys(B).map(function(k){return B[k];}).concat(U).forEach(function(item){['name','description'].forEach(function(key){if(typeof item[key]==='string')labels242.push({item:item,key:key,source:root.NovaI18n.source(item[key])});});});root.NovaI18n.setLanguage(lang);labels242.forEach(function(v){v.item[v.key]=tr(v.source);});hud();drawNeeded=true;Game.languages();};
 Game.settings=function(){open(tr('<h2>ตั้งค่า</h2><button class="wide" onclick="Game.languages()">🌐 ภาษา</button><button class="wide" onclick="Game.cloud()">☁ บัญชีและเซฟ</button><button class="wide" onclick="Game.toggleSound();Game.settings()">เสียงอาวุธ: ')+(soundOn?tr('เปิด'):tr('ปิด'))+tr('</button><button class="wide" onclick="Game.toggleMusic()">♫ ดนตรี: ')+(musicOn?tr('เปิด'):tr('ปิด'))+tr('</button><button class="wide" onclick="Game.help()">? วิธีเล่น</button><button class="wide" onclick="Game.close()">กลับ</button>'));};
 // Fixed work per effect; existing scene limits bound the total particles.
+var missileArt341=new Image();missileArt341.onload=function(){drawNeeded=true;};missileArt341.src="assets/missile341.webp";
 var previousFX218=drawFX;
 drawFX=function(f){
  weaponAudio218(f);var w=f.weapon,v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.48))),a=point(f.x,f.y),b=point(f.tx,f.ty);
  if(w!=='missile'){if(!(w==='impact'&&(['cannon','missile','grenade','bomb'].includes(f.effect)||f.radius>=20)))previousFX218(f);}else{
   a.x+=(f.muzzle?f.muzzle.x:0)*zoom;a.y+=(f.muzzle?f.muzzle.y:-15)*zoom;b.y-=15*zoom;
-  var t=Math.min(1,v*1.5),dx=b.x-a.x,dy=b.y-a.y,arc=(f.highArc?60:24)*zoom,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc;
+  var t=Math.min(1,v*1.5),dx=b.x-a.x,dy=b.y-a.y,arc=(f.highArc?145:70)*zoom,x=a.x+dx*t,y=a.y+dy*t-Math.sin(t*Math.PI)*arc;
   ctx.save();for(var i=1;i<=9;i++){var z=t-i*.035;if(z<0)continue;ctx.globalAlpha=(1-v)*((f.highArc?.85:.45)-i*.035);disk(a.x+dx*z,a.y+dy*z-Math.sin(z*Math.PI)*arc,(2+i*.55)*zoom,f.highArc?'#242a30':'#b6b4ae');}
-  if(t<1){ctx.globalAlpha=1;ctx.translate(x,y);ctx.rotate(Math.atan2(dy-Math.cos(t*Math.PI)*Math.PI*arc,dx));ctx.fillStyle='#ff8e27';ctx.beginPath();ctx.moveTo(-5*zoom,-3*zoom);ctx.lineTo(-(14+3*Math.sin(frame*2))*zoom,0);ctx.lineTo(-5*zoom,3*zoom);ctx.fill();box(-6*zoom,-2*zoom,11*zoom,4*zoom,'#dce9ee');ctx.fillStyle='#ff593f';ctx.beginPath();ctx.moveTo(5*zoom,-2*zoom);ctx.lineTo(9*zoom,0);ctx.lineTo(5*zoom,2*zoom);ctx.fill();box(-6*zoom,-4*zoom,3*zoom,8*zoom,'#7b929f');disk(-8*zoom,0,2*zoom,'#fff4b0');}
+  if(t<1){ctx.globalAlpha=1;ctx.translate(x,y);ctx.rotate(Math.atan2(dy-Math.cos(t*Math.PI)*Math.PI*arc,dx));ctx.fillStyle='#42baff';ctx.beginPath();ctx.moveTo(-12*zoom,-2.5*zoom);ctx.lineTo(-(24+3*Math.sin(frame*2))*zoom,0);ctx.lineTo(-12*zoom,2.5*zoom);ctx.fill();if(missileArt341.complete&&missileArt341.naturalWidth){var mw=34*zoom,mh=mw*missileArt341.naturalHeight/missileArt341.naturalWidth;ctx.drawImage(missileArt341,-mw/2,-mh/2,mw,mh);}else{box(-10*zoom,-2*zoom,20*zoom,4*zoom,'#dce9ee');}disk(-15*zoom,0,1.5*zoom,'#e3ffff');}
   else{ctx.globalAlpha=(1-v)*2;disk(b.x,b.y,(f.highArc?18+55*(v-.66):8+16*(v-.66))*zoom,'#ff9c32');disk(b.x,b.y,5*zoom,'#fff5bc');}ctx.restore();
  }
  if(w==='impact'&&(['cannon','missile','grenade','bomb'].includes(f.effect)||f.radius>=20)){
@@ -1714,7 +1715,7 @@ function minerSpot251(){for(var k=0;k<40;k++){var x=1.5+Math.random()*18,y=1.5+M
 function updateRobots251(){
  if(screen!=='home')return;var now=Date.now(),dt=Math.max(0,Math.min(.1,(now-(robotTick251||now))/1000));robotTick251=now;
  if(!robots251.length){var h=E.d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};robots251.push({x:h.x+2.4,y:h.y+2.4,phase:0,facing:1,height340:42,guard339:true});}robots251.length=1;
- robots251.forEach(function(r){sentryTick339({enemies:[],buildings:E.d.buildings,mapSize:22},r,dt);});
+ robots251.forEach(function(r){var d={enemies:[],buildings:E.d.buildings,mapSize:22};if(r.restAt341===undefined)r.restAt341=now+9000+Math.random()*9000;if(now>=r.restAt341){if(!r.restPoint341)r.restPoint341=sentryLanding340(d,r);if(r.restPoint341&&dist(r,r.restPoint341)>.08){sentryMove340(r,r.restPoint341,dt,1.15);return;}if(r.restPoint341&&(r.height340||0)>0){r.height340=Math.max(0,r.height340-dt*40);if(!r.height340){r.landFX340=.4;r.restUntil341=now+3000+Math.random()*4000;}return;}if(r.restUntil341&&now<r.restUntil341){r.moving=false;return;}r.restPoint341=null;r.restUntil341=0;r.restAt341=now+11000+Math.random()*14000;}sentryTick339(d,r,dt);});
 }
 var guardArt340=new Image(),guardLoaded340=false;guardArt340.onload=function(){guardLoaded340=true;drawNeeded=true;};guardArt340.src='assets/guard-jet-340.webp';var guardFlight340=new Image(),flightLoaded340=false;guardFlight340.onload=function(){flightLoaded340=true;drawNeeded=true;};guardFlight340.src='assets/guard-flight-340.webp';
 function drawMiner251(r){
@@ -1722,7 +1723,7 @@ function drawMiner251(r){
  ctx.save();ctx.translate(p.x,p.y);ctx.scale(zoom,zoom);ctx.fillStyle='rgba(8,22,32,.23)';ctx.beginPath();ctx.ellipse(0,3,16+h*.08,5+h*.02,0,0,Math.PI*2);ctx.fill();
  if(r.landFX340){var progress=1-r.landFX340/.4;ctx.globalAlpha=(1-progress)*.35;ctx.strokeStyle='#b9dded';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,3,12+progress*20,4+progress*7,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
  ctx.translate(0,-h-(h>10?Math.sin(t*3)*1.2:0));ctx.scale(facing,1);
- if(h>0){var strength=Math.min(1,h/12),len=(17+Math.sin(t*35)*2)*strength;[-13,-5].forEach(function(x){ctx.fillStyle='rgba(18,157,255,.32)';ctx.beginPath();ctx.moveTo(x-6,-24);ctx.quadraticCurveTo(x-8,-14,x,-24+len+10);ctx.quadraticCurveTo(x+7,-13,x+5,-24);ctx.fill();ctx.fillStyle='#44d7ff';ctx.beginPath();ctx.moveTo(x-3,-24);ctx.lineTo(x,-24+len+5);ctx.lineTo(x+3,-24);ctx.fill();ctx.fillStyle='#dfffff';ctx.beginPath();ctx.moveTo(x-1.5,-24);ctx.lineTo(x,-24+len*.7);ctx.lineTo(x+1.5,-24);ctx.fill();});}
+ if(h>0){var strength=Math.min(1,h/12),len=(32+Math.sin(t*24)*2)*strength;[-20,-12].forEach(function(x){ctx.fillStyle='rgba(18,157,255,.32)';ctx.beginPath();ctx.moveTo(x-5,-30);ctx.quadraticCurveTo(x-8,-14,x,-30+len+12);ctx.quadraticCurveTo(x+7,-13,x+5,-30);ctx.fill();ctx.fillStyle='#44d7ff';ctx.beginPath();ctx.moveTo(x-3,-30);ctx.lineTo(x,-30+len+7);ctx.lineTo(x+3,-30);ctx.fill();ctx.fillStyle='#dfffff';ctx.beginPath();ctx.moveTo(x-1.5,-30);ctx.lineTo(x,-30+len*.85);ctx.lineTo(x+1.5,-30);ctx.fill();});}
  var img=h>5&&flightLoaded340?guardFlight340:guardArt340,w=64*img.naturalWidth/img.naturalHeight;ctx.drawImage(img,-w/2,-58,w,64);ctx.restore();
 }
 var mineHud251=hud;hud=function(){mineHud251();if(!document.hidden&&mineOwner251&&Date.now()-minePoll251>60000&&!mineShow251){minePoll251=Date.now();mineSend251('status');}var start=$('mineStart251');if(start&&mine251){start.disabled=mineActive251()||!!mineBusy251||mineShow251;start.textContent=mineActive251()?mt251('กำลังขุด • รอบละ 24 ชั่วโมง','Mining • 24-hour session'):mt251('▶ ดูโฆษณา • เริ่มขุด 24 ชั่วโมง','▶ Watch ad • Mine for 24 hours');}var clock=$('mineClock251');if(clock&&mine251)clock.textContent=mineActive251()?mt251('เหลือเวลา ','Time left ')+duration((Date.parse(mine251.ends_at)-mineNow251())/1000):mt251('หมดรอบแล้ว กดเริ่มใหม่เพื่อสะสมต่อ','Session ended. Start again to earn.');};
@@ -2073,7 +2074,7 @@ var energyFX276=drawFX;drawFX=function(f){
  ctx.save();
  if(f.weapon==='energy276'){
   a.x+=(f.muzzle?f.muzzle.x:0)*z;a.y+=(f.muzzle?f.muzzle.y:-35)*z;
-  var orb=Math.max(1,Math.min(10,f.orb281||1)),arc=125*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-4*t*(1-t)*arc,diameter=8*z*Math.sqrt(orb);
+  var orb=Math.max(1,Math.min(10,f.orb281||1)),arc=190*z,dx=b.x-a.x,dy=b.y-a.y,x=a.x+dx*t,y=a.y+dy*t-4*t*(1-t)*arc,diameter=8*z*Math.sqrt(orb);
   // Short tail leaves the solid armored sphere visible even at small game scale.
   for(var j=4;j>=1;j--){var u=Math.max(0,t-j*.02);ctx.globalAlpha=(1-j/5)*.24;disk(a.x+dx*u,a.y+dy*u-4*u*(1-u)*arc,(2-j*.3)*z*Math.sqrt(orb),'#32c9ff');}
   ctx.globalAlpha=1;
