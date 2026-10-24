@@ -43,3 +43,21 @@ const oldNative=boot({...cloud,hasAccount:()=>true});
 oldNative.s.Game.cloud();
 assert.match(oldNative.el('modal').innerHTML,/Game.accountLogout282/,'old native bridge can log out without loading a backup');
 console.log('PASS account management: details, escaping, logout confirmation, offline controls, legacy bridge and clear sign-in screen');
+
+
+// Facebook shares the normal account/session path and blocks duplicate OAuth taps.
+let facebookCalls=[];
+const fb=boot({...cloud,loginFacebook:()=>facebookCalls.push('facebook'),login:()=>facebookCalls.push('google')});
+assert.ok(!fb.el('welcomeEmailDetails').open);
+fb.s.Game.welcomeFacebook();fb.s.Game.welcomeFacebook();fb.s.Game.welcomeGoogle();
+assert.deepEqual(facebookCalls,['facebook']);
+assert.equal(fb.el('welcomeFacebook').disabled,true);
+fb.s.novaCloudEvent('status',{message:'ยกเลิก'});
+assert.equal(fb.el('welcomeFacebook').disabled,false);
+fb.s.Game.welcomeFacebook();fb.s.novaCloudEvent('signed_in',{id:'facebook-account'});
+assert.equal(fb.el('welcome').hidden,true);
+const oldFb=boot(cloud);oldFb.s.Game.welcomeFacebook();
+assert.match(oldFb.el('welcomeStatus').textContent,/Google Play/);
+assert.equal(oldFb.el('welcomeFacebook').disabled,false);
+oldFb.s.Game.welcomeSwitch();assert.equal(oldFb.el('welcomeEmailDetails').open,true);
+console.log('PASS Facebook: duplicate taps, cancel/retry, account entry, old Android guard and email expansion');

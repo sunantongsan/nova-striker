@@ -1,0 +1,29 @@
+name: Verify account choices
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/java/**'
+      - 'game.js'
+      - 'index.html'
+      - 'tests/welcome217.cjs'
+      - '.github/workflows/auth-choices.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/welcome217.cjs && node tests/onboarding288.cjs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - run: gradle :app:assembleDebug --no-daemon

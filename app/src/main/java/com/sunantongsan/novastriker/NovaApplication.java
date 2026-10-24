@@ -10,3 +10,4 @@ public final class NovaApplication extends Application {
         PlayGamesSdk.initialize(this);
     }
 }
+
