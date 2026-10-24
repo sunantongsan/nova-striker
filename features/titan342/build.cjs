@@ -23,6 +23,8 @@ function integrate(source){
  if(source.includes('/* titan342:engine */'))return source;
  const core=fs.readFileSync(path.join(dir,'engine.js'),'utf8'),ui=fs.readFileSync(path.join(dir,'ui.js'),'utf8');
  source=source.replace('root.NovaRTS={','/* titan342:engine */\n'+core+'\nroot.NovaRTS={titan342:Titan342,');
+ source=source.replace("r.fx=r.fx.filter(function(f){return f.life>0;}).slice(-35);", "r.fx=limitTitanFX347(r.fx.filter(function(f){return f.life>0;}));");
+ source=source.replace("d.fx=d.fx.filter(function(f){f.life-=dt;return f.life>0;}).slice(-30);", "d.fx=limitTitanFX347(d.fx.filter(function(f){f.life-=dt;return f.life>0;}));");
  source=source.replace('function drawFighter(t,enemy){','function drawFighter(t,enemy){if(t.titan342){drawTitan342(t);return;}');
  source=source.replace('if(t.builder){repairBuilder228(d,t,dt);return;}','if(t.titan342)return;if(t.builder){repairBuilder228(d,t,dt);return;}');
  source=source.replace('r.troops.forEach(function(t){if(t.hp<=0||t.stun>0)return;','r.troops.forEach(function(t){if(t.titan342)return;if(t.hp<=0||t.stun>0)return;');
@@ -38,3 +40,4 @@ function integrate(source){
 }
 function payload(source){const vendor=fs.readFileSync(path.join(dir,'renderer.generated.js'),'utf8');const out='if(typeof document!=="undefined"){'+vendor+'}\n'+integrate(source);if(Buffer.byteLength(out)>16*1024*1024)throw Error('Native per-file limit exceeded');return out;}
 module.exports={build,integrate,payload};if(require.main===module)build().catch(e=>{console.error(e);process.exitCode=1;});
+
