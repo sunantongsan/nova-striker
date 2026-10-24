@@ -166,7 +166,7 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
         if(requestCode==NovaCloud.PLAY_GAMES_REQUEST && cloud!=null)
-            cloud.playGamesResult(resultCode==RESULT_OK && data!=null ? data.getStringExtra("auth_code") : null);
+            cloud.playGamesResult(resultCode==RESULT_OK && data!=null ? data.getStringExtra("auth_code") : null,data==null?-1:data.getIntExtra("attempt",-1));
     }
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }

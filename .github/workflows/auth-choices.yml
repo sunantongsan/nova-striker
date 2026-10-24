@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node tests/welcome217.cjs && node tests/onboarding288.cjs && node tests/playgames308.mjs
+      - run: node tests/welcome217.cjs && node tests/onboarding288.cjs && node tests/playgames308.mjs && node tests/guide309.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 35,
+  "nativeVersion": 36,
   "compatibleNativeVersions": [],
-  "contentVersion": 107,
-  "label": "1.9.57-account-choices",
+  "contentVersion": 108,
+  "label": "1.9.58-guided-onboarding",
   "maxBytes": 67108864
 }
