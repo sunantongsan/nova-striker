@@ -9,7 +9,7 @@ Model, texture, rig, motion and render license: CC0-1.0 by Ramon Linares. Three.
 
 ## Economy
 
-HQ10; reserve 10m gold and 10m power in installments; one 72h job; completed guardian persists and returns to base after battle. Timer acceleration is 10 seconds/NOVA or 500 seconds/verified video. Tiers cost 2500/10000 NOVA or 50/200 accumulated videos. Skill shop opens instantly from the left-side menu beside the calendar; no building, construction cost or wait. Skill ranks cost 250 * nextRank² NOVA or five verified videos, max rank5. Every video preparation has a server 60-second cooldown. No simulated-ad provider can mint guardian progress. UI displays prices before purchase; requests are idempotent.
+HQ10; order with 10m gold and 10m power, reserving available resources automatically; one 72h job; completed guardian persists and returns to base after battle. Timer acceleration is 10 seconds/NOVA or 25,920 seconds/verified video. Tiers cost 2500/10000 NOVA or 50/200 accumulated videos. Skill shop opens instantly from the left-side menu beside the calendar; no building, construction cost or wait. Skill ranks cost 250 * nextRank² NOVA or five verified videos, max rank5. Every video preparation has a server 60-second cooldown. No simulated-ad provider can mint guardian progress. UI displays prices before purchase; requests are idempotent.
 
 ## Gameplay
 
@@ -19,6 +19,6 @@ Run `node features/titan342/build.cjs`, `node tests/titan342.cjs`, `node tests/t
 
 ## Order flow (345)
 
-One order debits available required resources atomically, preserving previously reserved amounts. Missing resources cost 1 NOVA per 10,000 total units (rounded up), or one verified video per 2m units, at most ten videos. Wait authorizes automatic resource reservation during account status synchronization; the 72h build starts only after both 10m resource requirements are met. Production speed-up remains 10s/NOVA; each verified video removes 25,920 seconds, at most ten from a new 72h job. The two phases have separate displayed quotes. Existing ad cooldown/verification and one-mech ownership rules remain.
+One order debits available required resources atomically, preserving previously reserved amounts. Missing resources cost 1 NOVA per 10,000 total units (rounded up), or one verified video per 2m units, at most ten videos. Wait authorizes automatic resource reservation during account status synchronization; the 72h build starts only after both 10m resource requirements are met. Production speed-up remains 10s/NOVA; each verified video removes 25,920 seconds, at most ten from a new 72h job. Resource videos also credit 25,920 seconds toward production. The combined resource and production process therefore takes at most ten verified videos total; the second phase does not restart a ten-video requirement. Existing ad cooldown/verification and one-mech ownership rules remain.
 
 Guardians jump across walls only when the flight path contains no non-wall building and the landing tile is free and inside the map. Walls can still receive normal attack damage. Jump state is transmitted with battle frames. Illustrated controls use an AI-generated 12-icon atlas; progression spoilers remain hidden. The battlefield once again spans the full viewport.
