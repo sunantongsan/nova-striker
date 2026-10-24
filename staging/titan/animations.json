@@ -1,0 +1,63 @@
+{
+  "source": "https://opengameart.org/sites/default/files/universal_animation_library_2standard.zip",
+  "creator": "Quaternius",
+  "license": "CC0-1.0",
+  "sha256": "0815dd05531cae9bc313fc9c0ba81330bc72f8e19ec45f73738e74ddc5796a43",
+  "sourceFile": "UAL2_Standard.glb",
+  "selectedClips": [
+    {
+      "name": "Hit_Knockback",
+      "channels": 195
+    },
+    {
+      "name": "Idle_Shield_Break",
+      "channels": 195
+    },
+    {
+      "name": "Idle_Shield_Loop",
+      "channels": 195
+    },
+    {
+      "name": "NinjaJump_Land",
+      "channels": 195
+    },
+    {
+      "name": "Shield_Dash_RM",
+      "channels": 195
+    },
+    {
+      "name": "Shield_OneShot",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Block",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Dash_RM",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Regular_A",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Regular_B",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Regular_C",
+      "channels": 195
+    },
+    {
+      "name": "Sword_Regular_Combo",
+      "channels": 195
+    }
+  ],
+  "needsCustomAnimation": [
+    "palm_charge",
+    "palm_fire",
+    "ground_slam"
+  ],
+  "status": "source clips verified; retargeting to approved robots not yet possible"
+}
