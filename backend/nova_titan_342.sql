@@ -1,18 +1,18 @@
 -- FORGE ownership, reserved construction funds, verified rewards and skill shop.
-create table nova_private.titans342(owner uuid primary key references auth.users(id),level int not null default 0 check(level between 0 and 3),gold bigint not null default 0 check(gold between 0 and 10000000),power bigint not null default 0 check(power between 0 and 10000000),finishes_at timestamptz,shop_at timestamptz,skills jsonb not null default '{"slash":1,"palm":1,"dash":0,"shield":0,"nova":0}',ads jsonb not null default '{}',last_ad timestamptz);
+create table nova_private.titans342(owner uuid primary key references auth.users(id),level int not null default 0 check(level between 0 and 3),gold bigint not null default 0 check(gold between 0 and 10000000),power bigint not null default 0 check(power between 0 and 10000000),finishes_at timestamptz,skills jsonb not null default '{"slash":1,"palm":1,"dash":0,"shield":0,"nova":0}',ads jsonb not null default '{}',last_ad timestamptz);
 create table nova_private.titan_receipts342(owner uuid not null references auth.users(id),id uuid not null,target text not null,provider text,created_at timestamptz not null default now(),claimed_at timestamptz,primary key(owner,id));
 alter table nova_private.titans342 enable row level security;
 alter table nova_private.titan_receipts342 enable row level security;
 revoke all on nova_private.titans342,nova_private.titan_receipts342 from public,anon,authenticated;
 create function nova_private.titan_state342(who uuid) returns jsonb language sql stable set search_path='' as $$
- select jsonb_build_object('level',case when level=0 and finishes_at<=now() then 1 else level end,'gold',gold,'power',power,'finishes_at',case when finishes_at>now() then finishes_at end,'shop_at',shop_at,'shop_ready',shop_at<=now(),'skills',skills,'ads',ads,'next_ad',last_ad+interval '60 seconds') from nova_private.titans342 where owner=who;
+ select jsonb_build_object('level',case when level=0 and finishes_at<=now() then 1 else level end,'gold',gold,'power',power,'finishes_at',case when finishes_at>now() then finishes_at end,'shop_ready',true,'skills',skills,'ads',ads,'next_ad',last_ad+interval '60 seconds') from nova_private.titans342 where owner=who;
 $$;
 create function nova_private.titan_command342(payload jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid();mode text:=payload->>'titan342';s nova_private.titans342;p public.nova_war_players;receipt nova_private.titan_receipts342;rid uuid;target text;provider text;skill text:=payload->>'skill';lv int;hq int;price int:=0;countn int;amount bigint;g bigint;e bigint;online jsonb;verified bool;effect text;
 begin
  if uid is null or not exists(select 1 from auth.users where id=uid and not coalesce(is_anonymous,false)) then raise exception 'กรุณาเข้าสู่ระบบ';end if;
  if payload->>'owner' is not null and payload->>'owner'<>uid::text then raise exception 'ใช้บัญชีเดิมเพื่อตรวจหุ่น';end if;
- if mode is null or mode not in('status','fund','build','shop','upgrade','skill','speed','prepare','claim') then raise exception 'คำสั่งหุ่นไม่ถูกต้อง';end if;
+ if mode is null or mode not in('status','fund','build','upgrade','skill','speed','prepare','claim') then raise exception 'คำสั่งหุ่นไม่ถูกต้อง';end if;
  perform pg_advisory_xact_lock(153014,1);
  online:=nova_private.command('status',coalesce(payload-'titan342','{}'));
  select * into p from public.nova_war_players where user_id=uid for update;
@@ -40,7 +40,7 @@ begin
      provider:=case when exists(select 1 from nova_private.telegram_accounts231 where user_id=uid) then 'monetag' else 'admob' end;
      if provider='admob' and not exists(select 1 from nova_private.admob_settings230 where enabled) or provider='monetag' and not exists(select 1 from nova_private.monetag_settings231 where enabled) then raise exception 'โฆษณายังไม่พร้อม';end if;
      if target='speed' and (s.finishes_at is null or s.finishes_at<=now()) or target='upgrade' and s.level not between 1 and 2 then raise exception 'ไม่มีงานที่รับรางวัลได้';end if;
-     if target like 'skill:%' then skill:=split_part(target,':',2);lv:=coalesce((s.skills->>skill)::int,0);if s.shop_at is null or s.shop_at>now() or lv>=5 or s.level<(case skill when 'shield' then 2 when 'nova' then 3 else 1 end) then raise exception 'ยังไม่ปลดล็อกสกิลหรือเต็มแล้ว';end if;end if;
+     if target like 'skill:%' then skill:=split_part(target,':',2);lv:=coalesce((s.skills->>skill)::int,0);if lv>=5 or s.level<(case skill when 'shield' then 2 when 'nova' then 3 else 1 end) then raise exception 'ยังไม่ปลดล็อกสกิลหรือเต็มแล้ว';end if;end if;
      insert into nova_private.titan_receipts342(owner,id,target,provider) values(uid,rid,target,provider) returning * into receipt;
      if provider='admob' then insert into nova_private.admob_intents230(owner,id,kind,amount) values(uid,rid,'timer',0);else insert into nova_private.monetag_intents231(owner,id,kind,amount) values(uid,rid,'timer',0);end if;
      update nova_private.titans342 set last_ad=now() where owner=uid;
@@ -73,18 +73,13 @@ begin
     elsif mode='build' then
      if s.level>0 or s.finishes_at is not null or s.gold<10000000 or s.power<10000000 then raise exception 'ต้องสะสมทองและพลังงานอย่างละ 10 ล้าน และมีได้ฐานละตัว';end if;
      update nova_private.titans342 set finishes_at=now()+interval '3 days' where owner=uid;
-    elsif mode='shop' then
-     if s.shop_at is not null then raise exception 'มีร้านสกิลแล้ว';end if;
-     if p.resource_gold<500000 or p.resource_power<500000 then raise exception 'สร้างร้านใช้ทองและพลังงานอย่างละ 500,000';end if;
-     update public.nova_war_players set resource_gold=resource_gold-500000,resource_power=resource_power-500000,gold_delta=gold_delta-500000,power_delta=power_delta-500000 where user_id=uid;
-     update nova_private.titans342 set shop_at=now()+interval '1 hour' where owner=uid;
     elsif mode='speed' then
      if s.finishes_at is null or s.finishes_at<=now() then raise exception 'ไม่มีงานผลิต';end if;price:=ceil(extract(epoch from(s.finishes_at-now()))/10);update nova_private.titans342 set finishes_at=now(),level=1 where owner=uid;
     elsif mode='upgrade' then
      if s.level not between 1 and 2 then raise exception 'อัปเกรดไม่ได้';end if;price:=case s.level when 1 then 2500 else 10000 end;update nova_private.titans342 set level=level+1,ads=jsonb_set(ads,'{upgrade}','0') where owner=uid;
     elsif mode='skill' then
      if skill is null or skill not in('slash','palm','dash','shield','nova') then raise exception 'ไม่พบสกิล';end if;
-     lv:=coalesce((s.skills->>skill)::int,0);if s.shop_at is null or s.shop_at>now() or lv>=5 or s.level<(case skill when 'shield' then 2 when 'nova' then 3 else 1 end) then raise exception 'ยังไม่ปลดล็อกสกิลหรือเต็มแล้ว';end if;
+     lv:=coalesce((s.skills->>skill)::int,0);if lv>=5 or s.level<(case skill when 'shield' then 2 when 'nova' then 3 else 1 end) then raise exception 'ยังไม่ปลดล็อกสกิลหรือเต็มแล้ว';end if;
      price:=250*(lv+1)*(lv+1);update nova_private.titans342 set skills=jsonb_set(skills,array[skill],to_jsonb(lv+1)),ads=jsonb_set(ads,array['skill:'||skill],'0') where owner=uid;
     end if;
     if price>0 then update nova_private.test_wallets set gems=gems-price where user_id=uid and gems>=price;if not found then raise exception 'NOVA ไม่พอ';end if;end if;

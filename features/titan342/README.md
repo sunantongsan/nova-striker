@@ -9,7 +9,7 @@ Model, texture, rig, motion and render license: CC0-1.0 by Ramon Linares. Three.
 
 ## Economy
 
-HQ10; reserve 10m gold and 10m power in installments; one 72h job; completed guardian persists and returns to base after battle. Timer acceleration is 10 seconds/NOVA or 500 seconds/verified video. Tiers cost 2500/10000 NOVA or 50/200 accumulated videos. Skill shop costs 500k gold + 500k power, builds in 1h. Skill ranks cost 250 * nextRank² NOVA or five verified videos, max rank5. Every video preparation has a server 60-second cooldown. No simulated-ad provider can mint guardian progress. UI displays prices before purchase; requests are idempotent.
+HQ10; reserve 10m gold and 10m power in installments; one 72h job; completed guardian persists and returns to base after battle. Timer acceleration is 10 seconds/NOVA or 500 seconds/verified video. Tiers cost 2500/10000 NOVA or 50/200 accumulated videos. Skill shop opens instantly from the left-side menu beside the calendar; no building, construction cost or wait. Skill ranks cost 250 * nextRank² NOVA or five verified videos, max rank5. Every video preparation has a server 60-second cooldown. No simulated-ad provider can mint guardian progress. UI displays prices before purchase; requests are idempotent.
 
 ## Gameplay
 
