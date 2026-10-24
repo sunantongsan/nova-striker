@@ -26,7 +26,8 @@ G.refreshCheckin233();reply({...active,mining251:{...active.mining251,credited:1
 G.refreshCheckin233();reply({...active,mining251:{...active.mining251,credited:100,earned:100}});assert.equal(e.d.gems,before+100,'credit replay does not duplicate');
 const b=boot({...a.data});b.s.Game.refreshCheckin233();const br=b.requests.at(-1);b.s.novaCloudEvent('war',{action:br.a,request_id:br.id,data:{...active,mining251:{...active.mining251,credited:100,earned:100}}});assert.equal(b.s.test232.e.d.gems,before+100,'restart preserves credit marker');
 G.referrals251();assert(a.el('modal').innerHTML.includes('MYBASE'));
-G.droneGuide251();assert(a.el('modal').innerHTML.includes('Guide drone'));G.openDroneName251();assert(!a.el('baseNameGate').hidden);G.closeDroneName251();assert(a.el('baseNameGate').hidden);
+G.droneGuide251();assert(a.el('guideDock288').innerHTML.includes('Learn by doing'));G.openDroneName251();assert(!a.el('baseNameGate').hidden);G.closeDroneName251();assert(a.el('baseNameGate').hidden);
 console.log('PASS mining251 UI: platform callbacks, no early credit, replay/restart, no checkin grid, drone naming');
+
 
 

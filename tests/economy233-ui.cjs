@@ -25,7 +25,7 @@ for(const platform of ['android','telegram']){
 }
 console.log('PASS economy233 UI: upgrade shortfall, choice UI, durable debit/retry/cancel, no auto-upgrade and save-failure safety on Android/Telegram');
 
-assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton" onclick="Game.settings\(\)"[^>]*><span[^>]*>⚙/);
+assert.match(fs.readFileSync('index.html','utf8'),/id="settingsButton"[^>]*onclick="Game.settings\(\)"[^>]*aria-label="ตั้งค่า"[^>]*><svg/);
 {
  const a=boot({novaRTSIntro:'1'},'telegram'),G=a.s.Game,e=a.s.test232.e;let shown=0;a.s.NovaAds={rewardVerified(){shown++;}};a.s.test232.clearBusy();a.s.test232.setOnline();
  const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
@@ -67,4 +67,5 @@ console.log('PASS production UI: all rewards visible before ad and single-tap pr
  reply({owner:'a',enrolled:false,ad_reward:{...r,verified:true,claimed:true,granted:2}});assert(!e.d.pendingAd230);assert(![...a.timers.values()].some(t=>t.ms===4000),'successful claim stops polling');
 }
 console.log('PASS automatic reward finish: no post-ad menu, delayed verification retries silently and stops after delivery');
+
 
