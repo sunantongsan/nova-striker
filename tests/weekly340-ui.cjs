@@ -1,0 +1,23 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('game.js','utf8'),catalog=require('../localization/en.json');
+function boot(data={},platform='android'){
+ const elements={},errors=[],requests=[];let reloads=0,frame,timerId=0;const timers=new Map();
+ const ctx=new Proxy({measureText:t=>({width:String(t).length*8}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
+ const el=id=>elements[id]||(elements[id]={hidden:true,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
+ const storage={getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]};
+ const s={crypto:require('node:crypto').webcrypto,console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:(f,ms)=>{timers.set(++timerId,{f,ms});return timerId;},clearTimeout:id=>timers.delete(id),Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,warAvailable:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
+ if(platform==='telegram'){s.Telegram={WebApp:{}};s.window=s;}
+ vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v,select:id=>selected=id,clearBusy:()=>{warBusy=false;warActive=null;},badge:()=>dailyBadge340(),setClock:v=>dailyClockOffset340=v,pollNow:()=>dailyPollAt340=0,robots:()=>robots251,robotTick:()=>updateRobots251(),setOnline:()=>{E.d.onlineCrystal={owner:"a"};E.d.admob230=true;}};})(typeof globalThis!=='),s);
+ return {s,el,data,errors,requests,timers,reloads:()=>reloads,frame:n=>frame(n)};
+}
+
+const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e,owner='10000000-0000-4000-8000-000000000002';let shown=[];a.s.NovaAds={rewardTest248:(...args)=>shown.push(args),acknowledgeTest248(){}};
+const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
+const base={owner,test_gems:0,test_checkin248:true,checkin233:{day:'2026-10-24',claimed:false,streak:6,reward:0,next_reward:200,server_time:new Date().toISOString(),next_reset:new Date(Date.now()+3600000).toISOString(),schedule340:true}};
+G.openDaily340();reply(base);assert(a.el('modal').innerHTML.includes('200 NOVA'));assert(a.el('dailyCheckin340').className.includes('ready340'));assert(!a.el('modal').innerHTML.includes('test ad'));
+const before=e.d.gems;G.checkin();const p=a.requests.at(-1).p;reply({...base,test_receipt248:{id:p.request_id,day:'2026-10-24',amount:200,claimed:false}});assert.equal(shown.length,1,'check-in launches video without another confirmation');assert.equal(e.d.gems,before);
+a.s.novaRewardStatus('closed');assert.equal(e.d.gems,before,'closing video early gives nothing');
+a.s.novaTestRewardEarned248(owner,p.request_id);assert.equal(e.d.gems,before,'SDK completion waits for server');const claimed={...base,checkin233:{...base.checkin233,claimed:true,streak:7,reward:200,next_reward:50},test_receipt248:{id:p.request_id,day:'2026-10-24',amount:200,claimed:true,granted:200}};reply(claimed);assert.equal(e.d.gems,before+200);assert(!a.el('dailyCheckin340').className.includes('ready340'));
+G.refreshCheckin233();reply(claimed);assert.equal(e.d.gems,before+200);a.s.test232.setClock(-7200000);a.s.test232.pollNow();a.s.test232.badge();assert.equal(a.requests.at(-1).p.checkin233,true,'server midnight triggers refresh');reply({...base,checkin233:{...base.checkin233,day:'2026-10-25',streak:7,next_reward:50}});assert(a.el('dailyCheckin340').className.includes('ready340'));
+const rt=a.s.NovaRTS,guard={kind:2,guard339:true,x:12,y:12,hp:480,max:480,height340:42,cool:0,route:[]},target={kind:5,x:13,y:12,hp:500,max:500};let d={enemies:[target],buildings:[{type:'hq',x:10,y:10,hp:100}],fx:[],mapSize:22};rt.sentryTick339(d,guard,.1);assert.equal(target.hp,500,'no firing while airborne');assert(guard.height340<42);for(let i=0;i<10;i++)rt.sentryTick339(d,guard,.1);assert.equal(guard.height340,0);assert(target.hp<500,'lands before firing');d.enemies=[];rt.sentryTick339(d,guard,.1);assert(guard.height340>0,'takes off after threat ends');const old={x:guard.x,y:guard.y};for(let i=0;i<30;i++)rt.sentryTick339(d,guard,.1);assert(Math.hypot(guard.x-old.x,guard.y-old.y)>0,'jet patrol moves');
+console.log('PASS weekly340 UI: badge on/off/midnight, video-first grant, partial video denial, replay, jet patrol and landing before fire');
