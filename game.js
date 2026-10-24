@@ -1707,7 +1707,7 @@ function minerPose256(r){
  var c=((r.age256||0)%2.8)/2.8;
  // time, grip x/y, handle angle, torso lean, pelvis squat
  var keys=[[0,3,-24,.66,.23,3],[.18,-3,-34,-1.5,-.12,0],[.33,1,-35,-1.85,-.16,-1],[.46,12,-28,.70,.29,4],[.53,12,-28,.70,.29,4],[.72,-1,-27,.77,.38,5],[.86,0,-32,-.28,.04,1],[1,3,-24,.66,.23,3]];
- if(!r.mining)return{c:0,x:4,y:-29,angle:-.2,lean:r.moving?.06:0,squat:r.moving?Math.sin(r.age256*8):0};
+ if(!r.mining)return{c:0,x:4,y:-29,angle:-.2,lean:r.moving?.06:0,squat:r.moving?Math.sin((r.age256||0)*8):0};
  var i=1;while(i<keys.length-1&&c>keys[i][0])i++;var p=keys[i-1],q=keys[i],u=(c-p[0])/(q[0]-p[0]);u=i===3?u*u:u*u*(3-2*u);var out={c:c};['x','y','angle','lean','squat'].forEach(function(k,j){out[k]=p[j+1]+(q[j+1]-p[j+1])*u;});return out;
 }
 function drawMiner251(r){
