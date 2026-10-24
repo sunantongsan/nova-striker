@@ -1,0 +1,15 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const source=fs.readFileSync(process.argv[2]||'features/titan342/ui.js','utf8');
+const start=source.indexOf('function titanPanel342(){'),end=source.indexOf('var previewMech342',start);
+let html='',sent=[],previews=[];
+const c={titanState342:{level:0,gold:0,power:0,skills:{},ads:{}},titanShopOnly342:false,titanBusy342:null,E:{d:{gold:1700000,power:1700000},hq:()=>10},Game:{titanPreview342:n=>previews.push(n)},Titan342:{names:['ATLAS','VANGUARD','TITAN'],hp:[16000,34000,72000],skills:{slash:{level:1,name:'slash',en:'slash'},shield:{level:2,name:'shield',en:'shield'},nova:{level:3,name:'nova',en:'nova'}}},mt251:(a,b)=>b,modal:{querySelector:()=>({scrollTop:0}),setAttribute(){}},open:h=>html=h,duration:n=>String(n),titanSend342:(mode,p)=>{sent.push({mode,...p});return true;}};
+vm.createContext(c);vm.runInContext(source.slice(start,end),c);
+c.titanPanel342();assert(!html.includes('VANGUARD')&&!html.includes('TITAN'));assert(!html.includes('titanPreview342'));assert.equal((html.match(/onclick=/g)||[]).length,1);
+c.Game.titanContribute343();assert.equal(sent[0].kind,'gold');c.Game.titanContribute343();assert.equal(sent.length,1);
+c.E.d.gold=0;c.titanState342.gold=1700000;c.continueFunding343();assert.equal(sent[1].kind,'power');
+c.E.d.power=0;c.titanState342.power=1700000;c.continueFunding343();assert.equal(c.titanFunding343,false);
+c.titanState342.gold=10000000;c.titanState342.power=10000000;c.titanPanel342();assert(html.includes('Build · 3 days'));
+c.titanState342.level=1;c.titanPanel342();assert(html.includes('ATLAS'));assert(!html.includes('VANGUARD'));assert(!html.includes('shield'));assert.equal(previews.at(-1),1);
+c.titanShopOnly342=true;c.titanPanel342();assert(html.includes('slash'));assert(!html.includes('shield')&&!html.includes('nova'));
+c.titanState342.level=2;c.titanPanel342();assert(html.includes('shield'));assert(!html.includes('nova'));
+console.log('PASS guardian343: single contribution flow, duplicate-tap guard, funded build and hidden future forms/skills');
