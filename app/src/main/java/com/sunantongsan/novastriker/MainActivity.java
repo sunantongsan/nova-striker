@@ -16,7 +16,6 @@ import android.view.Gravity;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import androidx.webkit.WebViewAssetLoader;
-import com.google.android.gms.games.PlayGames;
 
 public class MainActivity extends Activity {
     private WebView game;
@@ -141,14 +140,7 @@ public class MainActivity extends Activity {
         ads.pause(); game.onPause(); super.onPause();
     }
     @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume();
-        // PGS handles automatic sign-in. Failure must never block local play or cloud login.
-        PlayGames.getGamesSignInClient(this).isAuthenticated()
-            .addOnCompleteListener(this, task -> {
-                if (destroyed) return;
-                boolean authenticated = task.isSuccessful() && task.getResult().isAuthenticated();
-                android.util.Log.i("NovaPlayGames", authenticated
-                    ? "Platform authentication ready" : "Platform authentication unavailable; continue playing");
-            });
+
     }
     private void immersive303() {
         android.view.Window window=getWindow();
@@ -171,8 +163,14 @@ public class MainActivity extends Activity {
         }
     }
     @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);if(focused)immersive303();}
+    @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==NovaCloud.PLAY_GAMES_REQUEST && cloud!=null)
+            cloud.playGamesResult(resultCode==RESULT_OK && data!=null ? data.getStringExtra("auth_code") : null,data==null?-1:data.getIntExtra("attempt",-1));
+    }
     @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
+
 
 
 

@@ -27,7 +27,10 @@ final class NovaCloud {
     private final MainActivity activity;
     private final SharedPreferences prefs;
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
-    private boolean closed;
+    private volatile boolean closed;
+    private final ExecutorService authWorker=Executors.newSingleThreadExecutor();
+    private final android.os.Handler authHandler=new android.os.Handler(android.os.Looper.getMainLooper());
+    private final java.util.concurrent.atomic.AtomicInteger authAttempt=new java.util.concurrent.atomic.AtomicInteger();
     private static final String CALLBACK="novastriker://auth/callback";
     NovaCloud(MainActivity activity){this.activity=activity;prefs=activity.getSharedPreferences("nova_cloud",0);}
     private void emit(String event,JSONObject data){activity.runOnUiThread(()->{if(!closed)activity.cloudEvent(event,data);});}
@@ -106,17 +109,57 @@ final class NovaCloud {
             JSONObject user=read().getJSONObject("user"),out=new JSONObject();
             out.put("id",user.getString("id")).put("email",user.optString("email",""));
             JSONObject metadata=user.optJSONObject("app_metadata");
-            out.put("provider",metadata==null?"":metadata.optString("provider",""));
+            boolean playGames=metadata!=null&&!metadata.optString("nova_pgs_subject","").isEmpty();
+            out.put("provider",prefs.getString("signed_in_provider",playGames?"playgames":metadata==null?"":metadata.optString("provider","")));
+            JSONArray identities=user.optJSONArray("identities"),providers=new JSONArray();
+            if(identities!=null)for(int i=0;i<identities.length();i++)providers.put(identities.getJSONObject(i).optString("provider"));
+            out.put("providers",providers);
+            if(playGames)out.put("email","Play Games");
             return out.toString();
         }catch(Exception e){return "{}";}
     }
     @JavascriptInterface public boolean available(){return BuildConfig.NOVA_CLOUD_ENABLED;}
-    @JavascriptInterface public void login(){
+    @JavascriptInterface public void login(){loginProvider("google");}
+    static final int PLAY_GAMES_REQUEST=7308;
+    private final java.util.concurrent.atomic.AtomicBoolean playGamesPending=new java.util.concurrent.atomic.AtomicBoolean(false);
+    @JavascriptInterface public void loginPlayGames(){
+        if(!available()){status("ระบบบัญชียังไม่พร้อม");return;}
+        if(!playGamesPending.compareAndSet(false,true))return;
+        final int attempt=authAttempt.incrementAndGet();
+        authHandler.postDelayed(()->{if(authAttempt.get()==attempt&&playGamesPending.getAndSet(false)){authAttempt.incrementAndGet();status("Play Games ไม่ตอบกลับ กรุณาลองใหม่หรือเลือกบัญชีอื่น");}},45000);
+        authWorker.execute(()->{try{
+            JSONObject config=new JSONObject(request("/functions/v1/nova-playgames-auth","POST",new JSONObject().put("action","config"),null));
+            String clientId=config.getString("client_id");
+            if(!clientId.endsWith(".apps.googleusercontent.com"))throw new Exception("invalid_config");
+            activity.runOnUiThread(()->{
+                if(closed||authAttempt.get()!=attempt||!playGamesPending.get())return;
+                try{activity.startActivityForResult(new Intent(activity,PlayGamesLoginActivity.class).putExtra("client_id",clientId).putExtra("attempt",attempt),PLAY_GAMES_REQUEST);}
+                catch(Exception e){playGamesPending.set(false);status("เปิด Play Games ไม่สำเร็จ กรุณาลองใหม่");}
+            });
+        }catch(Exception e){if(authAttempt.get()==attempt&&playGamesPending.getAndSet(false))status("http_503".equals(e.getMessage())?"Play Games ยังไม่ได้เปิดบริการ กรุณาเลือก Google อีเมล หรือ Facebook":"เชื่อมต่อ Play Games ไม่สำเร็จ กรุณาลองใหม่");}});
+    }
+    @JavascriptInterface public void cancelPlayGames(){authAttempt.incrementAndGet();playGamesPending.set(false);}
+    void playGamesResult(String code,int resultAttempt){
+        if(!playGamesPending.get()||resultAttempt!=authAttempt.get())return;
+        if(code==null||code.isEmpty()){playGamesPending.set(false);status("ยกเลิกการเข้า Play Games แล้ว");return;}
+        final int attempt=authAttempt.get();
+        authWorker.execute(()->{try{
+            JSONObject s=new JSONObject(request("/functions/v1/nova-playgames-auth","POST",new JSONObject().put("code",code),null));
+            if(closed||attempt!=authAttempt.get()||!playGamesPending.get())return;
+            keep(s);prefs.edit().putString("signed_in_provider","playgames").commit();emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));
+        }catch(Exception e){if(attempt==authAttempt.get())status("เข้า Play Games ไม่สำเร็จ กรุณาลองใหม่");}finally{if(attempt==authAttempt.get())playGamesPending.set(false);}});
+    }
+    @JavascriptInterface public void loginFacebook(){loginProvider("facebook");}
+    private void loginProvider(String provider){
+        cancelPlayGames();
         if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}
         activity.runOnUiThread(()->{try{
             byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes),challenge=encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
-            prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",false).commit();
-            Uri uri=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider","google").appendQueryParameter("prompt","select_account").appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256").build();
+            prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",false).putString("login_provider",provider).commit();
+            Uri.Builder builder=Uri.parse(BuildConfig.NOVA_CLOUD_URL+"/auth/v1/authorize").buildUpon().appendQueryParameter("provider",provider).appendQueryParameter("redirect_to",CALLBACK).appendQueryParameter("code_challenge",challenge).appendQueryParameter("code_challenge_method","s256");
+            if("google".equals(provider))builder.appendQueryParameter("prompt","select_account");
+            else builder.appendQueryParameter("scopes","email");
+            Uri uri=builder.build();
             activity.startActivity(new Intent(Intent.ACTION_VIEW,uri));
         }catch(Exception e){status("เปิดหน้าล็อกอินไม่ได้ กรุณาลองใหม่");}});
     }
@@ -124,14 +167,15 @@ final class NovaCloud {
         if(!available()||uri==null||!"novastriker".equals(uri.getScheme())||!"auth".equals(uri.getHost())||!"/callback".equals(uri.getPath()))return;
         String code=uri.getQueryParameter("code"),verifier=prefs.getString("verifier","");long age=System.currentTimeMillis()-prefs.getLong("login_at",0);
         boolean recovery=prefs.getBoolean("recovery",false);
-        prefs.edit().remove("verifier").remove("login_at").remove("recovery").commit();
+        String loginProvider=prefs.getString("login_provider","");
+        prefs.edit().remove("verifier").remove("login_at").remove("recovery").remove("login_provider").commit();
         if(code==null||verifier.isEmpty()||age<0||age>3600000){status("การล็อกอินหมดอายุหรือยกเลิก กรุณาลองใหม่");return;}
-        worker.execute(()->{try{JSONObject s=new JSONObject(request("/auth/v1/token?grant_type=pkce","POST",new JSONObject().put("auth_code",code).put("code_verifier",verifier),null));keep(s);if(recovery){prefs.edit().putBoolean("recovery_ready",true).commit();emit("password_recovery",new JSONObject());}else emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));}catch(Exception e){status("ล็อกอินไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่");}});
+        worker.execute(()->{try{JSONObject s=new JSONObject(request("/auth/v1/token?grant_type=pkce","POST",new JSONObject().put("auth_code",code).put("code_verifier",verifier),null));keep(s);if(!loginProvider.isEmpty())prefs.edit().putString("signed_in_provider",loginProvider).commit();if(recovery){prefs.edit().putBoolean("recovery_ready",true).commit();emit("password_recovery",new JSONObject());}else emit("signed_in",new JSONObject().put("id",s.getJSONObject("user").getString("id")));}catch(Exception e){status("ล็อกอินไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่");}});
     }
     @JavascriptInterface public void load(){if(!available()){status("เซฟ Google กำลังรอตั้งค่าเปิดใช้งาน");return;}worker.execute(()->{try{JSONObject s=session();JSONArray rows=new JSONArray(request("/rest/v1/nova_rts_saves?select=revision,payload,updated_at&user_id=eq."+s.getJSONObject("user").getString("id"),"GET",null,s.getString("access_token")));emit("loaded",new JSONObject().put("id",s.getJSONObject("user").getString("id")).put("save",rows.length()>0?rows.getJSONObject(0):JSONObject.NULL));}catch(Exception e){status("โหลดเซฟไม่ได้ กรุณาล็อกอินหรือตรวจอินเทอร์เน็ต");}});}
     @JavascriptInterface public void save(String json,long revision){if(!available()||json.length()>131072||revision<0)return;worker.execute(()->{try{JSONObject s=session(),payload=new JSONObject(json);String uid=s.getJSONObject("user").getString("id"),path="/rest/v1/nova_rts_saves";JSONObject body=new JSONObject().put("payload",payload).put("revision",revision+1);if(revision==0)body.put("user_id",uid);else path+="?user_id=eq."+uid+"&revision=eq."+revision;JSONArray rows=new JSONArray(request(path,revision==0?"POST":"PATCH",body,s.getString("access_token")));if(rows.length()!=1){status("มีเซฟใหม่จากอีกเครื่อง กรุณาโหลดจากคลาวด์ก่อน");return;}emit("saved",new JSONObject().put("revision",rows.getJSONObject(0).getLong("revision")).put("id",uid));}catch(Exception e){status("บันทึกออนไลน์ไม่สำเร็จหรือเซฟขัดแย้ง โหลดเซฟล่าสุดก่อนลองใหม่");}});}
     @JavascriptInterface public void deleteSave(){if(!available())return;worker.execute(()->{try{JSONObject s=session();request("/rest/v1/nova_rts_saves?user_id=eq."+s.getJSONObject("user").getString("id"),"DELETE",null,s.getString("access_token"));emit("deleted",new JSONObject());}catch(Exception e){status("ลบข้อมูลออนไลน์ไม่สำเร็จ");}});}
-    @JavascriptInterface public void logout(){worker.execute(()->{try{JSONObject s=read();request("/auth/v1/logout?scope=local","POST",null,s.getString("access_token"));}catch(Exception ignored){}prefs.edit().clear().commit();emit("signed_out",new JSONObject());});}
+    @JavascriptInterface public void logout(){cancelPlayGames();worker.execute(()->{try{JSONObject s=read();request("/auth/v1/logout?scope=local","POST",null,s.getString("access_token"));}catch(Exception ignored){}prefs.edit().clear().commit();emit("signed_out",new JSONObject());});}
     @JavascriptInterface public boolean warAvailable(){return available() && BuildConfig.NOVA_WAR_ENABLED;}
     @JavascriptInterface public void war(String action,String payload){runWar(action,payload,"");}
     @JavascriptInterface public void warRequest(String action,String payload,String requestId){runWar(action,payload,requestId);}
@@ -165,7 +209,7 @@ final class NovaCloud {
     }
     private String beginEmailLink(boolean recovery)throws Exception {
         byte[] bytes=new byte[32];new SecureRandom().nextBytes(bytes);String verifier=encode(bytes);
-        prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",recovery).commit();
+        prefs.edit().putString("verifier",verifier).putLong("login_at",System.currentTimeMillis()).putBoolean("recovery",recovery).putString("login_provider","email").commit();
         return encode(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));
     }
     @JavascriptInterface public void emailAuth(String action,String email,String password){
@@ -182,12 +226,13 @@ final class NovaCloud {
             else {path="/auth/v1/"+(action.equals("signup")?"signup":"recover")+"?redirect_to="+Uri.encode(CALLBACK);body.put("code_challenge",beginEmailLink(action.equals("recover"))).put("code_challenge_method","s256");if(action.equals("signup"))body.put("password",password);}
             JSONObject result=new JSONObject(request(path,action.equals("update")?"PUT":"POST",body,token));
             if(action.equals("update")){prefs.edit().remove("recovery_ready").commit();emit("signed_in",new JSONObject());status("เปลี่ยนรหัสผ่านแล้ว");}
-            else if(result.has("access_token")){keep(result);emit("signed_in",new JSONObject().put("id",result.getJSONObject("user").getString("id")));}
+            else if(result.has("access_token")){keep(result);prefs.edit().putString("signed_in_provider","email").commit();emit("signed_in",new JSONObject().put("id",result.getJSONObject("user").getString("id")));}
             else status(action.equals("recover")?"หากอีเมลนี้มีบัญชี ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ เปิดจากมือถือเครื่องนี้":"ตรวจกล่องอีเมลและสแปมเพื่อยืนยันบัญชี แล้วกลับมาเข้าสู่ระบบ หากเคยสมัครแล้วให้เข้าสู่ระบบแทน");
         }catch(Exception e){status("ทำรายการไม่ได้ ตรวจอีเมล รหัสผ่าน และการยืนยันอีเมล หากส่งอีเมลไม่ได้ให้ใช้ Google หรือลองใหม่ภายหลัง");}});
     }
-    void destroy(){closed=true;worker.shutdownNow();}
+    void destroy(){closed=true;cancelPlayGames();authHandler.removeCallbacksAndMessages(null);authWorker.shutdownNow();worker.shutdownNow();}
 }
+
 
 
 
