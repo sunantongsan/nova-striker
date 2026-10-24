@@ -198,6 +198,7 @@ final class NovaCloud {
         }catch(Exception ignored){error="billing_unavailable";}
         final JSONObject response=result;final String failure=error;
         activity.runOnUiThread(()->{if(!closed)callback.done(response,failure);});
+        });
     }
 }
 
