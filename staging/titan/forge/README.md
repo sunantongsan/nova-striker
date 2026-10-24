@@ -1,26 +1,9 @@
-# FORGE — หุ่นที่เลือกสำหรับ NOVA
+# FORGE source archive
 
-ผู้ใช้เลือก ATLAS /09, VANGUARD /07 และ TITAN /06 สำหรับชุดแรก และเก็บ RONIN /04 (ซามูไร) สำหรับอัปเดตครั้งถัดไป
+ATLAS /09, VANGUARD /07 and TITAN /06 are approved for initial tiers 1–3. RONIN /04 is reserved for the next release.
 
-ยังไม่ได้กำหนดลำดับเลเวลของสามตัวใหม่ และยังไม่ได้เปิดใช้ในเกมจริง
+Source commit: 1b8fb9d54160215c071c5a29a49b1c36dc01f0df in https://github.com/RamonLinares/atlas-09
 
-## แหล่งโมเดลที่เก็บไว้
+The source is acquired with verified Git blob hashes by features/titan342/build.cjs. All four original GLBs are retained in staging/titan/forge/models during builds; only the three approved characters enter the game payload. A submodule is no longer needed, avoiding download of the full Blender repository on each deployment. The earlier pinned submodule remains in commit 631526f186f33321d27abd2daf49d3bc986ea854.
 
-ต้นฉบับ: https://github.com/RamonLinares/atlas-09
-
-ล็อกเวอร์ชัน: 1b8fb9d54160215c071c5a29a49b1c36dc01f0df
-
-โฟลเดอร์ upstream เป็น Git submodule อ้างอิงต้นฉบับทั้งชุด รวมโมเดล GLB, Blender, ท่าทาง และภาพตัวอย่าง ต้องเรียก git submodule update --init staging/titan/forge/upstream เพื่อดาวน์โหลดไฟล์จริงหลัง clone
-
-โมเดล ภาพ และท่าทางของผู้สร้างใช้ CC0-1.0; โค้ดต้นฉบับใช้ MIT ตรวจ ASSET-LICENSE.md และ ASSET-PROVENANCE.md ใน upstream ก่อนนำส่วนอื่นมาใช้
-
-| ตัว | แผน |
-|---|---|
-| ATLAS /09 | ชุดแรก |
-| VANGUARD /07 | ชุดแรก |
-| TITAN /06 | ชุดแรก |
-| RONIN /04 | สำรองอัปเดตครั้งต่อไป |
-
-ข้อกำหนดเดิมยังอยู่: ฐานละหนึ่งตัว, ฐานแม่เลเวล 10, ทอง 10 ล้าน + พลังงาน 10 ล้าน, ผลิต 3 วัน, บังคับด้วยจอยเมื่อเลือก, โหมดเฝ้าฐานอัตโนมัติ, ดาบและปืนฝ่ามือพร้อมสกิล ไม่ทำความเสียหายฝ่ายเดียวกัน
-
-ก่อนเปิดใช้ต้องตรวจท่าทาง เพิ่มอาวุธที่ขาด และทดสอบประสิทธิภาพมือถือ การเลือกโมเดลไม่ได้หมายความว่าฟังก์ชันเหล่านี้ทำเสร็จแล้ว
+See features/titan342/README.md for integration and validation.
