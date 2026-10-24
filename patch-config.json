@@ -1,25 +1,9 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 34,
-  "compatibleNativeVersions": [
-    19,
-    20,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33
-  ],
-  "contentVersion": 106,
-  "label": "1.9.56-compact-welcome",
+  "nativeVersion": 35,
+  "compatibleNativeVersions": [],
+  "contentVersion": 107,
+  "label": "1.9.57-account-choices",
   "maxBytes": 67108864
 }
