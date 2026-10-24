@@ -187,7 +187,20 @@ final class NovaCloud {
         }catch(Exception e){status("ทำรายการไม่ได้ ตรวจอีเมล รหัสผ่าน และการยืนยันอีเมล หากส่งอีเมลไม่ได้ให้ใช้ Google หรือลองใหม่ภายหลัง");}});
     }
     void destroy(){closed=true;worker.shutdownNow();}
+
+    interface BillingCallback348 { void done(JSONObject data,String error); }
+    // Native-only method: JWT/session and receipt tokens never enter the JavaScript bridge.
+    void billing348(JSONObject body,BillingCallback348 callback){
+        worker.execute(()->{JSONObject result=null;String error=null;try{
+            JSONObject session=session();
+            if(!body.has("action"))body.put("action","status");
+            result=new JSONObject(request("/functions/v1/nova-play-billing","POST",body,session.getString("access_token")));
+        }catch(Exception ignored){error="billing_unavailable";}
+        final JSONObject response=result;final String failure=error;
+        activity.runOnUiThread(()->{if(!closed)callback.done(response,failure);});
+    }
 }
+
 
 
 

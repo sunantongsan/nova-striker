@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {validateReceipt,hash,PRODUCTS} from '../backend/functions/nova-play-billing/verify.mjs';
+const uid='test-account', product='nova_5000';
+const receipt={purchaseStateContext:{purchaseState:'PURCHASED'},testPurchaseContext:{fopType:'TEST'},obfuscatedExternalAccountId:await hash(uid),productLineItem:[{productId:product,productOfferDetails:{quantity:1,refundableQuantity:1}}]};
+assert.equal((await validateReceipt(receipt,uid,product)).nova,5000);
+for(const state of ['PENDING','CANCELLED'])await assert.rejects(()=>validateReceipt({...receipt,purchaseStateContext:{purchaseState:state}},uid,product),/purchase_not_completed/);
+for(const testPurchaseContext of [undefined,{}, {fopType:'REAL'}])await assert.rejects(()=>validateReceipt({...receipt,testPurchaseContext},uid,product),/test_purchases_only/);
+await assert.rejects(()=>validateReceipt(receipt,'other-account',product),/wrong_account/);
+await assert.rejects(()=>validateReceipt(receipt,uid,'nova_10500'),/product_mismatch/);
+await assert.rejects(()=>validateReceipt({...receipt,productLineItem:[{productId:product,productOfferDetails:{quantity:1,refundableQuantity:0}}]},uid,product),/quantity_or_refund/);
+assert.equal(Object.keys(PRODUCTS).length,6);
+console.log('PASS Play receipts: only completed, account-bound, unrefunded Google test purchases');

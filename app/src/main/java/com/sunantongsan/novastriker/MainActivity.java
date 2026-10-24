@@ -22,6 +22,8 @@ public class MainActivity extends Activity {
     private WebView game;
     private GameAds ads;
     private NovaCloud cloud;
+    private NovaBilling billing;
+    void billingEvent348(String event, org.json.JSONObject data){if(!destroyed&&game!=null)game.evaluateJavascript("window.novaBilling348 && window.novaBilling348("+org.json.JSONObject.quote(event)+","+data.toString()+")",null);}
     void cloudEvent(String event, org.json.JSONObject data) { game.evaluateJavascript("window.novaCloudEvent && window.novaCloudEvent("+org.json.JSONObject.quote(event)+","+data.toString()+")",null); }
     private boolean adsStarted, gameReady, destroyed, rolledBack;
     private GamePatcher patcher;
@@ -82,6 +84,7 @@ public class MainActivity extends Activity {
         game.addJavascriptInterface(ads, "NovaAds");
         cloud=new NovaCloud(this);
         game.addJavascriptInterface(cloud, "NovaCloud");
+        billing=new NovaBilling(this,cloud);game.addJavascriptInterface(billing,"NovaBilling");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 if (url.equals(GAME_URL)) { finishBoot(); game.getRootView().requestApplyInsets(); immersive303(); }
@@ -140,7 +143,7 @@ public class MainActivity extends Activity {
         game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
         ads.pause(); game.onPause(); super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume();
+    @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume(); if(billing!=null)billing.resume();
         // PGS handles automatic sign-in. Failure must never block local play or cloud login.
         PlayGames.getGamesSignInClient(this).isAuthenticated()
             .addOnCompleteListener(this, task -> {
@@ -171,8 +174,9 @@ public class MainActivity extends Activity {
         }
     }
     @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);if(focused)immersive303();}
-    @Override protected void onDestroy() { destroyed=true;if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() { destroyed=true;if(billing!=null)billing.destroy();game.removeJavascriptInterface("NovaBilling");if(patcher!=null)patcher.destroy();cloud.destroy(); game.removeJavascriptInterface("NovaCloud"); ads.destroy(); game.removeJavascriptInterface("NovaAds"); game.destroy(); super.onDestroy(); }
 }
+
 
 
 
