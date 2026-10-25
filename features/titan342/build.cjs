@@ -21,7 +21,7 @@ async function build(){
 }
 function integrate(source){
  if(source.includes('/* titan342:engine */'))return source;
- const core=fs.readFileSync(path.join(dir,'engine.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-engine.js'),'utf8'),ui=fs.readFileSync(path.join(dir,'ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'purchase-celebration.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'movable-ui.js'),'utf8');
+ const core=fs.readFileSync(path.join(dir,'engine.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-engine.js'),'utf8'),ui=fs.readFileSync(path.join(dir,'ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'purchase-celebration.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'movable-ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'combat-feedback.js'),'utf8');
  source=source.replace('root.NovaRTS={','/* titan342:engine */\n'+core+'\nroot.NovaRTS={hq352:HQ352,titan342:Titan342,');
  source=source.replace("r.fx=r.fx.filter(function(f){return f.life>0;}).slice(-35);", "r.fx=limitTitanFX347(r.fx.filter(function(f){return f.life>0;}));");
  source=source.replace("d.fx=d.fx.filter(function(f){f.life-=dt;return f.life>0;}).slice(-30);", "d.fx=limitTitanFX347(d.fx.filter(function(f){f.life-=dt;return f.life>0;}));");
@@ -45,5 +45,6 @@ function integrate(source){
 function payload(source){const vendor=fs.readFileSync(path.join(dir,'renderer.generated.js'),'utf8');const out='if(typeof document!=="undefined"){'+vendor+'}\n'+integrate(source);if(Buffer.byteLength(out)>16*1024*1024)throw Error('Native per-file limit exceeded');return out;}
 function documentPayload(html){const packed=JSON.parse(fs.readFileSync(path.join(dir,'hq-payload.generated.json'),'utf8'));const script='<script>window.NovaHQModel352='+JSON.stringify(packed)+';</script>';const result=html.replace(/<script([^>]*?)src=["']game\.js[^"']*["']([^>]*)>/,script+'<script$1src="game.js"$2>');if(result===html)throw Error('Game script insertion point missing');if(Buffer.byteLength(result)>16*1024*1024)throw Error('Native HTML limit exceeded');return result;}
 module.exports={build,integrate,payload,documentPayload};if(require.main===module)build().catch(e=>{console.error(e);process.exitCode=1;});
+
 
 

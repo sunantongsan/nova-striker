@@ -1,5 +1,5 @@
 // Titan combat shares the existing damage, targeting and collision systems.
-var Titan342={names:['ATLAS','VANGUARD','TITAN'],models:['atlas-09','vanguard-07','titan-06'],hp:[16000,34000,72000],damage:[420,900,1900],skills:{
+var Titan342={names:['NOVA I','NOVA II','NOVA III'],models:['atlas-09','vanguard-07','titan-06'],hp:[9600,20400,43200],damage:[273,585,1235],skills:{
  slash:{name:'ดาบพลาสมา',en:'Plasma blade',level:1,range:2.8,arc:2.4,damage:1.4,cool:4,cost:12,delay:.42,duration:1.15,clip:'SwordSlash'},
  palm:{name:'ปืนฝ่ามือ',en:'Palm cannon',level:1,range:7,arc:.4,damage:2,cool:8,cost:20,delay:.75,duration:1.35,air:true,clip:'KneelFire'},
  dash:{name:'พุ่งทะลวง',en:'Jet assault',level:1,range:3,arc:1.4,damage:1.8,cool:12,cost:25,delay:.48,duration:.9,clip:'Run'},
@@ -59,3 +59,4 @@ var combatTick347=Engine.prototype.tick;Engine.prototype.tick=function(dt){var s
 var defenseTick347=Engine.prototype.tickDefense;Engine.prototype.tickDefense=function(dt){var self=this,r=this.defense,out=preserveTitanFX347(r,function(){return defenseTick347.call(self,dt);});if(r&&!r.result)this.recordTitan347(r.defenders.find(function(t){return t.titan342;}),true);return out;};
 
 function limitTitanFX347(fx){return fx.filter(function(f){return f.weapon!=='titan342';}).slice(-35).concat(fx.filter(function(f){return f.weapon==='titan342';}).slice(-24));}
+
