@@ -8,14 +8,15 @@ for(const mode of ['wave','raid']){
  const {scene,gun,targets,tick}=setup(mode);tick(.05);gun.cool=999;
  assert(targets.every(t=>t.hp===1000),mode+': no damage on launch');assert.equal(scene.energy276.length,1);assert(scene.fx.some(f=>f.weapon==='energy276'&&f.highArc));
  tick(1.4);assert(targets.every(t=>t.hp===1000),mode+': no damage in flight');tick(.1);
- assert.equal(targets[0].hp,910);assert.equal(targets[1].hp,910,'exact three-tile boundary is included');assert.equal(targets[2].hp,1000,'outside three tiles is excluded');assert.equal(targets[3].hp,910,'diagonal inside circle is hit');assert.equal(targets[4].hp,1000,'diagonal outside circle is safe');
+ assert.equal(targets[0].hp,910);assert.equal(targets[1].hp,968.5,'three-tile edge receives 35% damage');assert.equal(targets[2].hp,1000,'outside three tiles is excluded');assert(targets[3].hp>910&&targets[3].hp<1000,'diagonal hit is attenuated');assert.equal(targets[4].hp,1000,'diagonal outside circle is safe');
  assert.equal(scene.energy276.length,0);assert(scene.fx.some(f=>f.weapon==='energyRing276'&&f.radius===3));const hp=targets.map(t=>t.hp);tick(.1);assert.deepEqual(targets.map(t=>t.hp),hp,'one damage event per projectile');assert.equal(gun.hp,5000,'no friendly fire on own tower');
 }
 // A moving target cannot drag the blast to its new position.
-let a=setup('wave');a.tick(.05);a.gun.cool=999;a.targets[0].x=20;a.targets[0].y=20;a.tick(1.5);assert.equal(a.targets[0].hp,1000);assert.equal(a.targets[1].hp,910);
+let a=setup('wave');a.tick(.05);a.gun.cool=999;a.targets[0].x=20;a.targets[0].y=20;a.tick(1.5);assert.equal(a.targets[0].hp,1000);assert.equal(a.targets[1].hp,968.5);
 // Launches survive destruction of the firing tower; queued hits still land.
-a=setup('wave');a.tick(.05);a.gun.hp=0;a.tick(1.5);assert.equal(a.targets[1].hp,910);
+a=setup('wave');a.tick(.05);a.gun.hp=0;a.tick(1.5);assert.equal(a.targets[1].hp,968.5);
 // Enhancements apply once to the area damage, using the existing combat rules.
-a=setup('wave');a.gun.enhance=2;a.tick(.05);a.gun.cool=999;a.tick(1.5);assert(a.targets[0].hp<910);assert.equal(a.targets[0].hp,a.targets[1].hp);
+a=setup('wave');a.gun.enhance=2;a.tick(.05);a.gun.cool=999;a.tick(1.5);assert(a.targets[0].hp<910);assert(Math.abs((1000-a.targets[1].hp)/(1000-a.targets[0].hp)-.35)<1e-9);
 console.log('PASS energy276: delayed impact, both battle modes, radius boundary/diagonals, one hit, fixed landing point, destroyed source, enhancements');
+
 
