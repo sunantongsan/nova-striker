@@ -23,8 +23,8 @@
     34,
     37
   ],
-  "contentVersion": 129,
-  "label": "1.9.79-nova-upgrade-deployment",
+  "contentVersion": 130,
+  "label": "1.9.80-nova-tap-management",
   "maxBytes": 67108864,
   "titan342": true
 }

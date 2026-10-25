@@ -12,3 +12,6 @@ console.log('PASS guardian UI: one-click order, three payment/wait choices, serv
 
 
 c.titanShopOnly342=false;Object.assign(c.titanState342,{level:1,upgrading355:true,upgrade_level355:2,upgrade_until355:new Date(Date.now()+259200000).toISOString(),upgrade_nova355:25920});c.titanPanel342();assert(html.includes('upgradeCountdown355'));assert(html.includes("titanAction342('speed')"));assert(html.includes("titanAd342('speed')"));assert(!html.includes("titanAction342('upgrade')"));assert(html.includes('8m 20s'));console.log('PASS upgrade countdown and quoted paid/video speed, no duplicate upgrade button');
+c.titanShopOnly342=false;Object.assign(c.titanState342,{level:1,upgrading355:false,resting347:false});c.titanPanel342();assert(html.includes('Status: Ready'));assert(html.includes('Upgrade · 2,500 NOVA'));assert(html.includes('titanControl356'));
+Object.assign(c.titanState342,{resting347:true,recovery_until347:new Date(Date.now()+900000).toISOString(),heal_nova348:90,heal_ads348:2});c.titanPanel342();assert(html.includes('Not ready · Recovering'));assert(html.includes("titanAction342('heal')"));assert(html.includes("titanAd342('heal')"));assert(!html.includes('titanControl356'));
+console.log('PASS ready/recovering status button, visible upgrade label and paid/video recovery controls');
