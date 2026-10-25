@@ -1068,5 +1068,13 @@
   "เลือกวิธีเข้าเล่นได้เลย": "Choose how to play",
   "หรือใช้อีเมล": "Or use email",
   "เริ่มเล่นได้ทันที หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ": "Start playing now or sign in to continue",
-  "อีเมลและรหัสผ่าน": "Email and password"
+  "อีเมลและรหัสผ่าน": "Email and password",
+  "เลือกพื้นที่ว่าง ห้ามวางทับอาคาร": "Deploy troops on open ground, never on buildings",
+  "แตะพื้นที่ว่าง": "Tap open ground",
+  "แตะพื้นที่ว่างเพื่อปล่อยทหาร เริ่มรบเมื่อปล่อยตัวแรก": "Tap open ground to deploy. Battle starts with the first troop",
+  "เลือกจุดปล่อยทหารบนพื้นที่ว่าง แล้วกองทัพจะโจมตีอัตโนมัติ": "Choose deployment points on open ground. Your army attacks automatically",
+  "เลือกชนิดทหาร แล้วแตะพื้นที่ว่างเพื่อปล่อยกำลัง": "Select a troop type, then tap open ground to deploy",
+  "แตะพื้นที่ว่างเพื่อวางทหารและชมการต่อสู้": "Tap open ground to deploy troops and watch the battle",
+  "แตะพื้นที่ว่างเพื่อวางทหาร": "Tap open ground to deploy troops",
+  "เลือกพื้นที่ลงจอดว่างบนพื้นที่ว่าง": "Select a clear landing zone on open ground"
 }
