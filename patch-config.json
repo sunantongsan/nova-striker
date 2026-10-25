@@ -23,8 +23,8 @@
     34,
     37
   ],
-  "contentVersion": 122,
-  "label": "1.9.72-command-guardian",
+  "contentVersion": 123,
+  "label": "1.9.73-command-guardian",
   "maxBytes": 67108864,
   "titan342": true
 }

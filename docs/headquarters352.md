@@ -1,4 +1,4 @@
-# Command headquarters transformation — patch 122
+# Command headquarters transformation — patch 123
 
 Five building tiers: 1–4, 5–8, 9–12, 13–16, 17–20. Six robot tiers unlock at 5, 8, 11, 14, 17, 20. Reuses the pinned CC0 RONIN-04 rig, suppresses the sword bone, recolors cobalt/cyan and adds graduated shoulder armor, horns, rear fins and an ultimate halo.
 
