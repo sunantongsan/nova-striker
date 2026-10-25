@@ -19,7 +19,9 @@ try {
  assert(!m.files.some(f=>f.path.startsWith('web/')||f.path==='telegram.js'));
  const play=telegram(source,output),webHTML=fs.readFileSync(path.join(play,'index.html'),'utf8');
  assert(webHTML.includes('telegram-web-app.js'));assert(webHTML.includes('src="telegram.js"'));
- assert.equal(webHTML,fs.readFileSync(path.join(source,'web/index.html'),'utf8'));
+ const config=JSON.parse(fs.readFileSync(path.join(source,'patch-config.json'),'utf8'));
+ const expectedWeb=fs.readFileSync(path.join(source,'web/index.html'),'utf8').replace(/var info=\{contentVersion:\d+,label:"[^"]*"\};/,'var info={contentVersion:'+JSON.stringify(config.contentVersion)+',label:'+JSON.stringify(config.label)+'};');
+ assert.equal(webHTML,expectedWeb,'Telegram entry must preserve its own markup and use the current content version');
  assert.equal(JSON.stringify(m),before);
  fs.appendFileSync(path.join(source,'web/index.html'),'<!-- Telegram-only edit -->');
  assert.deepEqual(android(source,output),m,'Telegram entry edits must not change Android patch');
