@@ -33,6 +33,7 @@ jobs:
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.51.1
           npx playwright install --with-deps chromium
           node tests/layout306-browser.cjs
+          node tests/celebration-browser.cjs
       - name: Save mobile layout screenshots
         continue-on-error: true
         if: always()
