@@ -9,3 +9,6 @@ Object.assign(c.titanState342,{level:1,finishes_at:null});c.titanPanel342();asse
 c.titanShopOnly342=true;c.shopTab348="skills";c.titanPanel342();assert(html.includes('slash'));assert(!html.includes('shield'));assert(html.includes('art345'));
 console.log('PASS guardian UI: one-click order, three payment/wait choices, server quotes, illustrated skills and hidden future forms');
 
+
+
+c.titanShopOnly342=false;Object.assign(c.titanState342,{level:1,upgrading355:true,upgrade_level355:2,upgrade_until355:new Date(Date.now()+259200000).toISOString(),upgrade_nova355:25920});c.titanPanel342();assert(html.includes('upgradeCountdown355'));assert(html.includes("titanAction342('speed')"));assert(html.includes("titanAd342('speed')"));assert(!html.includes("titanAction342('upgrade')"));assert(html.includes('8m 20s'));console.log('PASS upgrade countdown and quoted paid/video speed, no duplicate upgrade button');

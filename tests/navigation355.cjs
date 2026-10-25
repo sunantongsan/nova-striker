@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+const {integrate}=require('../features/titan342/build.cjs'),b={};vm.runInNewContext(integrate(fs.readFileSync('game.js','utf8')),b);
+const N=b.NovaRTS,T=N.titan342;
+const home={home355:true,mapSize:22,buildings:[{type:'hq',x:5,y:5,hp:1},{type:'wall',x:6,y:5,hp:1}],fx:[]};
+let t=T.make(1,4.2,5);T.move(home,t,1,0,.1,2);assert(t.jump345,'automatic home obstacle boost');
+for(let i=0;i<10;i++)T.advanceJump(home,t,.1);assert(!T.blocked(home,t.x,t.y));assert(t.x>4.2&&Math.hypot(t.x-4.2,t.y-5)>1.7);
+t=T.make(1,5,5);T.move(home,t,1,0,.1,2);assert(t.jump345,'escape a spawn overlapped by buildings');
+for(let i=0;i<10;i++)T.advanceJump(home,t,.1);assert(!T.blocked(home,t.x,t.y));
+t=T.make(1,20.5,5);T.move(home,t,1,0,.1,2);assert(!t.jump345,'never jump beyond map');
+const e=new N.Engine({getItem:()=>null,setItem(){}},()=>0);e.d.stage=100;e.d.army=N.units.map(()=>10);e.d.titan342={level:1,skills:{slash:1,palm:1}};e.scout(17);
+e.raid.buildings=[{id:0,type:'hq',x:10,y:10,hp:1000,max:1000,lv:17},{id:1,type:'landmine',x:12,y:12,hp:1,max:1,lv:1}];
+assert.equal(e.deploy(0,8,8),'');assert(e.deploy(0,10,10));assert(e.deploy(0,-1,8));assert(e.deploy(0,NaN,8));assert.equal(e.deploy(0,12,12),'','hidden traps do not reveal deployment blockers');
+assert(e.deployTitan342(10,10));assert.equal(e.deployTitan342(8,9),'');assert(e.deployTitan342(9,9),'one mech per battle remains');
+console.log('PASS home auto-boost and safe landing, embedded spawn escape, free central deployment, bounds/buildings/hidden traps and one-mech limit');

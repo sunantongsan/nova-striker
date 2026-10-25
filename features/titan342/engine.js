@@ -10,9 +10,20 @@ function titan342(level,x,y,skills){level=Math.max(1,Math.min(3,level||1));retur
 function titanBlocked342(scene,x,y){var max=(scene.mapSize||22)-1;return x<.4||y<.4||x>max-.4||y>max-.4||scene.buildings.some(function(b){return b.hp>0&&!trap278(b)&&Math.abs(x-b.x)<.75&&Math.abs(y-b.y)<.75;});}
 function titanJump345(scene,t,dx,dy){
  if(t.jump345||t.jumpCooldown345>0)return false;var len=Math.hypot(dx,dy);if(!len)return false;dx/=len;dy/=len;
+ if(scene.home355)return titanHomeJump355(scene,t,dx,dy);
  var wall=scene.buildings.find(function(b){return b.type==='wall'&&b.hp>0&&Math.abs(t.x+dx*.65-b.x)<.85&&Math.abs(t.y+dy*.65-b.y)<.85;});if(!wall)return false;
  for(var length=1.8;length<=3.3;length+=.3){var x=t.x+dx*length,y=t.y+dy*length;if(titanBlocked342(scene,x,y))continue;var safe=true;for(var d=.2;d<length;d+=.2){var px=t.x+dx*d,py=t.y+dy*d;if(scene.buildings.some(function(b){return b.hp>0&&b.type!=='wall'&&!trap278(b)&&Math.abs(px-b.x)<.75&&Math.abs(py-b.y)<.75;})){safe=false;break;}}if(!safe)continue;
  t.jump345={x:t.x,y:t.y,tx:x,ty:y,elapsed:0,duration:.85};t.jumpCooldown345=3;t.action342='BoostJump';t.actionTime342=.85;t.actionSeq342=(t.actionSeq342||0)+1;t.heading=t.aim=Math.atan2(dy,dx);return true;}return false;
+}
+// Home navigation may boost over obstacles, but only land on clear ground inside the base.
+function titanHomeJump355(scene,t,dx,dy){
+ if(!titanBlocked342(scene,t.x+dx*.8,t.y+dy*.8))return false;
+ var heading=Math.atan2(dy,dx);
+ for(var length=1.8;length<=5.1;length+=.3)for(var turn of [0,.35,-.35,.7,-.7]){
+  var x=t.x+Math.cos(heading+turn)*length,y=t.y+Math.sin(heading+turn)*length;
+  if(titanBlocked342(scene,x,y))continue;
+  t.jump345={x:t.x,y:t.y,tx:x,ty:y,elapsed:0,duration:.85};t.jumpCooldown345=1;t.action342='BoostJump';t.actionTime342=.85;t.actionSeq342=(t.actionSeq342||0)+1;t.heading=t.aim=heading+turn;return true;
+ }return false;
 }
 function advanceJump345(scene,t,dt){t.jumpCooldown345=Math.max(0,(t.jumpCooldown345||0)-dt);if(!t.jump345)return false;var j=t.jump345;j.elapsed=Math.min(j.duration,j.elapsed+dt);var p=j.elapsed/j.duration;t.x=j.x+(j.tx-j.x)*p;t.y=j.y+(j.ty-j.y)*p;t.action342='BoostJump';if(p>=1){delete t.jump345;t.action342='Sentinel';if(scene.fx)scene.fx.push({weapon:'titan342',skill342:'land345',x:t.x,y:t.y,tx:t.x,ty:t.y,life:.45,maxLife:.45});}return true;}
 function titanMove342(scene,t,dx,dy,dt,speed){if(t.jump345)return;var len=Math.hypot(dx,dy);if(!len)return;var step=Math.min(len,speed*dt),x=t.x+dx/len*step,y=t.y+dy/len*step;if(!titanBlocked342(scene,x,y)){t.x=x;t.y=y;}else if(titanJump345(scene,t,dx,dy))return;else if(!titanBlocked342(scene,x,t.y))t.x=x;else if(!titanBlocked342(scene,t.x,y))t.y=y;t.aim=t.heading=Math.atan2(dy,dx);t.moving=true;}
@@ -43,7 +54,7 @@ var tickTitan342=Engine.prototype.tick;Engine.prototype.tick=function(dt){if(thi
 var defenseTitan342=Engine.prototype.tickDefense;Engine.prototype.tickDefense=function(dt){if(this.defense&&!this.defense.result)tickTitans342(this.defense,Math.min(.1,Math.max(0,dt)));return defenseTitan342.call(this,dt);};
 var scoutTitan342=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scoutTitan342.call(this,target);if(ok&&target.titan342&&target.titan342.level&&!target.titan342.resting347){var h=this.raid.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};var t=titan342(target.titan342.level,h.x+1.5,h.y+1.5,target.titan342.skills);t.owner=target.id;this.raid.guards.push(t);}return ok;};
 var startTitan342=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=startTitan342.call(this);if(!error&&this.d.titan342&&this.d.titan342.level&&!this.titanRecovery347().resting){var h=supportPark339(this.d.buildings)||{x:10,y:10};this.defense.defenders.push(titan342(this.d.titan342.level,h.x+1.8,h.y+1.8,this.d.titan342.skills));}return error;};
-Engine.prototype.deployTitan342=function(x,y){var r=this.raid,s=this.d.titan342;if(!r||r.result||!s||!s.level||r.titanUsed342)return 'หุ่นยังไม่พร้อม';if(this.titanRecovery347().resting)return 'หุ่นกำลังพักฟื้น';if(r.liveMode)return 'กำลังเตรียมระบบหุ่นสำหรับสนามออนไลน์';var max=(r.mapSize||22)-1;if(!Number.isFinite(x)||!Number.isFinite(y)||titanBlocked342(r,x,y)||!(x<2||y<2||x>max-2||y>max-2))return 'เลือกจุดลงที่ขอบสนาม';var t=titan342(s.level,x,y,s.skills);r.troops.push(t);r.titanUsed342=true;r.deployed++;r.phase='battle';return '';};
+Engine.prototype.deployTitan342=function(x,y){var r=this.raid,s=this.d.titan342;if(!r||r.result||!s||!s.level||r.titanUsed342)return 'หุ่นยังไม่พร้อม';if(this.titanRecovery347().resting)return 'หุ่นกำลังพักฟื้น';if(r.liveMode)return 'กำลังเตรียมระบบหุ่นสำหรับสนามออนไลน์';var max=(r.mapSize||22)-1;if(!Number.isFinite(x)||!Number.isFinite(y)||titanBlocked342(r,x,y))return 'เลือกพื้นที่ว่าง ห้ามวางทับอาคาร';var t=titan342(s.level,x,y,s.skills);r.troops.push(t);r.titanUsed342=true;r.deployed++;r.phase='battle';return '';};
 Titan342.make=titan342;Titan342.cast=titanCast342;Titan342.tick=titanTick342;Titan342.blocked=titanBlocked342;Titan342.move=titanMove342;Titan342.jump=titanJump345;Titan342.advanceJump=advanceJump345;
 
 
