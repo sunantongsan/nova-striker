@@ -23,8 +23,8 @@
     34,
     37
   ],
-  "contentVersion": 130,
-  "label": "1.9.80-nova-tap-management",
+  "contentVersion": 131,
+  "label": "1.9.81-compact-upgrade-menu",
   "maxBytes": 67108864,
   "titan342": true
 }

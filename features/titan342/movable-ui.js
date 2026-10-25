@@ -19,6 +19,23 @@
  body .dockWindow354{position:relative;overflow:auto}
  #modal .sheet.dockReady353{padding-top:8px!important}#modal .sheet.dockReady353 .window-nav243{top:40px!important}#modal .sheet.dockReady353 h2{touch-action:none;cursor:grab;user-select:none}
  body .dockWindow354.dockMoved353,#modal .sheet.dockMoved353{position:fixed!important;left:var(--dock-x353)!important;top:var(--dock-y353)!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important;width:var(--dock-w353)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;box-sizing:border-box!important;min-width:0!important}
+
+ /* Scroll menu bodies with one finger; only their heading is a drag handle. */
+ #modal .sheet{overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scroll-padding-top:90px}
+ #modal .sheet section,#modal .sheet .actions345,#modal .sheet .pay357,#modal .sheet .action345,#modal .sheet .pay357 button{touch-action:pan-y}
+ #modal .titanShop342{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+ #modal .actions345{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+ #modal .actions345 .action345{min-width:0!important;max-width:100%;flex:1 1 88px;padding:8px 6px!important;box-sizing:border-box;overflow:hidden}
+ #modal .action345 b{display:block;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;font-size:clamp(11px,1.1vw,15px)!important;line-height:1.3}
+ #modal .sheet button:not(.dockGrip353){touch-action:pan-y!important}
+ #modal .action345 .art345,#modal .pay357 .art345{width:60px;height:60px;max-width:100%;flex:none}
+ #modal .pay357{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+ #modal .pay357 button{min-width:0;padding:10px 6px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:5px}
+ #modal .pay357 b{font-size:clamp(14px,1.7vw,21px);line-height:1.2;max-width:100%;overflow-wrap:anywhere}
+ #modal .pay357 small{font-size:12px;line-height:1.3;white-space:normal}
+ #modal .pay357 .enough357{background:#178248!important;color:#fff!important;border-color:#73df9a!important}
+ #modal .pay357 .short357,#modal .pay357 .short357:disabled{background:#080b10!important;color:#ddd!important;border-color:#394552!important;opacity:1!important}
+ @media(orientation:landscape){#modal #titanPreview342{height:120px!important}}
 `;document.head.appendChild(css);
  function persist(){try{localStorage.setItem(key,JSON.stringify(saved));}catch(e){}}
  function visible(el){return el.isConnected&&!el.hidden&&el.getClientRects().length&&getComputedStyle(el).display!=='none';}
@@ -46,3 +63,4 @@
  var settings353=Game.settings;Game.settings=function(){settings353.apply(this,arguments);var sheet=modal.querySelector('.sheet');if(sheet&&!sheet.querySelector('[data-reset353]')){var b=document.createElement('button');b.className='wide';b.dataset.reset353='1';b.textContent=mt251('คืนตำแหน่งหน้าต่างเมนูเดิม','Reset menu window positions');b.onclick=Game.resetLayout353;sheet.appendChild(b);}schedule();};
  persist();scan();
 })();
+
