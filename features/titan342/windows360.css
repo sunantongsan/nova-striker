@@ -1,0 +1,92 @@
+/* NOVA Alloy: a single window system, independent of retired modal skins. */
+#modal#modal[data-nova360]{align-items:center!important;justify-content:flex-start!important;padding:12px!important;background:transparent!important;pointer-events:none!important;user-select:none;-webkit-user-select:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#modal#modal[data-nova360] .sheet.novaWindow360{position:relative!important;inset:auto!important;transform:none!important;display:flex!important;flex-direction:column!important;width:clamp(260px,34vw,480px)!important;min-width:0!important;max-width:calc(100vw - 24px)!important;height:auto!important;max-height:calc(100dvh - 24px)!important;padding:0!important;margin:0!important;overflow:hidden!important;pointer-events:auto!important;border:2px solid #263c4c!important;border-radius:12px!important;background:#e9ede8!important;color:#253a44!important;box-shadow:0 3px 0 #102331,0 12px 28px #00132265,inset 0 0 0 1px #ffffffb0!important;font:12px/1.45 Tahoma,Arial,sans-serif!important;scroll-padding:0!important;isolation:isolate}
+#modal#modal[data-nova360] .sheet.novaWindow360.novaMoved360{position:fixed!important;left:var(--nova-x360)!important;top:var(--nova-y360)!important}
+#modal#modal[data-nova360] .novaHead360{position:relative!important;inset:auto!important;flex:0 0 auto!important;width:100%!important;box-sizing:border-box!important;pointer-events:auto!important;height:44px;min-height:44px;display:flex;align-items:center;gap:7px;padding:6px 8px;background:linear-gradient(#3e657a,#254657);border-bottom:3px solid #163445;box-shadow:inset 0 1px #96bdcb;touch-action:none;cursor:grab;color:#fff;z-index:3}
+#modal#modal[data-nova360] .novaHead360 h2{flex:1;min-width:0;margin:0!important;padding:0!important;border:0!important;color:#fff!important;font:700 14px/20px Tahoma,Arial,sans-serif!important;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;letter-spacing:0!important;text-shadow:0 1px #102c3a!important}
+#modal#modal[data-nova360] .novaHead360 h2:before{content:'◆';font-size:10px;color:#8ee0eb;margin-right:7px}
+#modal#modal[data-nova360] .novaHead360 button{flex:none!important;width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;margin:0!important;padding:0!important;border-radius:7px!important;font:bold 20px/26px Arial!important}
+#modal#modal[data-nova360] .novaHead360 .window-close243{background:linear-gradient(#ed7b65,#bc493d)!important;color:#fff!important;border:1px solid #ffb3a1!important;border-bottom:3px solid #85302a!important;box-shadow:inset 0 1px #ffd4c5!important}
+#modal#modal[data-nova360] .novaContent360{min-height:0;overflow:auto!important;overflow-x:hidden!important;padding:10px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#809ba6 #d6dfdc;touch-action:pan-y;-webkit-overflow-scrolling:touch;background:linear-gradient(135deg,#f3f3e9,#e1e9e7);color:#253a44}
+#modal#modal[data-nova360] .novaContent360 section{width:100%;min-width:0;max-width:100%;height:auto;color:#253a44;font-size:12px;box-sizing:border-box}
+#modal#modal[data-nova360] .novaContent360 h2{font-size:14px!important;line-height:20px!important;color:#294553!important;margin:4px 0 8px!important;padding:0!important;border:0!important}
+#modal#modal[data-nova360] .novaContent360 h3{font-size:12px!important;line-height:18px!important;color:#294553!important;margin:8px 0!important}
+#modal#modal[data-nova360] .novaContent360 p,#modal#modal[data-nova360] .novaContent360 small{font-size:11px!important;line-height:1.45!important;color:#536a71!important;margin:5px 0;overflow-wrap:anywhere}
+#modal#modal[data-nova360] button{font:700 11px/1.3 Tahoma,Arial,sans-serif!important;letter-spacing:0!important;white-space:normal!important;overflow-wrap:anywhere;min-height:34px!important;max-width:100%;padding:6px 9px!important;margin:0;border:1px solid #9cafa9!important;border-bottom:3px solid #859d98!important;border-radius:7px!important;background:linear-gradient(#fffef4,#dce5df)!important;color:#2e4751!important;text-shadow:0 1px #fff!important;box-shadow:inset 0 1px #fff!important;touch-action:pan-y!important;cursor:pointer}
+#modal#modal[data-nova360] button:active{transform:translateY(1px);filter:brightness(.96)}
+#modal#modal[data-nova360] button:focus-visible{outline:2px solid #1891b5;outline-offset:2px}
+#modal#modal[data-nova360] button:disabled{opacity:.45;filter:grayscale(.7);cursor:default}
+#modal#modal[data-nova360] button.green,#modal#modal[data-nova360] button[aria-pressed=true]{color:#fff!important;background:linear-gradient(#8ac752,#4e9a35)!important;border-color:#a6db77!important;border-bottom-color:#356b29!important;text-shadow:0 1px #315b25!important;box-shadow:inset 0 1px #cef3ae!important}
+#modal#modal[data-nova360] button.wide{width:100%;margin-top:7px}
+#modal#modal[data-nova360] input,#modal#modal[data-nova360] select,#modal#modal[data-nova360] textarea{font:12px/1.5 Tahoma,Arial,sans-serif!important;max-width:100%;padding:8px!important;border:1px solid #a2b5b8!important;border-radius:6px!important;color:#213e48!important;background:#fffef5!important;user-select:text;-webkit-user-select:text}
+#modal#modal[data-nova360] .window-nav243,#modal#modal[data-nova360] .dockGrip353{display:none!important}
+#modal#modal[data-nova360] .novaTabs360{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:0 0 10px;padding:3px;background:#cbd6d2;border-radius:8px;border:1px solid #acbbb7}
+#modal#modal[data-nova360] .novaTabs360 button{min-width:0;min-height:32px!important;padding:4px!important;border:0!important;border-bottom:2px solid transparent!important;background:transparent!important;box-shadow:none!important;color:#51676c!important;text-shadow:none!important;font-size:11px!important}
+#modal#modal[data-nova360] .novaTabs360 button[aria-pressed=true]{background:#fffef4!important;color:#204d60!important;border-bottom-color:#4794a9!important;box-shadow:0 1px 3px #40595a35!important}
+#modal#modal[data-nova360] .novaFilter360{display:flex;gap:4px;overflow:auto;padding:0 0 8px;margin:0;scrollbar-width:none}
+#modal#modal[data-nova360] .novaFilter360 button{flex:1;white-space:nowrap!important;min-width:0;font-size:10px!important;padding:4px!important;min-height:27px!important}
+#modal#modal[data-nova360] .novaCapacity360{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#687e82;margin:0 0 8px}
+#modal#modal[data-nova360] .novaCapacity360 b{font-size:11px;color:#33545e}
+#modal#modal[data-nova360] .novaTroops360{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#modal#modal[data-nova360] .novaTroop360{position:relative;min-width:0;padding:7px;border:1px solid #9fb5b7;border-bottom:3px solid #8ba6a7;border-radius:9px;background:linear-gradient(#fbfff8,#d6e4df);box-shadow:inset 0 1px white;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+#modal#modal[data-nova360] .novaTroop360>strong{font-size:11px;line-height:16px;text-align:center;color:#2c4650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 9px}
+#modal#modal[data-nova360] .novaPortrait360{height:62px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 65%,#a7c9cc80,transparent 70%)}
+#modal#modal[data-nova360] .novaPortrait360 .icon,#modal#modal[data-nova360] .novaPortrait360 .art278{display:block!important;width:58px!important;height:58px!important;margin:0!important;filter:drop-shadow(0 3px 2px #24414930)}
+#modal#modal[data-nova360] .novaCount360{position:absolute;right:6px;top:28px;border:1px solid #8ca8ad;border-radius:5px;background:#fcfff4;color:#34545f;padding:1px 4px;font-size:10px;font-weight:700}
+#modal#modal[data-nova360] button.novaInfo360{position:absolute;left:5px;top:27px;width:22px;min-height:22px!important;padding:0!important;border-radius:50%!important;font:700 12px/20px Georgia!important}
+#modal#modal[data-nova360] .novaCost360{display:flex;align-items:center;justify-content:space-between;gap:3px;font-size:10px;color:#43616a;white-space:nowrap}
+#modal#modal[data-nova360] .novaTrain360{width:100%;min-height:29px!important;padding:4px!important;font-size:11px!important}
+#modal#modal[data-nova360] .novaMiniTimer360{display:flex;align-items:center;justify-content:space-between;gap:4px;border-radius:4px;background:#d0dedd;padding:3px 5px;min-height:20px;color:#365963;font:10px/14px Tahoma,sans-serif;white-space:nowrap}
+#modal#modal[data-nova360] .novaMiniTimer360 b{font:700 10px/14px Tahoma,sans-serif;font-variant-numeric:tabular-nums}
+#modal#modal[data-nova360] .novaMiniTimer360.running360{background:#d6e9bb;color:#365b32}
+#modal#modal[data-nova360] .novaMiniTimer360[hidden]{display:none}
+#modal#modal[data-nova360] .novaLocked360{opacity:.58}
+/* One compact scale for the existing building, research, shop and recovery views. */
+#modal#modal[data-nova360] .shop-tabs261,#modal#modal[data-nova360] .storeTabs348{position:static!important;display:flex!important;gap:4px;padding:3px;background:#cbd6d2!important;border:0;box-shadow:none!important;overflow:auto;margin:0 0 10px}
+#modal#modal[data-nova360] .shop-tabs261 button,#modal#modal[data-nova360] .storeTabs348 button{flex:1;min-width:0;font-size:10px!important}
+#modal#modal[data-nova360] .shop-grid261,#modal#modal[data-nova360] .storeGrid348{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+#modal#modal[data-nova360] .build-card261,#modal#modal[data-nova360] .packCard348,#modal#modal[data-nova360] .skillCard348,#modal#modal[data-nova360] .stat261,#modal#modal[data-nova360] .cost261,#modal#modal[data-nova360] .detail-hero261,#modal#modal[data-nova360] .daily-day340{background:linear-gradient(#fbfff8,#dbe6df)!important;color:#2c4650!important;border:1px solid #a6bab4!important;border-radius:8px!important;box-shadow:inset 0 1px white!important;padding:8px!important;min-width:0}
+#modal#modal[data-nova360] .build-card261 b,#modal#modal[data-nova360] .packCard348 b{color:#2c4650!important;font-size:11px!important;line-height:16px;min-height:0!important}
+#modal#modal[data-nova360] .build-card261 .icon{width:58px!important;height:58px!important;margin:auto}
+#modal#modal[data-nova360] .stat261 strong{color:#47933e!important}
+#modal#modal[data-nova360] .count261{background:#ceded8!important;color:#3e635e!important;font-size:10px!important}
+#modal#modal[data-nova360] .timer359,#modal#modal[data-nova360] #guardianCountdown348,#modal#modal[data-nova360] #recoveryCountdown348,#modal#modal[data-nova360] #upgradeCountdown355{font:700 12px/20px Tahoma,sans-serif!important;font-variant-numeric:tabular-nums;color:#316b7c!important;white-space:nowrap}
+#modal#modal[data-nova360] .productionRow359{padding:8px 0;gap:8px;border-bottom:1px solid #b9c9c5}
+#modal#modal[data-nova360] .productionRow359 b{font-size:11px;color:#294b58}
+#modal#modal[data-nova360] progress{accent-color:#76b74d}
+#modal#modal[data-nova360] .productionEntry359{position:static!important;background:#e0e9df!important;color:#365a63!important;min-height:32px!important;z-index:auto!important}
+#modal#modal[data-nova360] .guardianCost345{font-size:11px!important;margin:8px 0!important}
+#modal#modal[data-nova360] .action345{padding:6px!important;min-height:64px!important;border-radius:7px!important}
+#modal#modal[data-nova360] .action345 .art345{width:36px!important;height:36px!important}
+#modal#modal[data-nova360] .action345 b{font-size:10px!important;line-height:14px!important;white-space:normal!important}
+#modal#modal[data-nova360] .titanShop342 canvas{height:105px!important}
+#modal#modal[data-nova360] .storeHead348{background:transparent!important;color:#294b58!important}
+#modal#modal[data-nova360] .storeHead348 strong{font-size:14px!important;color:#587342!important}
+#modal#modal[data-nova360] .detail-hero261{margin:5px 0 8px!important}
+#modal#modal[data-nova360] .detail-hero261 b{font-size:15px!important;color:#244b5c!important}
+/* Formation keeps independent drop targets and scroll lists, without the old oversized chrome. */
+#modal#modal[data-nova360] #armyHub278{display:block!important;height:auto!important;color:#294b58!important}
+#modal#modal[data-nova360] .armyColumns302{height:clamp(160px,46vh,330px)!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;flex:none!important}
+#modal#modal[data-nova360] .armyColumn302{display:flex;flex-direction:column;min-height:0;min-width:0}
+#modal#modal[data-nova360] .armyScroll302{display:flex!important;flex-direction:column;overflow:auto!important;min-height:0!important;gap:6px!important;padding:1px!important;flex:1}
+#modal#modal[data-nova360] .columnTitle302{font-size:10px!important;color:#57747b!important;padding:3px!important}
+#modal#modal[data-nova360] .unit278,#modal#modal[data-nova360] .ship278,#modal#modal[data-nova360] .air278{padding:6px!important;background:linear-gradient(#fbfff8,#d6e4df)!important;color:#2c4650!important;border:1px solid #a1b9ba!important;border-radius:7px!important;box-shadow:none!important;min-height:0!important}
+#modal#modal[data-nova360] .unit278{display:grid!important;grid-template-columns:1fr auto!important;gap:3px!important}
+#modal#modal[data-nova360] .unit278 strong,#modal#modal[data-nova360] .ship278>b{display:block!important;grid-column:1/-1;font-size:10px!important;line-height:14px!important;color:#315462!important}
+#modal#modal[data-nova360] .unit278 .art278,#modal#modal[data-nova360] .unit278 .icon{width:38px!important;height:38px!important}
+#modal#modal[data-nova360] .unit278 small.activeTimer359{font:700 9px/14px Tahoma!important;color:#37675d!important;background:#d3e6c3!important;min-height:0!important;padding:2px!important;border:0!important}
+#modal#modal[data-nova360] .count278{font-size:10px!important;color:#335864!important}
+#modal#modal[data-nova360] .cargo278{background:#cbdcd4!important;border:1px dashed #8fa9a5!important;min-height:24px!important}
+#modal#modal[data-nova360] .cargoUnit278{font-size:9px!important}
+#modal#modal[data-nova360] .cargoUnit278 .icon,#modal#modal[data-nova360] .cargoUnit278 .art278{width:24px!important;height:24px!important}
+#modal#modal[data-nova360] .fleetLink302{font-size:11px!important;min-height:30px!important}
+#modal#modal[data-nova360] .shop-tabs261 .active261,#modal#modal[data-nova360] .storeTabs348 .active{background:#d0e9ad!important;color:#365936!important}
+#novaConfirm358{font:12px/1.5 Tahoma,Arial,sans-serif;-webkit-text-size-adjust:100%}
+#novaConfirm358>section{background:linear-gradient(#f6f6ec,#dde6df)!important;color:#284854!important;border:2px solid #2c4e60!important;box-shadow:0 4px 0 #143544,0 12px 35px #001a3680;border-radius:10px!important}
+#novaConfirm358 h3{font-size:15px}#novaConfirm358 p{font-size:12px}#novaConfirm358 button{font-size:12px;min-height:36px;text-shadow:none}
+@media(orientation:portrait){#modal#modal[data-nova360]{justify-content:center!important}#modal#modal[data-nova360] .sheet.novaWindow360{width:min(440px,92vw)!important}}
+@media(max-height:340px){#modal#modal[data-nova360]{padding:6px!important}#modal#modal[data-nova360] .sheet.novaWindow360{max-height:calc(100dvh - 12px)!important}#modal#modal[data-nova360] .novaHead360{height:38px;min-height:38px}#modal#modal[data-nova360] .novaPortrait360{height:48px}}
+/* Decorative legacy button art must not determine row height. */
+#modal#modal[data-nova360] button.illustrated345{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important}
+#modal#modal[data-nova360] button.illustrated345>.art345{width:20px!important;height:20px!important;min-width:20px!important;margin:0!important;flex:0 0 20px!important}
+#modal#modal[data-nova360] .novaTabs360 button>.art345,#modal#modal[data-nova360] .novaFilter360 button>.art345,#modal#modal[data-nova360] .novaTrain360>.art345,#modal#modal[data-nova360] .shop-tabs261 button>.art345{display:none!important}
