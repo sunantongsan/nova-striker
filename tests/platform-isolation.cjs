@@ -15,13 +15,13 @@ try {
  const m=android(source,output),before=JSON.stringify(m);
  const entry=m.files.find(f=>f.path==='index.html');
  const nativeHTML=fs.readFileSync(path.join(output,'objects',entry.sha256),'utf8');
- assert(!nativeHTML.includes('telegram-web-app.js'));
+ assert(!nativeHTML.includes('telegram-web-app.js'));if(JSON.parse(fs.readFileSync(path.join(source,'patch-config.json'))).titan342)assert(nativeHTML.includes('window.NovaHQModel352='));
  assert(!m.files.some(f=>f.path.startsWith('web/')||f.path==='telegram.js'));
  const play=telegram(source,output),webHTML=fs.readFileSync(path.join(play,'index.html'),'utf8');
  assert(webHTML.includes('telegram-web-app.js'));assert(webHTML.includes('src="telegram.js"'));
  const config=JSON.parse(fs.readFileSync(path.join(source,'patch-config.json'),'utf8'));
  const expectedWeb=fs.readFileSync(path.join(source,'web/index.html'),'utf8').replace(/var info=\{contentVersion:\d+,label:"[^"]*"\};/,'var info={contentVersion:'+JSON.stringify(config.contentVersion)+',label:'+JSON.stringify(config.label)+'};');
- assert.equal(webHTML,expectedWeb,'Telegram entry must preserve its own markup and use the current content version');
+ assert.equal(webHTML,config.titan342?require('../features/titan342/build.cjs').documentPayload(expectedWeb):expectedWeb,'Telegram entry must preserve its own markup and use the current content version');
  assert.equal(JSON.stringify(m),before);
  fs.appendFileSync(path.join(source,'web/index.html'),'<!-- Telegram-only edit -->');
  assert.deepEqual(android(source,output),m,'Telegram entry edits must not change Android patch');
@@ -30,3 +30,4 @@ try {
  assert(!fs.existsSync(path.join(output,'play/backend')));
  console.log('PASS independent Android/Telegram entry pages, shared engine, isolated output');
 } finally {fs.rmSync(temp,{recursive:true,force:true});}
+

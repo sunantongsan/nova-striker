@@ -13,7 +13,7 @@ async function build(){
  const cache=path.join(root,'staging/titan/forge/models');fs.mkdirSync(cache,{recursive:true});const packed={},motions={},portraits={};
  for(const [name,hash] of Object.entries(sources)){const file=path.join(cache,name+'.glb');let b=fs.existsSync(file)?fs.readFileSync(file):null;if(!b||gitHash(b)!==hash){const r=await fetch(`https://raw.githubusercontent.com/RamonLinares/atlas-09/${sha}/public/models/${name}.glb`);if(!r.ok)throw Error('Model download '+r.status);b=Buffer.from(await r.arrayBuffer());if(gitHash(b)!==hash)throw Error('Model integrity '+name);fs.writeFileSync(file,b);}if(name==='ronin-04'){// Preserve the reserved model off-line; transfer quaternion sword motion only.
  const j=JSON.parse(b.subarray(20,20+b.readUInt32LE(12))),bin=b.subarray(28+b.readUInt32LE(12));
- for(const a of j.animations.filter(a=>['SwordSlash','SwordCombo'].includes(a.name))){motions[a.name]=a.channels.filter(c=>c.target.path==='rotation').map(c=>{const s=a.samplers[c.sampler],read=i=>{const ac=j.accessors[i],v=j.bufferViews[ac.bufferView],n=ac.count*(ac.type==='VEC4'?4:1),start=(v.byteOffset||0)+(ac.byteOffset||0);return Array.from({length:n},(_,k)=>bin.readFloatLE(start+k*4));};return {name:j.nodes[c.target.node].name,times:read(s.input),values:read(s.output)};});}continue;}
+ for(const a of j.animations.filter(a=>['SwordSlash','SwordCombo'].includes(a.name))){motions[a.name]=a.channels.filter(c=>c.target.path==='rotation').map(c=>{const s=a.samplers[c.sampler],read=i=>{const ac=j.accessors[i],v=j.bufferViews[ac.bufferView],n=ac.count*(ac.type==='VEC4'?4:1),start=(v.byteOffset||0)+(ac.byteOffset||0);return Array.from({length:n},(_,k)=>bin.readFloatLE(start+k*4));};return {name:j.nodes[c.target.node].name,times:read(s.input),values:read(s.output)};});}const small=await compact(b);const packedHQ=zlib.gzipSync(small,{level:9}).toString('base64');fs.writeFileSync(path.join(dir,'hq-payload.generated.json'),JSON.stringify(packedHQ));console.log(name,small.length,'bytes',packedHQ.length,'embedded in HTML');continue;}
  const renderPath=name==='atlas-09'?'output/atlas-09-beauty.png':'output/'+name+'/'+name+'-beauty.png';const pr=await fetch(`https://raw.githubusercontent.com/RamonLinares/atlas-09/${sha}/${renderPath}`);if(!pr.ok)throw Error('Portrait download');portraits[name]='data:image/webp;base64,'+(await require('sharp')(Buffer.from(await pr.arrayBuffer())).resize(192,192).webp({quality:78}).toBuffer()).toString('base64');
  const small=await compact(b);packed[name]=zlib.gzipSync(small,{level:9}).toString('base64');console.log(name,small.length,'bytes',packed[name].length,'embedded');}
  fs.writeFileSync(path.join(dir,'payload.generated.json'),JSON.stringify({packed,motions,portraits}));
@@ -21,10 +21,14 @@ async function build(){
 }
 function integrate(source){
  if(source.includes('/* titan342:engine */'))return source;
- const core=fs.readFileSync(path.join(dir,'engine.js'),'utf8'),ui=fs.readFileSync(path.join(dir,'ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'purchase-celebration.js'),'utf8');
- source=source.replace('root.NovaRTS={','/* titan342:engine */\n'+core+'\nroot.NovaRTS={titan342:Titan342,');
+ const core=fs.readFileSync(path.join(dir,'engine.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-engine.js'),'utf8'),ui=fs.readFileSync(path.join(dir,'ui.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'purchase-celebration.js'),'utf8')+'\n'+fs.readFileSync(path.join(dir,'hq-ui.js'),'utf8');
+ source=source.replace('root.NovaRTS={','/* titan342:engine */\n'+core+'\nroot.NovaRTS={hq352:HQ352,titan342:Titan342,');
  source=source.replace("r.fx=r.fx.filter(function(f){return f.life>0;}).slice(-35);", "r.fx=limitTitanFX347(r.fx.filter(function(f){return f.life>0;}));");
  source=source.replace("d.fx=d.fx.filter(function(f){f.life-=dt;return f.life>0;}).slice(-30);", "d.fx=limitTitanFX347(d.fx.filter(function(f){f.life-=dt;return f.life>0;}));");
+ source=source.replaceAll("if(b.hp<=0||['gun','hq','boss'","if(b.type==='hq'&&b.lv>=5||b.hp<=0||['gun','hq','boss'");
+ source=source.replaceAll("if(b.hp<=0||['hq','gun'","if(b.type==='hq'&&b.lv>=5||b.hp<=0||['hq','gun'");
+ source=source.replace('def.fx.forEach(drawFX);','def.fx.forEach(drawFX);(def.hqFX352||[]).forEach(drawHQEffect352);');
+ source=source.replace('raid.fx.forEach(drawFX);','raid.fx.forEach(drawFX);(raid.hqFX352||[]).forEach(drawHQEffect352);');
  source=source.replace('function drawFighter(t,enemy){','function drawFighter(t,enemy){if(t.titan342){drawTitan342(t);return;}');
  source=source.replace('if(t.builder){repairBuilder228(d,t,dt);return;}','if(t.titan342)return;if(t.builder){repairBuilder228(d,t,dt);return;}');
  source=source.replace('r.troops.forEach(function(t){if(t.hp<=0||t.stun>0)return;','r.troops.forEach(function(t){if(t.titan342)return;if(t.hp<=0||t.stun>0)return;');
@@ -39,5 +43,7 @@ function integrate(source){
  return source;
 }
 function payload(source){const vendor=fs.readFileSync(path.join(dir,'renderer.generated.js'),'utf8');const out='if(typeof document!=="undefined"){'+vendor+'}\n'+integrate(source);if(Buffer.byteLength(out)>16*1024*1024)throw Error('Native per-file limit exceeded');return out;}
-module.exports={build,integrate,payload};if(require.main===module)build().catch(e=>{console.error(e);process.exitCode=1;});
+function documentPayload(html){const packed=JSON.parse(fs.readFileSync(path.join(dir,'hq-payload.generated.json'),'utf8'));const script='<script>window.NovaHQModel352='+JSON.stringify(packed)+';</script>';const result=html.replace(/<script([^>]*?)src=["']game\.js[^"']*["']([^>]*)>/,script+'<script$1src="game.js"$2>');if(result===html)throw Error('Game script insertion point missing');if(Buffer.byteLength(result)>16*1024*1024)throw Error('Native HTML limit exceeded');return result;}
+module.exports={build,integrate,payload,documentPayload};if(require.main===module)build().catch(e=>{console.error(e);process.exitCode=1;});
+
 

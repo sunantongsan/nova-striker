@@ -5,7 +5,7 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 function build(source=root,output=path.join(root,'patch-dist')){
  const config=JSON.parse(fs.readFileSync(path.join(source,'patch-config.json')));
  if(config.schema!==1||!['test','live'].includes(config.channel)||!Number.isSafeInteger(config.nativeVersion)||config.nativeVersion<19||!Number.isSafeInteger(config.contentVersion)||config.contentVersion<1)throw Error('Invalid patch configuration');
- const content=p=>{const bytes=p==='game.js'&&config.titan342?Buffer.from(require('../features/titan342/build.cjs').payload(fs.readFileSync(path.join(source,p),'utf8'))):fs.readFileSync(path.join(source,p));return p==='index.html'?Buffer.from(bytes.toString('utf8').replace(/var info=\{contentVersion:\d+,label:"[^"]*"\};/,'var info={contentVersion:'+JSON.stringify(config.contentVersion)+',label:'+JSON.stringify(config.label)+'};')):bytes;};
+ const content=p=>{const bytes=p==='game.js'&&config.titan342?Buffer.from(require('../features/titan342/build.cjs').payload(fs.readFileSync(path.join(source,p),'utf8'))):fs.readFileSync(path.join(source,p));return p==='index.html'?Buffer.from((config.titan342?require('../features/titan342/build.cjs').documentPayload(bytes.toString('utf8')):bytes.toString('utf8')).replace(/var info=\{contentVersion:\d+,label:"[^"]*"\};/,'var info={contentVersion:'+JSON.stringify(config.contentVersion)+',label:'+JSON.stringify(config.label)+'};')):bytes;};
  const paths=['index.html','game.js',...fs.readdirSync(path.join(source,'assets')).filter(p=>p.endsWith('.webp')).sort().map(p=>'assets/'+p)];
  const files=paths.map(p=>{const bytes=content(p);return{path:p,sha256:hash(bytes),size:bytes.length};});
  const size=files.reduce((n,f)=>n+f.size,0);if(size>config.maxBytes||size>67108864)throw Error('Patch too large');
@@ -35,4 +35,5 @@ if(require.main===module){
  console.log('Patch',m.label,m.id,m.files.length,'verified content files');
 }
 module.exports={build,hash,android};
+
 
