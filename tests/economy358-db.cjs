@@ -1,0 +1,27 @@
+const fs=require('fs'),vm=require('vm');
+let source=fs.readFileSync('tests/upgrade355-db.cjs','utf8');
+const extra=`
+await db.exec(fs.readFileSync('backend/nova_economy_358.sql','utf8'));
+await db.query("update nova_private.sieges set finished_at=now() where finished_at is null");
+await db.query("update nova_private.titans342 set level=1,upgrade_level355=null,upgrade_until355=null,recovery_until347=null,ads='{}',last_ad=null where owner=$1",[uid]);
+await db.query('update public.nova_war_players set resource_gold=12000000,resource_power=12000000,gold_cap=17040000,power_cap=17040000,resource_at=now(),gold_rate=0,power_rate=0 where user_id=$1',[uid]);
+await db.query('update nova_private.test_wallets set gems=0 where user_id=$1',[uid]);
+let resourceUp=nonce();
+r=await send({titan342:'upgrade',request_id:resourceUp,upgrade_level358:1,resource_cost358:5000000});assert(r.state.upgrading355);assert.equal(r.gems,0);
+let bal=(await db.query('select resource_gold,resource_power from public.nova_war_players where user_id=$1',[uid])).rows[0];assert.equal(bal.resource_gold,7000000);assert.equal(bal.resource_power,7000000);
+r=await send({titan342:'upgrade',request_id:resourceUp,upgrade_level358:1,resource_cost358:5000000});assert.equal((await db.query('select resource_gold from public.nova_war_players where user_id=$1',[uid])).rows[0].resource_gold,7000000);
+await db.query("update nova_private.titans342 set upgrade_until355=now()-interval '1 second' where owner=$1",[uid]);await send();
+await assert.rejects(()=>send({titan342:'upgrade',request_id:nonce(),upgrade_level358:2,resource_cost358:10000000}),/ทองหรือพลังงาน/);
+await assert.rejects(()=>send({titan342:'upgrade',request_id:nonce()}),/ราคาเปลี่ยน/);
+await assert.rejects(()=>send({titan342:'prepare',target:'upgrade',request_id:nonce()}),/ทองและพลังงาน/);
+await db.query('update nova_private.titans342 set ads=$2 where owner=$1',[uid,JSON.stringify({upgrade:100})]);
+r=await send({titan342:'upgrade',request_id:nonce(),upgrade_level358:2,resource_cost358:5000000});assert(r.state.upgrading355);assert.equal(r.gems,0);
+assert.equal((await db.query('select resource_gold from public.nova_war_players where user_id=$1',[uid])).rows[0].resource_gold,2000000);
+let layout=[{type:'hq',lv:15,x:10,y:10}];for(let i=0;i<4;i++)for(const type of ['goldstore','powerstore'])layout.push({type,lv:15,x:i+1,y:type==='goldstore'?1:2});await call('publish',{layout});
+await assert.rejects(()=>call('publish',{layout:layout.concat([{type:'goldstore',lv:15,x:5,y:1}])}),/จำนวนอาคาร/);
+const seq=(await db.query('select snapshot_seq from public.nova_war_players where user_id=$1',[uid])).rows[0].snapshot_seq;
+await call('status',{resourceSnapshot:{owner:uid,seq:Number(seq)+1,gold:2000000,power:2000000,gold_cap:17040000,power_cap:17040000,gold_rate:0,power_rate:0}});
+assert.equal((await db.query('select gold_cap from public.nova_war_players where user_id=$1',[uid])).rows[0].gold_cap,17040000);
+console.log('PASS economy358 DB: resource debit, zero NOVA cost, idempotent receipt, shortage rollback, stale client rejected, new principal ads blocked, legacy ad credit, four stores and expanded snapshot');
+`;
+source=source.replace('await db.close();',extra+'\nawait db.close();');vm.runInThisContext('(function(require){'+source+'})')(require);

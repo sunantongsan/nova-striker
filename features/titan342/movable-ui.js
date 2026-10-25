@@ -20,6 +20,7 @@
  #modal .sheet.dockReady353{padding-top:8px!important}#modal .sheet.dockReady353 .window-nav243{top:40px!important}#modal .sheet.dockReady353 h2{touch-action:none;cursor:grab;user-select:none}
  body .dockWindow354.dockMoved353,#modal .sheet.dockMoved353{position:fixed!important;left:var(--dock-x353)!important;top:var(--dock-y353)!important;right:auto!important;bottom:auto!important;transform:none!important;margin:0!important;width:var(--dock-w353)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;box-sizing:border-box!important;min-width:0!important}
 
+ #modal .guardianCost345{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:clamp(11px,1.2vw,16px)}#modal .guardianCost345 span{min-width:0;display:flex;flex-direction:column;align-items:center;overflow-wrap:anywhere}
  /* Scroll menu bodies with one finger; only their heading is a drag handle. */
  #modal .sheet{overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;scroll-padding-top:90px}
  #modal .sheet section,#modal .sheet .actions345,#modal .sheet .pay357,#modal .sheet .action345,#modal .sheet .pay357 button{touch-action:pan-y}
