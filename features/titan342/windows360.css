@@ -90,3 +90,5 @@
 #modal#modal[data-nova360] button.illustrated345{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important}
 #modal#modal[data-nova360] button.illustrated345>.art345{width:20px!important;height:20px!important;min-width:20px!important;margin:0!important;flex:0 0 20px!important}
 #modal#modal[data-nova360] .novaTabs360 button>.art345,#modal#modal[data-nova360] .novaFilter360 button>.art345,#modal#modal[data-nova360] .novaTrain360>.art345,#modal#modal[data-nova360] .shop-tabs261 button>.art345{display:none!important}
+#modal#modal[data-nova360] .storeTabs348 button{display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;white-space:nowrap!important;overflow-wrap:normal!important;padding:5px!important}
+#modal#modal[data-nova360] .storeTabs348 button img,#modal#modal[data-nova360] .storeTabs348 button .art345{width:20px!important;height:20px!important;min-width:20px!important;flex:0 0 20px!important;margin:0!important}
