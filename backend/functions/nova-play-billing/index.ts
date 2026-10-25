@@ -18,9 +18,9 @@ Deno.serve(async(req)=>{let stage='request';try{
  const user=await userResponse.json();if(!user.id||user.is_anonymous)return json({error:'sign_in_required'},401);
  if(Number(req.headers.get('content-length')||0)>16000)return json({error:'too_large'},413);
  const raw=await req.text();if(raw.length>16000)return json({error:'too_large'},413);const input=JSON.parse(raw);
- const configured=Deno.env.get('NOVA_PLAY_SERVICE_ACCOUNT'),testers=(Deno.env.get('NOVA_PLAY_TEST_USERS')||'').split(',').map(s=>s.trim()),ready=!!configured&&testers.includes(user.id);
+ const configured=Deno.env.get('NOVA_PLAY_SERVICE_ACCOUNT'),ready=!!configured;
  if(input.action==='status')return json({ready,testOnly:false,account:await hash(user.id),products:Object.keys(PRODUCTS)});
- if(!ready)return json({error:'test_billing_not_configured'},503);
+ if(!ready)return json({error:'billing_not_configured'},503);
  if(input.action!=='verify'||typeof input.token!=='string'||input.token.length<10||input.token.length>4096||typeof input.product!=='string'||!Object.hasOwn(PRODUCTS,input.product))return json({error:'invalid_purchase'},400);
  stage='publisher_credentials';
  const access=await googleToken(JSON.parse(configured!)),headers={Authorization:'Bearer '+access};
