@@ -11,17 +11,19 @@
    var head=document.createElement('header');head.className='novaHead360';
    if(back){back.textContent='‹';back.setAttribute('aria-label',mt251('กลับ','Back'));head.appendChild(back);}
    var label=document.createElement('h2');label.textContent=title?title.textContent:mt251('NOVA','NOVA');head.appendChild(label);if(title)title.remove();if(oldnav)oldnav.remove();
-   var close=document.createElement('button');close.className='window-close243';close.textContent='×';close.setAttribute('aria-label',mt251('ปิด','Close'));close.onclick=function(){Game.dismissWindow243();};head.appendChild(close);
+   var close=document.createElement('button');close.className='window-close243';close.textContent='×';close.setAttribute('aria-label',mt251('ปิด','Close'));close.setAttribute('onclick','Game.dismissWindow243()');head.appendChild(close);
    var body=document.createElement('div');body.className='novaContent360';while(sheet.firstChild)body.appendChild(sheet.firstChild);sheet.appendChild(head);sheet.appendChild(body);
-   head.addEventListener('pointerdown',function(e){if(e.target.closest('button')||e.button>0)return;var r=sheet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};head.setPointerCapture(e.pointerId);e.preventDefault();});
-   head.addEventListener('pointermove',function(e){if(!drag||drag.id!==e.pointerId)return;var r=sheet.getBoundingClientRect();sheet.style.setProperty('--nova-x360',Math.max(6,Math.min(innerWidth-r.width-6,drag.left+e.clientX-drag.x))+'px');sheet.style.setProperty('--nova-y360',Math.max(6,Math.min(innerHeight-r.height-6,drag.top+e.clientY-drag.y))+'px');sheet.classList.add('novaMoved360');});
-   ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){head.addEventListener(type,function(){drag=null;});});
+
   }
   var head=sheet.querySelector('.novaHead360'),body=sheet.querySelector('.novaContent360');
   if(head&&body)Array.from(sheet.children).forEach(function(n){if(n!==head&&n!==body)body.appendChild(n);});
   // Legacy wrappers occasionally insert buttons after the title; return them to the body.
   if(head&&body)Array.from(head.children).forEach(function(n){if(n.tagName==='H2'||n.classList.contains('window-close243')||n.getAttribute('aria-label')===mt251('กลับ','Back'))return;body.prepend(n);});
  }finally{normalizing=false;}}
+ modal.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.novaHead360 .window-close243');if(!b)return;e.preventDefault();e.stopImmediatePropagation();Game.dismissWindow243();},true);
+   modal.addEventListener('pointerdown',function(e){var head=e.target.closest&&e.target.closest('.novaHead360');if(!head)return;var sheet=head.closest('.sheet');if(e.target.closest('button')||e.button>0)return;var r=sheet.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};head.setPointerCapture(e.pointerId);e.preventDefault();});
+   modal.addEventListener('pointermove',function(e){var sheet=modal.querySelector('.sheet');if(!sheet)return;if(!drag||drag.id!==e.pointerId)return;var r=sheet.getBoundingClientRect();sheet.style.setProperty('--nova-x360',Math.max(6,Math.min(innerWidth-r.width-6,drag.left+e.clientX-drag.x))+'px');sheet.style.setProperty('--nova-y360',Math.max(6,Math.min(innerHeight-r.height-6,drag.top+e.clientY-drag.y))+'px');sheet.classList.add('novaMoved360');});
+   ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){modal.addEventListener(type,function(){drag=null;});});
  function schedule(){if(!pending){pending=true;requestAnimationFrame(normalize);}}
  var previousOpen360=open;open=function(){var out=previousOpen360.apply(this,arguments);normalize();return out;};
  new MutationObserver(function(){if(!normalizing)schedule();}).observe(modal,{childList:true,subtree:true});
