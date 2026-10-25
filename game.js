@@ -54,7 +54,7 @@ B.airbase={name:tr('ฐานบินสกายพอร์ต'),cost:500,pow
 B.tech={name:tr('ศูนย์วิจัยโนวาแล็บ'),cost:400,power:180,cap:1,sprite:17,hp:800,require:2,time:35};
 B.storage={name:tr('คลังเสบียง'),cost:220,power:60,cap:2,sprite:18,hp:850,time:20};
 U.push({name:tr('พลซุ่มยิง'),cost:85,time:12,space:2,hp:180,damage:100,range:4,rate:2,speed:1.4,sprite:21,tech:1,description:tr('ยิงไกล พลังชีวิตน้อย')},
-{name:tr('เฮลิคอปเตอร์จู่โจม'),cost:150,time:18,space:4,hp:430,damage:48,range:2.6,rate:.6,speed:2.6,sprite:19,tech:2,air:true,description:tr('เฮลิคอปเตอร์ติดจรวด บินข้ามกำแพง')},
+{name:tr('เฮลิคอปเตอร์จู่โจม'),cost:150,time:18,space:4,hp:330,damage:48,range:2.6,rate:.6,speed:2.6,sprite:19,tech:2,air:true,description:tr('เฮลิคอปเตอร์ติดจรวด บินข้ามกำแพง')},
 {name:tr('หุ่นโล่'),cost:180,time:22,space:5,hp:2000,damage:35,range:1.2,rate:1.1,speed:.85,sprite:22,tech:3,description:tr('แนวหน้าพลังชีวิตสูง')},
 {name:tr('เครื่องบินทิ้งระเบิด'),cost:360,time:36,space:6,hp:720,damage:230,range:2.2,rate:2,speed:1.5,sprite:20,tech:4,air:true,splash:1.5,description:tr('ทิ้งระเบิดโจมตีพื้น • เกราะหนัก • แพ้มิสไซล์ใต้ดิน')},
 {name:tr('พลพลาสมาชั้นสูง'),cost:170,time:20,space:3,hp:650,damage:80,range:3,rate:.8,speed:1.6,sprite:21,tech:5,description:tr('พลซุ่มยิงรุ่นเกราะพลาสมา')});
