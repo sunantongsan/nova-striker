@@ -23,5 +23,17 @@ const seq=(await db.query('select snapshot_seq from public.nova_war_players wher
 await call('status',{resourceSnapshot:{owner:uid,seq:Number(seq)+1,gold:2000000,power:2000000,gold_cap:17040000,power_cap:17040000,gold_rate:0,power_rate:0}});
 assert.equal((await db.query('select gold_cap from public.nova_war_players where user_id=$1',[uid])).rows[0].gold_cap,17040000);
 console.log('PASS economy358 DB: resource debit, zero NOVA cost, idempotent receipt, shortage rollback, stale client rejected, new principal ads blocked, legacy ad credit, four stores and expanded snapshot');
+await db.query('update nova_private.test_wallets set gems=1000 where user_id=$1',[uid]);
+const oldReceipt359=nonce();
+await call('research',{enhance:'unit:0',enhance_currency257:'NOVA',quoted_cost257:100,quoted_level257:0,request_id:oldReceipt359});
+const oldBonus359=(await db.query('select enhancements from public.nova_war_players where user_id=$1',[uid])).rows[0].enhancements;
+const oldBalance359=(await db.query('select gems from nova_private.test_wallets where user_id=$1',[uid])).rows[0].gems;
+await db.exec(fs.readFileSync('backend/nova_retire_enhancements_359.sql','utf8'));
+await assert.rejects(()=>call('research',{enhance:'unit:0',enhance_currency257:'NOVA',quoted_cost257:400,quoted_level257:1,request_id:nonce()}),/ยกเลิก/);
+await call('research',{enhance:'unit:0',enhance_currency257:'NOVA',quoted_cost257:100,quoted_level257:0,request_id:oldReceipt359});
+assert.equal((await db.query('select gems from nova_private.test_wallets where user_id=$1',[uid])).rows[0].gems,oldBalance359);
+assert.deepEqual((await db.query('select enhancements from public.nova_war_players where user_id=$1',[uid])).rows[0].enhancements,oldBonus359);
+console.log('PASS retire359 DB: new purchases blocked, paid receipt replay preserved, wallet and legacy bonuses unchanged');
+
 `;
 source=source.replace('await db.close();',extra+'\nawait db.close();');vm.runInThisContext('(function(require){'+source+'})')(require);
