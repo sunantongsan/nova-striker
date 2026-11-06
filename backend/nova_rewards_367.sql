@@ -3,16 +3,16 @@ begin;
 create table nova_private.launch_campaign367(
  id boolean primary key default true check(id),
  starts_at timestamptz, ends_at timestamptz,
- check((starts_at is null and ends_at is null) or (starts_at is not null and ends_at=starts_at+interval '30 days'))
+ check((starts_at is null and ends_at is null) or (starts_at is not null and ends_at is not null and ends_at=starts_at+interval '30 days'))
 );
 insert into nova_private.launch_campaign367(id) values(true);
-create table nova_private.launch_grants367(owner uuid primary key references auth.users(id),amount integer not null default 1000 check(amount=1000),created_at timestamptz not null default now());
+create table nova_private.launch_grants367(owner uuid primary key references auth.users(id) on delete cascade,amount integer not null default 1000 check(amount=1000),created_at timestamptz not null default now());
 create table nova_private.coin_ads367(
- owner uuid not null references auth.users(id), id uuid not null,
+ owner uuid not null references auth.users(id) on delete cascade, id uuid not null,
  amount integer not null default 5 check(amount=5),
  created_at timestamptz not null default now(),expires_at timestamptz not null default now()+interval '30 minutes',
  claimed_at timestamptz, primary key(owner,id),
- foreign key(owner,id) references nova_private.admob_intents230(owner,id)
+ foreign key(owner,id) references nova_private.admob_intents230(owner,id) on delete cascade
 );
 create index coin_ads367_daily on nova_private.coin_ads367(owner,created_at);
 alter table nova_private.launch_campaign367 enable row level security;
@@ -78,7 +78,7 @@ begin
   end if;
  end if;
  select count(*) into used from nova_private.coin_ads367 where owner=uid and created_at>=day_start and (claimed_at is not null or expires_at>now() or exists(select 1 from nova_private.admob_intents230 a where a.owner=uid and a.id=coin_ads367.id and a.verified_at is not null));
- return jsonb_build_object('owner',uid,'coin_ad367',true,'available',exists(select 1 from nova_private.admob_settings230 where enabled),'amount',5,'daily_limit',6,'remaining',greatest(0,6-used),'next_reset',day_start+interval '1 day','external297',nova_private.external_credits297(),'receipt',case when r.id is null then null else jsonb_build_object('id',r.id,'claimed',r.claimed_at is not null,'expires_at',r.expires_at,'amount',r.amount) end);
+ return jsonb_build_object('owner',uid,'coin_ad367',true,'available',exists(select 1 from nova_private.admob_settings230 where enabled),'amount',5,'daily_limit',6,'remaining',greatest(0,6-used),'next_reset',day_start+interval '1 day','external297',nova_private.external_credits297(),'receipt',case when r.id is null then null else jsonb_build_object('id',r.id,'claimed',r.claimed_at is not null,'verified',exists(select 1 from nova_private.admob_intents230 a where a.owner=uid and a.id=r.id and a.verified_at is not null and not a.cancelled),'expires_at',r.expires_at,'amount',r.amount) end);
 end $$;
 
 alter function nova_private.test_command(text,jsonb) rename to test_command_before367;
