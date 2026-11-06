@@ -32,6 +32,15 @@ Status: DRAFT ONLY. No production database changes, patch publication, native re
 - Examples: HQ2 = 900 gold / 9 seconds; HQ3 = 3,600 gold / 27 minutes; HQ5 = 135,000 gold / 5h24m; HQ10 = 3,150,000 gold / 2d16h48m (storage cap applied).
 - Focused validation: 44 node:test cases plus production359 and economy358 regression scripts pass. Full historic release suite and phone validation are still required. Not published.
 
+### Personal outpost and equipment (370 candidate)
+
+- Server-owned personal outpost unlocks at main HQ5. Independent gold/energy, HQ, mine, reactor, two stores and forge; one timed builder and one timed material job. This first outpost is a fixed six-building management screen, not a second PvP battlefield.
+- Alloy: 500 outpost gold + 500 energy, 30 minutes, 20 units. Energy cores: 1,000 each, 1 hour, 5 units. Both are earned without premium currency or ads.
+- Weapon/armor equipment has 10 levels, limited by forge level. Next level consumes 30 × level alloy and 5 × level cores. Weapon gives +3% attack per level; armor +4% HP. Owned NOVA mech required; combat snapshots equipment at spawn.
+- Durable account-bound request IDs, cancellation, replay checks, private tables and cascading account deletion. No premium currency minting. Production settlement handles upgrade boundaries, full storage and frequent polling.
+- Client contains the outpost screen and equipment transport. 10 database/combat and 4 UI protocol tests pass, in addition to 44 economy cases and two regression scripts. The actual browser visual check was blocked by sandbox socket restrictions; mobile visual QA remains outstanding.
+- Migration `backend/nova_outpost_370.sql` has NOT been applied to production. No live outpost exists yet.
+
 ### New premium products
 
 | Price THB | New product | NOVA |
@@ -68,7 +77,7 @@ Not yet validated: complete migration chain against a production clone, Android 
 
 ## Still required before release
 
-1. Implement the personal secondary base and the two-material robot equipment gameplay. Neither is implemented yet; no clan system is added.
+1. Validate migration 370 against the installed production schema, complete mobile visual QA and validate online attacker/defender equipment propagation. Candidate fixed-layout outpost/equipment is implemented; a separate second-base combat mode is not included. No clan system is added.
 2. Validate normal reference version and map all Nova buildings/units, including unmatched unique units and levels. The 13 mapped main-building types use adapted tables in the candidate; unique buildings and units still need complete progression review.
 3. Integrate production rates, storage capacity, crystal production/storage, research, unit production and battle rewards. Avoid upgrades priced above obtainable storage.
 4. Budget all currency sources together: check-in, campaign, mining/referrals, ad channels, launch and purchases. Daily check-in remains unchanged; do not call the full economy balanced.
