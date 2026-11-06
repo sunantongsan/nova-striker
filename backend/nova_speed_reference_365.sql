@@ -26,6 +26,21 @@ begin
  body:=pg_get_functiondef('nova_private.titan_command_before347(jsonb)'::regprocedure);
  old:='ceil(extract(epoch from(s.finishes_at-now()))/10)';
  if strpos(body,old)=0 then raise exception 'Titan debit drift';end if;
- execute replace(body,old,'nova_private.speed_price365(extract(epoch from(s.finishes_at-now())))');
+ body:=replace(body,old,'nova_private.speed_price365(extract(epoch from(s.finishes_at-now())))');
+ old:='ceil(extract(epoch from(s.recovery_until347-now()))/10)';
+ if strpos(body,old)=0 then raise exception 'Titan recovery debit drift';end if;
+ body:=replace(body,old,'nova_private.speed_price365(extract(epoch from(s.recovery_until347-now())))');
+ old:='ceil(extract(epoch from(s.upgrade_until355-now()))/10)';
+ if strpos(body,old)=0 then raise exception 'Titan upgrade debit drift';end if;
+ execute replace(body,old,'nova_private.speed_price365(extract(epoch from(s.upgrade_until355-now())))');
+ body:=pg_get_functiondef('nova_private.titan_state_before355(uuid)'::regprocedure);
+ old:='ceil(greatest(0,extract(epoch from(recovery_until347-now())))/10)';
+ if strpos(body,old)=0 then raise exception 'Titan recovery quote drift';end if;
+ execute replace(body,old,'nova_private.speed_price365(extract(epoch from(recovery_until347-now())))');
+ body:=pg_get_functiondef('nova_private.titan_state342(uuid)'::regprocedure);
+ old:='ceil(greatest(0,extract(epoch from(upgrade_until355-now())))/10)';
+ if strpos(body,old)=0 then raise exception 'Titan upgrade quote drift';end if;
+ execute replace(body,old,'nova_private.speed_price365(extract(epoch from(upgrade_until355-now())))');
 end $migration$;
 commit;
+
