@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {PRODUCTS,validateReceipt,hash} from '../backend/functions/nova-play-billing/verify.mjs';
+const packs=[[1000, 30], [2100, 59], [3600, 99], [7600, 199], [16000, 399], [34000, 799]];
+test('pack value increases at every price tier and stays below 100000',()=>{let rate=0;for(const [amount,baht] of packs){assert.ok(amount/baht>rate);assert.ok(amount<100000);rate=amount/baht;}});
+test('new UI, Android allowlist, verifier and SQL agree on every pack',()=>{const ui=fs.readFileSync('features/titan342/ui.js','utf8'),java=fs.readFileSync('app/src/main/java/com/sunantongsan/novastriker/NovaBilling.java','utf8'),sql=fs.readFileSync('backend/nova_products_366.sql','utf8');const list=JSON.parse(ui.match(/var novaPacks348=(.*?);/)[1]);assert.deepEqual(list,packs.map(([nova,thb])=>({id:'nova_'+nova,nova,thb})));for(const [n,p] of packs){assert.equal(PRODUCTS['nova_'+n],n);assert.ok(java.includes('"nova_'+n+'"'));assert.ok(sql.includes("('nova_"+n+"',"+n+","+p+",true)"));}});
+test('old and new purchased receipts retain their exact quantity',async()=>{const uid='receipt-owner';for(const [product,nova] of Object.entries(PRODUCTS)){const receipt={orderId:'GPA.test',purchaseStateContext:{purchaseState:'PURCHASED'},obfuscatedExternalAccountId:await hash(uid),productLineItem:[{productId:product,productOfferDetails:{quantity:1,refundableQuantity:1}}]};assert.equal((await validateReceipt(receipt,uid,product)).nova,nova);await assert.rejects(()=>validateReceipt(receipt,'different-owner',product));}assert.equal(PRODUCTS.nova_180000,180000);assert.equal(PRODUCTS.nova_5000,5000);});
