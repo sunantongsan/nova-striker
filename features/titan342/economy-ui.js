@@ -13,7 +13,6 @@ guardNova358('finishQueue',function(price){return price;});
 guardNova358('supportConfirm228',function(){return E.d.pendingSupport228?null:supportQuote228&&supportQuote228.quoted;});
 guardNova358('buyResource233',function(){return E.d.pendingResource233?null:resourceQuote233&&resourceQuote233.offer&&resourceQuote233.offer.cost;});
 guardNova358('buyShield',function(hours,cost){return E.d.pendingShield?null:cost;});
-var scoutGold362=Game.warScout;Game.warScout=function(){var self=this,args=arguments;if(E.d.pendingScout262||E.d.pendingScout362)return scoutGold362.apply(self,args);confirmNova358(100,function(){scoutGold362.apply(self,args);},'gold');};
 guardNova358('enhanceBuy',function(){return E.d.pendingEnhance?null:enhancementSelection&&E.enhanceStats(enhancementSelection.key,enhancementSelection.lv).cost;});
 guardNova358('titanAction342',function(mode,key){var s=titanState342||{};if(mode==='skill')return 250*Math.pow(((s.skills||{})[key]||0)+1,2);if(mode==='heal')return s.heal_nova348;if(mode==='complete')return s.remaining_nova345;if(mode==='speed')return s.upgrading355?s.upgrade_nova355:s.speed_nova345;return null;});
 // Upgrade principal is gold + power. NOVA and videos remain timer accelerators.
@@ -25,4 +24,5 @@ Game.confirmTitanUpgrade358=function(){var s=titanState342||{};if(titanBusy342||
 ['training','army278','unitInfo278'].forEach(function(name){var fn=Game[name];if(fn)Game[name]=function(){refreshTraining358(E);return fn.apply(this,arguments);};});
 var inspectStorage358=Game.inspectBuilding261;
 Game.inspectBuilding261=function(id,upgrade){inspectStorage358.apply(this,arguments);var b=E.d.buildings.find(function(v){return v.id===id;});if(!b||!['goldstore','powerstore'].includes(b.type))return;Array.prototype.forEach.call(modal.querySelectorAll('.stat261'),function(row){if(row.textContent.indexOf(mt251('ความจุที่เพิ่ม','Storage contribution'))<0)return;var cell=row.querySelector('b');if(cell)cell.innerHTML=storeCapacity358(b.lv).toLocaleString()+(upgrade&&b.lv<20&&!b.until?' → <strong>'+storeCapacity358(b.lv+1).toLocaleString()+'</strong>':'');});};
+
 
