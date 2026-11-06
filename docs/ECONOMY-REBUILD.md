@@ -22,6 +22,16 @@ Status: DRAFT ONLY. No production database changes, patch publication, native re
 - Guarded migration 365 updates server support pricing, robot production/upgrade/recovery debit and their corresponding quotes. Not applied to production.
 - Paid/timed troop creation enforces unlock and capacity limits. Failed persistence rolls back both resources and queue changes. Existing training prices remain unchanged pending the full resource model.
 
+### Main building progression (369 candidate)
+
+- Assembled game now loads `features/economy-rebuild/progression369.js` for 13 building types through level 20.
+- Mapped cost/time use 90% of the checked-in reference numbers. Nova storage is a deliberate exception: costs are capped at 85% of attainable four dedicated plus two shared stores at the preceding level.
+- Above the reference level ceiling, the explicitly custom Nova extension adds 10% per level, rounded up. Unique unmapped Nova buildings retain their existing prices; this is not an exact reference-game conversion.
+- Walls stay instant. Existing balances, levels and already-started deadlines remain unchanged.
+- Construction, upgrades, wall batches and local speed purchases roll back debit/timer changes on failed persistence.
+- Examples: HQ2 = 900 gold / 9 seconds; HQ3 = 3,600 gold / 27 minutes; HQ5 = 135,000 gold / 5h24m; HQ10 = 3,150,000 gold / 2d16h48m (storage cap applied).
+- Focused validation: 44 node:test cases plus production359 and economy358 regression scripts pass. Full historic release suite and phone validation are still required. Not published.
+
 ### New premium products
 
 | Price THB | New product | NOVA |
@@ -46,7 +56,7 @@ Client store, Android allowlist, verifier and migration 366 agree. Value per bah
 
 ## Reference research
 
-`features/economy-rebuild/reference-candidate.json` contains 356 level rows for 26 main/secondary reference buildings, retrieved 2026-11-06 from ClashKing's extracted data. It is not loaded by the game. Only factual upgrade numbers and identifiers are included; no reference-game artwork or descriptive text is copied.
+`features/economy-rebuild/reference-candidate.json` contains 356 level rows for 26 main/secondary reference buildings, retrieved 2026-11-06 from ClashKing's extracted data. The extracted candidate file is not loaded directly; progression369 contains the adapted main-building runtime values. Only factual upgrade numbers and identifiers are included; no reference-game artwork or descriptive text is copied.
 
 Candidate mappings are by building function. They do not establish equivalent combat balance. The reference has different level ceilings from Nova's HQ20/building-level20 progression. Do not lower existing player levels or silently extrapolate the missing levels.
 
@@ -59,9 +69,10 @@ Not yet validated: complete migration chain against a production clone, Android 
 ## Still required before release
 
 1. Implement the personal secondary base and the two-material robot equipment gameplay. Neither is implemented yet; no clan system is added.
-2. Validate normal reference version and map all Nova buildings/units, including unmatched unique units and levels. Main building resource costs and upgrade times are NOT yet replaced by reference tables.
+2. Validate normal reference version and map all Nova buildings/units, including unmatched unique units and levels. The 13 mapped main-building types use adapted tables in the candidate; unique buildings and units still need complete progression review.
 3. Integrate production rates, storage capacity, crystal production/storage, research, unit production and battle rewards. Avoid upgrades priced above obtainable storage.
 4. Budget all currency sources together: check-in, campaign, mining/referrals, ad channels, launch and purchases. Daily check-in remains unchanged; do not call the full economy balanced.
 5. Coordinate new Play products/native app, verifier deployment, SQL migrations and content patch, with restore/replay testing. Keep live ads off pending approval. Set launch campaign dates only at release.
 
 No COCKRO implementation changes are included in this Nova PR.
+
