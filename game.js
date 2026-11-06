@@ -934,7 +934,7 @@ warEvent=function(event,message){
 };
 function pollResources(){
  if(lastEconomyReply&&Date.now()-lastEconomyReply<15000){setTimeout(pollResources,30000);return;}
- if(!document.hidden&&screen==='home'&&E.d.onlineCrystal&&!liveRoom&&!warBusy&&!E.d.pendingCrystal&&!E.d.pendingWar&&!E.d.pendingTest){resourcePolling=true;warRequest('status');}
+ if(!document.hidden&&screen==='home'&&E.d.onlineCrystal&&!liveRoom&&!warBusy&&!request362&&!searchQueued363&&!E.d.pendingCrystal&&!E.d.pendingWar&&!E.d.pendingTest){resourcePolling=true;warRequest('status');}
  setTimeout(pollResources,30000);
 }
 setTimeout(pollResources,3000);
@@ -2501,17 +2501,39 @@ setTimeout(function(){dailyPollAt340=0;dailyBadge340();},2200);
 var testPanel340=testPanel248;testPanel248=function(message){var clean=String(message||'').replace(/โฆษณาทดสอบ/g,'วิดีโอ').replace(/test ad/gi,'video');open('<h2>'+mt251('เช็คอินรายวัน','Daily check-in')+'</h2><p>'+escapeHTML(clean)+'</p><button class="wide" onclick="Game.checkin()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');};
 // 362: durable campaign credits and gold-based scouting.
 var request362=null,nextRequest362=0;
+// Keep user searches queued while native's single network worker finishes background work.
+var searchQueued363=null,searchTimer363=null;
+function searchPanel363(){open('<h2>'+mt251('กำลังค้นหาคู่ต่อสู้','Finding opponent')+'</h2><p>'+mt251('กำลังเชื่อมต่อ กรุณารอสักครู่','Connecting, please wait')+'</p><button class="wide" onclick="Game.cancelSearch363()">'+mt251('ยกเลิก','Cancel')+'</button>');}
+Game.cancelSearch363=function(){searchQueued363=null;clearTimeout(searchTimer363);searchTimer363=null;warBrowseIntent=false;close();};
+var targets363=Game.warTargets;
+function flushSearch363(){
+ var q=searchQueued363;if(!q)return;
+ if(q.owner!==(E.d.onlineCrystal&&E.d.onlineCrystal.owner)){Game.cancelSearch363();return;}
+ if(warBusy||request362){
+  if(++q.waits>=450){searchQueued363=null;open('<h2>'+mt251('เชื่อมต่อใช้เวลานาน','Connection is taking longer')+'</h2><button class="wide" onclick="Game.warTargets()">'+mt251('ลองอีกครั้ง','Retry')+'</button><button class="wide" onclick="Game.cancelSearch363()">'+mt251('กลับ','Back')+'</button>');return;}
+  searchTimer363=setTimeout(flushSearch363,100);return;
+ }
+ searchQueued363=null;searchTimer363=null;targets363(q.after);
+}
+Game.warTargets=function(after){
+ if(searchQueued363)return;
+ if(warBusy&&lastWarRequest&&lastWarRequest.action==='targets')return;
+ if(!warBusy&&!request362){targets363(after);return;}
+ searchQueued363={after:after,owner:E.d.onlineCrystal&&E.d.onlineCrystal.owner,waits:0};searchPanel363();flushSearch363();
+};
+
 function snapshot362(){E.sync();var a=E.d.raidDeltas||{};E.d.resourceSeq=(E.d.resourceSeq||0)+1;return {owner:E.d.onlineCrystal&&E.d.onlineCrystal.owner,seq:E.d.resourceSeq,gold:Math.floor(E.d.gold),power:Math.floor(E.d.power),gold_delta:a.gold_delta||0,power_delta:a.power_delta||0,gold_cap:E.resourceCapacity(),power_cap:E.resourceCapacity('power'),gold_rate:Math.round(E.d.buildings.filter(function(b){return b.type==='mine'&&active(b);}).reduce(function(n,b){return n+2160*b.lv;},0)),power_rate:Math.round(E.d.buildings.filter(function(b){return b.type==='reactor'&&active(b);}).reduce(function(n,b){return n+2160*b.lv;},0))};}
-function send362(kind,p){if(request362||!root.NovaCloud||(!root.NovaCloud.warRequest&&!root.NovaCloud.war)||guest288||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;var id=kind+'362-'+nonce160(),payload=Object.assign({},p);if(kind==='scout'){payload.live=p.cancel?'siege_scout_cancel362':'siege_scout_gold362';payload.resourceSnapshot=snapshot362();}else payload.campaign362=true;if(!E.save())return;request362={id:id,kind:kind,p:p};nextRequest362=Date.now()+15000;setTimeout(function(){if(request362&&request362.id===id){request362=null;if(kind==='scout')scoutPanel362();}},15000);try{if(root.NovaCloud.warRequest)root.NovaCloud.warRequest(kind==='scout'?'status':'test_claim',JSON.stringify(payload),id);else root.NovaCloud.war(kind==='scout'?'status':'test_claim',JSON.stringify(payload));}catch(e){request362=null;toast(mt251('เชื่อมต่อไม่ได้ รายการยังบันทึกไว้','Offline. Your request is saved.'));}}
+function send362(kind,p){if(warBusy||request362||!root.NovaCloud||(!root.NovaCloud.warRequest&&!root.NovaCloud.war)||guest288||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;var id=kind+'362-'+nonce160(),payload=Object.assign({},p);if(kind==='scout'){payload.live=p.cancel?'siege_scout_cancel362':'siege_scout_gold362';payload.resourceSnapshot=snapshot362();}else payload.campaign362=true;if(!E.save())return;request362={id:id,kind:kind,p:p};nextRequest362=Date.now()+15000;setTimeout(function(){if(request362&&request362.id===id){request362=null;if(kind==='scout')scoutPanel362();}},15000);try{if(root.NovaCloud.warRequest)root.NovaCloud.warRequest(kind==='scout'?'status':'test_claim',JSON.stringify(payload),id);else root.NovaCloud.war(kind==='scout'?'status':'test_claim',JSON.stringify(payload));}catch(e){request362=null;toast(mt251('เชื่อมต่อไม่ได้ รายการยังบันทึกไว้','Offline. Your request is saved.'));}}
 function scoutPanel362(){open('<h2>'+mt251('ค้นหาฐาน • 100 ทอง','Find base • 100 gold')+'</h2><p>'+mt251('ตรวจรายการเดิม ไม่หักเงินซ้ำ','Retry checks the same payment')+'</p><button class="wide green" onclick="Game.retryScout362(false)">'+mt251('ลองอีกครั้ง','Retry')+'</button><button class="wide" onclick="Game.retryScout362(true)">'+mt251('ยกเลิก','Cancel')+'</button>');}
 Game.retryScout362=function(cancel){var p=E.d.pendingScout362;if(!p||request362)return;if(cancel){p.cancel=true;if(!E.save())return;}send362('scout',p);};
 Game.warScout=function(index){if(E.d.pendingScout262){Game.retryScout262(false);return;}if(E.d.pendingScout362){Game.retryScout362(false);return;}if(warBusy||request362||!warState||!warState.targets||!warState.targets[index])return;var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner;if(!owner)return;E.sync();if(E.d.gold<100){toast(mt251('ทองไม่พอ • ค้นหาฐานครั้งละ 100 ทอง','Not enough gold • 100 gold per search'));return;}E.d.pendingScout362={owner:owner,request_id:nonce160(),target:warState.targets[index].id};if(!E.save()){delete E.d.pendingScout362;return;}scoutPanel362();send362('scout',E.d.pendingScout362);};
-function retryCampaign362(){if(request362||Date.now()<nextRequest362||screen!=='home')return;var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner,p=(E.d.campaignPending362||[]).find(function(v){return v.owner===owner;});if(p)send362('campaign',p);}
+function retryCampaign362(){if(searchQueued363||warBusy||request362||Date.now()<nextRequest362||screen!=='home')return;var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner,p=(E.d.campaignPending362||[]).find(function(v){return v.owner===owner;});if(p)send362('campaign',p);}
 var cloud362=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(data&&!data.request_id&&request362&&root.NovaCloud&&!root.NovaCloud.warRequest&&data.data&&((data.data.scout362&&data.data.scout362.id===request362.p.request_id)||(data.data.campaign362&&data.data.campaign362.stage===request362.p.stage)))data=Object.assign({},data,{request_id:request362.id});if(data&&/^(scout|campaign)362-/.test(data.request_id||'')){if(!request362||request362.id!==data.request_id)return;var q=request362;request362=null;var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner;if(q.p.owner!==owner)return;if(event!=='war'){toast(data.message||mt251('เชื่อมต่อไม่ได้ ลองอีกครั้ง','Connection failed. Retry.'));if(q.kind==='scout')scoutPanel362();return;}var d=data.data||{};if(q.kind==='campaign'){var r=d.campaign362;if(!r||r.owner!==owner||r.stage!==q.p.stage||!Number.isSafeInteger(r.credited)||r.credited<0||r.credited>453)return;var before=JSON.stringify(E.d),credits=E.d.campaignCredits362||{},old=credits[owner]||0;E.d.gems+=Math.max(0,r.credited-old);E.d.campaignCredits362=Object.assign({},credits);E.d.campaignCredits362[owner]=Math.max(old,r.credited);E.d.campaignPending362=(E.d.campaignPending362||[]).filter(function(v){return v.owner!==owner||v.stage!==r.stage;});if(!E.save()){E.d=JSON.parse(before);return;}hud();return;}var r=d.scout362,p=E.d.pendingScout362;if(!p||!r||r.owner!==owner||r.id!==p.request_id||![0,100].includes(r.cost))return;if(d.online)syncCrystal(d.online);delete E.d.pendingScout362;if(!E.save()){E.d.pendingScout362=p;return;}if(r.cost===100&&d.target){liveTarget=d.target;liveScene(liveTarget,'preview');}else Game.home();return;}cloud362.apply(this,arguments);};
-var heartbeat362=liveHeartbeat;liveHeartbeat=function(){if(!document.hidden&&!request362&&Date.now()>=nextRequest362){if(E.d.pendingScout362){Game.retryScout362(false);}else retryCampaign362();}heartbeat362();};
+var heartbeat362=liveHeartbeat;liveHeartbeat=function(){if(request362||searchQueued363){setTimeout(liveHeartbeat,1500);return;}if(!document.hidden&&!warBusy&&Date.now()>=nextRequest362){if(E.d.pendingScout362){Game.retryScout362(false);}else retryCampaign362();}heartbeat362();};
 var home362=Game.home;Game.home=function(){var out=home362.apply(this,arguments);retryCampaign362();return out;};
 
 })(typeof globalThis!=='undefined'?globalThis:this);
+
 
 
 
