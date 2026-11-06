@@ -1,0 +1,2374 @@
+{
+  "status": "candidate-not-live",
+  "retrievedAt": "2026-11-06",
+  "source": "https://raw.githubusercontent.com/ClashKingInc/ClashKingAssets/main/assets/static_data/buildings.json",
+  "normalizedSourceSha256": "e30880b055dd1c70543696640fdeff84c1d87a2950b745b99221bb604ae2c228",
+  "notes": [
+    "Facts only; no third-party game art or text included.",
+    "Validate source version and normal/event flags before activation.",
+    "Nova currently supports HQ20; this reference has different level ceilings. Do not lower existing levels or balances.",
+    "Mappings are by function and not a claim of combat-stat equivalence.",
+    "Production rates, storage capacities, troop production and unique Nova buildings still need a verified mapping."
+  ],
+  "items": [
+    {
+      "nova": "hq",
+      "reference": "Town Hall",
+      "referenceId": 1000001,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 0,
+          "build_time": 0,
+          "required_townhall": 0
+        },
+        {
+          "level": 2,
+          "build_cost": 1000,
+          "build_time": 10,
+          "required_townhall": 1
+        },
+        {
+          "level": 3,
+          "build_cost": 4000,
+          "build_time": 1800,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 25000,
+          "build_time": 10800,
+          "required_townhall": 3
+        },
+        {
+          "level": 5,
+          "build_cost": 150000,
+          "build_time": 21600,
+          "required_townhall": 4
+        },
+        {
+          "level": 6,
+          "build_cost": 500000,
+          "build_time": 43200,
+          "required_townhall": 5
+        },
+        {
+          "level": 7,
+          "build_cost": 1000000,
+          "build_time": 64800,
+          "required_townhall": 6
+        },
+        {
+          "level": 8,
+          "build_cost": 2000000,
+          "build_time": 86400,
+          "required_townhall": 7
+        },
+        {
+          "level": 9,
+          "build_cost": 2500000,
+          "build_time": 172800,
+          "required_townhall": 8
+        },
+        {
+          "level": 10,
+          "build_cost": 3500000,
+          "build_time": 259200,
+          "required_townhall": 9
+        },
+        {
+          "level": 11,
+          "build_cost": 4000000,
+          "build_time": 432000,
+          "required_townhall": 10
+        },
+        {
+          "level": 12,
+          "build_cost": 6000000,
+          "build_time": 518400,
+          "required_townhall": 11
+        },
+        {
+          "level": 13,
+          "build_cost": 9000000,
+          "build_time": 604800,
+          "required_townhall": 12
+        },
+        {
+          "level": 14,
+          "build_cost": 12000000,
+          "build_time": 648000,
+          "required_townhall": 13
+        },
+        {
+          "level": 15,
+          "build_cost": 13000000,
+          "build_time": 691200,
+          "required_townhall": 14
+        },
+        {
+          "level": 16,
+          "build_cost": 15000000,
+          "build_time": 777600,
+          "required_townhall": 15
+        },
+        {
+          "level": 17,
+          "build_cost": 16000000,
+          "build_time": 864000,
+          "required_townhall": 16
+        },
+        {
+          "level": 18,
+          "build_cost": 25000000,
+          "build_time": 1036800,
+          "required_townhall": 17
+        }
+      ]
+    },
+    {
+      "nova": "barracks",
+      "reference": "Barracks",
+      "referenceId": 1000006,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 100,
+          "build_time": 10,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 500,
+          "build_time": 15,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 2500,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 5000,
+          "build_time": 1800,
+          "required_townhall": 2
+        },
+        {
+          "level": 5,
+          "build_cost": 20000,
+          "build_time": 7200,
+          "required_townhall": 3
+        },
+        {
+          "level": 6,
+          "build_cost": 120000,
+          "build_time": 14400,
+          "required_townhall": 4
+        },
+        {
+          "level": 7,
+          "build_cost": 270000,
+          "build_time": 21600,
+          "required_townhall": 5
+        },
+        {
+          "level": 8,
+          "build_cost": 600000,
+          "build_time": 43200,
+          "required_townhall": 6
+        },
+        {
+          "level": 9,
+          "build_cost": 1000000,
+          "build_time": 86400,
+          "required_townhall": 7
+        },
+        {
+          "level": 10,
+          "build_cost": 1400000,
+          "build_time": 129600,
+          "required_townhall": 8
+        },
+        {
+          "level": 11,
+          "build_cost": 2600000,
+          "build_time": 172800,
+          "required_townhall": 9
+        },
+        {
+          "level": 12,
+          "build_cost": 3700000,
+          "build_time": 345600,
+          "required_townhall": 10
+        },
+        {
+          "level": 13,
+          "build_cost": 6000000,
+          "build_time": 432000,
+          "required_townhall": 11
+        },
+        {
+          "level": 14,
+          "build_cost": 7000000,
+          "build_time": 518400,
+          "required_townhall": 12
+        },
+        {
+          "level": 15,
+          "build_cost": 9000000,
+          "build_time": 604800,
+          "required_townhall": 13
+        },
+        {
+          "level": 16,
+          "build_cost": 11000000,
+          "build_time": 648000,
+          "required_townhall": 14
+        },
+        {
+          "level": 17,
+          "build_cost": 12600000,
+          "build_time": 691200,
+          "required_townhall": 15
+        },
+        {
+          "level": 18,
+          "build_cost": 15000000,
+          "build_time": 777600,
+          "required_townhall": 16
+        },
+        {
+          "level": 19,
+          "build_cost": 26000000,
+          "build_time": 907200,
+          "required_townhall": 17
+        }
+      ]
+    },
+    {
+      "nova": "camp",
+      "reference": "Army Camp",
+      "referenceId": 1000000,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 200,
+          "build_time": 60,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 2000,
+          "build_time": 300,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 10000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 100000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 250000,
+          "build_time": 21600,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 500000,
+          "build_time": 43200,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 1500000,
+          "build_time": 172800,
+          "required_townhall": 9
+        },
+        {
+          "level": 8,
+          "build_cost": 2500000,
+          "build_time": 259200,
+          "required_townhall": 10
+        },
+        {
+          "level": 9,
+          "build_cost": 4200000,
+          "build_time": 302400,
+          "required_townhall": 11
+        },
+        {
+          "level": 10,
+          "build_cost": 4500000,
+          "build_time": 345600,
+          "required_townhall": 12
+        },
+        {
+          "level": 11,
+          "build_cost": 7500000,
+          "build_time": 432000,
+          "required_townhall": 13
+        },
+        {
+          "level": 12,
+          "build_cost": 10000000,
+          "build_time": 518400,
+          "required_townhall": 15
+        },
+        {
+          "level": 13,
+          "build_cost": 17000000,
+          "build_time": 648000,
+          "required_townhall": 17
+        },
+        {
+          "level": 14,
+          "build_cost": 26000000,
+          "build_time": 1296000,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "mine",
+      "reference": "Gold Mine",
+      "referenceId": 1000004,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 150,
+          "build_time": 5,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 300,
+          "build_time": 15,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 700,
+          "build_time": 60,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 1400,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 5,
+          "build_cost": 3000,
+          "build_time": 300,
+          "required_townhall": 3
+        },
+        {
+          "level": 6,
+          "build_cost": 7000,
+          "build_time": 900,
+          "required_townhall": 3
+        },
+        {
+          "level": 7,
+          "build_cost": 14000,
+          "build_time": 1800,
+          "required_townhall": 4
+        },
+        {
+          "level": 8,
+          "build_cost": 28000,
+          "build_time": 3600,
+          "required_townhall": 4
+        },
+        {
+          "level": 9,
+          "build_cost": 56000,
+          "build_time": 5400,
+          "required_townhall": 5
+        },
+        {
+          "level": 10,
+          "build_cost": 75000,
+          "build_time": 7200,
+          "required_townhall": 5
+        },
+        {
+          "level": 11,
+          "build_cost": 85000,
+          "build_time": 10800,
+          "required_townhall": 7
+        },
+        {
+          "level": 12,
+          "build_cost": 170000,
+          "build_time": 14400,
+          "required_townhall": 8
+        },
+        {
+          "level": 13,
+          "build_cost": 400000,
+          "build_time": 18000,
+          "required_townhall": 10
+        },
+        {
+          "level": 14,
+          "build_cost": 800000,
+          "build_time": 21600,
+          "required_townhall": 11
+        },
+        {
+          "level": 15,
+          "build_cost": 1200000,
+          "build_time": 36000,
+          "required_townhall": 12
+        },
+        {
+          "level": 16,
+          "build_cost": 2000000,
+          "build_time": 86400,
+          "required_townhall": 14
+        },
+        {
+          "level": 17,
+          "build_cost": 8000000,
+          "build_time": 172800,
+          "required_townhall": 16
+        }
+      ]
+    },
+    {
+      "nova": "reactor",
+      "reference": "Elixir Collector",
+      "referenceId": 1000002,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 150,
+          "build_time": 5,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 300,
+          "build_time": 15,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 700,
+          "build_time": 60,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 1400,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 5,
+          "build_cost": 3000,
+          "build_time": 300,
+          "required_townhall": 3
+        },
+        {
+          "level": 6,
+          "build_cost": 7000,
+          "build_time": 900,
+          "required_townhall": 3
+        },
+        {
+          "level": 7,
+          "build_cost": 14000,
+          "build_time": 1800,
+          "required_townhall": 4
+        },
+        {
+          "level": 8,
+          "build_cost": 28000,
+          "build_time": 3600,
+          "required_townhall": 4
+        },
+        {
+          "level": 9,
+          "build_cost": 56000,
+          "build_time": 5400,
+          "required_townhall": 5
+        },
+        {
+          "level": 10,
+          "build_cost": 75000,
+          "build_time": 7200,
+          "required_townhall": 5
+        },
+        {
+          "level": 11,
+          "build_cost": 85000,
+          "build_time": 10800,
+          "required_townhall": 7
+        },
+        {
+          "level": 12,
+          "build_cost": 170000,
+          "build_time": 14400,
+          "required_townhall": 8
+        },
+        {
+          "level": 13,
+          "build_cost": 400000,
+          "build_time": 18000,
+          "required_townhall": 10
+        },
+        {
+          "level": 14,
+          "build_cost": 800000,
+          "build_time": 21600,
+          "required_townhall": 11
+        },
+        {
+          "level": 15,
+          "build_cost": 1200000,
+          "build_time": 36000,
+          "required_townhall": 12
+        },
+        {
+          "level": 16,
+          "build_cost": 2000000,
+          "build_time": 86400,
+          "required_townhall": 14
+        },
+        {
+          "level": 17,
+          "build_cost": 8000000,
+          "build_time": 172800,
+          "required_townhall": 16
+        }
+      ]
+    },
+    {
+      "nova": "goldstore",
+      "reference": "Gold Storage",
+      "referenceId": 1000005,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 300,
+          "build_time": 10,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 750,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 1500,
+          "build_time": 300,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 3000,
+          "build_time": 900,
+          "required_townhall": 3
+        },
+        {
+          "level": 5,
+          "build_cost": 6000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 6,
+          "build_cost": 12000,
+          "build_time": 3600,
+          "required_townhall": 3
+        },
+        {
+          "level": 7,
+          "build_cost": 25000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 8,
+          "build_cost": 50000,
+          "build_time": 10800,
+          "required_townhall": 4
+        },
+        {
+          "level": 9,
+          "build_cost": 100000,
+          "build_time": 14400,
+          "required_townhall": 5
+        },
+        {
+          "level": 10,
+          "build_cost": 250000,
+          "build_time": 18000,
+          "required_townhall": 6
+        },
+        {
+          "level": 11,
+          "build_cost": 500000,
+          "build_time": 21600,
+          "required_townhall": 7
+        },
+        {
+          "level": 12,
+          "build_cost": 1000000,
+          "build_time": 43200,
+          "required_townhall": 11
+        },
+        {
+          "level": 13,
+          "build_cost": 1800000,
+          "build_time": 64800,
+          "required_townhall": 12
+        },
+        {
+          "level": 14,
+          "build_cost": 2800000,
+          "build_time": 86400,
+          "required_townhall": 13
+        },
+        {
+          "level": 15,
+          "build_cost": 3000000,
+          "build_time": 172800,
+          "required_townhall": 14
+        },
+        {
+          "level": 16,
+          "build_cost": 4000000,
+          "build_time": 259200,
+          "required_townhall": 15
+        },
+        {
+          "level": 17,
+          "build_cost": 5500000,
+          "build_time": 345600,
+          "required_townhall": 16
+        },
+        {
+          "level": 18,
+          "build_cost": 10000000,
+          "build_time": 432000,
+          "required_townhall": 17
+        },
+        {
+          "level": 19,
+          "build_cost": 18000000,
+          "build_time": 1080000,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "powerstore",
+      "reference": "Elixir Storage",
+      "referenceId": 1000003,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 300,
+          "build_time": 10,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 750,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 1500,
+          "build_time": 300,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 3000,
+          "build_time": 900,
+          "required_townhall": 3
+        },
+        {
+          "level": 5,
+          "build_cost": 6000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 6,
+          "build_cost": 12000,
+          "build_time": 3600,
+          "required_townhall": 3
+        },
+        {
+          "level": 7,
+          "build_cost": 25000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 8,
+          "build_cost": 50000,
+          "build_time": 10800,
+          "required_townhall": 4
+        },
+        {
+          "level": 9,
+          "build_cost": 100000,
+          "build_time": 14400,
+          "required_townhall": 5
+        },
+        {
+          "level": 10,
+          "build_cost": 250000,
+          "build_time": 18000,
+          "required_townhall": 6
+        },
+        {
+          "level": 11,
+          "build_cost": 500000,
+          "build_time": 21600,
+          "required_townhall": 7
+        },
+        {
+          "level": 12,
+          "build_cost": 1000000,
+          "build_time": 43200,
+          "required_townhall": 11
+        },
+        {
+          "level": 13,
+          "build_cost": 1800000,
+          "build_time": 64800,
+          "required_townhall": 12
+        },
+        {
+          "level": 14,
+          "build_cost": 2800000,
+          "build_time": 86400,
+          "required_townhall": 13
+        },
+        {
+          "level": 15,
+          "build_cost": 3000000,
+          "build_time": 172800,
+          "required_townhall": 14
+        },
+        {
+          "level": 16,
+          "build_cost": 4000000,
+          "build_time": 259200,
+          "required_townhall": 15
+        },
+        {
+          "level": 17,
+          "build_cost": 5500000,
+          "build_time": 345600,
+          "required_townhall": 16
+        },
+        {
+          "level": 18,
+          "build_cost": 10000000,
+          "build_time": 432000,
+          "required_townhall": 17
+        },
+        {
+          "level": 19,
+          "build_cost": 18000000,
+          "build_time": 1080000,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "crystalplant",
+      "reference": "Dark Elixir Drill",
+      "referenceId": 1000023,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 180000,
+          "build_time": 14400,
+          "required_townhall": 7
+        },
+        {
+          "level": 2,
+          "build_cost": 270000,
+          "build_time": 21600,
+          "required_townhall": 7
+        },
+        {
+          "level": 3,
+          "build_cost": 540000,
+          "build_time": 43200,
+          "required_townhall": 7
+        },
+        {
+          "level": 4,
+          "build_cost": 900000,
+          "build_time": 64800,
+          "required_townhall": 9
+        },
+        {
+          "level": 5,
+          "build_cost": 1200000,
+          "build_time": 86400,
+          "required_townhall": 9
+        },
+        {
+          "level": 6,
+          "build_cost": 1800000,
+          "build_time": 129600,
+          "required_townhall": 9
+        },
+        {
+          "level": 7,
+          "build_cost": 2100000,
+          "build_time": 151200,
+          "required_townhall": 10
+        },
+        {
+          "level": 8,
+          "build_cost": 2400000,
+          "build_time": 172800,
+          "required_townhall": 11
+        },
+        {
+          "level": 9,
+          "build_cost": 3700000,
+          "build_time": 216000,
+          "required_townhall": 12
+        },
+        {
+          "level": 10,
+          "build_cost": 5300000,
+          "build_time": 259200,
+          "required_townhall": 14
+        },
+        {
+          "level": 11,
+          "build_cost": 12000000,
+          "build_time": 518400,
+          "required_townhall": 16
+        }
+      ]
+    },
+    {
+      "nova": "crystalstore",
+      "reference": "Dark Elixir Storage",
+      "referenceId": 1000024,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 250000,
+          "build_time": 28800,
+          "required_townhall": 7
+        },
+        {
+          "level": 2,
+          "build_cost": 500000,
+          "build_time": 57600,
+          "required_townhall": 7
+        },
+        {
+          "level": 3,
+          "build_cost": 1000000,
+          "build_time": 86400,
+          "required_townhall": 8
+        },
+        {
+          "level": 4,
+          "build_cost": 1500000,
+          "build_time": 129600,
+          "required_townhall": 8
+        },
+        {
+          "level": 5,
+          "build_cost": 2000000,
+          "build_time": 144000,
+          "required_townhall": 9
+        },
+        {
+          "level": 6,
+          "build_cost": 2400000,
+          "build_time": 172800,
+          "required_townhall": 9
+        },
+        {
+          "level": 7,
+          "build_cost": 3800000,
+          "build_time": 259200,
+          "required_townhall": 12
+        },
+        {
+          "level": 8,
+          "build_cost": 5400000,
+          "build_time": 302400,
+          "required_townhall": 13
+        },
+        {
+          "level": 9,
+          "build_cost": 6600000,
+          "build_time": 345600,
+          "required_townhall": 14
+        },
+        {
+          "level": 10,
+          "build_cost": 8000000,
+          "build_time": 388800,
+          "required_townhall": 15
+        },
+        {
+          "level": 11,
+          "build_cost": 10000000,
+          "build_time": 432000,
+          "required_townhall": 16
+        },
+        {
+          "level": 12,
+          "build_cost": 16000000,
+          "build_time": 604800,
+          "required_townhall": 17
+        },
+        {
+          "level": 13,
+          "build_cost": 25000000,
+          "build_time": 1123200,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "tech",
+      "reference": "Laboratory",
+      "referenceId": 1000007,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 5000,
+          "build_time": 60,
+          "required_townhall": 3
+        },
+        {
+          "level": 2,
+          "build_cost": 25000,
+          "build_time": 1800,
+          "required_townhall": 4
+        },
+        {
+          "level": 3,
+          "build_cost": 50000,
+          "build_time": 7200,
+          "required_townhall": 5
+        },
+        {
+          "level": 4,
+          "build_cost": 100000,
+          "build_time": 14400,
+          "required_townhall": 6
+        },
+        {
+          "level": 5,
+          "build_cost": 200000,
+          "build_time": 28800,
+          "required_townhall": 7
+        },
+        {
+          "level": 6,
+          "build_cost": 400000,
+          "build_time": 57600,
+          "required_townhall": 8
+        },
+        {
+          "level": 7,
+          "build_cost": 800000,
+          "build_time": 86400,
+          "required_townhall": 9
+        },
+        {
+          "level": 8,
+          "build_cost": 1300000,
+          "build_time": 151200,
+          "required_townhall": 10
+        },
+        {
+          "level": 9,
+          "build_cost": 2100000,
+          "build_time": 237600,
+          "required_townhall": 11
+        },
+        {
+          "level": 10,
+          "build_cost": 3800000,
+          "build_time": 345600,
+          "required_townhall": 12
+        },
+        {
+          "level": 11,
+          "build_cost": 5500000,
+          "build_time": 518400,
+          "required_townhall": 13
+        },
+        {
+          "level": 12,
+          "build_cost": 8100000,
+          "build_time": 604800,
+          "required_townhall": 14
+        },
+        {
+          "level": 13,
+          "build_cost": 10800000,
+          "build_time": 691200,
+          "required_townhall": 15
+        },
+        {
+          "level": 14,
+          "build_cost": 13000000,
+          "build_time": 777600,
+          "required_townhall": 16
+        },
+        {
+          "level": 15,
+          "build_cost": 18000000,
+          "build_time": 864000,
+          "required_townhall": 17
+        },
+        {
+          "level": 16,
+          "build_cost": 27000000,
+          "build_time": 1382400,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "wall",
+      "reference": "Wall",
+      "referenceId": 1000010,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 0,
+          "build_time": 0,
+          "required_townhall": 2
+        },
+        {
+          "level": 2,
+          "build_cost": 1000,
+          "build_time": 0,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 5000,
+          "build_time": 0,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 10000,
+          "build_time": 0,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 20000,
+          "build_time": 0,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 30000,
+          "build_time": 0,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 50000,
+          "build_time": 0,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 75000,
+          "build_time": 0,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 100000,
+          "build_time": 0,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 200000,
+          "build_time": 0,
+          "required_townhall": 9
+        },
+        {
+          "level": 11,
+          "build_cost": 500000,
+          "build_time": 0,
+          "required_townhall": 10
+        },
+        {
+          "level": 12,
+          "build_cost": 1000000,
+          "build_time": 0,
+          "required_townhall": 11
+        },
+        {
+          "level": 13,
+          "build_cost": 1500000,
+          "build_time": 0,
+          "required_townhall": 12
+        },
+        {
+          "level": 14,
+          "build_cost": 2000000,
+          "build_time": 0,
+          "required_townhall": 13
+        },
+        {
+          "level": 15,
+          "build_cost": 3000000,
+          "build_time": 0,
+          "required_townhall": 14
+        },
+        {
+          "level": 16,
+          "build_cost": 4000000,
+          "build_time": 0,
+          "required_townhall": 15
+        },
+        {
+          "level": 17,
+          "build_cost": 5000000,
+          "build_time": 0,
+          "required_townhall": 16
+        },
+        {
+          "level": 18,
+          "build_cost": 7000000,
+          "build_time": 0,
+          "required_townhall": 17
+        },
+        {
+          "level": 19,
+          "build_cost": 10000000,
+          "build_time": 0,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "gun",
+      "reference": "Cannon",
+      "referenceId": 1000008,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 250,
+          "build_time": 5,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 1000,
+          "build_time": 30,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 4000,
+          "build_time": 120,
+          "required_townhall": 2
+        },
+        {
+          "level": 4,
+          "build_cost": 16000,
+          "build_time": 1200,
+          "required_townhall": 3
+        },
+        {
+          "level": 5,
+          "build_cost": 50000,
+          "build_time": 1800,
+          "required_townhall": 4
+        },
+        {
+          "level": 6,
+          "build_cost": 60000,
+          "build_time": 3600,
+          "required_townhall": 5
+        },
+        {
+          "level": 7,
+          "build_cost": 100000,
+          "build_time": 7200,
+          "required_townhall": 6
+        },
+        {
+          "level": 8,
+          "build_cost": 160000,
+          "build_time": 10800,
+          "required_townhall": 7
+        },
+        {
+          "level": 9,
+          "build_cost": 250000,
+          "build_time": 12600,
+          "required_townhall": 8
+        },
+        {
+          "level": 10,
+          "build_cost": 330000,
+          "build_time": 14400,
+          "required_townhall": 8
+        },
+        {
+          "level": 11,
+          "build_cost": 500000,
+          "build_time": 16200,
+          "required_townhall": 9
+        },
+        {
+          "level": 12,
+          "build_cost": 600000,
+          "build_time": 18000,
+          "required_townhall": 10
+        },
+        {
+          "level": 13,
+          "build_cost": 660000,
+          "build_time": 21600,
+          "required_townhall": 10
+        },
+        {
+          "level": 14,
+          "build_cost": 1000000,
+          "build_time": 28800,
+          "required_townhall": 11
+        },
+        {
+          "level": 15,
+          "build_cost": 1200000,
+          "build_time": 36000,
+          "required_townhall": 11
+        },
+        {
+          "level": 16,
+          "build_cost": 1300000,
+          "build_time": 39600,
+          "required_townhall": 12
+        },
+        {
+          "level": 17,
+          "build_cost": 1500000,
+          "build_time": 43200,
+          "required_townhall": 12
+        },
+        {
+          "level": 18,
+          "build_cost": 1800000,
+          "build_time": 57600,
+          "required_townhall": 13
+        },
+        {
+          "level": 19,
+          "build_cost": 2000000,
+          "build_time": 72000,
+          "required_townhall": 13
+        },
+        {
+          "level": 20,
+          "build_cost": 2600000,
+          "build_time": 86400,
+          "required_townhall": 14
+        },
+        {
+          "level": 21,
+          "build_cost": 3000000,
+          "build_time": 129600,
+          "required_townhall": 15
+        }
+      ]
+    },
+    {
+      "nova": "tesla",
+      "reference": "Hidden Tesla",
+      "referenceId": 1000019,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 250000,
+          "build_time": 7200,
+          "required_townhall": 7
+        },
+        {
+          "level": 2,
+          "build_cost": 350000,
+          "build_time": 10800,
+          "required_townhall": 7
+        },
+        {
+          "level": 3,
+          "build_cost": 500000,
+          "build_time": 14400,
+          "required_townhall": 7
+        },
+        {
+          "level": 4,
+          "build_cost": 600000,
+          "build_time": 21600,
+          "required_townhall": 8
+        },
+        {
+          "level": 5,
+          "build_cost": 800000,
+          "build_time": 43200,
+          "required_townhall": 8
+        },
+        {
+          "level": 6,
+          "build_cost": 1200000,
+          "build_time": 86400,
+          "required_townhall": 8
+        },
+        {
+          "level": 7,
+          "build_cost": 1400000,
+          "build_time": 108000,
+          "required_townhall": 9
+        },
+        {
+          "level": 8,
+          "build_cost": 1600000,
+          "build_time": 129600,
+          "required_townhall": 10
+        },
+        {
+          "level": 9,
+          "build_cost": 2100000,
+          "build_time": 151200,
+          "required_townhall": 11
+        },
+        {
+          "level": 10,
+          "build_cost": 3000000,
+          "build_time": 172800,
+          "required_townhall": 12
+        },
+        {
+          "level": 11,
+          "build_cost": 3100000,
+          "build_time": 216000,
+          "required_townhall": 13
+        },
+        {
+          "level": 12,
+          "build_cost": 3700000,
+          "build_time": 259200,
+          "required_townhall": 13
+        },
+        {
+          "level": 13,
+          "build_cost": 5100000,
+          "build_time": 302400,
+          "required_townhall": 14
+        },
+        {
+          "level": 14,
+          "build_cost": 6500000,
+          "build_time": 345600,
+          "required_townhall": 15
+        },
+        {
+          "level": 15,
+          "build_cost": 8200000,
+          "build_time": 432000,
+          "required_townhall": 16
+        },
+        {
+          "level": 16,
+          "build_cost": 15000000,
+          "build_time": 604800,
+          "required_townhall": 17
+        },
+        {
+          "level": 17,
+          "build_cost": 25000000,
+          "build_time": 1123200,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "missileturret",
+      "reference": "Air Defense",
+      "referenceId": 1000012,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 22000,
+          "build_time": 3600,
+          "required_townhall": 4
+        },
+        {
+          "level": 2,
+          "build_cost": 90000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 3,
+          "build_cost": 210000,
+          "build_time": 21600,
+          "required_townhall": 5
+        },
+        {
+          "level": 4,
+          "build_cost": 500000,
+          "build_time": 43200,
+          "required_townhall": 6
+        },
+        {
+          "level": 5,
+          "build_cost": 800000,
+          "build_time": 64800,
+          "required_townhall": 7
+        },
+        {
+          "level": 6,
+          "build_cost": 1000000,
+          "build_time": 86400,
+          "required_townhall": 8
+        },
+        {
+          "level": 7,
+          "build_cost": 1750000,
+          "build_time": 172800,
+          "required_townhall": 9
+        },
+        {
+          "level": 8,
+          "build_cost": 2300000,
+          "build_time": 216000,
+          "required_townhall": 10
+        },
+        {
+          "level": 9,
+          "build_cost": 3400000,
+          "build_time": 259200,
+          "required_townhall": 11
+        },
+        {
+          "level": 10,
+          "build_cost": 5000000,
+          "build_time": 345600,
+          "required_townhall": 12
+        },
+        {
+          "level": 11,
+          "build_cost": 5600000,
+          "build_time": 388800,
+          "required_townhall": 13
+        },
+        {
+          "level": 12,
+          "build_cost": 6500000,
+          "build_time": 432000,
+          "required_townhall": 14
+        },
+        {
+          "level": 13,
+          "build_cost": 8000000,
+          "build_time": 518400,
+          "required_townhall": 15
+        },
+        {
+          "level": 14,
+          "build_cost": 9000000,
+          "build_time": 561600,
+          "required_townhall": 16
+        },
+        {
+          "level": 15,
+          "build_cost": 15000000,
+          "build_time": 604800,
+          "required_townhall": 17
+        },
+        {
+          "level": 16,
+          "build_cost": 26000000,
+          "build_time": 1144800,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "cannonturret",
+      "reference": "Mortar",
+      "referenceId": 1000013,
+      "village": "main",
+      "resource": "Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 5000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 2,
+          "build_cost": 25000,
+          "build_time": 3600,
+          "required_townhall": 4
+        },
+        {
+          "level": 3,
+          "build_cost": 90000,
+          "build_time": 7200,
+          "required_townhall": 5
+        },
+        {
+          "level": 4,
+          "build_cost": 180000,
+          "build_time": 10800,
+          "required_townhall": 6
+        },
+        {
+          "level": 5,
+          "build_cost": 300000,
+          "build_time": 21600,
+          "required_townhall": 7
+        },
+        {
+          "level": 6,
+          "build_cost": 500000,
+          "build_time": 28800,
+          "required_townhall": 8
+        },
+        {
+          "level": 7,
+          "build_cost": 900000,
+          "build_time": 43200,
+          "required_townhall": 9
+        },
+        {
+          "level": 8,
+          "build_cost": 1200000,
+          "build_time": 64800,
+          "required_townhall": 10
+        },
+        {
+          "level": 9,
+          "build_cost": 1600000,
+          "build_time": 72000,
+          "required_townhall": 11
+        },
+        {
+          "level": 10,
+          "build_cost": 1800000,
+          "build_time": 86400,
+          "required_townhall": 11
+        },
+        {
+          "level": 11,
+          "build_cost": 2300000,
+          "build_time": 108000,
+          "required_townhall": 12
+        },
+        {
+          "level": 12,
+          "build_cost": 2400000,
+          "build_time": 129600,
+          "required_townhall": 12
+        },
+        {
+          "level": 13,
+          "build_cost": 2800000,
+          "build_time": 172800,
+          "required_townhall": 13
+        },
+        {
+          "level": 14,
+          "build_cost": 4300000,
+          "build_time": 216000,
+          "required_townhall": 14
+        },
+        {
+          "level": 15,
+          "build_cost": 5000000,
+          "build_time": 259200,
+          "required_townhall": 15
+        },
+        {
+          "level": 16,
+          "build_cost": 7000000,
+          "build_time": 345600,
+          "required_townhall": 16
+        },
+        {
+          "level": 17,
+          "build_cost": 13000000,
+          "build_time": 432000,
+          "required_townhall": 17
+        },
+        {
+          "level": 18,
+          "build_cost": 21000000,
+          "build_time": 1080000,
+          "required_townhall": 18
+        }
+      ]
+    },
+    {
+      "nova": "robotworkshop",
+      "reference": "Blacksmith",
+      "referenceId": 1000070,
+      "village": "main",
+      "resource": "Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 600000,
+          "build_time": 43200,
+          "required_townhall": 8
+        },
+        {
+          "level": 2,
+          "build_cost": 1200000,
+          "build_time": 86400,
+          "required_townhall": 9
+        },
+        {
+          "level": 3,
+          "build_cost": 2300000,
+          "build_time": 172800,
+          "required_townhall": 10
+        },
+        {
+          "level": 4,
+          "build_cost": 3000000,
+          "build_time": 259200,
+          "required_townhall": 11
+        },
+        {
+          "level": 5,
+          "build_cost": 5000000,
+          "build_time": 345600,
+          "required_townhall": 12
+        },
+        {
+          "level": 6,
+          "build_cost": 6200000,
+          "build_time": 388800,
+          "required_townhall": 13
+        },
+        {
+          "level": 7,
+          "build_cost": 9200000,
+          "build_time": 432000,
+          "required_townhall": 14
+        },
+        {
+          "level": 8,
+          "build_cost": 10000000,
+          "build_time": 518400,
+          "required_townhall": 15
+        },
+        {
+          "level": 9,
+          "build_cost": 11000000,
+          "build_time": 604800,
+          "required_townhall": 16
+        },
+        {
+          "level": 10,
+          "build_cost": 18000000,
+          "build_time": 864000,
+          "required_townhall": 17
+        }
+      ]
+    },
+    {
+      "reference": "Wall",
+      "referenceId": 1000033,
+      "village": "secondary",
+      "resource": "Builder Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 0,
+          "build_time": 0,
+          "required_townhall": 2
+        },
+        {
+          "level": 2,
+          "build_cost": 2000,
+          "build_time": 0,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 10000,
+          "build_time": 0,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 50000,
+          "build_time": 0,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 150000,
+          "build_time": 0,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 240000,
+          "build_time": 0,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 400000,
+          "build_time": 0,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 600000,
+          "build_time": 0,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 800000,
+          "build_time": 0,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 1000000,
+          "build_time": 0,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Builder Hall",
+      "referenceId": 1000034,
+      "village": "secondary",
+      "resource": "Builder Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 0,
+          "build_time": 0,
+          "required_townhall": null
+        },
+        {
+          "level": 2,
+          "build_cost": 3500,
+          "build_time": 5,
+          "required_townhall": null
+        },
+        {
+          "level": 3,
+          "build_cost": 30000,
+          "build_time": 3600,
+          "required_townhall": null
+        },
+        {
+          "level": 4,
+          "build_cost": 200000,
+          "build_time": 86400,
+          "required_townhall": null
+        },
+        {
+          "level": 5,
+          "build_cost": 400000,
+          "build_time": 172800,
+          "required_townhall": null
+        },
+        {
+          "level": 6,
+          "build_cost": 1200000,
+          "build_time": 259200,
+          "required_townhall": null
+        },
+        {
+          "level": 7,
+          "build_cost": 1800000,
+          "build_time": 345600,
+          "required_townhall": null
+        },
+        {
+          "level": 8,
+          "build_cost": 2800000,
+          "build_time": 432000,
+          "required_townhall": null
+        },
+        {
+          "level": 9,
+          "build_cost": 3800000,
+          "build_time": 518400,
+          "required_townhall": null
+        },
+        {
+          "level": 10,
+          "build_cost": 4800000,
+          "build_time": 604800,
+          "required_townhall": null
+        }
+      ]
+    },
+    {
+      "reference": "Elixir Collector",
+      "referenceId": 1000035,
+      "village": "secondary",
+      "resource": "Builder Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 1000,
+          "build_time": 600,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 5000,
+          "build_time": 1200,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 10000,
+          "build_time": 2400,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 30000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 60000,
+          "build_time": 21600,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 100000,
+          "build_time": 86400,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 200000,
+          "build_time": 129600,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 300000,
+          "build_time": 172800,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 400000,
+          "build_time": 216000,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 800000,
+          "build_time": 259200,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Elixir Storage",
+      "referenceId": 1000036,
+      "village": "secondary",
+      "resource": "Builder Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 20000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 2,
+          "build_cost": 80000,
+          "build_time": 3600,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 200000,
+          "build_time": 10800,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 300000,
+          "build_time": 21600,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 600000,
+          "build_time": 43200,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 1000000,
+          "build_time": 86400,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 1500000,
+          "build_time": 172800,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 2000000,
+          "build_time": 259200,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 2500000,
+          "build_time": 345600,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 3200000,
+          "build_time": 432000,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Gold Mine",
+      "referenceId": 1000037,
+      "village": "secondary",
+      "resource": "Builder Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 1000,
+          "build_time": 600,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 5000,
+          "build_time": 1200,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 10000,
+          "build_time": 2400,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 30000,
+          "build_time": 7200,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 60000,
+          "build_time": 21600,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 100000,
+          "build_time": 86400,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 200000,
+          "build_time": 129600,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 300000,
+          "build_time": 172800,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 400000,
+          "build_time": 216000,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 800000,
+          "build_time": 259200,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Gold Storage",
+      "referenceId": 1000038,
+      "village": "secondary",
+      "resource": "Builder Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 20000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 2,
+          "build_cost": 80000,
+          "build_time": 3600,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 200000,
+          "build_time": 10800,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 300000,
+          "build_time": 21600,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 600000,
+          "build_time": 43200,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 1000000,
+          "build_time": 86400,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 1500000,
+          "build_time": 172800,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 2000000,
+          "build_time": 259200,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 2500000,
+          "build_time": 345600,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 3200000,
+          "build_time": 432000,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Builder Barracks",
+      "referenceId": 1000040,
+      "village": "secondary",
+      "resource": "Builder Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 1000,
+          "build_time": 0,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 4000,
+          "build_time": 60,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 10000,
+          "build_time": 600,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 25000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 5,
+          "build_cost": 100000,
+          "build_time": 10800,
+          "required_townhall": 4
+        },
+        {
+          "level": 6,
+          "build_cost": 150000,
+          "build_time": 21600,
+          "required_townhall": 4
+        },
+        {
+          "level": 7,
+          "build_cost": 300000,
+          "build_time": 32400,
+          "required_townhall": 5
+        },
+        {
+          "level": 8,
+          "build_cost": 500000,
+          "build_time": 86400,
+          "required_townhall": 6
+        },
+        {
+          "level": 9,
+          "build_cost": 1000000,
+          "build_time": 172800,
+          "required_townhall": 7
+        },
+        {
+          "level": 10,
+          "build_cost": 1500000,
+          "build_time": 259200,
+          "required_townhall": 8
+        },
+        {
+          "level": 11,
+          "build_cost": 2000000,
+          "build_time": 345600,
+          "required_townhall": 9
+        },
+        {
+          "level": 12,
+          "build_cost": 3000000,
+          "build_time": 432000,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Army Camp",
+      "referenceId": 1000042,
+      "village": "secondary",
+      "resource": "Builder Elixir",
+      "levels": []
+    },
+    {
+      "reference": "Cannon",
+      "referenceId": 1000044,
+      "village": "secondary",
+      "resource": "Builder Gold",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 10000,
+          "build_time": 60,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 20000,
+          "build_time": 300,
+          "required_townhall": 3
+        },
+        {
+          "level": 3,
+          "build_cost": 50000,
+          "build_time": 7200,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 200000,
+          "build_time": 28800,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 600000,
+          "build_time": 86400,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 1000000,
+          "build_time": 172800,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 1800000,
+          "build_time": 345600,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 2500000,
+          "build_time": 518400,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 3300000,
+          "build_time": 691200,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 4500000,
+          "build_time": 777600,
+          "required_townhall": 10
+        }
+      ]
+    },
+    {
+      "reference": "Star Laboratory",
+      "referenceId": 1000046,
+      "village": "secondary",
+      "resource": "Builder Elixir",
+      "levels": [
+        {
+          "level": 1,
+          "build_cost": 1000,
+          "build_time": 0,
+          "required_townhall": 1
+        },
+        {
+          "level": 2,
+          "build_cost": 15000,
+          "build_time": 600,
+          "required_townhall": 2
+        },
+        {
+          "level": 3,
+          "build_cost": 50000,
+          "build_time": 1800,
+          "required_townhall": 3
+        },
+        {
+          "level": 4,
+          "build_cost": 300000,
+          "build_time": 28800,
+          "required_townhall": 4
+        },
+        {
+          "level": 5,
+          "build_cost": 700000,
+          "build_time": 43200,
+          "required_townhall": 5
+        },
+        {
+          "level": 6,
+          "build_cost": 1000000,
+          "build_time": 172800,
+          "required_townhall": 6
+        },
+        {
+          "level": 7,
+          "build_cost": 2000000,
+          "build_time": 345600,
+          "required_townhall": 7
+        },
+        {
+          "level": 8,
+          "build_cost": 3000000,
+          "build_time": 518400,
+          "required_townhall": 8
+        },
+        {
+          "level": 9,
+          "build_cost": 4000000,
+          "build_time": 691200,
+          "required_townhall": 9
+        },
+        {
+          "level": 10,
+          "build_cost": 5000000,
+          "build_time": 864000,
+          "required_townhall": 10
+        }
+      ]
+    }
+  ]
+}
