@@ -1,53 +1,37 @@
-# NOVA economy rebuild — accepted scope, 6 November 2026
+# NOVA economy rebuild — current scope and status
 
-Status: design and tested policy foundation only; NOT integrated, deployed, or a complete economic rebalance.
+## Accepted scope
+- Keep the 1,000 NOVA new-account launch bonus and 30-day campaign.
+- Main base plus ONE personal secondary base. No clan base, raid medals or league currency.
+- Add four resources: two robot-equipment materials (proposed names Alloy and Energy Core), secondary-base Gold and Energy. Existing main-base Gold, Energy, Crystals and NOVA remain.
+- Match normal Clash reference progression with 90% resource/NOVA costs and 90% upgrade times for equivalent items. Production/storage use normal reference rates.
+- Ordinary army production is free and immediate; unlock, housing, branch capacity and combat restrictions remain.
+- Protect existing balances, permanent purchases and accepted receipts.
 
-## User decisions
-- Include the whole economy, including secondary base, clan systems and hero equipment.
-- For matched items use 90% of normal reference resource/NOVA costs and upgrade time. Production and storage follow the reference baseline.
-- Normal troops train free and instantly, subject to unlocks and army housing. Special NOVA mechs need explicit mapping.
-- Keep launch bonus 1,000 NOVA, once per newly registered account, not per character, for a 30-day campaign. No campaign dates or live grant are configured yet.
-- Preserve existing balances, purchases, completed unlocks and already accepted transaction receipts.
+## Implemented candidate (NOT deployed)
+- Shared client remaining-time price used by construction, research, legacy production queues and transport production.
+- Reference anchors: one minute 1 Gem, one hour 20, one day 260, one week 1,000. Linear interpolation of the base gem curve, floor to whole reference gems, then ceil(90%) with minimum 1 NOVA for positive time.
+- Resulting anchor prices: 1 / 18 / 234 / 900 NOVA. Integer rounding means tiny prices cannot be exactly 10% lower.
+- These time anchors are from community reference calculations, NOT an official current Supercell API: https://clashofclans.spokland.com/guide_tutorial/gem_calculations and https://coc.tools/about . Review them against current in-game prices before calling the schedule exact current-game parity.
+- Builder 2–5 prices 225/450/900/1,800, based on official normal prices: https://support.supercell.com/clash-of-clans/en/articles/builders-4.html
+- Free, instant ordinary training implemented in both legacy train and current army-menu train278, with failed-save rollback.
+- Production source resets ordinary unit energy/crystal cost and training time to zero. Existing paid queues remain available for completion; no retroactive refund/mint.
+- Guarded atomic server SQL updates construction/research support and both robot speed quote/debit functions. It is NOT applied to production.
+- New-account bonus amount is preserved in the policy; the promotional grant itself is still not implemented.
 
-## Resource mapping and missing gameplay
-| Reference | NOVA mapping | Required work |
-|---|---|---|
-| Gold | Gold | Complete per-building/level costs, production and storage tables |
-| Elixir | Energy | Same; revise current mixed gold/energy upgrade costs by building role |
-| Dark Elixir | Crystals | Restore coherent production, storage, unlock and spending loops; current client prevents building crystalplant/crystalstore |
-| Gems | NOVA | Align sinks and all free/paid sources; preserve launch gift |
-| Shiny/Glowy/Starry Ore | Three equipment materials, names pending | Actual equipment, upgrades, reward sources, caps, and UI |
-| Builder Gold/Elixir | Secondary-base resources, names pending | Secondary base, progression, production, storage, battles |
-| Capital Gold | Clan construction resource, name pending | Clan membership, shared districts, contributions and permissions |
-| Raid Medals | Clan raid reward currency, name pending | Raids, reward ledger and exchange shop |
-| League Medals | Clan league reward currency, name pending | League seasons, eligibility and reward settlement |
+## Validation completed
+17 tests pass: reference anchors, monotonicity, client/SQL parity over 215 samples, invalid input, quoted-price protection, duplicate local completion, army unlock/housing, save rollback and policy invariants.
+No claim of full assembled-app/browser validation, all historical regression suites, full live-RPC receipt tests or deployment.
 
-This is not an assertion that the above new systems already exist. Temporary event currencies and cosmetic endgame currencies need a separate inventory and reference pass before claiming exhaustive parity.
+## Still required before release
+- Full current normal reference tables and building/unit equivalence mapping. NORMAL UPGRADE DURATIONS AND RESOURCE COSTS HAVE NOT YET BEEN REPLACED. Do not just multiply old NOVA formulas by 0.9 and claim equivalence.
+- Main crystal production/storage restoration.
+- All source/sink budget model: check-in, campaign, mining/referrals, ads and premium packs. Check-in is unchanged pending this model.
+- Two-material robot equipment gameplay and secondary base with independent currencies, production, storage and battle progression.
+- Full client/server integration tests and UI inspection, including pricing with old outstanding receipts.
+- Coordinated content patch and database release. Current production remains unchanged.
 
-## Verified current imbalance
-Read-only production SQL showed builder prices 25/100/500/1500, construction speed completion ceil(seconds/10), and check-in 50 on days 1–6 / 200 on day 7. Thus a single daily claim buys builder 2 while one hour completion costs 360. Client main matches these values.
-Resource purchases use a production-time-based quote, not the same fixed amount formula as construction completion. Do not replace all '/10' or all '500' literals globally.
-Historical docs are stale: economy-229 describes one NOVA per 120 seconds whereas current code/live SQL use one per 10 seconds.
-
-## Reference baseline
-- Official builders: https://support.supercell.com/clash-of-clans/en/articles/builders-4.html — normal prices 250/500/1000/2000; candidate prices 225/450/900/1800.
-- Free troop production: https://supercell.com/en/games/clashofclans/blog/news/home-village-changes-2/
-- Instant training: https://supercell.com/en/games/clashofclans/blog/release-notes/welcome-to-clash-anytime-update/
-- Loot/Star Bonus: https://support.supercell.com/clash-of-clans/en/articles/about-multiplayer-and-trophies-3.html
-- Clan Capital: https://support.supercell.com/clash-of-clans/en/articles/what-is-the-clan-capital-3.html
-- Raid rewards: https://support.supercell.com/clash-of-clans/en/articles/rewards-2.html
-- League rewards: https://support.supercell.com/clash-of-clans/en/articles/clan-war-leagues-rewards-2.html
-- EXCLUDE temporary Hammer Jam discounts: https://supercell.com/en/games/clashofclans/blog/news/hammer-jam-is-here-backup-has-arrived/
-
-## Required implementation, in dependency order
-1. Inventory every live grant/spend path, premium packs, existing balances and all building/unit levels. Match roles and unlock tiers; do not equate unrelated units just by level number.
-2. Build versioned, sourced NORMAL tables for every mapped building/unit. Do not fill gaps with arbitrary numbers or temporary offers. Full per-level reference tables are not yet collected.
-3. Implement shared client/server quotes and authoritative transactions; server checks quoted version, identity, ownership, resources, prerequisites and receipts. Existing operation receipts retain original prices.
-4. Integrate free instant troop production on both sides; retire training-speed purchase/ads, preserve housing and reconcile paid pending queues.
-5. Restore crystal resource loop. Implement secondary base, equipment and clan gameplay before enabling corresponding currencies.
-6. Model 7/30/90-day progression from all income sources. Check-in amounts are deliberately not chosen yet; first include campaign, mining/referrals, ads and paid packs. A ten-percent price reduction alone cannot guarantee equal economic value.
-7. Test client/server parity, retry/reconnect, concurrent spending, new/old accounts, full storage, upgrade queues and rollback. Publish content and server changes together only when integration is complete.
-
-## Validation
-Run: node --test tests/economy-rebuild-policy.test.cjs
-This validates only the policy foundation, not live gameplay or database transactions.
+## Authoritative behavior references
+Free training: https://supercell.com/en/games/clashofclans/blog/news/home-village-changes-2/
+Instant training: https://supercell.com/en/games/clashofclans/blog/release-notes/welcome-to-clash-anytime-update/
+Exclude temporary 50% Hammer Jam discounts from normal baseline: https://supercell.com/en/games/clashofclans/blog/news/hammer-jam-is-here-backup-has-arrived/
