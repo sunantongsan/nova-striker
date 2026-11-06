@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const e=require('../features/economy-rebuild/policy.cjs');
+test('launch bonus and 30-day promotion are preserved',()=>{assert.equal(e.POLICY.launchBonusNova,1000);assert.equal(e.POLICY.launchDays,30);});
+test('permanent builders use official normal baseline less ten percent',()=>{assert.deepEqual([1,2,3,4,5].map(e.builderPrice),[0,225,450,900,1800]);assert.throws(()=>e.builderPrice(6));});
+test('integer rounding never exceeds baseline, including large values',()=>{for(const n of [0,1,2,9,10,99,500,86400,Number.MAX_SAFE_INTEGER]){const v=e.discounted(n);assert.ok(Number.isSafeInteger(v)&&v>=0&&v<=n);assert.equal(BigInt(v),(BigInt(n)*9n+9n)/10n);}});
+test('malformed prices cannot become free purchases',()=>{for(const n of [-1,NaN,Infinity,1.2,'100'])assert.throws(()=>e.discounted(n));});
+test('cost and time change while source record stays unchanged',()=>{const entry={id:'fixture',baseline:'normal',source:'https://example.org/reference',checkedAt:'2026-11-06',costs:{gold:1000,power:500},seconds:3600};const before=JSON.stringify(entry),q=e.quote(entry);assert.deepEqual(q.costs,{gold:900,power:450});assert.equal(q.seconds,3240);assert.equal(JSON.stringify(entry),before);});
+test('temporary event prices and unsourced entries are rejected',()=>{for(const entry of [{},{baseline:'event'},{baseline:'normal',source:'http://example.org',checkedAt:'2026-11-06',seconds:1}])assert.throws(()=>e.quote(entry));});
+test('normal army is free and instant but unlock and capacity still apply',()=>{const a={unlocked:true,spacePerUnit:4,quantity:5,capacity:20,occupied:0};assert.deepEqual(e.trainingQuote(a),{costs:{},seconds:0,space:20});assert.throws(()=>e.trainingQuote({...a,unlocked:false}));assert.throws(()=>e.trainingQuote({...a,occupied:1}));assert.throws(()=>e.trainingQuote({...a,special:true}));});
+test('unsafe army arithmetic cannot bypass housing limits',()=>{assert.throws(()=>e.trainingQuote({unlocked:true,spacePerUnit:Number.MAX_SAFE_INTEGER,quantity:2,capacity:Number.MAX_SAFE_INTEGER,occupied:0}));});
