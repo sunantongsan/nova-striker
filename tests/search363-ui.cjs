@@ -30,3 +30,18 @@ const cancelled=a.requests.length;tick();assert.equal(a.requests.length,cancelle
 assert.equal(a.errors.length,0);
 console.log('PASS search363: background queue, campaign serialization, heartbeat suppression, cancellation');
 
+
+// Paid scouting starts on the first tap, without a confirmation or retry panel.
+T.clearBusy();T.setRequest(null);e.d.gold=1000;
+T.setWar({targets:[{id:'b',callsign:'Enemy'}]});
+const oldGold=e.d.gold,oldGems=e.d.gems,start=a.requests.length;
+G.warScout(0);assert.equal(a.requests.length,start+1);
+const scout=a.requests.at(-1);assert.equal(scout.p.live,'siege_scout_gold362');
+assert(!/Game.retryScout|<button/.test(a.el('modal').innerHTML));
+assert.equal(e.d.gems,oldGems,'scouting never reserves NOVA');
+G.warScout(0);assert.equal(a.requests.length,start+1,'double tap does not duplicate the paid request');
+// Timeout exposes recovery only, retaining the same durable payment identifier.
+for(const [id,t] of [...a.timers])if(t.ms===15000){a.timers.delete(id);t.f();}
+assert(a.el('modal').innerHTML.includes('Game.retryScout362'));
+G.retryScout362(false);assert.equal(a.requests.at(-1).p.request_id,scout.p.request_id);
+console.log('PASS first-tap gold scout, no confirmation, duplicate tap guard and durable retry');
