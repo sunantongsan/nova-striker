@@ -4,11 +4,12 @@ assert.equal(api.buildings.goldstore.cap,4);assert.equal(api.buildings.powerstor
 e.d.buildings=[{id:1,type:'hq',lv:20,x:1,y:1}];for(let i=0;i<4;i++)for(const type of ['goldstore','powerstore'])e.d.buildings.push({id:e.d.buildings.length+1,type,lv:20,x:2+i,y:type==='goldstore'?2:3});for(let i=0;i<2;i++)e.d.buildings.push({id:e.d.buildings.length+1,type:'storage',lv:20,x:2+i,y:4});
 assert.equal(e.resourceCapacity('gold'),17040000);assert.equal(e.resourceCapacity('power'),17040000);
 for(let i=0;i<100;i++)e.d.buildings.push({id:100+i,type:'wall',lv:19,x:i%20,y:5+Math.floor(i/20)});
-e.d.gold=e.resourceCapacity();e.d.power=e.resourceCapacity('power');const q=e.wallQuote(100,'all');assert.equal(q.ids.length,100);assert(q.gold<=e.d.gold&&q.power<=e.d.power);assert.equal(e.upgradeWalls(100,'all',JSON.stringify(q)),'');assert(e.d.buildings.filter(b=>b.type==='wall').every(b=>b.lv===20));
+e.d.gold=e.resourceCapacity();e.d.power=e.resourceCapacity('power');const q=e.wallQuote(100,'all');assert.equal(q.ids.length,100);assert(q.gold>e.d.gold,'bulk purchase must reject unaffordable walls');assert(e.upgradeWalls(100,'all',JSON.stringify(q)));const one=e.wallQuote(100,'one');assert.equal(e.upgradeWalls(100,'one',JSON.stringify(one)),'');assert.equal(e.d.buildings.find(b=>b.id===100).lv,20);assert(e.d.buildings.filter(b=>b.type==='wall'&&b.id!==100).every(b=>b.lv===19));
 e.sync();assert.equal(api.units[0].cost,3000);assert.equal(api.units[1].cost,10000);e.d.buildings[0].lv=1;e.sync();assert.equal(api.units[0].cost,90);e.sync();assert.equal(api.units[0].cost,90);
 let calls=0,html='',box;const c={document:{createElement(){const buttons={};return box={style:{},querySelector:s=>buttons[s]||(buttons[s]={}),remove(){}};},body:{appendChild(){}}},E:{d:{gems:0,gold:10000000,power:10000000,buildings:[]}},Game:{warScout(){calls++}},mt251:(a,b)=>b,toast(){},titanState342:{level:1,ads:{}},titanBusy342:null,modal:{setAttribute(){}},open:h=>html=h,titanSend342:(mode,p)=>{calls++;assert.equal(p.resource_cost358,5000000)},refreshTraining358(){}};
 vm.createContext(c);vm.runInContext(fs.readFileSync('features/titan342/economy-ui.js','utf8'),c);c.Game.warScout();assert.equal(calls,1,'scouting must reach the server handler immediately');assert.equal(box,undefined,'no gold confirmation dialog');
 c.E.d.gold=10000000;c.renderTitanPay357(c.titanState342);assert(html.includes('5,000,000'));assert(!html.includes('ADS'));c.Game.confirmTitanUpgrade358();assert.equal(calls,2);assert.equal(c.titanUpgradeCost358({level:2,ads:{upgrade:100}}),5000000);
-console.log('PASS economy358: four stores each, 17.04M capacities, all 100 walls upgraded, level-scaled training, no compounding, immediate gold scouting without confirmation, resource-only mech UI');
+console.log('PASS economy358: four stores each, 17.04M capacities, bulk shortage and one-wall upgrade, level-scaled training, no compounding, immediate gold scouting without confirmation, resource-only mech UI');
+
 
 
