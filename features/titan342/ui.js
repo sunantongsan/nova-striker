@@ -97,7 +97,7 @@ function renderTitanPay357(s){
 }
 var titanFunding343=false;
 var shopTab348='nova',billingProducts348={},billingBusy348=false,billingMessage348='';
-var novaPacks348=[{id:'nova_5000',nova:5000,thb:30},{id:'nova_10500',nova:10500,thb:59},{id:'nova_19000',nova:19000,thb:99},{id:'nova_40000',nova:40000,thb:199},{id:'nova_85000',nova:85000,thb:399},{id:'nova_180000',nova:180000,thb:799}];
+var novaPacks348=[{"id":"nova_1000","nova":1000,"thb":30},{"id":"nova_2100","nova":2100,"thb":59},{"id":"nova_3600","nova":3600,"thb":99},{"id":"nova_7600","nova":7600,"thb":199},{"id":"nova_16000","nova":16000,"thb":399},{"id":"nova_34000","nova":34000,"thb":799}];
 function shopEscape348(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function packArt348(i){return '<span class="packArt348" aria-hidden="true" style="background-position:'+(i%2*100)+'% '+(Math.floor(i/2)*50)+'%"></span>';}
 function renderShop348(s){var lv=s.level||0,html='<section class="store348"><h2>'+mt251('ร้านค้า','Store')+'</h2><div class="storeHead348"><div>'+art345(1)+'<b>'+mt251('ร้านค้า NOVA','NOVA STORE')+'</b></div><strong>'+Number(E.d.gems||0).toLocaleString()+'</strong></div><div class="storeTabs348">';
@@ -163,4 +163,5 @@ var countdownAt348=0,ui348=tickUI342;tickUI342=function(dt){ui348(dt);if(Date.no
 
 // Server-backed upgrade countdown; reaching zero requests settlement, never grants a tier locally.
 var timerTick355=tickUI342;tickUI342=function(dt){timerTick355(dt);var s=titanState342,el=$('upgradeCountdown355');if(!s||!s.upgrading355||screen!=='home')return;var left=Math.max(0,(Date.parse(s.upgrade_until355)-Date.now()+(s.offset342||0))/1000);if(el)el.textContent=duration(left);if(left<=0&&!titanBusy342&&Date.now()>(s.nextSettle355||0)){s.nextSettle355=Date.now()+5000;titanSend342('status');}};
+
 
