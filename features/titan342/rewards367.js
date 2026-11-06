@@ -30,6 +30,7 @@ var cloudCoin367=root.novaCloudEvent;root.novaCloudEvent=function(event,data){
   if(request.mode==='status'){coinPanel367(s.available?'':mt251('กำลังรอเปิดบริการโฆษณา','Reward ads are not yet available'));return;}
   if(!p||!r||p.owner!==s.owner||r.id!==p.request_id)return;
   if(r.claimed){coinShowing367=false;if(!delivered){coinPanel367(mt251('บันทึกรางวัลไม่ได้ กดตรวจรายการเดิม','Could not save reward. Retry.'));return;}delete E.d.pendingCoin367;if(!E.save())E.d.pendingCoin367=p;coinPanel367(mt251('รับ 5 NOVA แล้ว','5 NOVA received'));return;}
+  if(r.verified&&!p.completed){p.completed=true;if(!E.save())return;coinSend367('claim');return;}
   if(p.completed){if(coinRetries367++<12)coinTimer367=setTimeout(function(){coinSend367('claim');},5000);coinPanel367(mt251('รอเซิร์ฟเวอร์ยืนยัน กดตรวจรายการเดิมได้โดยไม่ต้องดูซ้ำ','Waiting for verification. Retry without another video.'));return;}
   if(Date.parse(r.expires_at)<=Date.now()){p.request_id=nonce160();if(E.save())coinSend367('prepare');return;}
   coinShow367();return;
