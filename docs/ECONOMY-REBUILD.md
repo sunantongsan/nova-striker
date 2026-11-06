@@ -1,37 +1,67 @@
-# NOVA economy rebuild — current scope and status
+# NOVA economy rebuild — scope and release status
+
+Status: DRAFT ONLY. No production database changes, patch publication, native release, Play product activation or live-ad enablement has been performed.
 
 ## Accepted scope
-- Keep the 1,000 NOVA new-account launch bonus and 30-day campaign.
-- Main base plus ONE personal secondary base. No clan base, raid medals or league currency.
-- Add four resources: two robot-equipment materials (proposed names Alloy and Energy Core), secondary-base Gold and Energy. Existing main-base Gold, Energy, Crystals and NOVA remain.
-- Match normal Clash reference progression with 90% resource/NOVA costs and 90% upgrade times for equivalent items. Production/storage use normal reference rates.
-- Ordinary army production is free and immediate; unlock, housing, branch capacity and combat restrictions remain.
-- Protect existing balances, permanent purchases and accepted receipts.
 
-## Implemented candidate (NOT deployed)
-- Shared client remaining-time price used by construction, research, legacy production queues and transport production.
-- Reference anchors: one minute 1 Gem, one hour 20, one day 260, one week 1,000. Linear interpolation of the base gem curve, floor to whole reference gems, then ceil(90%) with minimum 1 NOVA for positive time.
-- Resulting anchor prices: 1 / 18 / 234 / 900 NOVA. Integer rounding means tiny prices cannot be exactly 10% lower.
-- These time anchors are from community reference calculations, NOT an official current Supercell API: https://clashofclans.spokland.com/guide_tutorial/gem_calculations and https://coc.tools/about . Review them against current in-game prices before calling the schedule exact current-game parity.
-- Builder 2–5 prices 225/450/900/1,800, based on official normal prices: https://support.supercell.com/clash-of-clans/en/articles/builders-4.html
-- Free, instant ordinary training implemented in both legacy train and current army-menu train278, with failed-save rollback.
-- Production source resets ordinary unit energy/crystal cost and training time to zero. Existing paid queues remain available for completion; no retroactive refund/mint.
-- Guarded atomic server SQL updates construction/research support and both robot speed quote/debit functions. It is NOT applied to production.
-- New-account bonus amount is preserved in the policy; the promotional grant itself is still not implemented.
+- Main base plus one personal secondary base; no clan, clan base, clan wars or clan currencies.
+- Four new resources: Alloy and Energy Core for robot equipment, plus independent secondary-base Gold and Energy. Names are provisional. Existing Gold, Energy, Crystals and NOVA remain.
+- Reference normal progression with 90% resource/NOVA costs and 90% upgrade times for comparable items. Exclude temporary event discounts.
+- Explicit exception to current Clash training: ordinary troops MUST consume resources and take time. Existing Nova paid/timed training is restored in both train and train278. No free/instant training is introduced.
+- Launch bonus: 1,000 NOVA once per new authenticated account during a 30-day campaign. Character changes never reset eligibility. Existing welcome grants remain separate.
+- Preserve balances, existing queues, permanent purchases and original purchased entitlements.
 
-## Validation completed
-17 tests pass: reference anchors, monotonicity, client/SQL parity over 215 samples, invalid input, quoted-price protection, duplicate local completion, army unlock/housing, save rollback and policy invariants.
-No claim of full assembled-app/browser validation, all historical regression suites, full live-RPC receipt tests or deployment.
+## Implemented candidate
+
+### Pricing and troop production
+
+- Shared client remaining-time curve for construction, research, production queues and transport production.
+- Anchors after discount: 1 minute = 1 NOVA, 1 hour = 18, 1 day = 234, 1 week = 900. Minimum one NOVA for a positive timer. Linear reference interpolation, floor reference gems, then ceil(90%).
+- Time anchors are community references, not verified exact current-game parity: https://clashofclans.spokland.com/guide_tutorial/gem_calculations and https://coc.tools/about .
+- Builder 2–5: 225 / 450 / 900 / 1,800 based on official baseline https://support.supercell.com/clash-of-clans/en/articles/builders-4.html .
+- Guarded migration 365 updates server support pricing, robot production/upgrade/recovery debit and their corresponding quotes. Not applied to production.
+- Paid/timed troop creation enforces unlock and capacity limits. Failed persistence rolls back both resources and queue changes. Existing training prices remain unchanged pending the full resource model.
+
+### New premium products
+
+| Price THB | New product | NOVA |
+|---:|---|---:|
+| 30 | nova_1000 | 1,000 |
+| 59 | nova_2100 | 2,100 |
+| 99 | nova_3600 | 3,600 |
+| 199 | nova_7600 | 7,600 |
+| 399 | nova_16000 | 16,000 |
+| 799 | nova_34000 | 34,000 |
+
+Client store, Android allowlist, verifier and migration 366 agree. Value per baht increases at every tier. Old SKUs are absent from the new sale catalog but remain restorable at their original amounts, including 180,000. Do NOT reduce the legacy receipt mapping or deactivate legacy DB product rows. New Play products and the new native app have not been published.
+
+### Account rewards
+
+- Migration 367 adds once-per-account launch grants and a 5 NOVA/video ledger, six reserved/verified rewards per Thai calendar day.
+- Currency grants require signed AdMob SSV verification; the client callback alone grants nothing. Each provider intent can be consumed once. Pending receipts survive reconnects.
+- Shop reward UI uses the existing verified native transport and cumulative external-credit delivery cursor. Failed local saves retain the pending receipt. Replies from a prior account are discarded.
+- Migration 368 changes new production/construction/research speed-ad receipts to 900 seconds, six reservations per Thai calendar day. Existing 500-second receipts retain their promised value. It does not enable ads. New test-provider speed receipts are blocked; already-issued legacy receipts retain their existing validation path.
+- The six speed videos are a separate daily quota from the six NOVA videos; this candidate allows up to 30 NOVA and 90 minutes from these two channels per day. Other existing ad channels are not yet globally consolidated.
+- Launch dates remain NULL. Installing the migration starts no campaign. Set dates in the coordinated release, after native/client/backend validation.
+
+## Reference research
+
+`features/economy-rebuild/reference-candidate.json` contains 356 level rows for 26 main/secondary reference buildings, retrieved 2026-11-06 from ClashKing's extracted data. It is not loaded by the game. Only factual upgrade numbers and identifiers are included; no reference-game artwork or descriptive text is copied.
+
+Candidate mappings are by building function. They do not establish equivalent combat balance. The reference has different level ceilings from Nova's HQ20/building-level20 progression. Do not lower existing player levels or silently extrapolate the missing levels.
+
+## Validation
+
+38 targeted tests passed across policy, assembled game engine, pricing/SQL parity, purchase receipts, backend reward ledgers and UI reward callbacks. The assembled content script also parses successfully. Coverage includes signed-verification gating, repeated claims, daily quotas, anonymous/old-account launch exclusion, cross-account isolation, save rollback, retained old product entitlements and retained old speed receipts.
+
+Not yet validated: complete migration chain against a production clone, Android compilation/device purchase restore, Play product availability, real AdMob callback round trip, visual browser/device layout or complete historic regression suites.
 
 ## Still required before release
-- Full current normal reference tables and building/unit equivalence mapping. NORMAL UPGRADE DURATIONS AND RESOURCE COSTS HAVE NOT YET BEEN REPLACED. Do not just multiply old NOVA formulas by 0.9 and claim equivalence.
-- Main crystal production/storage restoration.
-- All source/sink budget model: check-in, campaign, mining/referrals, ads and premium packs. Check-in is unchanged pending this model.
-- Two-material robot equipment gameplay and secondary base with independent currencies, production, storage and battle progression.
-- Full client/server integration tests and UI inspection, including pricing with old outstanding receipts.
-- Coordinated content patch and database release. Current production remains unchanged.
 
-## Authoritative behavior references
-Free training: https://supercell.com/en/games/clashofclans/blog/news/home-village-changes-2/
-Instant training: https://supercell.com/en/games/clashofclans/blog/release-notes/welcome-to-clash-anytime-update/
-Exclude temporary 50% Hammer Jam discounts from normal baseline: https://supercell.com/en/games/clashofclans/blog/news/hammer-jam-is-here-backup-has-arrived/
+1. Implement the personal secondary base and the two-material robot equipment gameplay. Neither is implemented yet; no clan system is added.
+2. Validate normal reference version and map all Nova buildings/units, including unmatched unique units and levels. Main building resource costs and upgrade times are NOT yet replaced by reference tables.
+3. Integrate production rates, storage capacity, crystal production/storage, research, unit production and battle rewards. Avoid upgrades priced above obtainable storage.
+4. Budget all currency sources together: check-in, campaign, mining/referrals, ad channels, launch and purchases. Daily check-in remains unchanged; do not call the full economy balanced.
+5. Coordinate new Play products/native app, verifier deployment, SQL migrations and content patch, with restore/replay testing. Keep live ads off pending approval. Set launch campaign dates only at release.
+
+No COCKRO implementation changes are included in this Nova PR.
