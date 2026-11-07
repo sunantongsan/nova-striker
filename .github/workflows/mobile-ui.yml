@@ -28,3 +28,11 @@ jobs:
           path: test-artifacts/
 
 
+      - run: node features/titan342/build.cjs && node scripts/patch.cjs
+        if: success()
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: success()
+        with:
+          name: nova-patch-149
+          path: patch-dist/
+          retention-days: 7
