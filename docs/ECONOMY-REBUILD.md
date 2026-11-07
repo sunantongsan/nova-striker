@@ -1,6 +1,6 @@
 # NOVA economy rebuild — scope and release status
 
-Status: DRAFT ONLY. No production database changes, patch publication, native release, Play product activation or live-ad enablement has been performed.
+Status: Patch 141 release candidate. Production migrations 365–370 were applied atomically as nova_economy_outpost_patch141. Patch publication is verified separately in the deployment record. Native release and Play product activation remain pending; live ads are disabled.
 
 ## Accepted scope
 
@@ -19,7 +19,7 @@ Status: DRAFT ONLY. No production database changes, patch publication, native re
 - Anchors after discount: 1 minute = 1 NOVA, 1 hour = 18, 1 day = 234, 1 week = 900. Minimum one NOVA for a positive timer. Linear reference interpolation, floor reference gems, then ceil(90%).
 - Time anchors are community references, not verified exact current-game parity: https://clashofclans.spokland.com/guide_tutorial/gem_calculations and https://coc.tools/about .
 - Builder 2–5: 225 / 450 / 900 / 1,800 based on official baseline https://support.supercell.com/clash-of-clans/en/articles/builders-4.html .
-- Guarded migration 365 updates server support pricing, robot production/upgrade/recovery debit and their corresponding quotes. Not applied to production.
+- Guarded migration 365 updates server support pricing, robot production/upgrade/recovery debit and their corresponding quotes. Applied to production in the atomic patch 141 migration.
 - Paid/timed troop creation enforces unlock and capacity limits. Failed persistence rolls back both resources and queue changes. Existing training prices remain unchanged pending the full resource model.
 
 ### Main building progression (369 candidate)
@@ -30,7 +30,7 @@ Status: DRAFT ONLY. No production database changes, patch publication, native re
 - Walls stay instant. Existing balances, levels and already-started deadlines remain unchanged.
 - Construction, upgrades, wall batches and local speed purchases roll back debit/timer changes on failed persistence.
 - Examples: HQ2 = 900 gold / 9 seconds; HQ3 = 3,600 gold / 27 minutes; HQ5 = 135,000 gold / 5h24m; HQ10 = 3,150,000 gold / 2d16h48m (storage cap applied).
-- Focused validation: 44 node:test cases plus production359 and economy358 regression scripts pass. Full historic release suite and phone validation are still required. Not published.
+- Focused validation: 58 node:test cases plus production359 and economy358 regression scripts pass. Full historic tests run in the Vercel release build; phone validation remains separate.
 
 ### Personal outpost and equipment (370 candidate)
 
@@ -38,8 +38,8 @@ Status: DRAFT ONLY. No production database changes, patch publication, native re
 - Alloy: 500 outpost gold + 500 energy, 30 minutes, 20 units. Energy cores: 1,000 each, 1 hour, 5 units. Both are earned without premium currency or ads.
 - Weapon/armor equipment has 10 levels, limited by forge level. Next level consumes 30 × level alloy and 5 × level cores. Weapon gives +3% attack per level; armor +4% HP. Owned NOVA mech required; combat snapshots equipment at spawn.
 - Durable account-bound request IDs, cancellation, replay checks, private tables and cascading account deletion. No premium currency minting. Production settlement handles upgrade boundaries, full storage and frequent polling.
-- Client contains the outpost screen and equipment transport. 10 database/combat and 4 UI protocol tests pass, in addition to 44 economy cases and two regression scripts. The actual browser visual check was blocked by sandbox socket restrictions; mobile visual QA remains outstanding.
-- Migration `backend/nova_outpost_370.sql` has NOT been applied to production. No live outpost exists yet.
+- Client contains the outpost screen and equipment transport. 10 database/combat and 4 UI protocol tests pass, in addition to 44 economy cases and two regression scripts. GitHub Actions Mobile UI regression run 42315337272 passed all nine windows at 844×390, 640×300 and 390×844, including bounds, horizontal overflow and close-button targets. Physical-device visual QA remains outstanding.
+- Migration `backend/nova_outpost_370.sql` is installed in production. The server accepts outpost commands; the menu arrives with patch 141.
 
 ### New premium products
 
@@ -71,13 +71,13 @@ Candidate mappings are by building function. They do not establish equivalent co
 
 ## Validation
 
-38 targeted tests passed across policy, assembled game engine, pricing/SQL parity, purchase receipts, backend reward ledgers and UI reward callbacks. The assembled content script also parses successfully. Coverage includes signed-verification gating, repeated claims, daily quotas, anonymous/old-account launch exclusion, cross-account isolation, save rollback, retained old product entitlements and retained old speed receipts.
+58 targeted tests passed across policy, assembled game engine, pricing/SQL parity, purchase receipts, backend reward ledgers and UI reward callbacks. The assembled content script also parses successfully. Coverage includes signed-verification gating, repeated claims, daily quotas, anonymous/old-account launch exclusion, cross-account isolation, save rollback, retained old product entitlements and retained old speed receipts.
 
 Not yet validated: complete migration chain against a production clone, Android compilation/device purchase restore, Play product availability, real AdMob callback round trip, visual browser/device layout or complete historic regression suites.
 
-## Still required before release
+## Follow-up work outside this content patch
 
-1. Validate migration 370 against the installed production schema, complete mobile visual QA and validate online attacker/defender equipment propagation. Candidate fixed-layout outpost/equipment is implemented; a separate second-base combat mode is not included. No clan system is added.
+1. Complete physical-device visual QA and online attacker/defender equipment propagation checks. Migration 370 installed successfully on the production schema. Candidate fixed-layout outpost/equipment is implemented; a separate second-base combat mode is not included. No clan system is added.
 2. Validate normal reference version and map all Nova buildings/units, including unmatched unique units and levels. The 13 mapped main-building types use adapted tables in the candidate; unique buildings and units still need complete progression review.
 3. Integrate production rates, storage capacity, crystal production/storage, research, unit production and battle rewards. Avoid upgrades priced above obtainable storage.
 4. Budget all currency sources together: check-in, campaign, mining/referrals, ad channels, launch and purchases. Daily check-in remains unchanged; do not call the full economy balanced.
@@ -85,3 +85,7 @@ Not yet validated: complete migration chain against a production clone, Android 
 
 No COCKRO implementation changes are included in this Nova PR.
 
+
+## Landscape menus (371)
+
+Home navigation is a horizontal 44px icon dock at the bottom right, inset for device safe areas. Shared windows have viewport-bounded dimensions, a fixed title/close row and an independently scrolling body. Landscape build, training and store grids use three compact columns. Outpost width cannot exceed its window. Existing new-product buttons stay disabled until Google Play returns the matching product; unavailable packs now explain the required native/product update.
