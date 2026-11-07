@@ -23,8 +23,8 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
  await page.setViewportSize({width:844,height:390});
  fs.mkdirSync('test-artifacts',{recursive:true});
  await page.evaluate(()=>Game.scout(1));await page.waitForTimeout(120);
- const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2};});
- assert.equal(battleDock.battle,'true');assert(battleDock.below&&battleDock.bottom,JSON.stringify(battleDock));
+ const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,full:Math.abs(field.bottom-innerHeight)<2,compact:nav.height<=80,clear:getComputedStyle(app.querySelector('nav')).backgroundColor==='rgba(0, 0, 0, 0)',bottom:Math.abs(nav.bottom-innerHeight)<2};});
+ assert.equal(battleDock.battle,'true');assert(battleDock.full&&battleDock.compact&&battleDock.clear&&battleDock.bottom,JSON.stringify(battleDock));
  await page.screenshot({path:'test-artifacts/battle-menu376.png'});
  await page.evaluate(()=>Game.home());await page.waitForTimeout(80);
  fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/bottom-menu376.png'});
