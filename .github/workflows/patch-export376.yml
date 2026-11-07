@@ -1,0 +1,21 @@
+name: Export verified game patch
+on:
+  push:
+    branches: [codex/nova-patch-export376]
+permissions:
+  contents: read
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node features/titan342/build.cjs && node scripts/patch.cjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: nova-patch-146
+          path: patch-dist/
+          retention-days: 7
