@@ -7,26 +7,7 @@ function placeMech379(){
 }
 var tickBefore379=tickUI342;tickUI342=function(dt){tickBefore379(dt);placeMech379();};
 
-// Rotate only the weapon assembly; the painted footing stays anchored to the ground.
-var paintedWeapon379=drawWeapon272,paintedRocket379=drawRocket227,paintedTurret379=drawTurret;
-function drawHead379(b,p){
- var g=turret379(b),z=zoom,size=tile*z*2.25;
- ctx.save();ctx.beginPath();ctx.rect(p.x-size/2,p.y-13*z,size,35*z);ctx.clip();
- if(b.type==='missileturret')paintedRocket379(b,p);else paintedWeapon379(b,p);ctx.restore();
- ctx.save();ctx.translate(p.x,p.y-g.height*z);ctx.scale(z,z);
- var metal=ctx.createLinearGradient(0,-5,0,13);metal.addColorStop(0,'#dcecf2');metal.addColorStop(.45,'#668899');metal.addColorStop(1,'#243f55');
- ctx.fillStyle=metal;ctx.beginPath();ctx.ellipse(0,7,12,7,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#92bdcf';ctx.stroke();
- ctx.scale(1,.62);ctx.rotate(g.turn);ctx.lineWidth=1;ctx.strokeStyle='#102b41';
- ctx.fillStyle=metal;ctx.fillRect(-10,-9,23,18);ctx.strokeRect(-10,-9,23,18);
- var rocket=b.type==='missileturret',barrels=rocket?3:Math.min(3,1+weaponStage272(b));
- for(var i=0;i<barrels;i++){var side=(i-(barrels-1)/2)*6;ctx.fillStyle=metal;ctx.fillRect(4,side-2.5,g.length-4,5);ctx.strokeRect(4,side-2.5,g.length-4,5);ctx.fillStyle=rocket?'#ffb966':'#67e4ff';ctx.fillRect(g.length-3,side-1.8,3,3.6);}
- ctx.fillStyle='#43c8f5';ctx.fillRect(-5,-5,7,10);ctx.restore();
- if(b.recoil>.12){var m=weaponMount(b);ctx.save();ctx.globalAlpha=Math.min(1,b.recoil/.18);disk(p.x+m.x*z,p.y+m.y*z,5*z,rocket?'#ffbd75':'#bdf8ff');disk(p.x+m.x*z,p.y+m.y*z,2*z,'#fff');ctx.restore();}
-}
-drawWeapon272=function(b,p){if(b.type==='gun'||b.type==='missileturret')return drawHead379(b,p);paintedWeapon379(b,p);};
-drawRocket227=function(b,p){drawHead379(b,p);};
-drawTurret=function(b,p){if(b.type==='gun')return drawHead379(b,p);paintedTurret379(b,p);};
-
+// 381: restore complete painted defense art. Directional artwork needs separate authored heads.
 // Distinct timbres per weapon AND shooter, using the existing muted/limited audio mixer.
 var audioBefore379=weaponAudio218;
 var voices379={machine:[['noise',4800,700,.045,.19],['triangle',180,50,.06,.08]],sniper:[['noise',6200,900,.12,.27],['sine',220,45,.2,.12]],cannon:[['noise',1800,80,.3,.28],['sine',100,28,.4,.24]],grenade:[['triangle',330,80,.13,.2],['noise',800,180,.15,.16]],bomb:[['sine',430,90,.45,.16],['noise',900,250,.25,.13]],missile:[['noise',400,4200,.42,.24],['sawtooth',90,300,.3,.07]],plasma:[['triangle',1300,180,.19,.18],['sine',650,90,.24,.1]],shock:[['sawtooth',830,130,.17,.12],['noise',5400,1500,.09,.14]],tesla:[['sawtooth',1700,230,.2,.11],['square',440,150,.11,.06]],heal:[['sine',520,880,.3,.08]],energy276:[['sine',680,65,.45,.24],['triangle',1500,170,.38,.12]]};

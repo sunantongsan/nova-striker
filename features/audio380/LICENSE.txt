@@ -43,3 +43,5 @@
 	Follow on Twitter for updates:
 	@KenneyNL
 Selected, trimmed, normalized and converted to mono MP3 for Nova. Embedded for offline use.
+
+Patch 151: victory trumpet and missile boom are user-supplied files, listed separately in SOURCES.json; the Kenney CC0 notice does not apply to those two files.

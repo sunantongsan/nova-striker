@@ -44,8 +44,19 @@ function integrate(source){
  const end=source.lastIndexOf("})(typeof globalThis");if(end<0)throw Error('Game closure not found');source=source.slice(0,end)+ui+'\n'+source.slice(end);
  return source;
 }
-function payload(source){const vendor=fs.readFileSync(path.join(dir,'renderer.generated.js'),'utf8');const out='if(typeof document!=="undefined"){'+vendor+'}\n'+integrate(source);if(Buffer.byteLength(out)>16*1024*1024)throw Error('Native per-file limit exceeded');return out;}
-function documentPayload(html){const packed=JSON.parse(fs.readFileSync(path.join(dir,'hq-payload.generated.json'),'utf8'));const script='<script>window.NovaHQModel352='+JSON.stringify(packed)+';</script>';const result=html.replace(/<script([^>]*?)src=["']game\.js[^"']*["']([^>]*)>/,script+'<script$1src="game.js"$2>');if(result===html)throw Error('Game script insertion point missing');if(Buffer.byteLength(result)>16*1024*1024)throw Error('Native HTML limit exceeded');return result;}
+// Keep large, stable renderer/model data in the stable HTML shell. Small code-only
+// patches then replace game.js without downloading the model bundle again.
+function payload(source){const out=integrate(source);if(Buffer.byteLength(out)>16*1024*1024)throw Error('Native per-file limit exceeded');return out;}
+function documentPayload(html){
+ const packed=JSON.parse(fs.readFileSync(path.join(dir,'hq-payload.generated.json'),'utf8'));
+ const vendor=fs.readFileSync(path.join(dir,'renderer.generated.js'),'utf8');
+ const bundle='window.NovaHQModel352='+JSON.stringify(packed)+';\n'+vendor;
+ const compressed=zlib.gzipSync(Buffer.from(bundle),{level:9}).toString('base64');
+ const unpack=require('esbuild').buildSync({stdin:{contents:"import {gunzipSync,strFromU8} from 'three/examples/jsm/libs/fflate.module.js';window.NovaUnpack381=b=>strFromU8(gunzipSync(b));",resolveDir:root},bundle:true,minify:true,format:'iife',write:false}).outputFiles[0].text;
+ const script='<script>'+unpack+'(function(){var raw=atob('+JSON.stringify(compressed)+'),b=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)b[i]=raw.charCodeAt(i);var s=document.createElement("script");s.textContent=window.NovaUnpack381(b);document.head.appendChild(s);s.remove();delete window.NovaUnpack381;})();</script>';
+ const result=html.replace(/<script([^>]*?)src=["']game\.js[^"']*["']([^>]*)>/,script+'<script$1src="game.js"$2>');
+ if(result===html)throw Error('Game script insertion point missing');if(Buffer.byteLength(result)>16*1024*1024)throw Error('Native HTML limit exceeded');return result;
+}
 module.exports={build,integrate,payload,documentPayload};if(require.main===module)build().catch(e=>{console.error(e);process.exitCode=1;});
 
 
