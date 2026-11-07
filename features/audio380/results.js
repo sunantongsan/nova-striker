@@ -1,3 +1,4 @@
+var windowNavBefore380=windowNav243;windowNav243=function(){if(modal.querySelector('.result380'))return;return windowNavBefore380.apply(this,arguments);};
 function number380(n){return Math.max(0,Math.floor(Number(n)||0)).toLocaleString();}
 function resultHTML380(o){
  var sign=o.loss?'−':'+',stats=[[mt251('ทำลาย','Destroyed'),o.percent===undefined?'—':number380(o.percent)+'%'],[mt251('ทอง','Gold'),sign+number380(o.gold)],[mt251('พลังงาน','Energy'),sign+number380(o.power)],['NOVA','+'+number380(o.gems)]];
