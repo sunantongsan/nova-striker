@@ -1,5 +1,5 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const source=fs.readFileSync('game.js','utf8'),catalog=require('../localization/en.json');
+const source=require('../features/titan342/source373.cjs')(fs.readFileSync('game.js','utf8')),catalog=require('../localization/en.json');
 function boot(data={},platform='android',account=false,locale='en-US'){
  const elements={},errors=[],requests=[];let reloads=0,frame,timerId=0;const timers=new Map();
  const ctx=new Proxy({measureText:t=>({width:String(t).length*8}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
