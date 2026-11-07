@@ -24,6 +24,7 @@ source=source.slice(0,end)+`root.visualTest373={e:E,tick:()=>guideTick288(),guid
  await page.setViewportSize({width:844,height:390});
  await page.evaluate(()=>{visualTest373.setStep(4);Game.training();visualTest373.tick();});
  await page.locator('#novaTrain360_0.guide-focus288').waitFor();
+ const visibleTrain=await page.locator('#novaTrain360_0').evaluate(b=>{const r=b.getBoundingClientRect(),body=b.closest('.novaContent360').getBoundingClientRect();return r.bottom<=body.bottom&&r.top>=body.top;});assert(visibleTrain,'training action is visible with its portrait');
  const before=await page.evaluate(()=>visualTest373.e.d.queue.length);await page.locator('#novaTrain360_0').click();
  assert.equal(await page.evaluate(()=>visualTest373.e.d.queue.length),before+1,'highlighted action trains for real');
  await page.evaluate(()=>{visualTest373.e.d.queue.forEach(q=>q.until=0);visualTest373.e.sync();visualTest373.tick();});

@@ -20,6 +20,7 @@
  // Soft contact shadows anchor buildings; health bars and selection remain in the original renderer.
  var previousBuilding=drawBuilding;
  drawBuilding=function(b,enemy){if(b.type!=='wall'&&!trap278(b)&&(b.hp===undefined||b.hp>0)){var p=point(b.x,b.y);if(p.x>-90&&p.x<viewWidth+90&&p.y>-90&&p.y<viewHeight+90){ctx.save();ctx.fillStyle='#102c3130';ctx.beginPath();ctx.ellipse(p.x+8*zoom,p.y+4*zoom,27*zoom,10*zoom,-.15,0,7);ctx.fill();ctx.restore();}}previousBuilding(b,enemy);};
+ var entryImage=document.querySelector('#titanEntry342 img');if(entryImage){entryImage.onerror=function(){this.onerror=null;this.src='assets/nova-hero.webp';};if(!entryImage.getAttribute('src'))entryImage.src='assets/nova-hero.webp';}
  // Small descriptive labels make the existing icon rail learnable on touch screens.
  Array.from(document.querySelectorAll('#homebar > button')).forEach(function(b){var label=document.createElement('span');label.className='railLabel373';label.textContent=b.getAttribute('aria-label')||b.title;b.appendChild(label);});
  var settingsBefore=Game.settings;

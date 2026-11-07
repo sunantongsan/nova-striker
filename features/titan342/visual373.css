@@ -28,3 +28,15 @@
 @media(prefers-reduced-motion:reduce){#app .guide-focus288{animation:none!important}}
 
 @media(orientation:portrait){#modal#modal[data-nova360] .sheet.novaWindow360{width:min(440px,94vw)!important;max-height:calc(100dvh - 24px)!important}}
+/* Keep an entire training action visible without scrolling past its portrait. */
+#modal#modal[data-nova360] .novaTroop360{display:grid!important;grid-template-columns:72px minmax(0,1fr);gap:4px 6px!important;align-items:center}
+#modal#modal[data-nova360] .novaTroop360>strong{grid-column:2;grid-row:1;padding:0!important;text-align:left;white-space:normal}
+#modal#modal[data-nova360] .novaTroop360 .novaPortrait360{grid-column:1;grid-row:1/span 3;height:82px!important}
+#modal#modal[data-nova360] .novaTroop360 .novaPortrait360 .art278,#modal#modal[data-nova360] .novaTroop360 .novaPortrait360 .icon{width:76px!important;height:76px!important}
+#modal#modal[data-nova360] .novaTroop360 .novaCost360{grid-column:2;grid-row:2;flex-wrap:wrap;font-size:10px}
+#modal#modal[data-nova360] .novaTroop360 .novaTrain360{grid-column:2;grid-row:3;min-height:44px!important}
+#modal#modal[data-nova360] .novaTroop360 .novaMiniTimer360{grid-column:1/-1;grid-row:4}
+#modal#modal[data-nova360] .novaTroop360 .novaInfo360{position:absolute!important;left:2px;top:auto;bottom:2px;min-width:44px!important;min-height:44px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#355c74!important;text-align:left;padding-left:5px!important}
+#modal#modal[data-nova360] .novaTroop360 .novaCount360{top:5px;left:5px;right:auto}
+#app #homebar>button .railLabel373{width:max-content!important;height:auto!important;margin:0!important;font-size:10px!important;line-height:14px!important;max-width:68px;overflow:visible}
+@media(max-width:450px){#modal#modal[data-nova360] .novaTroop360{grid-template-columns:58px minmax(0,1fr);padding:6px!important}#modal#modal[data-nova360] .novaTroop360 .novaPortrait360 .art278,#modal#modal[data-nova360] .novaTroop360 .novaPortrait360 .icon{width:62px!important;height:62px!important}}
