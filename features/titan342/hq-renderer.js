@@ -1,3 +1,4 @@
+import {resources375,dispose375} from './resources375.mjs';
 import * as T from 'three';
 import {clone} from 'three/addons/utils/SkeletonUtils.js';
 const smooth=x=>{x=T.MathUtils.clamp(x,0,1);return x*x*(3-2*x);};
@@ -53,10 +54,12 @@ function armorPanels352(c,im,form,tier){const size=218+tier*5,x=128-size/2,y=286
 }
 export function createHQRenderer({renderer,scene,camera,load}){
  const cache=new Map();let model=null,pending=null;
+ function release(r){const shared=resources375(model?.root);for(const m of [steel,white,dark,gold,blue,glass])shared.materials.add(m);dispose375(r,shared);}
+ function sweep(now,key){for(const [k,r] of cache)if(k!==key&&now-r.used>30000){release(r);cache.delete(k);}}
  function request(){if(!pending)pending=load('ronin-04').then(v=>{model=v;window.dispatchEvent(new Event('nova-hq-art352'));return v;}).catch(()=>{pending=null;});}
  function make(key,b){const tier=Math.min(4,Math.floor(((b.lv||1)-1)/4)),r=structure(tier);r.key=key;r.canvas=document.createElement('canvas');r.canvas.width=256;r.canvas.height=320;r.last=-1000;r.version=b.lv;r.used=performance.now();r.wreck=new T.Group();r.root.add(r.wreck);r.wreck.visible=false;
  for(let i=0;i<22;i++){let a=i*2.399;const m=box(r.wreck,.12+(i%4)*.08,.10+(i%3)*.04,.15+(i%5)*.04,i%5===0?gold:i%3===0?white:steel,Math.sin(a)*(.2+i%5*.15),.25+(i%4)*.04,Math.cos(a)*(.2+i%5*.15));m.rotation.set(i*.7,i*.4,i*.9);}const helmet=mesh(r.wreck,new T.DodecahedronGeometry(.18,0),steel,.48,.34,.14);helmet.rotation.z=1.2;const visor=box(helmet,.23,.04,.04,dark,0,.03,.15);for(const side of [-1,1]){const horn=mesh(helmet,new T.ConeGeometry(.04,.22,4),gold,side*.13,.14,0);horn.rotation.z=-side*.7;}for(let k=0;k<5;k++){const limb=mesh(r.wreck,new T.CylinderGeometry(.07,.09,.45,8),k%2?steel:white,Math.sin(k*2.4)*.65,.3,Math.cos(k*2.4)*.65);limb.rotation.z=1.4;limb.rotation.y=k;mesh(r.wreck,new T.SphereGeometry(.09,8,6),dark,limb.position.x,.31,limb.position.z);}const brokenRing=mesh(r.wreck,new T.TorusGeometry(.4,.035,6,20,Math.PI*1.3),gold,-.22,.32,-.15);brokenRing.rotation.x=1.3;cache.set(key,r);return r;}
- function render(b){request();const tier=Math.min(5,Math.max(0,Math.floor(((b.lv||5)-5)/3))),key=b.renderKey352||(b.renderKey352='hq-'+Math.random().toString(36).slice(2));let r=cache.get(key);if(!r||r.version!==b.lv)r=make(key,b);r.used=performance.now();
+ function render(b){request();const tier=Math.min(5,Math.max(0,Math.floor(((b.lv||5)-5)/3))),key=b.renderKey352||(b.renderKey352='hq-'+Math.random().toString(36).slice(2));let r=cache.get(key);if(!r||r.version!==b.lv){release(r);r=make(key,b);}r.used=performance.now();sweep(r.used,key);
  if(model&&!r.robot&&b.lv>=5){r.robot=clone(model.root);r.root.add(r.robot);r.bones=outfit(r.robot,tier,model.height);r.mixer=new T.AnimationMixer(r.robot);const clip=model.clips.find(c=>c.name==='Sentinel');if(clip){r.action=r.mixer.clipAction(clip);r.action.play();r.mixer.update(0);}r.rest={};r.robot.traverse(o=>{if(o.isBone)r.rest[o.name]={p:o.position.clone(),q:o.quaternion.clone(),s:o.scale.clone()};});}
  const form=T.MathUtils.clamp(b.form352||0,0,1),dead=b.hp!==undefined&&b.hp<=0,charge=b.charge352>0?1-b.charge352/1.05:0,signature=[form.toFixed(2),dead,charge.toFixed(1),Math.round((b.aim||0)*14),!!r.robot,headquartersArt352[r.tier].complete].join(':');
  if(r.signature===signature||performance.now()-r.last<66)return r.canvas;r.last=performance.now();r.signature=signature;
@@ -65,7 +68,8 @@ export function createHQRenderer({renderer,scene,camera,load}){
  r.parts.forEach(p=>{p.o.position.x=p.x+p.side*open*.32;p.o.position.y=p.y+rise*.5;p.o.rotation.z=-p.side*open*.8;});
  if(r.robot){r.robot.visible=!dead&&form>.12;r.robot.rotation.y=Math.PI*.5-(b.aim||0);r.robot.position.y=.23;r.robot.scale.setScalar((2.8/model.height)*(.97+.016*tier));r.robot.traverse(o=>{const base=r.rest[o.name];if(base){o.position.copy(base.p);o.quaternion.copy(base.q);o.scale.copy(base.s);}});
  const bend=1-smooth((form-.3)/.7);for(const side of ['L','R']){for(const [name,angle] of [['thigh',-1.3],['shin',1.7],['upper_arm',-.85]]){const bone=r.bones[name+side]||r.bones[name+'_'+side]||r.bones[name+'.'+side];if(bone)bone.rotateX(angle*bend);}}const chest=r.bones.chest;if(chest)chest.rotateX(.35*bend-charge*.035);r.root.updateMatrixWorld(true);const feet=['footL','footR','foot_L','foot_R','foot.L','foot.R'].map(n=>r.bones[n]).filter(Boolean);if(feet.length){const floor=Math.min(...feet.map(o=>o.getWorldPosition(new T.Vector3()).y));r.robot.position.y+=.33-floor;}}
- scene.add(r.root);renderer.render(scene,camera);if(r.robot&&r.bones.chest){const point=r.bones.chest.getWorldPosition(new T.Vector3());point.project(camera);r.canvas.hqMuzzle352={x:(point.x+1)*128,y:(1-point.y)*160};}scene.remove(r.root);const c=r.canvas.getContext('2d');c.clearRect(0,0,256,320);if(form>0||dead||!hasArt)c.drawImage(renderer.domElement,0,0);if(hasArt&&!dead)armorPanels352(c,art,form,r.tier);for(const [k,v]of cache)if(performance.now()-v.used>30000){v.root.traverse(o=>{if(o.isMesh&&!o.isSkinnedMesh)o.geometry.dispose();});cache.delete(k);}return r.canvas;
+ scene.add(r.root);try{renderer.render(scene,camera);}finally{scene.remove(r.root);}if(r.robot&&r.bones.chest){const point=r.bones.chest.getWorldPosition(new T.Vector3());point.project(camera);r.canvas.hqMuzzle352={x:(point.x+1)*128,y:(1-point.y)*160};}scene.remove(r.root);const c=r.canvas.getContext('2d');c.clearRect(0,0,256,320);if(form>0||dead||!hasArt)c.drawImage(renderer.domElement,0,0);if(hasArt&&!dead)armorPanels352(c,art,form,r.tier);return r.canvas;
  }
  return {render,stats:()=>({cached:cache.size,model:!!model}),ready:()=>{request();return Promise.all([pending,...headquartersArt352.map(im=>im.decode().catch(()=>{}))]);}};
 }
+

@@ -15,6 +15,7 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
       - run: npx playwright install --with-deps chromium
+      - run: node --test tests/resources375.mjs
       - run: node tests/mobile364-browser.cjs
       - run: node tests/visual373-browser.cjs
         if: success() || failure()
