@@ -60,17 +60,44 @@ final class GamePatcher {
         if(manifest==null)return false;
         try{JSONArray fs=manifest.getJSONArray("files");for(int i=0;i<fs.length();i++){JSONObject f=fs.getJSONObject(i);if(!bundledFile(f)&&!PatchFiles.valid(object(f),f.getLong("size"),f.getString("sha256")))return false;}return true;}catch(Exception e){return false;}
     }
-    private HttpURLConnection open(String path)throws IOException {
-        URL base=new URL(BuildConfig.NOVA_PATCH_ORIGIN);
-        if(!base.getProtocol().equals("https")||base.getUserInfo()!=null)throw new IOException("HTTPS required");
+    private List<String> origins() {
+        List<String> result=new ArrayList<>();
+        for(String value:new String[]{BuildConfig.NOVA_PATCH_ORIGIN,BuildConfig.NOVA_PATCH_BACKUP_ORIGIN}) {
+            String origin=value.trim();
+            if(!origin.isEmpty()&&!result.contains(origin))result.add(origin);
+        }
+        return result;
+    }
+    private HttpURLConnection open(String origin,String path)throws IOException {
+        URL base=new URL(origin);
+        if(!base.getProtocol().equals("https")||base.getHost().isEmpty()||base.getUserInfo()!=null||base.getQuery()!=null||base.getRef()!=null||(!base.getPath().isEmpty()&&!base.getPath().equals("/")))throw new IOException("HTTPS required");
         HttpURLConnection c=(HttpURLConnection)new URL(base,path).openConnection();connection=c;
         c.setConnectTimeout(10000);c.setReadTimeout(15000);c.setInstanceFollowRedirects(false);c.setUseCaches(false);
         c.setRequestProperty("Accept-Encoding","identity");
-        int code=c.getResponseCode();if(code!=200){c.disconnect();throw new IOException("Patch server HTTP "+code);}return c;
+        try {
+            int code=c.getResponseCode();if(code!=200)throw new IOException("Patch server HTTP "+code);
+            return c;
+        } catch(IOException e) {c.disconnect();connection=null;throw e;}
     }
     private JSONObject fetch()throws Exception {
-        HttpURLConnection c=open("/patches/"+BuildConfig.NOVA_PATCH_CHANNEL+"/native-"+BuildConfig.VERSION_CODE+"/manifest.json");
-        try(InputStream in=c.getInputStream()){return parse(read(in,256*1024));}finally{c.disconnect();connection=null;}
+        Exception failure=new IOException("No patch server configured");
+        JSONObject newest=null;
+        for(String origin:origins()) {
+            if(stopped)throw new InterruptedIOException();
+            HttpURLConnection c=null;
+            try {
+                c=open(origin,"/patches/"+BuildConfig.NOVA_PATCH_CHANNEL+"/native-"+BuildConfig.VERSION_CODE+"/manifest.json");
+                try(InputStream in=c.getInputStream()) {
+                    JSONObject candidate=parse(read(in,256*1024));
+                    if(candidate.getLong("contentVersion")<Math.max(bundled.getLong("contentVersion"),previous.getLong("contentVersion"))||candidate.getString("id").equals(prefs.getString("rejected","")))throw new IOException("Stale or rejected patch");
+                    if(newest==null||candidate.getLong("contentVersion")>newest.getLong("contentVersion"))newest=candidate;
+                }
+            } catch(Exception e) {failure=e;}
+            finally {if(c!=null)c.disconnect();connection=null;}
+            if(!stopped)status("กำลังตรวจสอบแหล่งอัปเดตสำรอง…",-1);
+        }
+        if(newest!=null)return newest;
+        throw failure;
     }
     private void select(JSONObject manifest) throws Exception {
         Map<String,JSONObject> map=new HashMap<>();JSONArray files=manifest.getJSONArray("files");for(int i=0;i<files.length();i++){JSONObject f=files.getJSONObject(i);map.put(f.getString("path"),f);}
@@ -81,7 +108,7 @@ final class GamePatcher {
             try(InputStream in=context.getAssets().open("patch-bundled.json")){bundled=parse(read(in,256*1024));}
             JSONArray base=bundled.getJSONArray("files");for(int i=0;i<base.length();i++){JSONObject f=base.getJSONObject(i);bundledHashes.put(f.getString("path"),f.getString("sha256"));}
             previous=load("active.json");if(!complete(previous))previous=bundled;
-            if(BuildConfig.NOVA_PATCH_ORIGIN.isEmpty()){select(previous);status("กำลังเตรียมฐานทัพ…",100);listener.ready();return;}
+            if(origins().isEmpty()){select(previous);status("กำลังเตรียมฐานทัพ…",100);listener.ready();return;}
             JSONObject pending=load("pending.json"),target=null;
             {
                 for(int attempt=0;attempt<2&&!stopped;attempt++){
@@ -98,7 +125,11 @@ final class GamePatcher {
                 try{if(!complete(target))save("pending.json",target);download(target);break;}
                 catch(Exception e){
                     if(stopped)return;
-                    retries++;int seconds=Math.min(15,3+retries*2);
+                    retries++;
+                    if(retries>=2||"Not enough storage".equals(e.getMessage())) {
+                        select(previous);status("อัปเดตยังไม่พร้อม • ใช้ข้อมูลเกมที่พร้อมแล้ว",100);listener.ready();return;
+                    }
+                    int seconds=Math.min(15,3+retries*2);
                     for(int s=seconds;s>0&&!stopped;s--){status(("Not enough storage".equals(e.getMessage())?"พื้นที่ไม่พอ กรุณาเพิ่มพื้นที่ว่าง • ":"โหลดข้อมูลยังไม่ครบ • ")+"ลองใหม่ใน "+s+" วินาที",-1);Thread.sleep(1000);}
                 }
             }
@@ -114,13 +145,25 @@ final class GamePatcher {
         for(int i=0;i<files.length();i++){
             if(stopped)throw new InterruptedIOException();JSONObject f=files.getJSONObject(i);
             if(bundledFile(f)||PatchFiles.valid(object(f),f.getLong("size"),f.getString("sha256")))continue;
-            long before=done;HttpURLConnection c=open("/objects/"+f.getString("sha256"));
-            try(InputStream in=c.getInputStream()){
-                PatchFiles.install(in,object(f),f.getLong("size"),f.getString("sha256"),n->{
-                    long amount=before+n;int percent=(int)(amount*100/Math.max(1,required));
-                    status(String.format(java.util.Locale.ROOT,"กำลังอัปเดตข้อมูลเกม %d%%\n%.1f / %.1f MB",percent,amount/1048576.0,required/1048576.0),percent);
-                });
-            }finally{c.disconnect();connection=null;}
+            long before=done;
+            Exception failure=new IOException("No patch server configured");boolean installed=false;
+            for(String origin:origins()) {
+                if(stopped)throw new InterruptedIOException();
+                HttpURLConnection c=null;
+                try {
+                    c=open(origin,"/objects/"+f.getString("sha256"));
+                    try(InputStream in=c.getInputStream()) {
+                        PatchFiles.install(in,object(f),f.getLong("size"),f.getString("sha256"),n->{
+                            long amount=before+n;int percent=(int)(amount*100/Math.max(1,required));
+                            status(String.format(java.util.Locale.ROOT,"กำลังอัปเดตข้อมูลเกม %d%%\n%.1f / %.1f MB",percent,amount/1048576.0,required/1048576.0),percent);
+                        });
+                    }
+                    installed=true;break;
+                } catch(Exception e) {failure=e;}
+                finally {if(c!=null)c.disconnect();connection=null;}
+                if(!stopped)status("กำลังดาวน์โหลดจากแหล่งสำรอง…",-1);
+            }
+            if(!installed)throw failure;
             done+=f.getLong("size");
         }
         if(!complete(target))throw new IOException("Patch incomplete");
@@ -149,3 +192,4 @@ final class GamePatcher {
     }
     void destroy(){stopped=true;HttpURLConnection c=connection;if(c!=null)c.disconnect();worker.shutdownNow();}
 }
+

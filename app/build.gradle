@@ -11,6 +11,7 @@ android {
         versionName '1.9.38'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
         buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
+        buildConfigField 'String', 'NOVA_PATCH_BACKUP_ORIGIN', groovy.json.JsonOutput.toJson(providers.gradleProperty('novaPatchBackupOrigin').getOrElse(''))
         buildConfigField 'boolean', 'NOVA_CLOUD_ENABLED', 'true'
         buildConfigField 'boolean', 'NOVA_WAR_ENABLED', 'true'
         buildConfigField 'String', 'NOVA_CLOUD_URL', '"https://uzinxxeadejmzxqmqqtx.supabase.co"'
@@ -61,6 +62,7 @@ tasks.register('verifySdkVersions') {
         }
     }
 }
+
 
 
 
