@@ -18,7 +18,7 @@ async function sample380(key,options){
  try{
   var buffer=await decode380(key);if(ac.state==='suspended')await ac.resume();
   if(!buffer||ac.state!=='running'||!soundOn||!mediaAllowed250()||performance.now()-requested>(options.outcome?5000:400))return false;
-  if(!options.outcome&&playing380.size>=8)return false;
+  if(!options.outcome&&(playing380.size>=8||performance.now()<outcomeUntil380))return false;
   var mix=mixer218();if(!mix)return false;
   if(options.outcome){playing380.forEach(function(n){try{n.stop();}catch(ignore){}});outcomeUntil380=performance.now()+2200;}
   function start(delay,rate,volume){var n=ac.createBufferSource(),g=ac.createGain();n.buffer=buffer;n.playbackRate.value=rate;g.gain.value=volume;n.connect(g);g.connect(mix.sfx);playing380.add(n);n.onended=function(){playing380.delete(n);n.disconnect();g.disconnect();};n.start(ac.currentTime+delay);}

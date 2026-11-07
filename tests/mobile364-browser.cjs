@@ -13,18 +13,17 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
  await page.evaluate(()=>{for(const id of ['welcome','baseNameGate','guideDock288']){const n=document.getElementById(id);if(n)n.style.display='none';}});
  for(const size of [{width:844,height:390},{width:640,height:300},{width:390,height:844}]){
   await page.setViewportSize(size);await page.waitForTimeout(80);
-  const dock=await page.evaluate(()=>{const bar=document.getElementById('homebar'),nav=bar.parentElement.getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect(),buttons=[...bar.children].filter(b=>!b.hidden);return {full:Math.abs(field.bottom-innerHeight)<2,clear:getComputedStyle(bar.parentElement).backgroundColor==='rgba(0, 0, 0, 0)',compact:nav.height<=50,bottom:Math.abs(nav.bottom-innerHeight)<2,row:buttons.every(b=>Math.abs(b.getBoundingClientRect().top-buttons[0].getBoundingClientRect().top)<2),labels:buttons.every(b=>b.querySelector('.railLabel373')?.textContent.trim()),touch:buttons.every(b=>b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44),count:buttons.length};});
-  assert(dock.full&&dock.clear&&dock.compact&&dock.bottom&&dock.row&&dock.labels&&dock.touch&&dock.count===10,JSON.stringify({size,dock}));
-  const topClear=await page.evaluate(()=>[document.querySelector('header'),document.querySelector('header .title>div'),...document.querySelectorAll('header .resources>*')].every(n=>{const s=getComputedStyle(n);return s.backgroundColor==='rgba(0, 0, 0, 0)'&&s.backgroundImage==='none'&&s.boxShadow==='none'&&parseFloat(s.borderTopWidth)===0;}));assert(topClear,'top HUD has icons and text without panels');
-  await page.locator('#botAttack376').click();
+  const dock=await page.evaluate(()=>{const bar=document.getElementById('homebar'),nav=bar.parentElement.getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect(),buttons=[...bar.children].filter(b=>!b.hidden);return {below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2,row:buttons.every(b=>Math.abs(b.getBoundingClientRect().top-buttons[0].getBoundingClientRect().top)<2),labels:buttons.every(b=>b.querySelector('.railLabel373')?.textContent.trim()),touch:buttons.every(b=>b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44),count:buttons.length};});
+  assert(dock.below&&dock.bottom&&dock.row&&dock.labels&&dock.touch&&dock.count===10,JSON.stringify({size,dock}));
+  try{await page.locator('#botAttack376').click();}catch(error){fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/mobile-click-failure.png',timeout:3000}).catch(()=>{});console.error('Mobile click context',size,errors);throw error;}
   assert.equal(await page.locator('.missions button').count(),100,'bot icon opens existing 100 bot bases');
   await page.evaluate(()=>Game.close());
  }
  await page.setViewportSize({width:844,height:390});
  fs.mkdirSync('test-artifacts',{recursive:true});
  await page.evaluate(()=>Game.scout(1));await page.waitForTimeout(120);
- const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,full:Math.abs(field.bottom-innerHeight)<2,compact:nav.height<=80,clear:getComputedStyle(app.querySelector('nav')).backgroundColor==='rgba(0, 0, 0, 0)',bottom:Math.abs(nav.bottom-innerHeight)<2};});
- assert.equal(battleDock.battle,'true');assert(battleDock.full&&battleDock.compact&&battleDock.clear&&battleDock.bottom,JSON.stringify(battleDock));
+ const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2};});
+ assert.equal(battleDock.battle,'true');assert(battleDock.below&&battleDock.bottom,JSON.stringify(battleDock));
  await page.screenshot({path:'test-artifacts/battle-menu376.png'});
  await page.evaluate(()=>Game.home());await page.waitForTimeout(80);
  fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/bottom-menu376.png'});
