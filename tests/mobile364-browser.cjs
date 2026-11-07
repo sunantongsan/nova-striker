@@ -23,12 +23,13 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
  await page.evaluate(()=>Game.home());
  for(const size of [{width:844,height:390},{width:640,height:300},{width:390,height:844}]){
   await page.setViewportSize(size);
-  for(const [name,call] of [['training','Game.training()'],['queue','Game.production359("all")'],['formation','Game.armyView360("formation")'],['build','Game.build()'],['shop','Game.shop348("nova")'],['settings','Game.settings()'],['storage','Game.inspectBuilding261(200,true)'],['unit','Game.unitInfo278(1)'],['walls','Game.wallGallery361()']]){
+  for(const [name,call] of [['training','Game.training()'],['queue','Game.production359("all")'],['formation','Game.armyView360("formation")'],['build','Game.build()'],['shop','Game.shop348("nova")'],['settings','Game.settings()'],['daily','Game.openDaily340()'],['storage','Game.inspectBuilding261(200,true)'],['unit','Game.unitInfo278(1)'],['walls','Game.wallGallery361()']]){
    await page.evaluate(call);await page.waitForTimeout(60);
-   const check=await page.evaluate(()=>{const w=document.querySelector('.novaWindow360'),b=w.querySelector('.novaContent360'),r=w.getBoundingClientRect(),close=w.querySelector('.window-close243').getBoundingClientRect();return {inBounds:r.x>=0&&r.y>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1,noOverflow:b.scrollWidth<=b.clientWidth+1,touch:close.width>=44&&close.height>=44};});
+   const check=await page.evaluate(()=>{const w=document.querySelector('.novaWindow360'),b=w.querySelector('.novaContent360'),r=w.getBoundingClientRect(),close=w.querySelector('.window-close243').getBoundingClientRect();return {inBounds:r.x>=0&&r.y>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1,compact:innerWidth<innerHeight||(r.width<=480.5&&r.height<=innerHeight*.76+1),noOverflow:b.scrollWidth<=b.clientWidth+1,touch:close.width>=44&&close.height>=44};});
    assert(Object.values(check).every(Boolean),name+JSON.stringify(size)+JSON.stringify(check));
    await page.screenshot({path:'test-artifacts/'+name+'-'+size.width+'.png'});
   }
  }
- assert.deepEqual(errors,[]);await browser.close();console.log('PASS assembled mobile364: no gold confirmation, full opponent name, server presence labels, nine windows at three phone sizes');
+ assert.deepEqual(errors,[]);await browser.close();console.log('PASS assembled mobile364: no gold confirmation, full opponent name, server presence labels, ten compact windows at three phone sizes');
 })().catch(e=>{console.error(e);process.exit(1)});
+

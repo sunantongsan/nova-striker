@@ -19,6 +19,7 @@
   if(head&&body)Array.from(sheet.children).forEach(function(n){if(n!==head&&n!==body)body.appendChild(n);});
   // Legacy wrappers occasionally insert buttons after the title; return them to the body.
   if(head&&body)Array.from(head.children).forEach(function(n){if(n.tagName==='H2'||n.classList.contains('window-close243')||n.getAttribute('aria-label')===mt251('กลับ','Back'))return;body.prepend(n);});
+  sheet.dataset.wide372=body&&body.querySelector('.shop-grid261,.storeGrid348,.novaTroops360,#armyHub278,.outpost370,.wallGallery361,.daily-card340')?'true':'false';
  }finally{normalizing=false;}}
  modal.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.novaHead360 .window-close243');if(!b)return;e.preventDefault();e.stopImmediatePropagation();Game.dismissWindow243();},true);
    modal.addEventListener('pointerdown',function(e){var head=e.target.closest&&e.target.closest('.novaHead360');if(!head)return;var sheet=head.closest('.sheet');if(e.target.closest('button')||e.button>0)return;var r=sheet.getBoundingClientRect();sheet.style.setProperty('--nova-width371',r.width+'px');sheet.style.setProperty('--nova-height371',r.height+'px');drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};head.setPointerCapture(e.pointerId);e.preventDefault();});
