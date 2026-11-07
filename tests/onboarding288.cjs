@@ -16,5 +16,19 @@ assert.equal(boot({},'android',false,'th-TH').s.NovaI18n.language,'th');
 assert.equal(boot({},'android',false,'en-TH').s.NovaI18n.language,'th');
 assert.equal(boot({novaLanguage:'en'},'android',false,'th-TH').s.NovaI18n.language,'en');
 assert.equal(boot({novaLanguage:'th'},'android',false,'en-US').s.NovaI18n.language,'th');
-for(const account of [false,true]){const a=boot({},'android',account,'th-TH');for(const t of [...a.timers.values()])if(t.ms===1600)t.f();assert.equal(a.el('guideDock288').hidden,true);assert.equal(a.s.test232.guide(),null);a.s.Game.welcomeGuest();a.s.Game.beginGuide288(true);a.s.test232.tick();assert.equal(a.el('guideDock288').hidden,true);assert.equal(a.s.test232.guide(),null);a.s.novaCloudEvent('signed_in',{id:'online'});for(const t of [...a.timers.values()])if(t.ms===1600)t.f();assert.equal(a.s.test232.guide(),null);assert.equal(a.el('guideDock288').hidden,true);assert.deepEqual(a.errors,[]);}
-console.log('PASS onboarding288: locale preferences preserved, tutorial disabled for guest, account, restart and explicit replay');
+// A guide waits for player evidence, can be skipped, and respects the saved completion.
+for(const account of [false,true]){
+ const a=boot({},'android',account,'th-TH');
+ a.s.Game.welcomeGuest();a.s.Game.beginGuide288(true);a.s.test232.tick();
+ assert.equal(a.el('guideDock288').hidden,false);assert.equal(a.s.test232.guide().step,0);
+ for(let i=0;i<20;i++)a.s.test232.tick();assert.equal(a.s.test232.guide().step,0,'time alone cannot advance');
+ a.s.test232.e.d.guestName288='Commander';a.el('baseNameGate').hidden=true;
+ a.s.test232.tick();a.s.test232.tick();assert.equal(a.s.test232.guide().step,2,'name and guest bonus lead to actual construction');
+ a.s.Game.guideNext288();assert.equal(a.s.test232.guide().step,2,'Next cannot bypass construction');
+ a.s.Game.guideFinish288();assert.equal(a.s.test232.guide(),null);assert.equal(a.el('guideDock288').hidden,true);
+ assert.equal(a.s.test232.e.d.onboarding288.guest.done,true);
+ a.s.Game.beginGuide288();assert.equal(a.s.test232.guide(),null,'completed guide does not restart');
+ a.s.Game.beginGuide288(true);assert(a.s.test232.guide(),'explicit replay is available');
+ assert.deepEqual(a.errors,[]);
+}
+console.log('PASS onboarding373: locale, evidence-gated progress, skip persistence and explicit replay');
