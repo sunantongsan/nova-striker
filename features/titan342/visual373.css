@@ -73,3 +73,24 @@
 #app[data-battle300="true"] .raidtop #titanEntry342>img{height:30px!important;width:30px!important;object-fit:contain!important}
 #app[data-battle300="true"] .raidtop #titanEntry342 .railLabel373{position:absolute;bottom:0;left:0;width:100%;white-space:nowrap;color:#fff;font:700 10px/12px Tahoma,Arial,sans-serif}
 #app[data-battle300="true"] .raidtop>button:last-child{order:3}
+
+/* 377: full-screen home with small floating icons, no solid HUD panels. */
+#app:not([data-battle300="true"])>nav{height:calc(48px + env(safe-area-inset-bottom,0px))!important;padding:0 6px env(safe-area-inset-bottom,0px)!important;background:transparent!important;border:0!important;box-shadow:none!important;pointer-events:none!important}
+#app:not([data-battle300="true"]) #field{bottom:0!important}
+#app:not([data-battle300="true"]) #homebar{width:max-content!important;max-width:100%!important;height:48px!important;max-height:48px!important;margin:0 auto!important;gap:3px!important;background:transparent!important;pointer-events:auto!important;scrollbar-width:none}
+#app:not([data-battle300="true"]) #homebar::-webkit-scrollbar{display:none}
+#app:not([data-battle300="true"]) #homebar>button{flex-basis:48px!important;width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;padding:1px 8px 15px!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+#app:not([data-battle300="true"]) #homebar>button .menu-art339,#app:not([data-battle300="true"]) #homebar>button>img,#app #homebar #botAttack376 svg{width:29px!important;height:29px!important;filter:drop-shadow(0 1px 2px #071624)}
+#app:not([data-battle300="true"]) #homebar>button .railLabel373{bottom:3px!important;max-width:48px!important;font:600 8px/12px Tahoma,Arial,sans-serif!important;text-shadow:0 1px 2px #071624,1px 0 2px #071624,-1px 0 2px #071624!important}
+#app:not([data-battle300="true"]) #selection{bottom:54px!important}
+#app>header,#app>header .title>div,#app>header .resources>span,#app>header .resources>.gembalance,#app>header #commanderButton,#app>header #commanderButton i{background:transparent!important;border:0!important;box-shadow:none!important}
+#app>header .resources>span:before{display:none!important}
+#app>header .resources b,#app>header #mode,#app>header .title b,#app>header .gembalance{text-shadow:0 1px 2px #071624,1px 0 2px #071624,-1px 0 2px #071624!important}
+#app>header .resources b{font-size:9px!important;font-weight:600!important}
+#app>header .resources .resourceArt303,#app>header .resources .nova-core-icon{width:20px!important;height:20px!important;filter:drop-shadow(0 1px 2px #071624)}
+#app>header .title b{font-size:9px!important}
+#app>header #mode{font-size:8px!important}
+#app>header #commanderButton{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;padding:7px!important}
+#app>header #commanderPortrait{width:30px!important;height:30px!important;border:0!important;box-shadow:none!important}
+#app>header .resources>.gembalance{min-height:44px!important}
+@media(orientation:landscape){#app>header{height:46px!important;min-height:46px!important}#app>header .title{flex-basis:160px!important}}
