@@ -96,4 +96,6 @@ create function nova_private.titan_state342(who uuid) returns jsonb language sql
  select nova_private.titan_state_before370(who)||jsonb_build_object('equipment370',coalesce((select equipment from nova_private.outposts370 where owner=who),'{"weapon":0,"armor":0}'::jsonb));
 $$;
 revoke all on function nova_private.outpost_quote370(text,int),nova_private.outpost_state370(uuid),nova_private.outpost_settle370(uuid),nova_private.outpost_command370(jsonb),nova_private.test_command(text,jsonb),nova_private.test_command_before370(text,jsonb),nova_private.titan_state342(uuid),nova_private.titan_state_before370(uuid) from public,anon,authenticated;
+-- Keep the authenticated command entry point callable after replacing its wrappers.
+grant execute on function nova_private.test_command(text,jsonb) to authenticated;
 commit;
