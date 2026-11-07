@@ -2,7 +2,7 @@ const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('nod
 const root=path.resolve(__dirname,'..');process.chdir(root);
 const {integrate}=require('../features/titan342/build.cjs');let source=integrate(fs.readFileSync('game.js','utf8'));
 const end=source.lastIndexOf('})(typeof globalThis');
-source=source.slice(0,end)+`root.visualTest373={e:E,tick:()=>guideTick288(),guide:()=>guide288,setStep:n=>{guide288.step=n;guideEnter337();},render:()=>draw(),battle:()=>{Game.guideFinish288();E.d.titan342={level:1,skills:{slash:1,palm:1}};delete E.d.titanRecovery347;E.scout(1);E.raid.guards=[];E.raid.buildings=[{id:900,type:'hq',lv:1,x:12,y:10,hp:10000,max:10000,cool:999}];screen='raid';paused=true;zoom=.85;panX=0;panY=0;close();hud();tickUI342(0);},point:()=>{fitCanvas();const p=point(7,10),r=canvas.getBoundingClientRect();return {x:r.left+p.x*r.width/viewWidth,y:r.top+p.y*r.height/viewHeight};},armed:()=>deployTitan342,tickMech:()=>{const t=E.raid.troops.find(t=>t.titan342);for(let i=0;i<200;i++)titanTick342(E.raid,t,.1);return {manual:!!t.manual342,x:t.x,hp:E.raid.buildings[0].hp};}};`+source.slice(end);
+source=source.slice(0,end)+`root.visualTest373={e:E,tick:()=>guideTick288(),guide:()=>guide288,setStep:n=>{guide288.step=n;guideEnter337();},render:()=>draw(),battle:()=>{Game.guideFinish288();E.d.titan342={level:1,skills:{slash:1,palm:1}};delete E.d.titanRecovery347;E.scout(1);E.raid.guards=[];E.raid.buildings=[{id:900,type:'hq',lv:1,x:12,y:10,hp:10000,max:10000,cool:999}];screen='raid';paused=true;zoom=.85;panX=0;panY=0;close();hud();tickUI342(0);},point:()=>{fitCanvas();const p=point(7,7),r=canvas.getBoundingClientRect();return {x:r.left+p.x*r.width/viewWidth,y:r.top+p.y*r.height/viewHeight};},armed:()=>deployTitan342,tickMech:()=>{const t=E.raid.troops.find(t=>t.titan342);for(let i=0;i<200;i++)titanTick342(E.raid,t,.1);return {manual:!!t.manual342,x:t.x,hp:E.raid.buildings[0].hp};}};`+source.slice(end);
 (async()=>{
  const {chromium}=require('playwright');const browser=await chromium.launch({executablePath:process.env.NOVA_CHROMIUM||undefined,args:['--no-sandbox'],headless:true});
  const page=await browser.newPage({viewport:{width:844,height:390}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -41,6 +41,7 @@ source=source.slice(0,end)+`root.visualTest373={e:E,tick:()=>guideTick288(),guid
  await page.evaluate(()=>visualTest373.battle());
  await page.locator('#titanEntry342').click();assert(await page.evaluate(()=>visualTest373.armed()));
  const ground=await page.evaluate(()=>visualTest373.point());
+ assert(await page.evaluate(p=>document.elementFromPoint(p.x,p.y)?.id==='world',ground),'deployment tile is unobstructed');
  await page.mouse.click(ground.x,ground.y);
  assert.equal(await page.evaluate(()=>visualTest373.e.raid.troops.filter(t=>t.titan342).length),1,'real button and ground tap deploy one mech');
  const combat=await page.evaluate(()=>visualTest373.tickMech());

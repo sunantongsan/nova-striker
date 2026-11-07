@@ -128,3 +128,5 @@
 #app>header .resources .resourceArt303,#app>header .resources .nova-core-icon{width:17px!important;height:17px!important}
 @media(orientation:landscape){#app>header{right:max(170px,32vw)!important;width:auto!important;gap:4px!important}#app>header .title{flex:0 1 126px!important;min-width:70px!important}#app>header .title>div{padding:0!important}#app>header #mode{max-width:90px!important;overflow:hidden!important;text-overflow:ellipsis!important}}
 /* The native banner host will occupy the clear top-right corner only after onAdLoaded. */
+
+#app[data-battle300="true"] #deploy{width:max-content!important}
