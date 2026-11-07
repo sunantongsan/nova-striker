@@ -1,4 +1,4 @@
-export const PRODUCTS=Object.freeze({nova_5000:5000,nova_10500:10500,nova_19000:19000,nova_40000:40000,nova_85000:85000,nova_180000:180000});
+export const PRODUCTS=Object.freeze({nova_5000:5000,nova_10500:10500,nova_19000:19000,nova_40000:40000,nova_85000:85000,nova_180000:180000,nova_1000:1000,nova_2100:2100,nova_3600:3600,nova_7600:7600,nova_16000:16000,nova_34000:34000});
 export async function hash(text){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');}
 export async function validateReceipt(purchase,uid,product){
  if(!Object.hasOwn(PRODUCTS,product))throw Error('unknown_product');
@@ -11,4 +11,5 @@ export async function validateReceipt(purchase,uid,product){
  const offer=lines[0].productOfferDetails;if(!offer||offer.quantity!==1||offer.refundableQuantity!==1)throw Error('quantity_or_refund');
  return {nova:PRODUCTS[product],orderId:purchase.orderId||null,isTest};
 }
+
 

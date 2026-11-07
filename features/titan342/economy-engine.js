@@ -7,3 +7,4 @@ U.forEach(function(u){u.baseCost358=u.cost;});
 function refreshTraining358(engine){var factor=Math.max(3,Math.ceil(engine.hq()*engine.hq()/4));U.forEach(function(u){u.cost=u.baseCost358*factor;});}
 var syncEconomy358=Engine.prototype.sync;
 Engine.prototype.sync=function(){var result=syncEconomy358.apply(this,arguments);refreshTraining358(this);return result;};
+
