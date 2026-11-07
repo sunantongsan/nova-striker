@@ -4,6 +4,5 @@ function turret379(b){
  var turn=Math.atan2(Math.sin(angle)/.62,Math.cos(angle)),length=(rocket?24:27)+stage*2-Math.min(.18,b.recoil||0)*12;
  return {turn:turn,length:length,height:height,x:Math.cos(turn)*length,y:Math.sin(turn)*length*.62-height};
 }
-var mountBefore379=weaponMount;
-weaponMount=function(b){return ['gun','missileturret'].includes(b.type)?turret379(b):mountBefore379(b);};
+// 381: use the original weapon geometry together with the restored painted artwork.
 function hqDestroyed379(buildings){return !!(buildings||[]).find(function(b){return b.type==='hq'&&b.hp<=0;});}

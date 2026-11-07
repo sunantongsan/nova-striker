@@ -1,11 +1,5 @@
 [
   {
-    "key": "victory",
-    "source": "https://raw.githubusercontent.com/blancmathis/Super_Bash_Folds/1028a3b739ef54efdcbe5a2ef0ad1714fe569c47/public/assets/audio/open/sfx/game-set.ogg",
-    "original_sha256": "889d4c2b76c7edd63138b3a976c3f7337aaba3de90019d19bca70ec958c93014",
-    "packed_sha256": "1bcb917d51587aefae4b0c5703b9142e5f1bba9770c84d5b8c90f42d366f6877"
-  },
-  {
     "key": "defeat",
     "source": "https://raw.githubusercontent.com/blancmathis/Super_Bash_Folds/1028a3b739ef54efdcbe5a2ef0ad1714fe569c47/public/assets/audio/open/sfx/boot.ogg",
     "original_sha256": "86e97f88473e77119c24cc2fbcc711b3343a0b665d4297ea684f59ea17fc998e",
@@ -58,5 +52,19 @@
     "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/laserSmall_000.ogg",
     "original_sha256": "72b589eadd41781257ac859e4f4d030222e623390e4a1a83f6d05329a6e026f1",
     "packed_sha256": "5a74d255ee0fd495549b0d267a3f82f78e99d2053f092be5a8fa4c23a3babcff"
+  },
+  {
+    "key": "victory",
+    "source": "User supplied: astralsynthesizer-11l-victory_trumpet-1749704501065-358769.mp3",
+    "original_sha256": "0be251d779646d816262d6494e76676af5fc9891f0d4feda22ad2c7e30641adf",
+    "packed_sha256": "7226b559136051c50e39fae13d6c8f40c45ce14a412995a74a0a8ce14a7831b0",
+    "processing": "Full duration, original pitch, mono 44.1kHz 96kbps MP3; missile gain 0.65"
+  },
+  {
+    "key": "missileImpact",
+    "source": "User supplied: u_cps9x2omzt-missile-boom-481180.mp3",
+    "original_sha256": "abca96073f8a2b43ce99209987bf8add4507260c45010e1d6b438c846bf73401",
+    "packed_sha256": "2a5f1c8402537796ee51b530057d6d6e3aceaadde55b44cf3acab7283de1cdda",
+    "processing": "Full duration, original pitch, mono 44.1kHz 96kbps MP3; missile gain 0.65"
   }
 ]

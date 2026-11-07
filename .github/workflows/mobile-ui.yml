@@ -32,9 +32,16 @@ jobs:
 
       - run: node features/titan342/build.cjs && node scripts/patch.cjs
         if: success()
+      - run: node tests/repair381-browser.cjs
+        if: success()
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: repair381-proof
+          path: test-artifacts/repair381*
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: success()
         with:
-          name: nova-patch-150
+          name: nova-patch-151
           path: patch-dist/
           retention-days: 7
