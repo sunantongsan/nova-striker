@@ -13,8 +13,8 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
  await page.evaluate(()=>{for(const id of ['welcome','baseNameGate','guideDock288']){const n=document.getElementById(id);if(n)n.style.display='none';}});
  for(const size of [{width:844,height:390},{width:640,height:300},{width:390,height:844}]){
   await page.setViewportSize(size);await page.waitForTimeout(80);
-  const dock=await page.evaluate(()=>{const bar=document.getElementById('homebar'),nav=bar.parentElement.getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect(),buttons=[...bar.children].filter(b=>!b.hidden);return {below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2,row:buttons.every(b=>Math.abs(b.getBoundingClientRect().top-buttons[0].getBoundingClientRect().top)<2),labels:buttons.every(b=>b.querySelector('.railLabel373')?.textContent.trim()),touch:buttons.every(b=>b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44),count:buttons.length};});
-  assert(dock.below&&dock.bottom&&dock.row&&dock.labels&&dock.touch&&dock.count===10,JSON.stringify({size,dock}));
+  const dock=await page.evaluate(()=>{const bar=document.getElementById('homebar'),nav=bar.parentElement.getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect(),buttons=[...bar.children].filter(b=>!b.hidden);return {full:Math.abs(field.height-innerHeight)<2&&Math.abs(field.width-innerWidth)<2,bottom:Math.abs(nav.bottom-innerHeight)<2,row:buttons.every(b=>Math.abs(b.getBoundingClientRect().top-buttons[0].getBoundingClientRect().top)<2),labels:buttons.every(b=>b.querySelector('.railLabel373')?.textContent.trim()),touch:buttons.every(b=>b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44),count:buttons.length};});
+  assert(dock.full&&dock.bottom&&dock.row&&dock.labels&&dock.touch&&dock.count===10,JSON.stringify({size,dock}));
   try{await page.locator('#botAttack376').click();}catch(error){fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/mobile-click-failure.png',timeout:3000}).catch(()=>{});console.error('Mobile click context',size,errors);throw error;}
   assert.equal(await page.locator('.missions button').count(),100,'bot icon opens existing 100 bot bases');
   await page.evaluate(()=>Game.close());
@@ -22,8 +22,8 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
  await page.setViewportSize({width:844,height:390});
  fs.mkdirSync('test-artifacts',{recursive:true});
  await page.evaluate(()=>Game.scout(1));await page.waitForTimeout(120);
- const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2};});
- assert.equal(battleDock.battle,'true');assert(battleDock.below&&battleDock.bottom,JSON.stringify(battleDock));
+ const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,full:Math.abs(field.height-innerHeight)<2&&Math.abs(field.width-innerWidth)<2,bottom:Math.abs(nav.bottom-innerHeight)<2};});
+ assert.equal(battleDock.battle,'true');assert(battleDock.full&&battleDock.bottom,JSON.stringify(battleDock));
  await page.screenshot({path:'test-artifacts/battle-menu376.png'});
  await page.evaluate(()=>Game.home());await page.waitForTimeout(80);
  fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/bottom-menu376.png'});
