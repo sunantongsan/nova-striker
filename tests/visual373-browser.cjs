@@ -35,6 +35,6 @@ source=source.slice(0,end)+`root.visualTest373={e:E,tick:()=>guideTick288(),guid
  await page.locator('#guideDock288 .guide-skip337').click();assert.equal(await page.evaluate(()=>visualTest373.guide()),null);
  await page.evaluate(()=>{Game.settings();});await page.locator('.replayGuide373').click();await page.locator('#guideDock288').waitFor({state:'visible'});
  await page.evaluate(()=>Game.guideFinish288());
- for(const [name,call] of [['home','Game.home()'],['army','Game.armyView360("train")'],['build','Game.build()'],['settings','Game.settings()']]){await page.evaluate(call);await page.waitForTimeout(100);await page.screenshot({path:'test-artifacts/visual373-'+name+'.png'});}
+ for(const [name,call] of [['home','Game.home()'],['army','Game.armyView360("train")'],['build','Game.build()'],['settings','Game.settings()']]){await page.evaluate(call);await page.waitForTimeout(100);await page.screenshot({path:'test-artifacts/visual373-'+name+'.png'});if(name==='build'){const visible=await page.locator('.build-card261 .green:not(:disabled)').first().evaluate(b=>b.getBoundingClientRect().bottom<=b.closest('.novaContent360').getBoundingClientRect().bottom);assert(visible,'first build action is visible with its building');}}
  assert.deepEqual(errors,[]);await browser.close();console.log('PASS visual373: guide placement on three viewports, real training, formation, skip/replay, screenshot capture and no runtime errors');
 })().catch(e=>{console.error(e);process.exit(1);});
