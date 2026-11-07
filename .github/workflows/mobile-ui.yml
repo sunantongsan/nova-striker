@@ -17,6 +17,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/mobile364-browser.cjs
       - run: node tests/visual373-browser.cjs
+        if: success() || failure()
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
