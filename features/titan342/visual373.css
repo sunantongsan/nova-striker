@@ -94,3 +94,6 @@
 #app>header #commanderPortrait{width:30px!important;height:30px!important;border:0!important;box-shadow:none!important}
 #app>header .resources>.gembalance{min-height:44px!important}
 @media(orientation:landscape){#app>header{height:46px!important;min-height:46px!important}#app>header .title{flex-basis:160px!important}}
+
+#app>header .resources em{margin-right:0!important}
+#app>header .resources>span,#app>header .resources>.gembalance{gap:4px!important}
