@@ -20,6 +20,12 @@ source=source.slice(0,end364)+`root.mobileTest364={e:E,prepare:function(target){
   await page.evaluate(()=>Game.close());
  }
  await page.setViewportSize({width:844,height:390});
+ fs.mkdirSync('test-artifacts',{recursive:true});
+ await page.evaluate(()=>Game.scout(1));await page.waitForTimeout(120);
+ const battleDock=await page.evaluate(()=>{const app=document.getElementById('app'),nav=app.querySelector('nav').getBoundingClientRect(),field=document.getElementById('field').getBoundingClientRect();return {battle:app.dataset.battle300,below:field.bottom<=nav.top+1,bottom:Math.abs(nav.bottom-innerHeight)<2};});
+ assert.equal(battleDock.battle,'true');assert(battleDock.below&&battleDock.bottom,JSON.stringify(battleDock));
+ await page.screenshot({path:'test-artifacts/battle-menu376.png'});
+ await page.evaluate(()=>Game.home());await page.waitForTimeout(80);
  fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/bottom-menu376.png'});
  const target={id:'10000000-0000-4000-8000-000000000002',callsign:'ผู้บัญชาการฐานดาวเหนือทดสอบชื่อยาว',layout:[{type:'hq',lv:10,x:10,y:10}],presence364:{online:true,checked_at:new Date().toISOString()}};
  await page.evaluate(t=>{mobileTest364.prepare(t);Game.warScout(0);},target);
