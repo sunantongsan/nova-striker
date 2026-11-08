@@ -13,19 +13,18 @@ paintTerrain219=function(map,raid){
 };
 Game.environmentOverview384=function(){
  if(screen!=='home')return;fitCanvas();var map=22;
- zoom=Math.min(.65,Math.max(.25,Math.min(viewWidth*.94/(map*tile*2/.64),(viewHeight-100)/(map*tile*.62*2/.54))));
+ zoom=Math.min(1.2,Math.max(.35,Math.max(viewWidth/(map*tile*2/.64),viewHeight/(map*tile*.62*2/.54))));
  panX=0;panY=viewHeight*.49-originY-(map-1)*tile*.62*zoom;terrainKey219='';drawNeeded=true;
 };
 var selectEnvironment384=Game.choosePlanet298;
-Game.choosePlanet298=function(i){selectEnvironment384(i);if(planetChoice298===i)Game.environmentOverview384();};
+Game.choosePlanet298=function(i){selectEnvironment384(i);if(planetChoice298===i){Game.close();Game.environmentOverview384();}};
 var themeBuildSource384=false,buildBefore384=Game.build;
 Game.build=function(tab){
  if(tab==='environments'){themeBuildSource384=true;Game.planets298();return;}
  themeBuildSource384=false;buildBefore384.apply(this,arguments);
  var tabs=modal.querySelector('.shop-tabs261');
  if(tabs&&!tabs.querySelector('[data-environments384]'))tabs.insertAdjacentHTML('beforeend','<button data-environments384="true" aria-pressed="false" onclick="Game.build(\'environments\')">'+mt251('พื้นที่ตั้งฐาน','Environments')+'</button>');
- var grid=modal.querySelector('.shop-grid261');
- if(grid&&(!tab||tab==='all'))grid.insertAdjacentHTML('afterbegin','<button class="environmentEntry384" onclick="Game.build(\'environments\')"><span class="environmentThumb384"></span><strong>'+mt251('พื้นที่ตั้งฐาน','Base environments')+'</strong><small>'+mt251('ทุ่งหญ้า / ทะเลทราย ฟรี','Meadow / Desert free')+'</small><small>'+mt251('ทะเล / ลอยฟ้า • 50 NOVA หรือวิดีโอ 2 ครั้ง','Ocean / Sky • 50 NOVA or 2 videos')+'</small></button>');
+
 };
 var panelBefore384=themePanel383;
 themePanel383=function(message){panelBefore384(message);var panel=modal.querySelector('.themePanel383');if(panel){
@@ -33,10 +32,11 @@ themePanel383=function(message){panelBefore384(message);var panel=modal.querySel
  var info=panel.querySelector('p');if(info)info.textContent=mt251('ซื้อครั้งเดียว ใช้ได้ถาวร • วิดีโอสะสมแยกแต่ละฉาก • ไม่เพิ่มพลังรบ','Permanent unlock • Video progress is separate per scene • Cosmetic only');
  }};
 var style384=document.createElement('style');style384.textContent=`
+#modal#modal[data-nova360] .themeBuy383{background:linear-gradient(#ffecdf,#ffcaad)!important;color:#76523b!important;border-color:#e4ad91!important}
 .themePreview383{background-image:url('assets/environments384.webp');height:120px;background-size:200% 200%}
-.environmentEntry384{grid-column:1/-1;display:grid!important;grid-template-columns:100px 1fr;text-align:left;gap:3px 12px;padding:10px!important;background:linear-gradient(125deg,#e8fff4,#e8e7ff)!important;color:#315c70!important;border:2px solid #a6dcd0!important;border-radius:16px!important}
+#modal#modal[data-nova360] .environmentEntry384{grid-column:1/-1;display:grid!important;grid-template-columns:100px 1fr;text-align:left;gap:3px 12px;padding:10px!important;background:linear-gradient(125deg,#e8fff4,#e8e7ff)!important;color:#315c70!important;border:2px solid #a6dcd0!important;border-radius:16px!important}
 .environmentEntry384 .environmentThumb384{grid-row:1/4;background:url('assets/environments384.webp') 0 0/200% 200%;border-radius:12px;min-height:70px}
 .environmentEntry384 small{color:#42667a!important;font-size:12px}.environmentBack384{background:#dff3f3!important;color:#315c70!important;border-radius:10px!important;margin-bottom:8px;min-height:44px}
-.shop-tabs261{flex-wrap:wrap!important}.shop-tabs261 [data-environments384]{background:linear-gradient(#fff2ce,#ffce9e)!important;color:#5a5143!important;border-color:#e8bb83!important;min-height:44px}
-#modal[data-nova360] .novaHead360{background:linear-gradient(120deg,#b9e5e6,#d6cbee)!important;color:#315469!important}#modal[data-nova360] .novaHead360 h2{color:#315469!important}
+.shop-tabs261{flex-wrap:wrap!important}#modal#modal[data-nova360] .shop-tabs261 [data-environments384]{background:linear-gradient(#fff2ce,#ffce9e)!important;color:#5a5143!important;border-color:#e8bb83!important;min-height:44px}
+#modal#modal[data-nova360] .novaHead360{background:linear-gradient(120deg,#b9e5e6,#d6cbee)!important;color:#315469!important}#modal#modal[data-nova360] .novaHead360 h2{color:#315469!important}
 `;document.head.appendChild(style384);
