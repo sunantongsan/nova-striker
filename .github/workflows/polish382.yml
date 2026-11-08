@@ -1,0 +1,27 @@
+name: Nova presentation patch
+on:
+  push:
+    branches: [fix/polish382]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/polish382-browser.cjs
+      - run: node tests/audio380-browser.cjs
+      - run: node tests/visual373-browser.cjs
+      - run: node tests/combat379-browser.cjs
+      - run: node features/titan342/build.cjs && node scripts/patch.cjs
+      - run: node tests/repair381-browser.cjs
+      - name: Package verified patch and previews
+        run: |
+          tar -czf nova-patch-152.tar.gz -C patch-dist .
+          gh release create "polish382-${{ github.run_number }}" nova-patch-152.tar.gz test-artifacts/polish382*.png --target "$GITHUB_SHA" --prerelease --title 'Nova RTS presentation patch 152' --notes 'Verified presentation patch: percussive weapons, alien terrain, beveled HUD and dedicated player search. Not deployed automatically.'
+        env:
+          GH_TOKEN: ${{ github.token }}

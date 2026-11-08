@@ -21,14 +21,14 @@ async function sample380(key,options){
   if(!options.outcome&&performance.now()<outcomeUntil380)return false;
   // Keep a loud explosion from using all voices: each sound has its own small quota.
   var same=Array.from(playing380).filter(function(n){return n.sampleKey381===key;});
-  var limit=key==='impact'||key==='missileImpact'?1:2;
-  if(!options.outcome&&same.length>=limit){try{same[0].stop();}catch(ignore){}playing380.delete(same[0]);}
+  var limit=key==='impact'||key==='missileImpact'?1:key==='machine'?6:3;
+  if(!options.outcome&&same.length>=limit)return true; // Let attacks and explosion tails finish; drop excess voices.
   if(!options.outcome&&playing380.size>=12){var oldest=playing380.values().next().value;try{oldest.stop();}catch(ignore){}playing380.delete(oldest);}
   var mix=mixer218();if(!mix)return false;
   if(options.outcome){playing380.forEach(function(n){try{n.stop();}catch(ignore){}});outcomeUntil380=performance.now()+buffer.duration*1000+150;}
   function start(delay,rate,volume){var n=ac.createBufferSource(),g=ac.createGain();n.sampleKey381=key;n.buffer=buffer;n.playbackRate.value=rate;g.gain.value=volume;n.connect(g);g.connect(mix.sfx);playing380.add(n);n.onended=function(){playing380.delete(n);n.disconnect();g.disconnect();};n.start(ac.currentTime+delay);}
   start(0,options.rate||1,options.volume||.75);
-  if(key==='machine')start(.07,options.rate||1,.45);
+  if(key==='machine'){start(.065,options.rate||1,.50);start(.13,(options.rate||1)*.97,.38);}
 
   return true;
  }catch(ignore){return false;}finally{queued380--;}
@@ -48,3 +48,7 @@ if(!key||f.heard218||f.queued380||!soundOn||!mediaAllowed250())return;
 };
 outcomeSound379=function(win){return sample380(win?'victory':'defeat',{outcome:true,volume:1});};
 document.addEventListener('visibilitychange',function(){if(document.hidden)playing380.forEach(function(n){try{n.stop();}catch(ignore){}});});
+
+
+// A short physical deployment click; the old square-wave confirmation sounded like beeping.
+deployAudio250=function(){if(!soundOn||Date.now()-lastDeploy250<500||!mediaAllowed250())return;lastDeploy250=Date.now();sample380('machine',{volume:.18,rate:.85});};

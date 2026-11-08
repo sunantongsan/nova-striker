@@ -37,21 +37,24 @@
   },
   {
     "key": "sniper",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/laserRetro_002.ogg",
-    "original_sha256": "df6112dc4eba5444bc28a1c8b80f6ce942bb2696beb466ac8e736b2ebf3e15b9",
-    "packed_sha256": "4c87af65c1ac2f5d979e68cacb6746395911378d847113e3eb3e26429c6514cc"
+    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/explosionCrunch_002.ogg",
+    "original_sha256": "be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97",
+    "packed_sha256": "b6f23246caa38b0a2a3c84cb5d01ad03a5e361257ca6041c89972334a400e540",
+    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 430ms low-pitched rifle report"
   },
   {
     "key": "cannon",
     "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/lowFrequency_explosion_000.ogg",
     "original_sha256": "3cb48d86dab63140cfb9aaeea4d4a6846abaca5831d157d8adbec0490da26343",
-    "packed_sha256": "f07329ac3b9c1080d8b133690c536c5cc885478906ed12aa4dbbada53e3bbe2b"
+    "packed_sha256": "d352b8b21f66f1df21736d86ad8914fddbbeead280a1d14d169e33ada70634b8",
+    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 80Hz high-pass and 900Hz +5dB for phone audibility"
   },
   {
     "key": "machine",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/laserSmall_000.ogg",
-    "original_sha256": "72b589eadd41781257ac859e4f4d030222e623390e4a1a83f6d05329a6e026f1",
-    "packed_sha256": "5a74d255ee0fd495549b0d267a3f82f78e99d2053f092be5a8fa4c23a3babcff"
+    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/explosionCrunch_002.ogg",
+    "original_sha256": "be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97",
+    "packed_sha256": "d70bb35b99a9b917dee1c60658e5b15e5bd504b32db1c09b3b26a0fed0ebb995",
+    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 200ms burst shot"
   },
   {
     "key": "victory",
