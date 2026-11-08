@@ -37,7 +37,12 @@ android {
     sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets'), layout.buildDirectory.dir('generated/patchAssets')] }
 }
 // One task writes both content and its manifest from the same verified bytes.
+tasks.register('generateTitanAssets', Exec) {
+    workingDir rootProject.projectDir
+    commandLine 'node', 'features/titan342/build.cjs'
+}
 tasks.register('generatePatchManifest', Exec) {
+    dependsOn 'generateTitanAssets'
     workingDir rootProject.projectDir
     commandLine 'node', 'scripts/patch.cjs', '--android', '--native-version', android.defaultConfig.versionCode.toString()
 }
