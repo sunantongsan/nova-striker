@@ -20,6 +20,21 @@ import com.google.android.gms.games.PlayGames;
 
 public class MainActivity extends Activity {
     private WebView game;
+    private FrameLayout bannerHost;
+    private int bannerSafeTop;
+    // Keep the native ad outside the WebView, so no game control can sit beneath it.
+    void showBanner(com.google.android.gms.ads.AdView view) {
+        if (bannerHost==null) return;
+        bannerHost.removeAllViews();
+        boolean visible=view!=null && !destroyed && gameReady;
+        if(visible) bannerHost.addView(view,new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.RIGHT));
+        bannerHost.setVisibility(visible?View.VISIBLE:View.GONE);
+        int height=visible ? view.getAdSize().getHeightInPixels(this)+bannerSafeTop+dp(6) : 0;
+        FrameLayout.LayoutParams gameParams=(FrameLayout.LayoutParams)game.getLayoutParams();
+        gameParams.topMargin=height;
+        game.setLayoutParams(gameParams);
+    }
+    private int dp(int value) { return Math.round(value*getResources().getDisplayMetrics().density); }
     private GameAds ads;
     private NovaCloud cloud;
     private NovaBilling billing;
@@ -110,12 +125,23 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(0xff07021a);
         root.addView(game, new FrameLayout.LayoutParams(-1, -1));
+        bannerHost=new FrameLayout(this);
+        bannerHost.setBackgroundColor(0xff124f77);
+        bannerHost.setVisibility(View.GONE);
+        root.addView(bannerHost,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
         welcome=createWelcome();root.addView(welcome,new FrameLayout.LayoutParams(-1,-1));
         root.setOnApplyWindowInsetsListener((v, insets) -> {
             int left=0,top=0,right=0,bottom=0;
             if(android.os.Build.VERSION.SDK_INT>=28 && insets.getDisplayCutout()!=null){
                 android.view.DisplayCutout c=insets.getDisplayCutout();
                 left=c.getSafeInsetLeft();top=c.getSafeInsetTop();right=c.getSafeInsetRight();bottom=c.getSafeInsetBottom();
+            }
+            bannerSafeTop=top;
+            bannerHost.setPadding(0,top,right,dp(6));
+            if(bannerHost.getChildCount()>0) {
+                FrameLayout.LayoutParams params=(FrameLayout.LayoutParams)game.getLayoutParams();
+                params.topMargin=((com.google.android.gms.ads.AdView)bannerHost.getChildAt(0)).getAdSize().getHeightInPixels(this)+top+dp(6);
+                game.setLayoutParams(params);
             }
             float density=getResources().getDisplayMetrics().density;
             String js="document.documentElement.style.setProperty('--safe-left303','"+(left/density)+"px');"
