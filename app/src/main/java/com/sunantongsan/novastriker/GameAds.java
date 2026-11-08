@@ -99,6 +99,9 @@ final class GameAds {
         });
     }
 
+    @JavascriptInterface public void bannerLayoutAllowed(boolean allowed) {
+        activity.runOnUiThread(() -> { if(!destroyed) activity.setBannerLayoutAllowed(allowed); });
+    }
     private AdView banner;
     private boolean bannerLoaded;
     private final android.os.Handler bannerHandler = new android.os.Handler(android.os.Looper.getMainLooper());
