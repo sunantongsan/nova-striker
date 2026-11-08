@@ -1,6 +1,7 @@
 // Static, content-addressed game patches. Never publish the repository root.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..');
+const chunker=require('./patch-chunks.cjs');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 function build(source=root,output=path.join(root,'patch-dist')){
  const config=JSON.parse(fs.readFileSync(path.join(source,'patch-config.json')));
@@ -13,15 +14,15 @@ function build(source=root,output=path.join(root,'patch-dist')){
   return Buffer.from(config.titan342?require('../features/titan342/build.cjs').documentPayload(html):html);
  };
  const paths=['index.html','game.js',...fs.readdirSync(path.join(source,'assets')).filter(p=>p.endsWith('.webp')).sort().map(p=>'assets/'+p)];
- const files=paths.map(p=>{const bytes=content(p);return{path:p,sha256:hash(bytes),size:bytes.length};});
+ const files=paths.map(p=>{const bytes=content(p),file={path:p,sha256:hash(bytes),size:bytes.length};if(bytes.length>=chunker.THRESHOLD)file.chunks=chunker.chunks(bytes).map(({size,sha256})=>({size,sha256}));return file;});
  const size=files.reduce((n,f)=>n+f.size,0);if(size>config.maxBytes||size>67108864)throw Error('Patch too large');
  const manifest={schema:1,channel:config.channel,nativeVersion:config.nativeVersion,contentVersion:config.contentVersion,label:config.label,files};
  manifest.id=hash(Buffer.from(JSON.stringify(manifest)));
  fs.rmSync(output,{recursive:true,force:true});fs.mkdirSync(path.join(output,'objects'),{recursive:true});
- for(const f of files)fs.writeFileSync(path.join(output,'objects',f.sha256),content(f.path));
+ for(const f of files){const bytes=content(f.path);fs.writeFileSync(path.join(output,'objects',f.sha256),bytes);let offset=0;for(const c of f.chunks||[]){fs.writeFileSync(path.join(output,'objects',c.sha256),bytes.subarray(offset,offset+c.size));offset+=c.size;}}
  const dir=path.join(output,'patches',config.channel,'native-'+config.nativeVersion);fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify(manifest));
- for(const version of config.compatibleNativeVersions||[]){if(!Number.isSafeInteger(version)||version<19)throw Error('Invalid compatible native version');const compatible={...manifest,nativeVersion:version};delete compatible.id;compatible.id=hash(Buffer.from(JSON.stringify(compatible)));const compatDir=path.join(output,'patches',config.channel,'native-'+version);fs.mkdirSync(compatDir,{recursive:true});fs.writeFileSync(path.join(compatDir,'manifest.json'),JSON.stringify(compatible));}
+ for(const version of config.compatibleNativeVersions||[]){if(!Number.isSafeInteger(version)||version<19)throw Error('Invalid compatible native version');const compatible={...manifest,nativeVersion:version};if(version<39)compatible.files=files.map(({chunks,...file})=>file);delete compatible.id;compatible.id=hash(Buffer.from(JSON.stringify(compatible)));const compatDir=path.join(output,'patches',config.channel,'native-'+version);fs.mkdirSync(compatDir,{recursive:true});fs.writeFileSync(path.join(compatDir,'manifest.json'),JSON.stringify(compatible));}
  fs.writeFileSync(path.join(output,'index.html'),'<!doctype html><meta charset="utf-8"><title>Nova Striker Updates</title><p>Nova Striker game content delivery</p>');
  return manifest;
 }
@@ -41,6 +42,7 @@ if(require.main===module){
  console.log('Patch',m.label,m.id,m.files.length,'verified content files');
 }
 module.exports={build,hash,android};
+
 
 
 

@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'app/**'
+      - 'scripts/patch*.cjs'
+      - 'tests/*Patch*.java'
+      - 'tests/patch-chunks.cjs'
       - '.github/workflows/native-pr.yml'
 permissions:
   contents: read
@@ -24,8 +27,16 @@ jobs:
           gradle-version: '8.13'
       - run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify incremental patch download and recovery
+        run: |
+          node tests/patch-chunks.cjs /tmp/nova-delta-fixture
+          mkdir -p /tmp/nova-delta-classes
+          javac -d /tmp/nova-delta-classes app/src/main/java/com/sunantongsan/novastriker/PatchFiles.java app/src/main/java/com/sunantongsan/novastriker/PatchChunks.java tests/PatchFilesTest.java tests/PatchChunksTest.java
+          java -cp /tmp/nova-delta-classes com.sunantongsan.novastriker.PatchFilesTest
+          java -cp /tmp/nova-delta-classes com.sunantongsan.novastriker.PatchChunksTest /tmp/nova-delta-fixture
       - run: node tests/native-packaging.cjs
       - run: gradle :app:compileDebugJavaWithJavac --no-daemon
       - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
       - run: npx playwright install --with-deps chromium
       - run: node tests/banner39-browser.cjs
+
