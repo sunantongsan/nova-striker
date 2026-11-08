@@ -1,0 +1,26 @@
+name: Nova environment purchase regression
+on:
+  push:
+    branches: [fix/theme-purchase385]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node tests/walls383.cjs && node --test tests/themes383-db.cjs tests/themes383-ui.cjs
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/theme-purchase385-browser.cjs
+      - run: node tests/polish382-browser.cjs && node tests/combat379-browser.cjs
+      - run: node features/titan342/build.cjs && node scripts/patch.cjs
+      - run: node tests/repair381-browser.cjs
+      - name: Package verified patch and previews
+        run: |
+          tar -czf nova-patch-155.tar.gz -C patch-dist .
+          gh release create "themes385-${{ github.run_number }}" nova-patch-155.tar.gz test-artifacts/purchase385*.png --target "$GITHUB_SHA" --prerelease --title 'Nova RTS cartoon environments patch 155' --notes 'Verified four environments, 20 cartoon wall levels, level 15 machine guns, permanent 50 NOVA or two verified video unlocks.'
+        env:
+          GH_TOKEN: ${{ github.token }}
