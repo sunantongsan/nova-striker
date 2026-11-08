@@ -26,3 +26,6 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node tests/native-packaging.cjs
       - run: gradle :app:compileDebugJavaWithJavac --no-daemon
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/banner39-browser.cjs
