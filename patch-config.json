@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 38,
+  "nativeVersion": 39,
   "compatibleNativeVersions": [
     19,
     20,
@@ -21,7 +21,8 @@
     35,
     36,
     34,
-    37
+    37,
+    38
   ],
   "contentVersion": 151,
   "label": "1.10.1-art-audio-repair",

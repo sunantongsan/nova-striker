@@ -99,6 +99,40 @@ final class GameAds {
         });
     }
 
+    private AdView banner;
+    private boolean bannerLoaded;
+    private final android.os.Handler bannerHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable bannerRetry = this::loadBanner;
+    private void clearBanner() {
+        bannerHandler.removeCallbacks(bannerRetry);
+        bannerLoaded=false;
+        activity.showBanner(null);
+        if (banner!=null) { banner.destroy(); banner=null; }
+    }
+    private void loadBanner() {
+        if (!initialized || !foreground || !enabled() || !consent.canRequestAds() || banner!=null) return;
+        bannerHandler.removeCallbacks(bannerRetry);
+        final AdView view=new AdView(activity);
+        final int gen=generation;
+        banner=view;
+        view.setAdSize(AdSize.BANNER);
+        view.setAdUnitId(BuildConfig.DEBUG ? "ca-app-pub-3940256099942544/6300978111" : "ca-app-pub-4585492700643566/9131827435");
+        view.setAdListener(new AdListener() {
+            @Override public void onAdLoaded() {
+                if (banner!=view || destroyed || gen!=generation) return;
+                if (!enabled() || !consent.canRequestAds()) { clearBanner(); return; }
+                bannerLoaded=true;
+                if (foreground) activity.showBanner(view);
+            }
+            @Override public void onAdFailedToLoad(LoadAdError error) {
+                if (banner!=view || destroyed) return;
+                clearBanner();
+                if (foreground && enabled() && consent.canRequestAds()) bannerHandler.postDelayed(bannerRetry,60000);
+            }
+        });
+        Bundle extras=new Bundle(); extras.putString("npa","1");
+        view.loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class,extras).build());
+    }
     private boolean initialized, loading, showing, destroyed, foreground;
     private long lastShown = SystemClock.elapsedRealtime();
     private int generation;
@@ -118,16 +152,16 @@ final class GameAds {
         activity.runOnUiThread(() -> {
             if (destroyed || showing) return;
             new AlertDialog.Builder(activity).setTitle("โฆษณาและความเป็นส่วนตัว")
-                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบบรับรางวัลเพื่อรับรางวัลที่แสดงในเกมได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
+                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบนเนอร์ โฆษณาระหว่างเปลี่ยนฉาก และโฆษณาแบบรับรางวัลเพื่อรับรางวัลที่แสดงในเกมได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
                 .setPositiveButton("อายุ 18+ และเปิดโฆษณา", (d,w) -> {
                     prefs.edit().putBoolean("enabled", true).apply(); requestConsent();
                 })
                 .setNegativeButton("ไม่เปิด / อายุต่ำกว่า 18", (d,w) -> {
-                    prefs.edit().putBoolean("enabled", false).apply(); generation++; ready=null; rewardReady=null;
+                    prefs.edit().putBoolean("enabled", false).apply(); generation++; ready=null; rewardReady=null; clearBanner();
                 })
                 .setNeutralButton("จัดการความยินยอม", (d,w) -> {
                     if (consent.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED) {
-                        ready=null; rewardReady=null; generation++;
+                        ready=null; rewardReady=null; generation++; clearBanner();
                         UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
                     }
                 }).show();
@@ -149,6 +183,7 @@ final class GameAds {
         new Thread(() -> MobileAds.initialize(activity, status -> activity.runOnUiThread(this::load))).start();
     }
     private void load() {
+        loadBanner();
         if (!enabled() || !consent.canRequestAds() || loading || ready!=null) return;
         loading=true;
         final int requestGeneration=generation;
@@ -179,9 +214,9 @@ final class GameAds {
         });
     }
     private void done() { if (!destroyed) activity.adFinished(); }
-    void resume() { foreground=true; }
-    void pause() { foreground=false; }
-    void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; }
+    void resume() { foreground=true; if(banner!=null) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
+    void pause() { foreground=false; bannerHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
+    void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; clearBanner(); }
 }
 
 

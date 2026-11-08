@@ -10,7 +10,12 @@ try{
  assert.throws(()=>p.android(dir,NaN),/must match/);
  const m=p.android(dir,30);
  for(const f of m.files){const b=fs.readFileSync(path.join(dir,'app/build/generated/gameAssets',f.path));assert.equal(b.length,f.size);assert.equal(p.hash(b),f.sha256);}
- assert(fs.readFileSync(path.join(dir,'app/build/generated/gameAssets/index.html'),'utf8').includes('contentVersion:92'));
+ const html=fs.readFileSync(path.join(dir,'app/build/generated/gameAssets/index.html'),'utf8');
+ const js=fs.readFileSync(path.join(dir,'app/build/generated/gameAssets/game.js'),'utf8');
+ const context={window:{},game:undefined};
+ require('node:vm').runInNewContext(js+'\n'+html,context);
+ assert.equal(context.info.contentVersion,92);
+ assert.equal(context.info.label,'new');
  assert.equal(JSON.parse(fs.readFileSync(path.join(dir,'app/build/generated/patchAssets/patch-bundled.json'))).nativeVersion,30);
  console.log('PASS native version guard and exact bundled bytes');
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
