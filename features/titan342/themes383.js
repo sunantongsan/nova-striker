@@ -1,0 +1,50 @@
+var themeBusy383=null,themeShowing383=false,themeTimer383=null,themeRetries383=0,themeState383=null;
+function themeVisible383(){return !!modal.querySelector('.themePanel383');}
+function themePanel383(message){var p=E.d.pendingTheme383,cache=themeCache383();
+ open('<section class="themePanel383"><h2>'+mt251('พื้นที่ตั้งฐาน','Base environments')+'</h2><p>'+mt251('เลือกบรรยากาศที่ชอบ • ไม่มีผลต่อความแข็งแกร่ง','Choose your scenery • No combat advantage')+'</p><div class="themeGrid383">'+planets298.map(function(t,i){var key=i===2?'ocean':'sky',s=cache[key]||{},owned=themeOwned383(i),busy=!!themeBusy383||themeShowing383||!!p,progress=s.videos||0;return '<article class="themeCard383" data-selected="'+(planetChoice298===i)+'"><div class="themePreview383" style="background-position:'+(i%2?'100%':'0')+' '+(i>=2?'100%':'0')+'"></div><h3>'+t.name+'</h3><small>'+(i<2?mt251('ใช้ฟรี','Free'):owned?mt251('ปลดล็อกถาวรแล้ว','Permanently unlocked'):mt251('วิดีโอที่ยืนยันแล้ว ','Verified videos ')+progress+'/2')+'</small>'+(owned?'<button '+(themeBusy383?'disabled':'')+' onclick="Game.choosePlanet298('+i+')">'+mt251(planetChoice298===i?'กำลังใช้งาน':'เลือกใช้',planetChoice298===i?'Selected':'Use')+'</button>':'<button class="themeBuy383" '+(busy?'disabled':'')+' onclick="Game.themeBuy383('+i+')">50 NOVA • '+mt251('ซื้อถาวร','Unlock')+'</button><button '+(busy?'disabled':'')+' onclick="Game.themeAd383('+i+')">'+mt251('ดูวิดีโอ ','Watch video ')+(progress+1)+'/2</button>')+'</article>';}).join('')+'</div><p class="themeStatus383">'+escapeHTML(message||'')+'</p>'+(p?'<button class="wide" '+(themeBusy383||themeShowing383?'disabled':'')+' onclick="Game.themeRetry383()">'+mt251('ตรวจรายการที่ค้าง','Check pending transaction')+'</button>'+(p.kind==='buy'?'<button class="wide" '+(themeBusy383?'disabled':'')+' onclick="Game.themeCancel383()">'+mt251('ยกเลิกรายการที่ยังไม่สำเร็จ','Cancel unprocessed purchase')+'</button>':''):'')+'<button class="wide" onclick="Game.planets298()">'+mt251('ตรวจสิทธิ์อีกครั้ง','Refresh ownership')+'</button><button class="wide" onclick="Game.close()">'+mt251('ปิด','Close')+'</button></section>');
+}
+function themeMessage383(message){if(themeVisible383())themePanel383(message);else toast(message);}
+function themeSend383(mode){var owner=themeOwner383(),p=E.d.pendingTheme383;if(themeBusy383||!owner||!root.NovaCloud||!root.NovaCloud.warRequest){if(!owner)resourceAccount233();return;}
+ if(mode!=='status'&&(!p||p.owner!==owner)){themeMessage383(mt251('ใช้บัญชีเดิมเพื่อตรวจรายการ','Use the original account'));return;}
+ var id='theme383-'+nonce160(),payload=Object.assign({},p&&p.owner===owner?p:{owner:owner},{theme383:mode});themeBusy383={id:id,mode:mode,owner:owner};
+ clearTimeout(themeTimer383);themeTimer383=setTimeout(function(){if(themeBusy383&&themeBusy383.id===id){themeBusy383=null;themeMessage383(mt251('เชื่อมต่อไม่ได้ รายการเดิมยังอยู่ กดตรวจซ้ำได้','Timed out. Your transaction is saved. Retry.'));}},20000);
+ try{root.NovaCloud.warRequest(mode==='claim'||mode==='buy'||mode==='cancel'?'test_claim':'test_status',JSON.stringify(payload),id);}catch(e){clearTimeout(themeTimer383);themeBusy383=null;themeMessage383(mt251('เชื่อมต่อไม่ได้ กรุณาลองอีกครั้ง','Connection unavailable. Retry.'));}
+}
+Game.planets298=function(){themePanel383();if(themeOwner383())themeSend383('status');};
+Game.choosePlanet298=function(i){if(!Number.isInteger(i)||i<0||i>3||!themeOwned383(i))return;var old=E.d.terrainChoices383,prefs=Object.assign({},old);prefs[themeOwner383()||'guest']=i;E.d.terrainChoices383=prefs;if(!E.save()){E.d.terrainChoices383=old;toast(mt251('บันทึกไม่ได้','Could not save'));return;}planetChoice298=i;terrainKey219='';drawNeeded=true;themePanel383();};
+function themeCanAct383(){return !themeBusy383&&!themeShowing383&&!coinBusy367&&!coinShowing367&&!speedShowing264&&!raidShowing260&&!mineShow251&&!testShowing248&&!titanAd342&&!(E.d.pendingAd230&&E.d.pendingAd230.showRequested)&&!(liveRoom&&!liveRoom.finished)&&!warBusy;}
+Game.themeBuy383=function(i){if(![2,3].includes(i)||themeOwned383(i)||!themeCanAct383()||E.d.pendingTheme383)return;var owner=themeOwner383();if(!owner){resourceAccount233();return;}confirmNova358(50,function(){if(themeOwner383()!==owner||!themeCanAct383()||E.d.pendingTheme383||themeOwned383(i)||E.d.gems<50)return;var before=JSON.stringify(E.d);E.d.gems-=50;E.d.pendingTheme383={owner:owner,request_id:nonce160(),theme:i===2?'ocean':'sky',kind:'buy',gemDebit:50};if(!E.save()){E.d=JSON.parse(before);toast(mt251('บันทึกไม่ได้ ยังไม่หัก NOVA','Could not save; no NOVA deducted'));return;}themePanel383();themeSend383('buy');});};
+Game.themeCancel383=function(){var p=E.d.pendingTheme383;if(!p||p.kind!=='buy'||!themeCanAct383())return;p.cancelRequested=true;if(!E.save()){delete p.cancelRequested;return;}themeSend383('cancel');};
+Game.themeAd383=function(i){if(![2,3].includes(i)||themeOwned383(i)||!themeCanAct383()||E.d.pendingTheme383)return;var owner=themeOwner383();if(!owner){resourceAccount233();return;}E.d.pendingTheme383={owner:owner,request_id:nonce160(),theme:i===2?'ocean':'sky',kind:'ad'};if(!E.save()){delete E.d.pendingTheme383;return;}themeRetries383=0;themePanel383();themeSend383('prepare');};
+Game.themeRetry383=function(){var p=E.d.pendingTheme383;if(!p||!themeCanAct383())return;themeRetries383=0;themeSend383(p.kind==='buy'?(p.cancelRequested?'cancel':'buy'):p.completed?'claim':'prepare');};
+function themeShow383(){var p=E.d.pendingTheme383,a=root.NovaAds;if(!p||p.kind!=='ad'||p.completed||p.owner!==themeOwner383())return;try{if(!a||!a.rewardVerified||a.provider==='monetag')throw Error('unavailable');themeShowing383=true;a.rewardVerified(p.owner,p.request_id);}catch(e){themeShowing383=false;themeMessage383(mt251('วิดีโอยังไม่พร้อม ลองตรวจรายการเดิมภายหลัง','Video unavailable. Retry the saved transaction later.'));}}
+var cloudTheme383=root.novaCloudEvent;root.novaCloudEvent=function(event,data){
+ if(data&&/^theme383-/.test(data.request_id||'')){
+  if(!themeBusy383||themeBusy383.id!==data.request_id)return;var q=themeBusy383;themeBusy383=null;clearTimeout(themeTimer383);if(q.owner!==themeOwner383())return;
+  var s=data.data,p=E.d.pendingTheme383;
+  if(event!=='war'||!s||!s.theme383){themeShowing383=false;themeMessage383(data.message||mt251('ตรวจรายการไม่ได้ กรุณาลองอีกครั้ง','Could not check transaction. Retry.'));return;}
+  if(s.owner!==themeOwner383()||!s.themes)return;
+  var valid=['ocean','sky'].every(function(k){var t=s.themes[k];return t&&typeof t.unlocked==='boolean'&&Number.isInteger(t.videos)&&t.videos>=0&&t.videos<=2;});if(!valid)return;
+  var before=JSON.stringify(E.d),r=s.receipt;E.d.themes383=Object.assign({},E.d.themes383);E.d.themes383[s.owner]=s.themes;themeState383=s;
+  if(p&&p.owner===s.owner&&r&&r.theme===p.theme&&r.kind===p.kind){
+   // An ad reservation from another device can be resumed, but a purchase ID may never change.
+   if(r.id!==p.request_id){if(p.kind!=='ad'||q.mode!=='prepare'){E.d=JSON.parse(before);return;}p.request_id=r.id;}
+   if(r.finished){if(p.kind==='buy'){if(![0,50].includes(r.cost)||p.gemDebit!==50){E.d=JSON.parse(before);return;}E.d.gems+=50-r.cost;}delete E.d.pendingTheme383;themeShowing383=false;}
+   else if(r.verified){p.completed=true;}
+  }else if(p&&p.kind==='ad'&&p.owner===s.owner&&s.themes[p.theme].unlocked&&!r){delete E.d.pendingTheme383;themeShowing383=false;}
+  if(!E.save()){E.d=JSON.parse(before);themeMessage383(mt251('บันทึกไม่ได้ รายการยังอยู่ กดตรวจซ้ำ','Could not save. Retry the saved transaction.'));return;}
+  hud();themeRestore383();p=E.d.pendingTheme383;
+  if(q.mode==='status'){if(themeVisible383())themePanel383();return;}
+  if(!p){themeMessage383(r&&r.cancelled?mt251('รายการไม่สำเร็จ คืน NOVA ที่สำรองไว้แล้ว','Purchase not completed. Reserved NOVA returned.'):mt251('บันทึกสิทธิ์แล้ว เลือกพื้นที่ที่ต้องการได้เลย','Progress saved. Choose your environment.'));return;}
+  if(p.kind==='ad'&&r){if(p.completed){themeShowing383=false;if(themeRetries383++<12)themeTimer383=setTimeout(function(){if(themeOwner383()===q.owner)themeSend383('claim');},5000);themeMessage383(mt251('รอเซิร์ฟเวอร์ยืนยันวิดีโอ ไม่ต้องดูซ้ำ','Waiting for video verification. No need to watch again.'));return;}
+   if(Date.parse(r.expires_at)<=Date.now()){p.request_id=nonce160();if(E.save())themeSend383('prepare');return;}themeShow383();}
+  return;
+ }
+ if(event==='signed_in'||event==='signed_out'){clearTimeout(themeTimer383);themeBusy383=null;themeShowing383=false;themeState383=null;}
+ cloudTheme383.apply(this,arguments);if(event==='signed_in'||event==='signed_out')themeRestore383();
+};
+var earnedTheme383=root.novaRewardEarned;root.novaRewardEarned=function(id){var p=E.d.pendingTheme383;if(themeShowing383&&p&&p.owner===themeOwner383()){p.completed=true;if(!E.save())return;themeShowing383=false;if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);themeSend383('claim');return;}earnedTheme383(id);};
+var statusTheme383=root.novaRewardStatus;root.novaRewardStatus=function(status){if(themeShowing383){if(status==='ready'){themeShow383();return;}if(['loading','showing'].includes(status))return;themeShowing383=false;themeMessage383(mt251('วิดีโอยังไม่พร้อมหรือยังดูไม่ครบ กดตรวจรายการเดิมได้','Video unavailable or incomplete. Retry your saved transaction.'));return;}statusTheme383(status);};
+var mediaTheme383=mediaAllowed250;mediaAllowed250=function(){return !themeShowing383&&mediaTheme383();};
+var idleTheme383=Game.walletIdle297;Game.walletIdle297=function(){return !themeBusy383&&!themeShowing383&&idleTheme383();};
+var coinAdBefore383=Game.coinAd367;Game.coinAd367=function(){if(themeShowing383||themeBusy383)return;return coinAdBefore383.apply(this,arguments);};
