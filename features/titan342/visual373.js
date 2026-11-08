@@ -2,19 +2,27 @@
 (function(){
  var style=document.createElement('style');style.id='novaVisual373';style.textContent=visualCSS373;document.head.appendChild(style);
  // Keep one continuous ground surface. Decorative marks are cached by drawTerrain219.
- var originalTerrain=paintTerrain219;
+ // Alien bedrock, cached by drawTerrain219; all ornament stays cosmetic.
  paintTerrain219=function(map,raid){
-  if(placing||moving)return originalTerrain(map,raid);
-  var palette=planetPalette298(),z=zoom;
-  ctx.clearRect(0,0,viewWidth,viewHeight);box(0,0,viewWidth,viewHeight,palette.sky);
+  var z=zoom,palette=planetPalette298(),alien=planetChoice298===0||planetChoice298===5;
+  ctx.clearRect(0,0,viewWidth,viewHeight);
+  var sky=ctx.createLinearGradient(0,0,0,viewHeight);sky.addColorStop(0,alien?'#182e50':palette.sky);sky.addColorStop(1,'#354e69');box(0,0,viewWidth,viewHeight,sky);
   var corners=[point(-.5,-.5),point(map-.5,-.5),point(map-.5,map-.5),point(-.5,map-.5)];
   ctx.save();ctx.beginPath();corners.forEach(function(p,i){if(i)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);});ctx.closePath();
-  var ground=ctx.createLinearGradient(0,0,viewWidth,viewHeight);ground.addColorStop(0,palette.ground[1]);ground.addColorStop(.6,palette.ground[0]);ground.addColorStop(1,palette.ground[2]);ctx.fillStyle=ground;ctx.fill();ctx.clip();
-  for(var i=0;i<220;i++){var x=((i*73)%997)/997*map,y=((i*137+39)%991)/991*map,p=point(x,y);ctx.fillStyle=i%3?'#1738240a':'#edffc014';ctx.beginPath();ctx.ellipse(p.x,p.y,(10+i%17)*z,(4+i%7)*z,-.25,0,Math.PI*2);ctx.fill();}
-  // A shallow border gives the island depth without cluttering the buildable area.
-  ctx.strokeStyle='#183e3666';ctx.lineWidth=10*z;ctx.beginPath();ctx.moveTo(corners[1].x,corners[1].y);ctx.lineTo(corners[2].x,corners[2].y);ctx.lineTo(corners[3].x,corners[3].y);ctx.stroke();ctx.restore();
-  if(raid){for(var x=0;x<map;x++)for(var y=0;y<map;y++)if(!raid.buildings.some(function(b){return b.hp>0&&!trap278(b)&&Math.abs(b.x-x)<.75&&Math.abs(b.y-y)<.75;}))diamond(x,y,'rgba(66,190,240,.035)');}
-  for(var n=0;n<22;n++){var side=n%2,x=side?map+.15:(n*.91)%map,y=side?(n*.91)%map:map+.15,p=point(x,y);if(p.x<-35||p.x>viewWidth+35||p.y<-60||p.y>viewHeight+60)continue;ctx.save();ctx.fillStyle='#102c3438';ctx.beginPath();ctx.ellipse(p.x+7*z,p.y+3*z,17*z,6*z,0,0,7);ctx.fill();box(p.x-2*z,p.y-20*z,4*z,23*z,palette.rock);for(var k=0;k<3;k++){ctx.fillStyle=k===2?palette.ground[1]:k===1?palette.ground[0]:palette.rock;ctx.beginPath();ctx.moveTo(p.x,p.y-(38-k*9)*z);ctx.lineTo(p.x+(15-k*3)*z,p.y-(8-k*4)*z);ctx.quadraticCurveTo(p.x,p.y-k*3*z,p.x-(15-k*3)*z,p.y-(8-k*4)*z);ctx.closePath();ctx.fill();}ctx.restore();}
+  var ground=ctx.createLinearGradient(corners[0].x,corners[0].y,corners[2].x,corners[2].y);ground.addColorStop(0,alien?'#73949e':palette.ground[1]);ground.addColorStop(.55,alien?'#617f95':palette.ground[0]);ground.addColorStop(1,alien?'#555d83':palette.ground[2]);ctx.fillStyle=ground;ctx.fill();ctx.clip();
+  // Broad mineral strata, subtle enough to read buildings against them.
+  for(var i=0;i<95;i++){var x=((i*73)%997)/997*map,y=((i*137+39)%991)/991*map,p=point(x,y);ctx.fillStyle=i%3?'#1128430c':'#d7faff13';ctx.beginPath();ctx.ellipse(p.x,p.y,(14+i%29)*z,(5+i%11)*z,-.12,0,Math.PI*2);ctx.fill();}
+  for(var i=0;i<12;i++){var x=(i*7.31+1.7)%map,y=(i*3.79+.8)%map,p=point(x,y);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+20*z,p.y+3*z);ctx.lineTo(p.x+32*z,p.y-2*z);ctx.lineTo(p.x+47*z,p.y+4*z);ctx.strokeStyle='#1f344c38';ctx.lineWidth=2*z;ctx.stroke();ctx.strokeStyle='#9ce7e52b';ctx.lineWidth=.6*z;ctx.stroke();}
+  ctx.restore();
+  // Faceted rock ledge below the near edges; no collision objects added.
+  for(var edge=1;edge<3;edge++){var a=corners[edge],b=corners[edge+1];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(b.x,b.y+12*z);ctx.lineTo(a.x,a.y+12*z);ctx.closePath();ctx.fillStyle=edge===1?'#283c57':'#364f69';ctx.fill();}
+  // A few crystal outcrops outside the buildable area, instead of terrestrial trees.
+  for(var n=0;n<12;n++){var side=n%2,x=side?map+.6:1+(n*1.91)%(map-2),y=side?1+(n*1.91)%(map-2):map+.6,p=point(x,y);if(p.x<-45||p.x>viewWidth+45||p.y<-50||p.y>viewHeight+50)continue;
+   ctx.save();ctx.fillStyle='#10233d55';ctx.beginPath();ctx.ellipse(p.x+5*z,p.y+3*z,14*z,5*z,0,0,7);ctx.fill();
+   for(var k=0;k<2;k++){var xx=p.x+(k*10-5)*z,h=(k?18:29)*z,w=(k?5:7)*z;ctx.beginPath();ctx.moveTo(xx-w,p.y);ctx.lineTo(xx-w*.7,p.y-h*.65);ctx.lineTo(xx,p.y-h);ctx.lineTo(xx+w,p.y-h*.7);ctx.lineTo(xx+w,p.y);ctx.closePath();ctx.fillStyle=k?'#7687b7':'#5eabae';ctx.fill();ctx.beginPath();ctx.moveTo(xx,p.y-h);ctx.lineTo(xx+w,p.y-h*.7);ctx.lineTo(xx+w,p.y);ctx.lineTo(xx,p.y-2*z);ctx.closePath();ctx.fillStyle=k?'#b3bce0':'#ade5de';ctx.fill();}ctx.restore();
+  }
+  // Preserve placement feedback on the same surface rather than switching scenes.
+  if(!raid&&(placing||moving)){for(var x=1;x<=20;x++)for(var y=1;y<=20;y++)if(E.empty(x,y,moving))diamond(x,y,'rgba(172,255,203,.17)','#a4e4cb');}
  };
  terrainKey219='';drawNeeded=true;
  // Soft contact shadows anchor buildings; health bars and selection remain in the original renderer.
@@ -31,6 +39,8 @@
  [$('dailyCheckin340'),$('skillShop342')].forEach(function(b){if(b)homeDock376.appendChild(b);});
  // Small descriptive labels make the existing icon rail learnable on touch screens.
  Array.from(document.querySelectorAll('#homebar > button')).forEach(function(b){var label=document.createElement('span');label.className='railLabel373';var names={titanEntry342:mt251('หุ่น NOVA','Mech'),botAttack376:mt251('มัลติเพลย์','Multiplayer'),dailyCheckin340:mt251('เช็คอิน','Check-in'),skillShop342:mt251('ร้านค้า','Shop')};label.textContent=names[b.id]||(b.classList.contains('rail-attack338')?mt251('ตีผู้เล่น','Players'):b.getAttribute('aria-label')||b.title);label.title=b.title;b.appendChild(label);});
+ var playerSearch382=homeDock376.querySelector('.rail-attack338');
+ if(playerSearch382){playerSearch382.id='playerSearch382';playerSearch382.title=mt251('ค้นหาผู้เล่น','Find players');playerSearch382.setAttribute('aria-label',playerSearch382.title);var label=playerSearch382.querySelector('.railLabel373');if(label)label.textContent=playerSearch382.title;}
  var settingsBefore=Game.settings;
  Game.settings=function(){settingsBefore.apply(this,arguments);var sheet=modal.querySelector('.novaContent360')||modal.querySelector('.sheet');if(sheet&&!sheet.querySelector('.replayGuide373')){var b=document.createElement('button');b.className='wide replayGuide373';b.textContent=mt251('สอนเล่นทีละขั้น','Learn step by step');b.onclick=function(){close();Game.help();};sheet.appendChild(b);}};
  // A single anchored coach card; focus never intercepts a player's tap.
@@ -48,3 +58,4 @@
  // Do not auto-restart guides already completed or skipped by an existing player.
  guideAutoPending288=true;
 })();
+
