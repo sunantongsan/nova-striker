@@ -15,7 +15,12 @@ try {
  const m=android(source,output),before=JSON.stringify(m);
  const entry=m.files.find(f=>f.path==='index.html');
  const nativeHTML=fs.readFileSync(path.join(output,'objects',entry.sha256),'utf8');
- assert(!nativeHTML.includes('telegram-web-app.js'));if(JSON.parse(fs.readFileSync(path.join(source,'patch-config.json'))).titan342)assert(nativeHTML.includes('window.NovaHQModel352='));
+ assert(!nativeHTML.includes('telegram-web-app.js'));if(JSON.parse(fs.readFileSync(path.join(source,'patch-config.json'))).titan342){
+  const packed=nativeHTML.match(/var raw=atob\(("[^"]+")\)/);
+  assert(packed,'compressed model payload must be present');
+  const decoded=require('node:zlib').gunzipSync(Buffer.from(JSON.parse(packed[1]),'base64')).toString('utf8');
+  assert(decoded.includes('window.NovaHQModel352='),'compressed native payload must include the HQ model');
+ }
  assert(!m.files.some(f=>f.path.startsWith('web/')||f.path==='telegram.js'));
  const play=telegram(source,output),webHTML=fs.readFileSync(path.join(play,'index.html'),'utf8');
  assert(webHTML.includes('telegram-web-app.js'));assert(webHTML.includes('src="telegram.js"'));
@@ -30,4 +35,5 @@ try {
  assert(!fs.existsSync(path.join(output,'play/backend')));
  console.log('PASS independent Android/Telegram entry pages, shared engine, isolated output');
 } finally {fs.rmSync(temp,{recursive:true,force:true});}
+
 
