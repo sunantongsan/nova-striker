@@ -21,34 +21,34 @@ async function sample380(key,options){
   if(!options.outcome&&performance.now()<outcomeUntil380)return false;
   // Keep a loud explosion from using all voices: each sound has its own small quota.
   var same=Array.from(playing380).filter(function(n){return n.sampleKey381===key;});
-  var limit=key==='impact'||key==='missileImpact'?1:key==='machine'?6:3;
+  var limit=key==='missileImpact'||key==='bomb'?1:key==='impact'||key==='cannon'||key==='energy'?2:key==='machine'?4:3;
   if(!options.outcome&&same.length>=limit)return true; // Let attacks and explosion tails finish; drop excess voices.
   if(!options.outcome&&playing380.size>=12){var oldest=playing380.values().next().value;try{oldest.stop();}catch(ignore){}playing380.delete(oldest);}
   var mix=mixer218();if(!mix)return false;
   if(options.outcome){playing380.forEach(function(n){try{n.stop();}catch(ignore){}});outcomeUntil380=performance.now()+buffer.duration*1000+150;}
   function start(delay,rate,volume){var n=ac.createBufferSource(),g=ac.createGain();n.sampleKey381=key;n.buffer=buffer;n.playbackRate.value=rate;g.gain.value=volume;n.connect(g);g.connect(mix.sfx);playing380.add(n);n.onended=function(){playing380.delete(n);n.disconnect();g.disconnect();};n.start(ac.currentTime+delay);}
   start(0,options.rate||1,options.volume||.75);
-  if(key==='machine'){start(.065,options.rate||1,.50);start(.13,(options.rate||1)*.97,.38);}
 
   return true;
  }catch(ignore){return false;}finally{queued380--;}
 }
-var soundKeys380={machine:'machine',sniper:'sniper',cannon:'cannon',grenade:'cannon',bomb:'missile',missile:'missile',plasma:'plasma',tesla:'tesla',shock:'tesla',heal:'heal',energy276:'plasma',energyRing276:'impact',impact:'impact',mineburst278:'impact',airburst278:'impact',siloLaunch278:'missile'};
+// 391: one distinct, original sound per weapon family (see synth391.py).
+var soundKeys380={machine:'machine',sniper:'sniper',cannon:'cannon',grenade:'grenade',bomb:'missile',missile:'missile',plasma:'plasma',tesla:'tesla',shock:'shock',heal:'heal',energy276:'energy',energyRing276:'impact',impact:'impact',mineburst278:'bomb',airburst278:'impact',siloLaunch278:'missile'};
 weaponAudio218=function(f){
  var key=soundKeys380[f.weapon];
  if(f.weapon==='impact'){
-  if(['missile','bomb'].includes(f.effect))key='missileImpact';
+  if(['missile','bomb'].includes(f.effect))key='missileImpact';else if(f.effect==='grenade')return; // the grenade clip already contains its blast
   else if(!['cannon','grenade','energy276'].includes(f.effect))return;
  }
 if(!key||f.heard218||f.queued380||!soundOn||!mediaAllowed250())return;
- var now=performance.now(),bucket=key+':'+(f.sourceKind379===undefined?f.sourceType379||'default':f.sourceKind379),gap=key==='missileImpact'?1100:key==='impact'?350:100;
+ var now=performance.now(),bucket=key+':'+(f.sourceKind379===undefined?f.sourceType379||'default':f.sourceKind379),gap=key==='missileImpact'||key==='bomb'?900:key==='impact'?300:key==='cannon'||key==='energy'?220:key==='sniper'?180:110;
  if(now-(lastSample380[bucket]===undefined?-10000:lastSample380[bucket])<gap){f.heard218=true;return;}
  lastSample380[bucket]=now;f.queued380=true;
- sample380(key,{rate:f.sourceType379?.9:1+(Math.max(0,f.sourceKind379||0)%4)*.07,volume:key==='missileImpact'?.55:key==='impact'?.2:.8}).then(function(ok){f.queued380=false;if(ok)f.heard218=true;});
+ sample380(key,{rate:f.sourceType379?.9:1+(Math.max(0,f.sourceKind379||0)%4)*.07,volume:key==='missileImpact'||key==='bomb'?.7:key==='impact'?.35:key==='machine'?.7:.8}).then(function(ok){f.queued380=false;if(ok)f.heard218=true;});
 };
 outcomeSound379=function(win){return sample380(win?'victory':'defeat',{outcome:true,volume:1});};
 document.addEventListener('visibilitychange',function(){if(document.hidden)playing380.forEach(function(n){try{n.stop();}catch(ignore){}});});
 
 
 // A short physical deployment click; the old square-wave confirmation sounded like beeping.
-deployAudio250=function(){if(!soundOn||Date.now()-lastDeploy250<500||!mediaAllowed250())return;lastDeploy250=Date.now();sample380('machine',{volume:.18,rate:.85});};
+deployAudio250=function(){if(!soundOn||Date.now()-lastDeploy250<500||!mediaAllowed250())return;lastDeploy250=Date.now();sample380('impact',{volume:.2,rate:1.5});};

@@ -12,51 +12,6 @@
     "packed_sha256": "b6953b35cffe9ded1a55d37c8c85f440efaf8944ccaa1466e365a0b855f6c7c0"
   },
   {
-    "key": "impact",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/explosionCrunch_002.ogg",
-    "original_sha256": "be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97",
-    "packed_sha256": "c566c0d3ec1017c2cae8d4628a26b9362633958bc22ccbcb648784a43943d556"
-  },
-  {
-    "key": "plasma",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/laserLarge_001.ogg",
-    "original_sha256": "e678aca631495b7dfef4ac625f0349875ccac81a60f538d530e072241af3e4bd",
-    "packed_sha256": "d9ed68491bf60745aeda17c62741dc5d274797ecefb9c3874eb13e743ec43075"
-  },
-  {
-    "key": "tesla",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/forceField_001.ogg",
-    "original_sha256": "5574e69dd04e5f59322c5ddffde5978f077b09170ae5e29cec0bd9901828cd90",
-    "packed_sha256": "48912ccde9153e716c4c8297ec164cf9a60910c6112f427d5fc8362023adb0d3"
-  },
-  {
-    "key": "missile",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/thrusterFire_000.ogg",
-    "original_sha256": "0fdc474d93f209debf1fc4ea77765a669dcb7676db31b4d8a0a509685bccf374",
-    "packed_sha256": "b729952975f4a33990c2ec9a2579fe71381605b0536f6d8e715b2d8de3599b8c"
-  },
-  {
-    "key": "sniper",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/explosionCrunch_002.ogg",
-    "original_sha256": "be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97",
-    "packed_sha256": "b6f23246caa38b0a2a3c84cb5d01ad03a5e361257ca6041c89972334a400e540",
-    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 430ms low-pitched rifle report"
-  },
-  {
-    "key": "cannon",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/lowFrequency_explosion_000.ogg",
-    "original_sha256": "3cb48d86dab63140cfb9aaeea4d4a6846abaca5831d157d8adbec0490da26343",
-    "packed_sha256": "d352b8b21f66f1df21736d86ad8914fddbbeead280a1d14d169e33ada70634b8",
-    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 80Hz high-pass and 900Hz +5dB for phone audibility"
-  },
-  {
-    "key": "machine",
-    "source": "https://raw.githubusercontent.com/GeorgeQLe/assets-sfx-combat/9662dc1bed3b06ae753045915f9accfac044c7ce/assets/kenney/sci-fi-sounds/Audio/explosionCrunch_002.ogg",
-    "original_sha256": "be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97",
-    "packed_sha256": "d70bb35b99a9b917dee1c60658e5b15e5bd504b32db1c09b3b26a0fed0ebb995",
-    "processing": "382: percussive weapon report from CC0 explosion sample; filtered and faded for phone speakers; no laser beep. 200ms burst shot"
-  },
-  {
     "key": "victory",
     "source": "User supplied: astralsynthesizer-11l-victory_trumpet-1749704501065-358769.mp3",
     "original_sha256": "0be251d779646d816262d6494e76676af5fc9891f0d4feda22ad2c7e30641adf",
@@ -64,10 +19,63 @@
     "processing": "Full duration, original pitch, mono 44.1kHz 96kbps MP3; missile gain 0.65"
   },
   {
+    "key": "machine",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "f395da8da58dce767b31a1b49be9bb3864e246e4a1018df4ce201478dd0ada60"
+  },
+  {
+    "key": "sniper",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "76b15d90654184c42581154a5a949111fbae51e3e8f454069d427fb65dc2df45"
+  },
+  {
+    "key": "cannon",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "1852843bc76d1f9d482f180a8f9087a7a5d833e213644516003dad37bc0d7eea"
+  },
+  {
+    "key": "grenade",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "b0c2079e0d2cd3d43ef7d9aa64f2d583dcbe3dc8e1f3f5672853dc4b9c5e8b0b"
+  },
+  {
+    "key": "missile",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "31da3a1392d68b728af079ef99b6397ab0f8d2674bab0ab0aef4143946604796"
+  },
+  {
     "key": "missileImpact",
-    "source": "User supplied: u_cps9x2omzt-missile-boom-481180.mp3",
-    "original_sha256": "abca96073f8a2b43ce99209987bf8add4507260c45010e1d6b438c846bf73401",
-    "packed_sha256": "2a5f1c8402537796ee51b530057d6d6e3aceaadde55b44cf3acab7283de1cdda",
-    "processing": "Full duration, original pitch, mono 44.1kHz 96kbps MP3; missile gain 0.65"
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "5e937499d591487b5f080ed8bea0b1c17e23c759071a36b1f6edeaefc4369068"
+  },
+  {
+    "key": "bomb",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "03b04fec8f09c1287792f1227dcbd5d01db24cafbf7f1003a84139f6342ef157"
+  },
+  {
+    "key": "impact",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "a18cf28ba99790e52795cc6e4fc975cd93d2e1019de88099615ac57c36644c6f"
+  },
+  {
+    "key": "plasma",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "ccebb93eded3546368784f3d06d226371fe09df7534c1af8699a00790ee23100"
+  },
+  {
+    "key": "tesla",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "ea88475ddd9b646224b670ce43c1f2b7e1f1f1bfbb3a1996312785d2a22b7506"
+  },
+  {
+    "key": "shock",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "2ae10e58c81f3cf2e63d56a4531b5468e3412b473c4e51ea6ee4f737e7cd5417"
+  },
+  {
+    "key": "energy",
+    "source": "features/audio380/synth391.py (original NOVA synthesis, CC0)",
+    "packed_sha256": "9904495584add3910bc1c228f6a1bbf3d69110f7e76713e2b7c257208ba8d713"
   }
 ]

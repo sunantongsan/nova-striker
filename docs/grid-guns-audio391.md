@@ -1,0 +1,8 @@
+# 391: environment grid fit, paid 26×26 bases, wall machine guns, weapon audio
+
+- **Art fit**: `features/titan342/env391.js` maps each environment's painted floor diamond (measured per quadrant of `environments384.webp`) onto the real build grid, so the base sits on the floor in every scene. Vertical stretch is capped (1.22×) for the flatter ocean/sky platforms; a blurred copy fills wide screens.
+- **Paid area**: ocean and sky (once unlocked) allow 26×26 cells (`save.grid391`). Meadow/desert keep 20×20. Switching from a paid scene to a free one with buildings outside 20×20 asks first, then moves those buildings to the nearest free cells. Losing ownership re-fits automatically.
+- **Battles**: map size follows the layout extent (`sceneSize391`), so 20×20 bases keep the exact 22-cell map; larger bases get up to 28. Home defense, raids, live siege deploy, live frame decoding and the titan use the scene size.
+- **Server** (`backend/nova_grid_391.sql`, applied): publish accepts cells 1–26, cells above 20 only for accounts with an unlocked paid environment; siege deploy/landing bounds follow the target layout extent (still 0–21 for 20×20 bases).
+- **Wall guns** (level 15+): cartoon machine gun with swivel base, receiver, vented cooling jacket, muzzle brake, ammo box; twin barrels from level 18. The dark round shadow under wall pieces was removed.
+- **Audio**: `features/audio380/synth391.py` generates original clips — 3-round machine-gun burst, sniper crack with echo, cannon boom, grenade, missile whoosh, explosion, bomb, impact, plasma laser, tesla arc, heavy shock, energy cannon. Each weapon family has its own key; the old triple-voice machine click and the gun-click deploy sound were removed.
