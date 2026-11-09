@@ -2540,6 +2540,98 @@ var cloud362=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(dat
 var heartbeat362=liveHeartbeat;liveHeartbeat=function(){if(request362||searchQueued363){setTimeout(liveHeartbeat,1500);return;}if(!document.hidden&&!warBusy&&Date.now()>=nextRequest362){if(E.d.pendingScout362){Game.retryScout362(false);}else retryCampaign362();}heartbeat362();};
 var home362=Game.home;Game.home=function(){var out=home362.apply(this,arguments);retryCampaign362();return out;};
 
+
+// 390: Clash-style periodic advisor. The guide drone appears at real milestones
+// (HQ level-ups, new unlocks, full storage, busy builders...) once per account.
+// It never blocks play, never advances by itself, and can be turned off in Settings.
+var tipNow390=null,tipShownAt390=0,tipCheckAt390=0,tipFocus390=null;
+var TIP_GAP390=90000; // at most one new tip every 90 seconds
+function tipState390(){
+ var s=E.d.tips390;
+ if(!s||typeof s!=='object'){
+  // Existing bases: past HQ milestones are already known; do not replay them.
+  var hq=E.hq();s=E.d.tips390={seen:{},off:false,hq:hq};
+  for(var l=2;l<=hq;l++)s.seen['hq'+l]=1;
+  if(hq>=5)['storage','builders','army','attack','walls','defense','upgrade'].forEach(function(k){s.seen[k]=1;});
+  E.save();
+ }
+ if(!s.seen||typeof s.seen!=='object')s.seen={};
+ return s;
+}
+function tipName390(type){var b=B[type];return b?String(b.name):type;}
+function tipCount390(type,level){
+ var b=B[type];if(!b||type==='hq'||level<(b.require||((type==='factory'||type==='tesla')?2:1)))return 0;
+ try{return Number(E.buildCap.call(Object.create(E,{hq:{value:function(){return level;}}}),type))||0;}catch(e){return Number(b.cap)||0;}
+}
+function tipUnlocks390(level){
+ var fresh=[],more=[];
+ Object.keys(B).forEach(function(type){var now=tipCount390(type,level),before=tipCount390(type,level-1);
+  if(now>0&&before===0)fresh.push(tipName390(type));else if(now>before&&type!=='wall')more.push(tipName390(type)+' +'+(now-before));});
+ return {fresh:fresh,more:more};
+}
+function tipStorageFull390(){
+ try{return ['gold','power'].some(function(k){var cap=E.resourceCapacity(k);return cap>0&&Number(E.d[k])>=cap*0.98;});}catch(e){return false;}
+}
+function tipArmy390(){var n=0;(E.d.army||[]).forEach(function(v){n+=Number(v)||0;});return n;}
+function tipHas390(type){return E.d.buildings.some(function(b){return b.type===type&&!b.constructing;});}
+var BUILD390='#homebar button[onclick="Game.build()"]',ARMY390='#homebar button[onclick="Game.training()"]',MISSION390='#homebar button[onclick="Game.activities()"]';
+// Each lesson: id, condition, Thai/English title and text, button label, action, highlighted element.
+function tipLessons390(){
+ var hq=E.hq(),list=[];
+ for(var l=2;l<=hq;l++){(function(level){
+  var u=tipUnlocks390(level),th='ศูนย์บัญชาการระดับ '+level+' แล้ว! ',en='Headquarters level '+level+'! ';
+  if(u.fresh.length){th+='ปลดล็อกอาคารใหม่: '+u.fresh.join(', ')+' ';en+='New buildings: '+u.fresh.join(', ')+' ';}
+  if(u.more.length){th+='สร้างเพิ่มได้: '+u.more.join(', ')+' ';en+='More allowed: '+u.more.join(', ')+' ';}
+  if(level===10){th+='สั่งสร้างหุ่นผู้พิทักษ์ NOVA ได้แล้ว ';en+='You can now order a NOVA guardian mech. ';}
+  if(!u.fresh.length&&!u.more.length&&level!==10){th+='อาคารทุกหลังอัปเกรดได้สูงขึ้นแล้ว';en+='Your buildings can now upgrade higher.';}
+  list.push({id:'hq'+level,when:true,title:['เลื่อนระดับฐาน!','Base level up!'],text:[th.trim(),en.trim()],go:['เปิดเมนูสร้าง','Open Build'],act:function(){Game.build();},focus:BUILD390});
+ })(l);}
+ list.push(
+  {id:'upgrade',when:hq===1&&E.d.buildings.filter(function(b){return b.type!=='wall'&&!b.constructing;}).length>=4&&E.builderFree(),title:['อัปเกรดศูนย์บัญชาการ','Upgrade your HQ'],text:['แตะศูนย์บัญชาการแล้วกดอัปเกรด เลเวลที่สูงขึ้นจะปลดล็อกอาคาร ทหาร และป้อมใหม่','Tap your Headquarters and upgrade it. Higher levels unlock new buildings, troops and defenses.'],go:['เข้าใจแล้ว','Got it'],act:null,focus:'#world'},
+  {id:'storage',when:tipStorageFull390(),title:['คลังเต็มแล้ว!','Storage is full!'],text:['ทรัพยากรจะไม่เพิ่มเมื่อคลังเต็ม ใช้ทองและพลังงานอัปเกรดอาคาร หรือสร้าง/อัปเกรดคลังเพื่อเก็บได้มากขึ้น','Production stops while storage is full. Spend gold and energy on upgrades, or build/upgrade storage to hold more.'],go:['ดูคลังทรัพยากร','See storage'],act:function(){Game.build('economy');},focus:'.resources'},
+  {id:'builders',when:!E.builderFree()&&E.builderCount()<2&&hq>=2,title:['โดรนช่างไม่ว่าง','All builders busy'],text:['โดรนช่างทำงานครั้งละหนึ่งงาน รอให้เสร็จ เร่งด้วย NOVA หรือเพิ่มโดรนช่างเพื่อสร้างหลายอย่างพร้อมกัน','Each builder drone does one job at a time. Wait, speed up with NOVA, or add builders to work in parallel.'],go:['ดูโดรนช่าง','Builder drones'],act:function(){Game.droneShop();},focus:'#builderBadge'},
+  {id:'army',when:hq>=2&&tipHas390('barracks')&&tipArmy390()===0&&!(E.d.queue||[]).length,title:['เตรียมกองทัพ','Train an army'],text:['ฐานพร้อมแล้ว ไปฝึกทหารกัน เรนเจอร์ถูกและเร็ว เหมาะเป็นทหารชุดแรก','Your base is ready. Train troops! Rangers are cheap and quick, a great first unit.'],go:['เปิดกองทัพ','Open Army'],act:function(){Game.training();},focus:ARMY390},
+  {id:'attack',when:tipArmy390()>0&&Number(E.d.stage||1)<=2,title:['ออกรบได้แล้ว','Ready for battle'],text:['มีทหารแล้ว ลองบุกด่านภารกิจเพื่อรับทองและดาว ด่านแรกๆ เหมาะสำหรับฝึก','You have troops. Attack a mission stage for gold and stars. Early stages are good practice.'],go:['เปิดภารกิจ','Open Missions'],act:function(){Game.activities();},focus:MISSION390},
+  {id:'walls',when:hq>=3&&!E.d.buildings.some(function(b){return b.type==='wall';}),title:['สร้างกำแพง','Build walls'],text:['กำแพงชะลอศัตรูให้อยู่ในระยะป้อม วางล้อมอาคารสำคัญ กำแพงที่ติดกันจะเชื่อมเป็นแนวเดียว','Walls slow enemies inside turret range. Surround key buildings; adjacent walls join into one line.'],go:['สร้างกำแพง','Build walls'],act:function(){Game.build('defense');},focus:BUILD390},
+  {id:'defense',when:hq>=3&&tipHas390('gun'),title:['ทดสอบแนวป้องกัน','Test your defenses'],text:['ลองโหมดป้องกันฐานเพื่อดูว่าป้อมและกำแพงรับมือศัตรูได้ไหม ซ่อมฟรีหลังจบ','Try home defense to see how your turrets and walls hold. Repairs are free afterwards.'],go:['เปิดภารกิจ','Open Missions'],act:function(){Game.activities();},focus:MISSION390}
+ );
+ return list;
+}
+function tipClear390(){if(tipFocus390&&tipFocus390.classList)tipFocus390.classList.remove('guide-focus288');tipFocus390=null;}
+function tipDock390(){var d=$('tipDock390');if(!d&&document.createElement){d=document.createElement('aside');d.id='tipDock390';d.hidden=true;d.setAttribute('aria-live','polite');d.setAttribute('aria-label',mt251('คำแนะนำโดรนผู้ช่วย','Guide tip'));var app=$('app')||document.body;if(app&&app.appendChild)app.appendChild(d);}return d;}
+function tipHide390(){var d=$('tipDock390');if(d)d.hidden=true;tipClear390();}
+function tipRender390(t){
+ var dock=tipDock390();if(!dock)return;
+ dock.hidden=false;
+ setHTML219(dock,'<div class="coachPortrait373 tip390-face" aria-hidden="true"></div><div class="tip390-body"><small>🛸 '+mt251('ผู้ช่วย NOVA แนะนำ','NOVA GUIDE TIP')+'</small><b>'+mt251(t.title[0],t.title[1])+'</b><p>'+mt251(t.text[0],t.text[1])+'</p><div class="tip390-actions">'+(t.act?'<button class="green" onclick="Game.tipGo390()">'+mt251(t.go[0],t.go[1])+'</button>':'')+'<button class="tip390-later" onclick="Game.tipDone390()">'+mt251(t.act?'ไว้ทีหลัง':'เข้าใจแล้ว',t.act?'Later':'Got it')+'</button></div></div>');
+ var target=t.focus&&document.querySelector&&document.querySelector(t.focus);
+ if(target!==tipFocus390){tipClear390();if(target&&target.classList&&target.id!=='world'){target.classList.add('guide-focus288');tipFocus390=target;}}
+}
+function tipTick390(){
+ var s=tipState390(),dock=$('tipDock390');
+ if(s.off){if(tipNow390){tipNow390=null;tipHide390();}return;}
+ // Never compete with the step-by-step first-play guide.
+ var blocked=screen!=='home'||document.hidden||!!guide288||($('welcome')&&!$('welcome').hidden)||($('baseNameGate')&&!$('baseNameGate').hidden)||modal.style.display==='flex'||!!placing||!!moving;
+ if(blocked){if(dock&&!dock.hidden)tipHide390();return;}
+ if(tipNow390){if(!dock||dock.hidden)tipRender390(tipNow390);return;}
+ var now=Date.now();if(now-tipCheckAt390<1000||now-tipShownAt390<TIP_GAP390)return;tipCheckAt390=now;
+ var next=tipLessons390().find(function(t){return t.when&&!s.seen[t.id];});
+ if(!next)return;
+ tipNow390=next;tipShownAt390=now;tipRender390(next);
+}
+function tipMark390(){var s=tipState390();if(tipNow390){s.seen[tipNow390.id]=1;s.hq=E.hq();E.save();}tipNow390=null;tipHide390();}
+Game.tipDone390=function(){tipMark390();};
+Game.tipGo390=function(){var t=tipNow390;tipMark390();if(t&&t.act)t.act();if(t&&t.focus&&t.focus!=='#world'&&document.querySelector){var el=document.querySelector(t.focus);if(el&&el.classList){el.classList.add('guide-focus288');setTimeout(function(){el.classList.remove('guide-focus288');},4000);}}};
+Game.tipToggle390=function(){var s=tipState390();s.off=!s.off;E.save();if(s.off){tipNow390=null;tipHide390();}Game.settings();};
+Game.tipReplay390=function(){var s=tipState390();s.seen={};s.off=false;E.save();tipShownAt390=0;tipCheckAt390=0;tipNow390=null;close();toast(mt251('ผู้ช่วย NOVA จะแนะนำอีกครั้ง','Guide tips will show again'));tipTick390();};
+var settings390=Game.settings;Game.settings=function(){settings390.apply(this,arguments);var sheet=modal.querySelector&&(modal.querySelector('.novaContent360')||modal.querySelector('.sheet'));if(!sheet)return;var s=tipState390();sheet.insertAdjacentHTML('beforeend','<button class="wide" onclick="Game.tipToggle390()">🛸 '+mt251('คำแนะนำระหว่างเล่น: ','Gameplay tips: ')+(s.off?mt251('ปิด','Off'):mt251('เปิด','On'))+'</button><button class="wide" onclick="Game.tipReplay390()">'+mt251('ดูคำแนะนำทั้งหมดอีกครั้ง','Replay all tips')+'</button>');};
+// Bright pastel coach card that sits where the first-play guide appears.
+(function(){if(!document.createElement||!document.head)return;var st=document.createElement('style');st.textContent='#tipDock390{position:fixed;left:max(12px,env(safe-area-inset-left));top:60px;z-index:10019;display:flex;gap:9px;width:min(320px,calc(100vw - 24px));box-sizing:border-box;padding:9px 10px;background:linear-gradient(150deg,#fffdf2,#e8f7ff);border:2px solid #a9dcf7;border-left:5px solid #ffc75a;border-radius:16px;box-shadow:0 8px 22px #5aa7d455;color:#29455f;animation:tipIn390 .35s ease-out}#tipDock390[hidden]{display:none}@keyframes tipIn390{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}.tip390-face{display:block!important;flex:0 0 46px;width:46px;height:60px;align-self:flex-start}.tip390-body{flex:1;min-width:0}.tip390-body small{display:block;font-size:10.5px;color:#4f8fbd;font-weight:700;letter-spacing:.3px}.tip390-body b{display:block;font-size:15px;color:#f07a2c;margin-top:1px}.tip390-body p{margin:3px 0 7px;font-size:12.5px;line-height:1.45;color:#2f4c66}.tip390-actions{display:flex;gap:6px}.tip390-actions button{flex:1;min-height:44px;margin:0;border-radius:12px;font-weight:700;font-size:12.5px;background:#fff;border:2px solid #bfe0f3;color:#35597a}.tip390-actions button.green{background:linear-gradient(#a6ea80,#5cc45a);border-color:#4aa84a;color:#fff;text-shadow:0 1px 0 #3a8a3a}.tip390-actions .tip390-later{flex:0 0 auto;padding:0 12px}@media(orientation:portrait){#tipDock390{top:auto;bottom:96px;left:12px;right:12px;width:auto}}@media(prefers-reduced-motion:reduce){#tipDock390{animation:none}}';document.head.appendChild(st);})();
+var hudTip390=hud;hud=function(){hudTip390();tipTick390();};
+var open390=open;open=function(){tipHide390();return open390.apply(this,arguments);};
+(function loop390(){try{tipTick390();}catch(e){}setTimeout(loop390,2000);})();
+// End 390 advisor.
+
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 
