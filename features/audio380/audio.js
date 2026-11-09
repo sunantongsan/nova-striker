@@ -33,7 +33,7 @@ async function sample380(key,options){
  }catch(ignore){return false;}finally{queued380--;}
 }
 // 391: one distinct, original sound per weapon family (see synth391.py).
-var soundKeys380={machine:'machine',sniper:'sniper',cannon:'cannon',grenade:'grenade',bomb:'missile',missile:'missile',plasma:'plasma',tesla:'tesla',shock:'shock',heal:'heal',energy276:'energy',energyRing276:'impact',impact:'impact',mineburst278:'bomb',airburst278:'impact',siloLaunch278:'missile'};
+var soundKeys380={machine:'machine',sniper:'sniper',cannon:'cannon',grenade:'grenade',bomb:'missile',missile:'missile',plasma:'plasma',tesla:'tesla',shock:'shock',heal:null,energy276:'energy',energyRing276:'impact',impact:'impact',mineburst278:'bomb',airburst278:'impact',siloLaunch278:'missile'};
 weaponAudio218=function(f){
  var key=soundKeys380[f.weapon];
  if(f.weapon==='impact'){
