@@ -1,0 +1,83 @@
+/* 391: unified bright cartoon window skin (Clash-style usability: big windows, chunky tabs,
+   large outlined buttons, cream panels). Presentation only; selectors are doubled to win over
+   earlier layered skins without touching their files. */
+:root{--ink391:#2f4060;--cream391:#fff8e8;--cream2391:#f7ecd2;--line391:#e2cfa4;--sky1391:#8fd6ff;--sky2391:#4aa3ea;--g1391:#a4ea62;--g2391:#56b82e;--gd391:#2f7a1c;--r1391:#ff8a76;--r2391:#e4432f;--rd391:#8c2617;--gold391:#ffcf4a;--title391:0 2px 0 var(--ink391),1.5px 0 0 var(--ink391),-1.5px 0 0 var(--ink391),0 -1.5px 0 var(--ink391),1px 1px 0 var(--ink391),-1px 1px 0 var(--ink391)}
+
+/* Backdrop and frame */
+#modal#modal[data-nova360]{background:radial-gradient(ellipse at center,#24476b55,#0f243c88)!important;backdrop-filter:blur(1.5px)}
+#modal#modal[data-nova360] .sheet.novaWindow360.novaWindow360{width:min(94vw,920px)!important;max-width:94vw!important;max-height:calc(100dvh - 14px)!important;min-height:min(78dvh,520px)!important;border:3px solid var(--ink391)!important;border-radius:20px!important;background:var(--cream391)!important;color:var(--ink391)!important;box-shadow:0 5px 0 #1f2c45,0 16px 34px #0b1a2e70,inset 0 0 0 3px #fff!important;font:600 13px/1.45 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;animation:pop391 .18s ease-out}
+@keyframes pop391{from{transform:scale(.94)!important;opacity:.4}to{transform:none;opacity:1}}
+@media(orientation:portrait){#modal#modal[data-nova360] .sheet.novaWindow360.novaWindow360{width:96vw!important;max-width:96vw!important;max-height:calc(100dvh - 90px)!important;min-height:min(62dvh,560px)!important}}
+
+/* Header: sky ribbon, chunky outlined title, round back, red close */
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaHead360.novaHead360{position:relative;display:flex!important;align-items:center!important;gap:8px!important;min-height:50px!important;padding:6px 8px 8px 12px!important;margin:0!important;background:linear-gradient(#a6e0ff,var(--sky1391) 45%,var(--sky2391))!important;border:0!important;border-bottom:3px solid var(--ink391)!important;border-radius:17px 17px 0 0!important;box-shadow:inset 0 3px 0 #ffffff99,inset 0 -4px 0 #2f84cf55!important;cursor:grab}
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaHead360 h2{flex:1!important;margin:0!important;padding:0!important;font:900 21px/1.15 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;color:#fff!important;text-shadow:var(--title391)!important;letter-spacing:.3px;text-align:left!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none!important}
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaHead360 button{flex:0 0 auto!important;width:46px!important;height:46px!important;min-width:46px!important;min-height:46px!important;padding:0!important;margin:0!important;border:3px solid var(--ink391)!important;border-radius:13px!important;font:900 26px/1 Arial,sans-serif!important;color:#fff!important;text-shadow:0 2px 0 var(--ink391)!important;background:linear-gradient(#ffe48a,#ffbf2e)!important;box-shadow:0 3px 0 var(--ink391),inset 0 3px 0 #fff8!important}
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaHead360 button.window-close243{background:linear-gradient(var(--r1391),var(--r2391))!important;box-shadow:0 3px 0 var(--rd391),inset 0 3px 0 #fff6!important;border-color:var(--rd391)!important;font-size:28px!important}
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaHead360 button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink391)!important}
+
+/* Body */
+#modal#modal[data-nova360] .sheet.novaWindow360 .novaContent360.novaContent360{flex:1 1 auto!important;padding:12px!important;background:var(--cream391) linear-gradient(0deg,#f3e3bf55 1px,transparent 1px) 0 0/100% 26px!important;color:var(--ink391)!important;overflow:auto!important;border-radius:0 0 17px 17px;scrollbar-width:thin;scrollbar-color:#d8bf86 transparent}
+#modal#modal[data-nova360] .novaContent360 h2,#modal#modal[data-nova360] .novaContent360 h3{color:#e4702a!important;font-weight:900!important;text-shadow:0 1px 0 #fff!important}
+#modal#modal[data-nova360] .novaContent360 p,#modal#modal[data-nova360] .novaContent360 small{color:#4a5a73!important}
+
+/* Buttons: chunky, outlined, pressed-in on tap */
+#modal#modal[data-nova360] .novaContent360 button{min-height:44px;border:2px solid #7aa7cf!important;border-radius:13px!important;background:linear-gradient(#ffffff,#e4f3ff)!important;color:var(--ink391)!important;font-weight:800!important;box-shadow:0 3px 0 #7aa7cf,inset 0 2px 0 #fff!important;transition:transform .06s}
+#modal#modal[data-nova360] .novaContent360 button:active:not([disabled]){transform:translateY(2px);box-shadow:0 1px 0 #7aa7cf!important}
+#modal#modal[data-nova360] .novaContent360 button.green{border-color:var(--gd391)!important;background:linear-gradient(var(--g1391),var(--g2391))!important;color:#fff!important;text-shadow:0 1.5px 0 var(--gd391),1px 0 0 var(--gd391),-1px 0 0 var(--gd391)!important;box-shadow:0 3px 0 var(--gd391),inset 0 3px 0 #ffffff70!important;font-weight:900!important}
+#modal#modal[data-nova360] .novaContent360 button.green:active:not([disabled]){box-shadow:0 1px 0 var(--gd391)!important}
+#modal#modal[data-nova360] .novaContent360 button[disabled]{filter:grayscale(.85);opacity:.6!important;cursor:not-allowed}
+#modal#modal[data-nova360] .novaContent360 button.wide{width:100%;margin:8px 0 0!important;font-size:14px!important}
+
+/* Tabs: big pills, raised yellow when active */
+#modal#modal[data-nova360] .shop-tabs261,#modal#modal[data-nova360] .novaTabs360,#modal#modal[data-nova360] .novaFilter360{display:flex!important;gap:6px!important;padding:5px!important;margin:0 0 10px!important;background:var(--cream2391)!important;border:2px solid var(--line391)!important;border-radius:16px!important;position:sticky;top:-12px;z-index:3;box-shadow:0 4px 8px #fff8e8}
+#modal#modal[data-nova360] .shop-tabs261 button,#modal#modal[data-nova360] .novaTabs360 button,#modal#modal[data-nova360] .novaFilter360 button{flex:1!important;min-height:42px!important;margin:0!important;padding:4px 8px!important;font-size:13px!important;border-color:#d4bd8b!important;background:linear-gradient(#fffdf5,#f3e6c6)!important;box-shadow:0 2px 0 #d4bd8b!important;color:#7a5a2c!important}
+#modal#modal[data-nova360] .shop-tabs261 button[aria-pressed="true"],#modal#modal[data-nova360] .novaTabs360 button[aria-pressed="true"],#modal#modal[data-nova360] .novaFilter360 button[aria-pressed="true"]{background:linear-gradient(#fff3b0,var(--gold391))!important;border-color:#c98a12!important;color:#6b3f00!important;box-shadow:0 3px 0 #c98a12,inset 0 2px 0 #fff!important}
+#modal#modal[data-nova360] .novaFilter360 button{min-height:36px!important;font-size:12px!important}
+
+/* Cards: white tiles with soft gold rim; grid widens on big windows */
+#modal#modal[data-nova360] .shop-grid261,#modal#modal[data-nova360] .novaTroops360{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;gap:10px!important}
+#modal#modal[data-nova360] .build-card261,#modal#modal[data-nova360] .novaTroop360{position:relative;background:linear-gradient(#fff,#fdf6e6)!important;border:2px solid var(--line391)!important;border-radius:16px!important;box-shadow:0 3px 0 #e0c88f,0 6px 12px #c7a25a22!important;color:var(--ink391)!important;padding:8px!important;overflow:hidden}
+#modal#modal[data-nova360] .build-card261 b,#modal#modal[data-nova360] .novaTroop360 strong{color:var(--ink391)!important;font-weight:900!important;font-size:14px!important}
+#modal#modal[data-nova360] .build-card261.locked261,#modal#modal[data-nova360] .novaTroop360.novaLocked360{background:linear-gradient(#f4f1ea,#e9e4d8)!important;border-color:#d6cfbd!important;box-shadow:0 3px 0 #cfc6b1!important}
+#modal#modal[data-nova360] .build-card261.locked261 .icon,#modal#modal[data-nova360] .novaLocked360 .novaPortrait360{filter:grayscale(.7) brightness(1.05)}
+#modal#modal[data-nova360] .count261,#modal#modal[data-nova360] .novaCount360{background:var(--ink391)!important;color:#fff!important;border-radius:9px!important;padding:1px 7px!important;font-weight:900!important;font-size:11px!important}
+
+/* Command / missions / calendar grids as tappable tiles */
+#modal#modal[data-nova360] .command-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:10px!important}
+#modal#modal[data-nova360] .command-grid>button{min-height:112px!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(#fff,#e9f6ff)!important;border-radius:18px!important}
+#modal#modal[data-nova360] .command-grid>button b{font-size:15px!important;font-weight:900!important;color:var(--ink391)!important}
+#modal#modal[data-nova360] .missions{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(78px,1fr))!important;gap:8px!important}
+#modal#modal[data-nova360] .missions button{min-height:66px!important;font-size:20px!important;font-weight:900!important;background:linear-gradient(#fff6c9,#ffd75e)!important;border-color:#c98a12!important;box-shadow:0 3px 0 #c98a12!important;color:#6b3f00!important}
+#modal#modal[data-nova360] .missions button[disabled]{background:linear-gradient(#f2efe7,#ddd6c6)!important;border-color:#bfb59f!important;box-shadow:0 3px 0 #bfb59f!important;color:#8d826b!important;filter:none;opacity:1!important}
+#modal#modal[data-nova360] .missions button small{display:block;font-size:11px!important;color:inherit!important}
+
+/* Former navy panels become bright cards (daily calendar, welcome bonus, wallet) */
+#modal#modal[data-nova360] .daily-card340,#modal#modal[data-nova360] .welcome-bonus247,#modal#modal[data-nova360] .checkin237{background:linear-gradient(#e9f7ff,#d3ecff)!important;border:2px solid #9ccbee!important;border-radius:18px!important;color:var(--ink391)!important;box-shadow:0 3px 0 #9ccbee!important}
+#modal#modal[data-nova360] .daily-card340 *,#modal#modal[data-nova360] .welcome-bonus247 *{color:var(--ink391)!important;text-shadow:none!important}
+#modal#modal[data-nova360] .daily-week340{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:7px!important}
+@media(orientation:portrait){#modal#modal[data-nova360] .daily-week340{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+#modal#modal[data-nova360] .daily-day340{background:linear-gradient(#fff,#fff6dc)!important;border:2px solid var(--line391)!important;border-radius:14px!important;box-shadow:0 3px 0 #e0c88f!important;min-height:76px}
+#modal#modal[data-nova360] .daily-day340 b{color:#e4702a!important;font-size:18px!important;font-weight:900!important}
+#modal#modal[data-nova360] .daily-day340.today340{background:linear-gradient(#fff8c4,#ffd85a)!important;border-color:#c98a12!important;box-shadow:0 3px 0 #c98a12,0 0 0 3px #fff3!important;animation:glow391 1.6s ease-in-out infinite}
+@keyframes glow391{50%{box-shadow:0 3px 0 #c98a12,0 0 12px 3px #ffd85a99}}
+#modal#modal[data-nova360] .novaContent360 [style*="#0"],#modal#modal[data-nova360] .novaContent360 [style*="rgb(1"]{color:var(--ink391)}
+
+@media(prefers-reduced-motion:reduce){#modal#modal[data-nova360] .sheet.novaWindow360,#modal#modal[data-nova360] .daily-day340.today340{animation:none!important}}
+
+/* Daily calendar: one row of seven in landscape */
+#modal#modal[data-nova360] .daily-week340.checkin-grid237>.daily-day340{grid-column:auto!important;grid-row:auto!important;width:auto!important}
+
+/* Troop info badge */
+#modal#modal[data-nova360] .novaContent360 button.novaInfo360{min-height:0!important;width:26px!important;height:26px!important;padding:0!important;border-radius:50%!important;border:2px solid #fff!important;background:linear-gradient(#7cc4ff,#3a8fe0)!important;color:#fff!important;font:900 14px/1 Georgia,serif!important;box-shadow:0 2px 0 #2a6bb0!important}
+
+/* Selected building: floating outlined name and chunky action tiles, no dark slab */
+#app #selection#selection{background:none!important;border:0!important;box-shadow:none!important;padding:4px!important;text-align:center}
+#app #selection#selection .selection-heading{display:flex;justify-content:center;align-items:center;gap:6px;background:none!important;border:0!important}
+#app #selection#selection .selection-heading b{font:900 18px/1.2 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;color:#fff!important;text-shadow:var(--title391)!important}
+#app #selection#selection .selection-heading small{color:#ffe17a!important;font-weight:900}
+#app #selection#selection .actions261{display:flex!important;justify-content:center;gap:8px!important;background:none!important}
+#app #selection#selection .actions261 button{flex:0 0 auto!important;width:74px!important;min-height:70px!important;border:3px solid var(--ink391)!important;border-radius:18px!important;background:linear-gradient(#fffdf4,#f3e4bd)!important;color:var(--ink391)!important;font-weight:900!important;font-size:12px!important;box-shadow:0 4px 0 var(--ink391),inset 0 3px 0 #fff!important}
+#app #selection#selection .actions261 button.green{background:linear-gradient(var(--g1391),var(--g2391))!important;color:#fff!important;text-shadow:0 1.5px 0 var(--gd391)!important}
+#app #selection#selection .actions261 button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink391)!important}
+#app #selection#selection>button.wide{margin:8px auto 0!important;width:auto!important;min-width:160px;min-height:40px!important;padding:0 18px!important;border:3px solid #a0650a!important;border-radius:22px!important;background:linear-gradient(#fff1a0,var(--gold391))!important;color:#6b3f00!important;font-weight:900!important;box-shadow:0 3px 0 #a0650a!important}
