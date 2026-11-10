@@ -1,5 +1,5 @@
 // 392: black-and-red military shock mortar (energy cannon), pre-rendered 3D, 5 tiers x 16 directions.
-// The shell is a dark round with a red-hot core; on landing an electric shock ring crackles outward.
+// The shell is a dark round with a red-hot core; on landing it splits into a cluster of bomblets.
 var cannon3dArt392=new Image();cannon3dArt392.onload=function(){drawNeeded=true;};cannon3dArt392.src='assets/cannon3d392.webp';
 function cannon3dTier392(b){return Math.max(0,Math.min(cannon3dMeta392.tiers.length-1,Math.floor(((b.lv||1)-1)/4)));}
 function cannon3dK392(){return tile*2.0/cannon3dMeta392.tiers[0].width;}
@@ -23,21 +23,34 @@ drawWreck=function(b,p,size,enemy){if(b.type!=='cannonturret'||!cannon3dArt392.c
 // jagged lightning between two screen points
 function bolt392(x1,y1,x2,y2,seed,jit){var n=6,pts=[[x1,y1]];for(var i=1;i<n;i++){var t=i/n,s=Math.sin(seed*12.9898+i*78.233)*43758.5453;s=s-Math.floor(s)-.5;var nx=-(y2-y1),ny=x2-x1,l=Math.hypot(nx,ny)||1;pts.push([x1+(x2-x1)*t+nx/l*s*jit,y1+(y2-y1)*t+ny/l*s*jit]);}pts.push([x2,y2]);
  ctx.beginPath();pts.forEach(function(q,i){if(i)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);});ctx.stroke();}
+// Cluster burst: the shell splits, bomblets scatter over the damage radius and pop one after another.
+function clusterPts392(f){if(f.cl392)return f.cl392;var n=9,pts=[],seed=Math.abs(Math.round((f.tx*73.1+f.ty*19.7)*100))||7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
+ for(var i=0;i<n;i++){var a=i/n*Math.PI*2+rnd()*.6,r=(i===0?0:.35+rnd()*.6)*(f.radius||3)*.9;pts.push({x:f.tx+Math.cos(a)*r,y:f.ty+Math.sin(a)*r,d:.12+i*.065+rnd()*.05,s:.8+rnd()*.5});}
+ return f.cl392=pts;}
 function shockRing392(f){
- var c=point(f.tx,f.ty),v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||1.15))),z=zoom,R=(f.radius||3)*tile*z*Math.SQRT2*.92;
- var grow=Math.min(1,v/.35),rx=R*(.25+.75*grow),ry=rx*.62,fade=v<.75?1:1-(v-.75)/.25,flick=Math.floor(Date.now()/45);
+ var v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||1.15))),T=v*(f.maxLife||1.15),z=zoom,c=point(f.tx,f.ty),pts=clusterPts392(f);
  ctx.save();
- var g=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,rx);g.addColorStop(0,'rgba(60,10,20,'+(.28*fade)+')');g.addColorStop(.75,'rgba(160,20,30,'+(.18*fade)+')');g.addColorStop(.95,'rgba(220,30,40,'+(.3*fade)+')');g.addColorStop(1,'rgba(220,30,40,0)');
- ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(c.x,c.y,rx,ry,0,0,7);ctx.fill();
- var segs=18,pts=[];for(var i=0;i<=segs;i++){var a=i/segs*Math.PI*2;pts.push([c.x+Math.cos(a)*rx,c.y+Math.sin(a)*ry]);}
- ctx.lineCap='round';ctx.lineJoin='round';
- [[7*z,'rgba(120,0,20,'+(.45*fade)+')'],[3.4*z,'rgba(235,30,40,'+(.95*fade)+')'],[1.3*z,'rgba(255,240,235,'+fade+')']].forEach(function(L){ctx.lineWidth=L[0];ctx.strokeStyle=L[1];
-  for(var i=0;i<segs;i++)bolt392(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],i+flick*7,rx*.09);});
- // arcs running inward from the ring to the centre
- ctx.lineWidth=2*z;ctx.strokeStyle='rgba(235,30,40,'+(.9*fade)+')';
- for(var j=0;j<5;j++){var a=(j/5+flick*.137)%1*Math.PI*2;bolt392(c.x+Math.cos(a)*rx,c.y+Math.sin(a)*ry,c.x+Math.cos(a)*rx*.25,c.y+Math.sin(a)*ry*.25,j*31+flick,rx*.12);}
- ctx.fillStyle='rgba(255,240,220,'+(.85*fade*(1-grow*.6))+')';ctx.beginPath();ctx.ellipse(c.x,c.y,9*z,5.5*z,0,0,7);ctx.fill();
- ctx.restore();if(fade>0)drawNeeded=true;
+ // the opening burst where the shell split
+ if(T<.18){var k=T/.18;ctx.globalAlpha=1-k;ctx.fillStyle='#fff1c4';ctx.beginPath();ctx.arc(c.x,c.y-40*z*(1-k),(6+10*k)*z,0,7);ctx.fill();}
+ pts.forEach(function(q){var p=point(q.x,q.y);
+  if(T<q.d){ // bomblet falling from the split point to its spot
+   var k=T/q.d,x=c.x+(p.x-c.x)*k,y=c.y-40*z+(p.y-(c.y-40*z))*k-Math.sin(k*Math.PI)*18*z;
+   ctx.globalAlpha=1;ctx.fillStyle='#26272d';ctx.beginPath();ctx.arc(x,y,2.6*z,0,7);ctx.fill();ctx.fillStyle='#ff3b2a';ctx.beginPath();ctx.arc(x,y,1.2*z,0,7);ctx.fill();return;}
+  var e=(T-q.d)/.55;if(e>1)return;var R=16*z*q.s;
+  // scorch
+  ctx.globalAlpha=.35*(1-e*.6);ctx.fillStyle='#3a2a20';ctx.beginPath();ctx.ellipse(p.x,p.y,R*1.1,R*.6,0,0,7);ctx.fill();
+  // fireball
+  var fb=Math.min(1,e/.25),fade=e<.35?1:1-(e-.35)/.65;
+  var g=ctx.createRadialGradient(p.x,p.y-R*.5*fb,0,p.x,p.y-R*.5*fb,R*(.4+.6*fb));g.addColorStop(0,'rgba(255,250,220,'+fade+')');g.addColorStop(.35,'rgba(255,190,70,'+fade+')');g.addColorStop(.7,'rgba(240,80,30,'+(.85*fade)+')');g.addColorStop(1,'rgba(180,40,20,0)');
+  ctx.globalAlpha=1;ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-R*.5*fb,R*(.4+.6*fb),0,7);ctx.fill();
+  // smoke puffs rising
+  if(e>.2){ctx.globalAlpha=.55*(1-e);ctx.fillStyle='#5b5d63';for(var s=0;s<3;s++){ctx.beginPath();ctx.arc(p.x+(s-1)*R*.45,p.y-R*(.6+e*1.2)-s*3*z,R*(.35+e*.35),0,7);ctx.fill();}}
+  // shock ring on the ground
+  ctx.globalAlpha=.7*(1-e);ctx.strokeStyle='#ffd27a';ctx.lineWidth=2*z;ctx.beginPath();ctx.ellipse(p.x,p.y,R*(.5+e*1.4),R*(.3+e*.85),0,0,7);ctx.stroke();
+  // sparks
+  if(e<.4){ctx.globalAlpha=1-e/.4;ctx.fillStyle='#ffe9a0';for(var s=0;s<5;s++){var a=s*1.256+q.s*3,d=R*(.4+e*2.2);ctx.beginPath();ctx.arc(p.x+Math.cos(a)*d,p.y-R*.4+Math.sin(a)*d*.6-e*12*z,1.4*z,0,7);ctx.fill();}}
+ });
+ ctx.restore();if(v<1)drawNeeded=true;
 }
 function shockShell392(f){
  var v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||1.55))),a=point(f.x,f.y),b=point(f.tx,f.ty),z=zoom;
