@@ -43,3 +43,4 @@
 #baseNameGate .name-card input{background:#fff!important;color:#1f2c45!important;border:3px solid #7aa7d8!important;border-radius:12px!important;font-weight:800;box-sizing:border-box}
 #baseNameGate .name-card #baseNameRetry,#baseNameGate .name-card #baseNameLogin{text-shadow:none!important;background:linear-gradient(#fffdf4,#f3e4bd)!important;color:#1f2c45!important;border:3px solid #1f2c45!important;border-radius:14px!important;box-shadow:0 3px 0 #1f2c45!important}
 @media (orientation:landscape) and (max-height:500px){#baseNameGate .name-card img{display:none}#baseNameGate .name-card{padding-top:56px!important}#baseNameGate .name-card button{min-height:40px!important;margin-top:6px!important}}
+.portrait393{background-image:url(assets/portraits393.webp)!important;background-size:400% 300%!important;background-repeat:no-repeat!important;background-color:transparent!important}

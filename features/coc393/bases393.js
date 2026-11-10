@@ -85,8 +85,8 @@ Engine.prototype.scout=function(n){
 };
 // Frame the whole bot base when a stage opens (larger late-game bases no longer start half off-screen).
 function fitRaid393(){var r=E.raid;if(screen!=='raid'||!r||!r.campaign299||!r.buildings.length)return;
- var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;r.buildings.forEach(function(b){var sx=(b.x-b.y)*tile,sy=(b.x+b.y)*tile*.62;x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy);});
+ var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;r.buildings.forEach(function(b){if(b.type==='mine'||b.type==='reactor')return;var sx=(b.x-b.y)*tile,sy=(b.x+b.y)*tile*.62;x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy);});
  var top=58,bottom=96,w=Math.max(200,viewWidth-30),h=Math.max(120,viewHeight-top-bottom),bw=x1-x0+tile*2.4,bh=y1-y0+tile*2.6;
- zoom=Math.max(.42,Math.min(1,w/bw,h/bh));var cx=(x0+x1)/2,cy=(y0+y1)/2-tile*.5;
+ zoom=Math.max(.62,Math.min(1,w/bw,h/bh));var cx=(x0+x1)/2,cy=(y0+y1)/2-tile*.5;
  panX=viewWidth/2-originX-cx*zoom;panY=top+h/2-originY-cy*zoom;drawNeeded=true;}
 var scoutCam393=Game.scout;Game.scout=function(){var out=scoutCam393.apply(this,arguments);fitRaid393();setTimeout(fitRaid393,0);return out;};

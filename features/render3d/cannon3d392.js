@@ -27,40 +27,51 @@ function bolt392(x1,y1,x2,y2,seed,jit){var n=6,pts=[[x1,y1]];for(var i=1;i<n;i++
 function clusterPts392(f){if(f.cl392)return f.cl392;var n=9,pts=[],seed=Math.abs(Math.round((f.tx*73.1+f.ty*19.7)*100))||7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
  for(var i=0;i<n;i++){var a=i/n*Math.PI*2+rnd()*.6,r=(i===0?0:.35+rnd()*.6)*(f.radius||3)*.9;pts.push({x:f.tx+Math.cos(a)*r,y:f.ty+Math.sin(a)*r,d:.12+i*.065+rnd()*.05,s:.8+rnd()*.5});}
  return f.cl392=pts;}
+// Airburst: the shell splits high above the target, bomblets rain down and pop one after another.
+var BURST392=.72,bursts392={};
+function burstKey392(x,y){return Math.round(x*100)+','+Math.round(y*100);}
+function bomblet392(x,y,z,k){ctx.globalAlpha=1;ctx.strokeStyle='rgba(255,150,90,.55)';ctx.lineWidth=1.4*z;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y-7*z*(.4+k));ctx.stroke();
+ ctx.fillStyle='#26272d';ctx.beginPath();ctx.ellipse(x,y,2.4*z,3.1*z,0,0,7);ctx.fill();ctx.fillStyle='#ff3b2a';ctx.beginPath();ctx.arc(x,y+.6*z,1.1*z,0,7);ctx.fill();}
+// burst cloud in the air: hot flash, then a dark smoke puff that drifts and fades
+function airCloud392(x,y,z,tb){if(tb<.16){var k=tb/.16,g=ctx.createRadialGradient(x,y,0,x,y,(12+28*k)*z);g.addColorStop(0,'rgba(255,252,225,'+(1-k*.5)+')');g.addColorStop(.45,'rgba(255,190,80,'+(1-k*.6)+')');g.addColorStop(1,'rgba(240,90,40,0)');ctx.globalAlpha=1;ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,(12+28*k)*z,0,7);ctx.fill();}
+ var e=Math.min(1,tb/1.1);if(e>=1)return;ctx.globalAlpha=.55*(1-e);ctx.fillStyle='#62646b';for(var s=0;s<5;s++){var a=s*1.257+.4;ctx.beginPath();ctx.arc(x+Math.cos(a)*(7+e*13)*z,y+Math.sin(a)*(4+e*8)*z-e*8*z,(7+e*9)*z,0,7);ctx.fill();}
+ if(tb<.3){ctx.globalAlpha=1-tb/.3;ctx.fillStyle='#ffe9a0';for(var s=0;s<8;s++){var a=s*.785,d=(6+tb*80)*z;ctx.beginPath();ctx.arc(x+Math.cos(a)*d,y+Math.sin(a)*d*.7+tb*20*z,1.3*z,0,7);ctx.fill();}}}
+function fallPos392(B,p,k,z){var sx=B.x+(p.x-B.x)*k,sy=B.y+(p.y-B.y)*(k*k)-Math.sin(k*Math.PI)*6*z;return {x:sx,y:sy};}
 function shockRing392(f){
- var v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||1.15))),T=v*(f.maxLife||1.15),z=zoom,c=point(f.tx,f.ty),pts=clusterPts392(f);
+ var life=f.maxLife||1.15,v=Math.max(0,Math.min(1,1-f.life/life)),T=v*life,z=zoom,c=point(f.tx,f.ty),pts=clusterPts392(f),info=bursts392[burstKey392(f.tx,f.ty)];
+ var pre=info?info.pre:.4,B=info?point(info.x,info.y):{x:c.x,y:c.y};if(info)B.y-=info.h*z;else B.y-=110*z;
  ctx.save();
- // the opening burst where the shell split
- if(T<.18){var k=T/.18;ctx.globalAlpha=1-k;ctx.fillStyle='#fff1c4';ctx.beginPath();ctx.arc(c.x,c.y-40*z*(1-k),(6+10*k)*z,0,7);ctx.fill();}
- pts.forEach(function(q){var p=point(q.x,q.y);
-  if(T<q.d){ // bomblet falling from the split point to its spot
-   var k=T/q.d,x=c.x+(p.x-c.x)*k,y=c.y-40*z+(p.y-(c.y-40*z))*k-Math.sin(k*Math.PI)*18*z;
-   ctx.globalAlpha=1;ctx.fillStyle='#26272d';ctx.beginPath();ctx.arc(x,y,2.6*z,0,7);ctx.fill();ctx.fillStyle='#ff3b2a';ctx.beginPath();ctx.arc(x,y,1.2*z,0,7);ctx.fill();return;}
-  var e=(T-q.d)/.55;if(e>1)return;var R=16*z*q.s;
-  // scorch
+ airCloud392(B.x,B.y,z,pre+T);
+ pts.forEach(function(q){var p=point(q.x,q.y),land=q.d*.6;
+  if(T<land){var k=(pre+T)/(pre+land),fp=fallPos392(B,p,k,z);bomblet392(fp.x,fp.y,z,k);return;}
+  var e=(T-land)/.55;if(e>1)return;var R=16*z*q.s;
   ctx.globalAlpha=.35*(1-e*.6);ctx.fillStyle='#3a2a20';ctx.beginPath();ctx.ellipse(p.x,p.y,R*1.1,R*.6,0,0,7);ctx.fill();
-  // fireball
   var fb=Math.min(1,e/.25),fade=e<.35?1:1-(e-.35)/.65;
   var g=ctx.createRadialGradient(p.x,p.y-R*.5*fb,0,p.x,p.y-R*.5*fb,R*(.4+.6*fb));g.addColorStop(0,'rgba(255,250,220,'+fade+')');g.addColorStop(.35,'rgba(255,190,70,'+fade+')');g.addColorStop(.7,'rgba(240,80,30,'+(.85*fade)+')');g.addColorStop(1,'rgba(180,40,20,0)');
   ctx.globalAlpha=1;ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y-R*.5*fb,R*(.4+.6*fb),0,7);ctx.fill();
-  // smoke puffs rising
   if(e>.2){ctx.globalAlpha=.55*(1-e);ctx.fillStyle='#5b5d63';for(var s=0;s<3;s++){ctx.beginPath();ctx.arc(p.x+(s-1)*R*.45,p.y-R*(.6+e*1.2)-s*3*z,R*(.35+e*.35),0,7);ctx.fill();}}
-  // shock ring on the ground
   ctx.globalAlpha=.7*(1-e);ctx.strokeStyle='#ffd27a';ctx.lineWidth=2*z;ctx.beginPath();ctx.ellipse(p.x,p.y,R*(.5+e*1.4),R*(.3+e*.85),0,0,7);ctx.stroke();
-  // sparks
   if(e<.4){ctx.globalAlpha=1-e/.4;ctx.fillStyle='#ffe9a0';for(var s=0;s<5;s++){var a=s*1.256+q.s*3,d=R*(.4+e*2.2);ctx.beginPath();ctx.arc(p.x+Math.cos(a)*d,p.y-R*.4+Math.sin(a)*d*.6-e*12*z,1.4*z,0,7);ctx.fill();}}
  });
- ctx.restore();if(v<1)drawNeeded=true;
+ ctx.restore();if(v<1)drawNeeded=true;else delete bursts392[burstKey392(f.tx,f.ty)];
 }
 function shockShell392(f){
- var v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||1.55))),a=point(f.x,f.y),b=point(f.tx,f.ty),z=zoom;
- a.x+=(f.muzzle?f.muzzle.x:0)*z;a.y+=(f.muzzle?f.muzzle.y:-30)*z;
- var arc=150*z,x=a.x+(b.x-a.x)*v,y=a.y+(b.y-a.y)*v-Math.sin(v*Math.PI)*arc;
+ var life=f.maxLife||1.55,v=Math.max(0,Math.min(1,1-f.life/life)),a=point(f.x,f.y),b=point(f.tx,f.ty),z=zoom;
+ var mx=(f.muzzle?f.muzzle.x:0),my=(f.muzzle?f.muzzle.y:-30);a.x+=mx*z;a.y+=my*z;
+ var arc=150*z;function at(t){return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t-Math.sin(t*Math.PI)*arc};}
+ // world position and height of the split point, shared with the ground explosions
+ var key=burstKey392(f.tx,f.ty),wx=f.x+(f.tx-f.x)*BURST392,wy=f.y+(f.ty-f.y)*BURST392,h=Math.sin(BURST392*Math.PI)*150-my*(1-BURST392);
+ bursts392[key]={x:wx,y:wy,h:h,pre:(1-BURST392)*life};
  ctx.save();
- for(var i=1;i<=7;i++){var t=v-i*.03;if(t<0)break;ctx.globalAlpha=.5-i*.06;ctx.fillStyle=i<3?'#ff6a3a':'#5a5a62';ctx.beginPath();ctx.arc(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t-Math.sin(t*Math.PI)*arc,(2.6+i*.7)*z,0,7);ctx.fill();}
- ctx.globalAlpha=1;ctx.fillStyle='#24252b';ctx.strokeStyle='#0d0d10';ctx.lineWidth=1.2*z;ctx.beginPath();ctx.arc(x,y,5.5*z,0,7);ctx.fill();ctx.stroke();
- ctx.fillStyle='#ff3b2a';ctx.beginPath();ctx.arc(x,y,2.8*z,0,7);ctx.fill();
- ctx.strokeStyle='rgba(255,180,140,.9)';ctx.lineWidth=1*z;var fl=Math.floor(Date.now()/50);bolt392(x-6*z,y,x+6*z,y,fl,3*z);
+ if(v<BURST392){var p=at(v);
+  for(var i=1;i<=7;i++){var t=v-i*.03;if(t<0)break;var q=at(t);ctx.globalAlpha=.5-i*.06;ctx.fillStyle=i<3?'#ff6a3a':'#5a5a62';ctx.beginPath();ctx.arc(q.x,q.y,(2.6+i*.7)*z,0,7);ctx.fill();}
+  ctx.globalAlpha=1;ctx.fillStyle='#24252b';ctx.strokeStyle='#0d0d10';ctx.lineWidth=1.2*z;ctx.beginPath();ctx.arc(p.x,p.y,5.5*z,0,7);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#ff3b2a';ctx.beginPath();ctx.arc(p.x,p.y,2.8*z,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(255,180,140,.9)';ctx.lineWidth=1*z;bolt392(p.x-6*z,p.y,p.x+6*z,p.y,Math.floor(Date.now()/50),3*z);
+ }else{
+  var B=point(wx,wy);B.y-=h*z;var tb=(v-BURST392)*life,pre=(1-BURST392)*life;airCloud392(B.x,B.y,z,tb);
+  clusterPts392({tx:f.tx,ty:f.ty,radius:typeof ENERGY_RADIUS276!=='undefined'?ENERGY_RADIUS276:3}).forEach(function(q){var p=point(q.x,q.y),k=tb/(pre+q.d*.6),fp=fallPos392(B,p,k,z);bomblet392(fp.x,fp.y,z,k);});
+ }
  ctx.restore();drawNeeded=true;
 }
 var cannon3dFX392=drawFX;
