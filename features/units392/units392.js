@@ -1,8 +1,8 @@
 // 392: hand-drawn frame animation for soldiers and mechs (idle / walk / attack / death),
 // front view for downward movement and back view for upward movement, mirrored for left.
 // Walk frames advance with the distance actually travelled, so feet never slide.
-// Atlases are produced by features/units392/extract.py (cell 224x192, feet at 92,184).
-var UNIT_CELL392={w:224,h:192,ax:92,ay:184,idle:156};
+// Atlases are produced by features/units392/extract.py (cell 140x120, feet at 57.5,115).
+var UNIT_CELL392={w:140,h:120,ax:57.5,ay:115,idle:97.5};
 // Unit kind -> atlas file, on-screen idle height (px at zoom 1) and walk frames per tile travelled.
 var unitSheets392={
  0:{file:'ranger',height:36,perTile:10},4:{file:'sniper',height:36,perTile:10},8:{file:'plasma',height:38,perTile:10},

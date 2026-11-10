@@ -15,7 +15,7 @@ from scipy import ndimage
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = os.path.join(ROOT, 'staging', 'units392', 'src')
-CELL_W, CELL_H, ANCHOR_X, BASE_Y, IDLE_H = 224, 192, 92, 184, 156
+CELL_W, CELL_H, ANCHOR_X, BASE_Y, IDLE_H = 140, 120, 57.5, 115, 97.5
 
 
 def background_mask(rgb, magenta):
@@ -136,7 +136,7 @@ def build(unit):
             atlas.alpha_composite(tmp.crop(box), (box[0], box[1]))
         counts[key] = len(rows[key])
     out = os.path.join(ROOT, 'assets', f'units392-{unit}.webp')
-    atlas.save(out, 'WEBP', quality=88, method=6)
+    atlas.save(out, 'WEBP', quality=86, method=6)
     meta_path = os.path.join(ROOT, 'features', 'units392', 'sheets.json')
     meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {}
     meta[unit] = {'rows': order, 'counts': counts}
