@@ -9,3 +9,7 @@ Known art gaps from the generator: battle-mech front walk frames lack the gatlin
 ## Hidden missile silo (ground rocket battery)
 
 `features/units392/silo.py` builds `assets/silo392.webp` from AI sheets in `staging/silo392/src` (row 1 = 8-frame pop-up, row 4 cell 7 = destroyed), aligned on the bunker's bottom-centre and sized so later designs are slightly larger; `silo.json` stores the order and muzzle points. `silo392.js`: levels 1–20 use 10 designs (2 levels each). The bunker stays closed at home (opens while selected), opens in battle when hostiles are within range +1.5 tiles or it fired in the last 2.5 s, closes when clear, mirrors toward the target side, fires from the launcher tip, and shows its own rubble when destroyed. Sheet 11 was dropped because its bunker changes shape mid pop-up.
+
+## 3D pre-rendered silo (replaces the AI-drawn silo)
+
+`features/render3d/silo3d.html` is a three.js toon-shaded model (outlines, 4-step light ramp, white-blue armour, gold trim, cyan glow) with 5 tiers (pods, missile count, radar dishes, glow core, trim and colour change). `node features/render3d/render.cjs` renders `assets/silo3d392.webp` (per tier: 8 pop-up frames, 16 aim directions, 1 wreck) and `silo3d.json` (anchors, per-direction muzzle points). The camera matches the game grid (yaw 45°, screen depth 0.62). `silo3d392.js` maps levels 1–20 to tiers in steps of 4, keeps the open/close logic, and picks the direction frame from the turret's aim. The AI atlas is kept in staging only.

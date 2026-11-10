@@ -1,0 +1,89 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="352"></canvas>
+<script type="module">
+// 392: Clash-style pre-rendered 3D hidden missile silo. Rendered to sprites by render.cjs.
+// Camera matches the game's isometric grid (screen y = 0.62 * depth): yaw 45 deg, elevation ~38 deg.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.localClippingEnabled=true;
+R.clippingPlanes=[new T.Plane(new T.Vector3(0,1,0),0.02)]; // nothing renders below the ground
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.75,2.75,3.6,-2.45,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,1.3));
+const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([65,145,212,255]);const ramp=new T.DataTexture(g,4,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.MeshBasicMaterial({color:0x1f2c48,side:T.BackSide});
+function mesh(geo,mat,parent,ol=0.05){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){const o=new T.Mesh(geo,OUT);o.scale.setScalar(1+ol);m.add(o);}return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const geo=new T.ExtrudeGeometry(s,{depth:Math.max(0.01,d-2*r*0.6),bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:3,curveSegments:6});geo.translate(0,0,-Math.max(0.01,d-2*r*0.6)/2);geo.computeVertexNormals();return geo;}
+// tier designs: each clearly richer than the last, same family
+const TIERS=[
+ {pods:1,rows:2,cols:2,dish:0,scale:0.94,arm:0xdfe9f6,panel:0x4f9fe0,deep:0x2f6fb8,trim:0xf2a91e,tip:0xff7a5c,glow:0x5ff2ff,core:0},
+ {pods:2,rows:2,cols:2,dish:1,scale:0.98,arm:0xdfe9f6,panel:0x3f95e0,deep:0x2a62b0,trim:0xf2a91e,tip:0x3fb8ff,glow:0x5ff2ff,core:0},
+ {pods:2,rows:2,cols:3,dish:1,scale:1.02,arm:0xe4ecf8,panel:0x3a8ce0,deep:0x24589f,trim:0xf7b21f,tip:0x2fd5ff,glow:0x4ff7ff,core:1},
+ {pods:3,rows:2,cols:2,dish:2,scale:1.06,arm:0xe8eefa,panel:0x3c7fe0,deep:0x2a4c9c,trim:0xffbf27,tip:0x6fe0ff,glow:0x6ff9ff,core:1},
+ {pods:2,rows:3,cols:3,dish:2,scale:1.1,arm:0xf2f2fb,panel:0x5d6ff0,deep:0x3a3ca8,trim:0xffc93a,tip:0x9cf3ff,glow:0x8afcff,core:2}
+];
+let state=null;
+function build(t){
+ const P=TIERS[t];if(state)S.remove(state.root);
+ const ARM=M(P.arm),PANEL=M(P.panel),DEEP=M(P.deep),GOLD=M(P.trim),STEEL=M(0x6f84a0),DARK=M(0x27324a),TIP=M(P.tip,0x06283c),BODY=M(0xf6f8fc),GLOW=new T.MeshBasicMaterial({color:P.glow});
+ const root=new T.Group();root.scale.setScalar(P.scale);S.add(root);
+ const base=new T.Group();root.add(base);
+ mesh(lathe([[0,0],[2.1,0],[2.2,0.14],[2.12,0.45],[1.9,0.82],[1.62,1.0],[1.5,1.04],[0,1.04]]),ARM,base,0.02);
+ mesh(lathe([[2.17,0.16],[2.2,0.2],[2.16,0.38],[2.13,0.42]]),PANEL,base,0);
+ const ring=mesh(new T.TorusGeometry(1.58,0.085,12,56),GOLD,base,0.14);ring.rotation.x=Math.PI/2;ring.position.y=1.02;
+ const nb=t>=3?8:6;for(let i=0;i<nb;i++){const a=i/nb*Math.PI*2+0.52;const f=mesh(rbox(0.62,0.62,0.36,0.1),i%2&&t>=2?GOLD:PANEL,base,0.05);f.position.set(Math.cos(a)*1.98,0.32,Math.sin(a)*1.98);f.rotation.y=-a+Math.PI/2;f.rotation.x=-0.42;
+  if(t>=2){const l=new T.Mesh(rbox(0.22,0.1,0.02,0.04),GLOW);l.position.set(0,0.12,0.19);f.add(l);}}
+ const pit=mesh(new T.CylinderGeometry(1.42,1.42,0.06,48),DARK,base,0);pit.position.y=1.0;
+ const glowRing=new T.Mesh(new T.TorusGeometry(1.25,0.05,8,48),GLOW);glowRing.rotation.x=Math.PI/2;glowRing.position.y=1.03;base.add(glowRing);
+ const doors=[];
+ for(const s of [1,-1]){const hinge=new T.Group();hinge.position.set(0,1.08,0);hinge.rotation.y=Math.PI/4;base.add(hinge);
+  const arm=new T.Group();arm.position.x=s*1.42;hinge.add(arm);const lid=new T.Group();lid.position.x=-s*1.42;arm.add(lid);
+  mesh(new T.CylinderGeometry(1.42,1.42,0.16,40,1,false,s>0?Math.PI/2:-Math.PI/2,Math.PI),ARM,lid,0.03);
+  const st=mesh(rbox(0.5,0.08,0.16,0.03),GOLD,lid,0.1);st.position.set(s*0.75,0.1,0);st.rotation.y=Math.PI/2;
+  if(t>=1){const st2=mesh(rbox(0.9,0.06,0.12,0.03),PANEL,lid,0.1);st2.position.set(s*0.35,0.1,0);}
+  doors.push({arm,s});}
+ const lift=new T.Group();root.add(lift);lift.scale.setScalar(1.12);
+ for(const z of [-0.35,0.35]){mesh(new T.CylinderGeometry(0.11,0.11,0.8,12),STEEL,lift,0.08).position.set(0,0.2,z);mesh(new T.CylinderGeometry(0.07,0.07,0.6,10),M(0xc8d4e2),lift,0.1).position.set(0,0.65,z);}
+ const yaw=new T.Group();yaw.position.y=1.0;lift.add(yaw);
+ mesh(new T.CylinderGeometry(0.72,0.78,0.24,32),GOLD,yaw,0.05);
+ mesh(new T.CylinderGeometry(0.62,0.66,0.2,32),DEEP,yaw,0.05).position.y=0.2;
+ if(P.core){const c=new T.Mesh(new T.OctahedronGeometry(0.22),GLOW);c.position.set(-0.55,0.45,0);c.scale.y=1.5;yaw.add(c);}
+ const pitch=new T.Group();pitch.position.y=0.7;yaw.add(pitch);
+ const span=P.pods*0.78;for(const z of [-span/2-0.1,span/2+0.1]){const sup=mesh(rbox(0.5,0.7,0.18,0.06),PANEL,yaw,0.06);sup.position.set(0,0.48,z);}
+ const missiles=[],tips=[];const podH=0.3+P.rows*0.28,podW=0.12+P.cols*0.3;
+ for(let k=0;k<P.pods;k++){const z=(k-(P.pods-1)/2)*(podW+0.08);const pod=new T.Group();pod.position.z=z;pitch.add(pod);
+  mesh(rbox(1.5,podH,podW,0.14),ARM,pod,0.04);
+  mesh(rbox(0.12,podH+0.04,podW+0.04,0.04),GOLD,pod,0).position.x=-0.2;
+  if(t>=3)mesh(rbox(0.12,podH+0.04,podW+0.04,0.04),GOLD,pod,0).position.x=0.35;
+  mesh(rbox(0.06,podH-0.12,podW-0.1,0.08),DEEP,pod,0).position.x=0.76;
+  for(let r=0;r<P.rows;r++)for(let c=0;c<P.cols;c++){const y=(r-(P.rows-1)/2)*0.28,zz=(c-(P.cols-1)/2)*0.3;const m=new T.Group();m.position.set(0.8,y,zz);pod.add(m);
+   const tube=mesh(new T.CylinderGeometry(0.12,0.12,0.06,16),DARK,m,0);tube.rotation.z=Math.PI/2;
+   const body=mesh(new T.CylinderGeometry(0.09,0.09,0.16,14),BODY,m,0.1);body.rotation.z=-Math.PI/2;body.position.x=0.07;
+   const nose=mesh(new T.ConeGeometry(0.09,0.2,14),TIP,m,0.1);nose.rotation.z=-Math.PI/2;nose.position.x=0.25;missiles.push(m);}}
+ for(let k=0;k<P.dish;k++){const dish=new T.Group();dish.position.set(-0.45,podH/2+0.15,(k?1:-1)*(P.dish>1?span/2:0));pitch.add(dish);
+  mesh(new T.CylinderGeometry(0.05,0.05,0.35,8),STEEL,dish,0.1).position.y=0.12;
+  const d2=mesh(new T.SphereGeometry(0.32,22,10,0,Math.PI*2,0,Math.PI/2.8),PANEL,dish,0.06);d2.rotation.x=Math.PI;d2.rotation.z=0.7;d2.position.y=0.4;}
+ // wreck pieces (only shown destroyed)
+ const wreck=new T.Group();root.add(wreck);
+ for(let i=0;i<9;i++){const a=i*0.7+0.3,r=0.6+((i*37)%10)/14;const p=mesh(rbox(0.35+(i%3)*0.12,0.18,0.3,0.05),i%3?M(0x8e9bb0):M(0x5f6c82),wreck,0.08);p.position.set(Math.cos(a)*r,1.0+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ const bentPod=mesh(rbox(1.2,0.6,0.6,0.12),M(0x7f8aa0),wreck,0.05);bentPod.position.set(0.2,1.15,-0.1);bentPod.rotation.set(0.3,0.6,-0.5);
+ state={root,base,doors,lift,yaw,pitch,missiles,wreck,armMat:ARM,P,podH};
+}
+window.pose=(t,open,yawA,wreckd)=>{
+ if(!state||state.t!==t){build(t);state.t=t;}
+ const st=state,door=wreckd?0.55:Math.min(1,open/0.45),up=wreckd?0:Math.max(0,(open-0.3)/0.7);
+ st.doors.forEach(d=>{d.arm.scale.x=Math.max(0.02,1-door*0.98);d.arm.position.y=door*0.04;d.arm.rotation.z=wreckd?d.s*0.35:0;});
+ st.lift.position.y=-1.1+up*1.15;st.lift.visible=!wreckd&&up>0.12;
+ st.yaw.rotation.y=yawA;st.pitch.rotation.z=0.12+up*0.3;
+ st.wreck.visible=!!wreckd;st.armMat.color.set(wreckd?0x8f9aae:st.P.arm);
+ R.render(S,cam);st.root.updateMatrixWorld(true);const v=new T.Vector3(1.05,0,0);st.pitch.localToWorld(v);v.project(cam);
+ return {img:canvas.toDataURL('image/png'),mx:(v.x+1)/2*canvas.width,my:(1-v.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>
