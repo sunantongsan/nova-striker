@@ -32,3 +32,14 @@
  .titanShop342 .action345 .art345{width:34px!important;height:34px!important}
  .titanShop342 .recovery348{margin:6px 0!important;padding:6px!important}
 }
+/* base name window: Clash-style card that fits phone landscape */
+#baseNameGate#baseNameGate{padding:8px!important;background:radial-gradient(ellipse at center,#24476bcc,#0f243cee)!important}
+#baseNameGate .name-card{position:relative;width:min(94vw,420px)!important;max-width:420px!important;max-height:calc(100dvh - 16px);overflow:auto;padding:58px 16px 12px!important;background:#fff6e2!important;border:3px solid #1f2c45;border-radius:20px;box-shadow:0 5px 0 #1f2c45,0 16px 34px #0b1a2e70,inset 0 0 0 3px #fff;color:#1f2c45!important;box-sizing:border-box}
+#baseNameGate .name-card h2{position:absolute;left:0;right:0;top:0;margin:0!important;height:50px;display:flex;align-items:center;padding:0 60px 0 16px;box-sizing:border-box;background:linear-gradient(#a6e0ff,#5fb8f5 45%,#3a95e6);border-bottom:3px solid #1f2c45;border-radius:17px 17px 0 0;font:900 21px/1 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;color:#fff!important;text-shadow:0 2px 0 #1f2c45,0 0 2px #1f2c45}
+#baseNameGate .name-card .dockGrip353{display:none!important}
+#baseNameGate .name-card>button[onclick*="closeDroneName251"]{position:absolute;top:4px;right:6px;z-index:2;width:42px!important;height:42px;min-height:42px!important;margin:0!important;padding:0!important;border:3px solid #9b2a24!important;border-radius:12px;background:linear-gradient(#ff8a72,#e2453a)!important;color:#fff!important;font:900 24px/1 Arial,sans-serif!important;box-shadow:0 3px 0 #9b2a24,inset 0 3px 0 #fff6!important}
+#baseNameGate .name-card img{width:72px!important;height:72px!important;margin:0 auto 2px;display:block}
+#baseNameGate .name-card p{color:#1f2c45!important;font-weight:700;margin:4px 0}
+#baseNameGate .name-card input{background:#fff!important;color:#1f2c45!important;border:3px solid #7aa7d8!important;border-radius:12px!important;font-weight:800;box-sizing:border-box}
+#baseNameGate .name-card #baseNameRetry,#baseNameGate .name-card #baseNameLogin{text-shadow:none!important;background:linear-gradient(#fffdf4,#f3e4bd)!important;color:#1f2c45!important;border:3px solid #1f2c45!important;border-radius:14px!important;box-shadow:0 3px 0 #1f2c45!important}
+@media (orientation:landscape) and (max-height:500px){#baseNameGate .name-card img{display:none}#baseNameGate .name-card{padding-top:56px!important}#baseNameGate .name-card button{min-height:40px!important;margin-top:6px!important}}

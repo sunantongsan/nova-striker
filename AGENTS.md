@@ -6,4 +6,4 @@ Implement the approved visual reference faithfully in the actual game. Do not re
 
 Before presenting a visual change as finished, inspect screenshots rendered by the integrated game at phone sizes and compare them against the approved reference. A passing code test or generated concept alone is not visual acceptance. Show the owner actual in-game screenshots before publishing replacement artwork when approval is pending. Never claim an unreviewed picture matches the reference.
 
-Base environments must be accessible from Construction. Meadow and desert are free. Ocean and sky are cosmetic, permanent per-account unlocks costing 50 NOVA each or two server-verified rewarded videos per environment. Do not reset ownership or progress when replacing artwork.
+Base environments must be accessible from Construction. Meadow and desert are free. Ocean and sky are cosmetic, permanent per-account unlocks costing 50 NOVA each or four server-verified rewarded videos per environment (raised from two in patch 168 so NOVA is the better deal). Do not reset ownership or progress when replacing artwork.
