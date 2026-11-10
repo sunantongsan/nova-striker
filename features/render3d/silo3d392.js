@@ -2,7 +2,7 @@
 // Per tier: 8 pop-up frames, 16 aim directions (launcher raised), 1 wreck. Atlas by render.cjs.
 var silo3dArt392=new Image();silo3dArt392.onload=function(){drawNeeded=true;};silo3dArt392.src='assets/silo3d392.webp';
 function silo3dTier392(b){return Math.max(0,Math.min(silo3dMeta392.tiers.length-1,Math.floor(((b.lv||1)-1)/4)));}
-function silo3dK392(){return tile*1.95/silo3dMeta392.tiers[0].width;}
+function silo3dK392(){return tile*1.35/silo3dMeta392.tiers[0].width;}
 function silo3dBase392(p){return p.y+tile*zoom*2.25*.12;}
 function silo3dDir392(b){var a=b.aim===undefined?Math.PI/4:b.aim,n=silo3dMeta392.dirs;return ((Math.round(a/(2*Math.PI/n))%n)+n)%n;}
 function silo3dHostiles392(b){

@@ -2,7 +2,7 @@
 // The shell is a dark round with a red-hot core; on landing it splits into a cluster of bomblets.
 var cannon3dArt392=new Image();cannon3dArt392.onload=function(){drawNeeded=true;};cannon3dArt392.src='assets/cannon3d392.webp';
 function cannon3dTier392(b){return Math.max(0,Math.min(cannon3dMeta392.tiers.length-1,Math.floor(((b.lv||1)-1)/4)));}
-function cannon3dK392(){return tile*2.0/cannon3dMeta392.tiers[0].width;}
+function cannon3dK392(){return tile*1.4/cannon3dMeta392.tiers[0].width;}
 function cannon3dBase392(){return tile*2.25*.12;}
 function cannon3dDir392(b){var a=b.aim===undefined?Math.PI/4:b.aim,n=cannon3dMeta392.dirs;return ((Math.round(a/(2*Math.PI/n))%n)+n)%n;}
 function cannon3dCell392(b,col,p){var m=cannon3dMeta392,t=cannon3dTier392(b),tm=m.tiers[t],k=cannon3dK392()*zoom;
