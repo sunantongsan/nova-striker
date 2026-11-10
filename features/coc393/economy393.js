@@ -8,3 +8,12 @@ progressionQuote369=function(type,target){var q=quote393(type,target);if(!q)retu
 var upgradeCost393=Engine.prototype.upgradeCost;
 Engine.prototype.upgradeCost=function(b){var c=upgradeCost393.call(this,b),cap=priceCap393((b.lv||1)+1);return Object.assign({},c,{gold:Math.min(c.gold,cap),power:Math.min(c.power,cap)});};
 Object.keys(B).forEach(function(type){var q=progressionQuote369(type,1);if(q&&type!=='hq'){B[type].cost=q.gold;B[type].power=q.power;}});
+// New walls cost gold (they were free after the reference progression set level 1 to 0).
+B.wall.cost=200;B.wall.power=0;
+// NOVA speed-ups are 20% cheaper (server nova_private.speed_price365 uses the same .72 factor).
+novaSpeedPrice365=function(seconds){
+ if(!Number.isFinite(seconds))throw new RangeError('Invalid remaining time');
+ if(seconds<=0)return 0;
+ var gems=seconds<=60?1:seconds<=3600?1+(seconds-60)*19/3540:seconds<=86400?20+(seconds-3600)*240/82800:260+(seconds-86400)*740/518400;
+ return Math.max(1,Math.ceil(Math.floor(gems)*.72));
+};
