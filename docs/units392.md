@@ -5,3 +5,7 @@
 `features/units392/units392.js` draws ranger, battle mech, sniper, shield mech, elite plasma trooper and heavy assault mech: front view when moving/aiming downward, back view upward, mirrored for left. Walk frames advance by distance travelled (no foot sliding); attack frames follow weapon recoil; death plays once. Enemy/alien units and other kinds keep the previous drawing. To replace a unit, drop new sheets in staging and run `python3 features/units392/extract.py <unit>`.
 
 Known art gaps from the generator: battle-mech front walk frames lack the gatling, shield-mech front walk frames lack the shield, sniper back-walk carries the rifle on the other shoulder.
+
+## Hidden missile silo (ground rocket battery)
+
+`features/units392/silo.py` builds `assets/silo392.webp` from AI sheets in `staging/silo392/src` (row 1 = 8-frame pop-up, row 4 cell 7 = destroyed), aligned on the bunker's bottom-centre and sized so later designs are slightly larger; `silo.json` stores the order and muzzle points. `silo392.js`: levels 1–20 use 10 designs (2 levels each). The bunker stays closed at home (opens while selected), opens in battle when hostiles are within range +1.5 tiles or it fired in the last 2.5 s, closes when clear, mirrors toward the target side, fires from the launcher tip, and shows its own rubble when destroyed. Sheet 11 was dropped because its bunker changes shape mid pop-up.
