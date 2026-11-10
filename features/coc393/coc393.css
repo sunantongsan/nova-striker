@@ -1,0 +1,34 @@
+.wallArt393{display:inline-block;flex:0 0 auto;background:url(assets/wall-modules384.webp) 0 0/400% 500% no-repeat;filter:drop-shadow(0 2px 0 #2a3a5a55)}
+#selection#selection.wallSel393 .walls393{display:flex;flex-direction:column;align-items:center;gap:4px}
+#selection#selection .wallHead393{display:flex;align-items:center;justify-content:center;gap:6px}
+#selection#selection .wallHead393 b{font:900 18px/1.2 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif;color:#fff;text-shadow:var(--title391,0 2px 0 #1f2c45)}
+#selection#selection .wallHead393 b small{color:#ffe17a;font-weight:900}
+#selection#selection .wallHead393 em{font:900 12px/1 "Trebuchet MS",Tahoma,sans-serif;font-style:normal;color:#1f2c45;background:linear-gradient(#fff7c8,#ffd75a);border:2px solid #1f2c45;border-radius:10px;padding:3px 7px}
+#selection#selection .wallBar393{display:flex;justify-content:center;gap:7px;flex-wrap:nowrap}
+#selection#selection .wallBar393 .wallBtn393{position:relative;flex:0 0 auto;width:68px;min-height:68px;padding:4px 2px 6px!important;margin:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:3px solid var(--ink391,#1f2c45)!important;border-radius:17px!important;background:linear-gradient(#fffdf4,#f3e4bd)!important;color:var(--ink391,#1f2c45)!important;font:900 11px/1.15 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;box-shadow:0 4px 0 var(--ink391,#1f2c45),inset 0 3px 0 #fff!important;text-shadow:none!important}
+#selection#selection .wallBar393 .wallBtn393 strong{font-size:22px;line-height:1;color:#3c7fd0}
+#selection#selection .wallBar393 .wallBtn393.green{background:linear-gradient(var(--g1391,#a6ea80),var(--g2391,#5cc45a))!important;color:#fff!important;text-shadow:0 1.5px 0 #2d7a2d!important}
+#selection#selection .wallBar393 .wallBtn393.green strong{color:#fff}
+#selection#selection .wallBar393 .wallBtn393 small{display:flex;align-items:center;gap:2px;margin-top:2px;padding:1px 5px;border-radius:8px;background:#1f2c45cc;color:#fff;font-size:10.5px;text-shadow:none}
+#selection#selection .wallBar393 .wallBtn393.short393 small{color:#ff8c7a}
+#selection#selection .wallBar393 .wallBtn393 small .resourceArt303{width:13px;height:13px}
+#selection#selection .wallBar393 .wallBtn393:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink391,#1f2c45)!important}
+#selection#selection .wallBar393 .wallBtn393:disabled{opacity:.55;filter:grayscale(.4)}
+.wallUp393{text-align:center}
+.wallUp393 .wallUpArt393{display:flex;justify-content:center;align-items:center;gap:14px;margin:4px 0 6px}
+.wallUp393 .wallUpArt393 b{font-size:28px;color:#3c9a3c}
+.wallUp393 .wallUpInfo393{font-weight:800;margin:4px 0 8px}
+.wallUp393 .wallPay393{display:flex!important;align-items:center;justify-content:center;gap:5px;font-size:17px!important;max-width:320px;margin:0 auto 4px!important}
+.wallUp393 .wallPay393 .resourceArt303{width:22px;height:22px}
+.wallUp393 .wallShort393{color:#d8432b;font-weight:900;margin:2px}
+.wallUp393 .wallLevels393{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:2px 0 8px}
+.wallUp393 .wallLevels393 span{display:flex;align-items:center;gap:2px;font-weight:900}
+@media (orientation:landscape){
+ .titanShop342{display:grid!important;grid-template-columns:minmax(150px,36%) 1fr;column-gap:14px;align-items:start}
+ .titanShop342>*{grid-column:2;min-width:0}
+ .titanShop342>#titanPreview342{grid-column:1;grid-row:1/span 5;width:100%!important;height:auto!important;max-height:calc(100dvh - 200px);object-fit:contain;align-self:center}
+ .titanShop342>.guardianRank343{grid-column:1;grid-row:6;margin:0!important}
+ .titanShop342 .action345{min-height:60px!important;padding:4px!important}
+ .titanShop342 .action345 .art345{width:34px!important;height:34px!important}
+ .titanShop342 .recovery348{margin:6px 0!important;padding:6px!important}
+}
