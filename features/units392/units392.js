@@ -23,6 +23,7 @@ function facing392(t){
  return {flip:t.flip392||1,back:!!t.back392,moving:moving||!!t.moving};
 }
 function sprite392(t,u,enemy,z,flip){
+ if(typeof unit3d392==='function'&&unit3d392(t,u,enemy,z,flip))return true;
  if(enemy)return false;var s=sheetFor392(t.kind);if(!s)return false;
  var f=facing392(t),row,idx,n;
  if(t.hp<=0){var now=Date.now();if(t.die392===undefined)t.die392=now;row='death';n=s.counts.death;idx=Math.min(n-1,Math.floor((now-t.die392)/140));}

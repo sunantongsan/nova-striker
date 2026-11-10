@@ -1,0 +1,132 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="240" height="256"></canvas>
+<script type="module">
+// 392: Clash-style pre-rendered 3D troops. Each unit faces local +x; yaw = -gridAngle.
+// Animations are procedural on a simple rig: idle, walk, attack, death.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-1.6,1.6,2.35,-1.05,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.9,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,1.35));
+const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.5);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([70,150,215,255]);const ramp=new T.DataTexture(g,4,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.MeshBasicMaterial({color:0x1f2c48,side:T.BackSide});
+function mesh(geo,mat,parent,ol=0.07){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){const o=new T.Mesh(geo,OUT);o.scale.setScalar(1+ol);m.add(o);}return m;}
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:3,curveSegments:6});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+function cyl(r1,r2,h,seg=16){return new T.CylinderGeometry(r1,r2,h,seg);}
+const C={white:0xe6eef8,sky:0x4f9fe0,deep:0x2f6fb8,gold:0xf2a91e,steel:0x6f84a0,dark:0x27324a,glow:0x5ff2ff,tan:0xd8b47c,tanDark:0xb08850,skin:0xf1c9a5};
+const mat={};for(const k in C)mat[k]=M(C[k]);const GLOW=new T.MeshBasicMaterial({color:C.glow}),SHIELD=new T.MeshBasicMaterial({color:0x6fd8ff,transparent:true,opacity:0.55,side:T.DoubleSide});
+// rig builder: returns joints to animate
+function legs(parent,o){const L={};for(const s of [1,-1]){const hip=new T.Group();hip.position.set(0,o.hip,s*o.w);parent.add(hip);
+  mesh(rbox(o.th,o.tl,o.th,o.th*0.35),o.thighMat,hip).position.y=-o.tl/2;
+  const knee=new T.Group();knee.position.y=-o.tl;hip.add(knee);
+  mesh(rbox(o.sh,o.sl,o.sh,o.sh*0.35),o.shinMat,knee).position.y=-o.sl/2;
+  const foot=mesh(rbox(o.fl,o.fh,o.fw,o.fh*0.4),o.footMat,knee);foot.position.set(o.fl*0.18,-o.sl+o.fh/2-0.02,0);
+  L[s>0?'l':'r']={hip,knee};}return L;}
+function arm(parent,side,o){const sh=new T.Group();sh.position.set(o.sx||0,o.sy,side*o.sz);parent.add(sh);
+ if(o.pad)mesh(rbox(o.pad,o.pad*0.7,o.pad,o.pad*0.3),o.padMat,sh).position.y=0.02;
+ mesh(rbox(o.ua,o.ul,o.ua,o.ua*0.35),o.mat,sh).position.y=-o.ul/2;
+ const el=new T.Group();el.position.y=-o.ul;sh.add(el);
+ mesh(rbox(o.fa,o.fl,o.fa,o.fa*0.35),o.mat2||o.mat,el).position.y=-o.fl/2;
+ const hand=new T.Group();hand.position.y=-o.fl;el.add(hand);return {sh,el,hand};}
+const UNITS={
+ mech(){const root=new T.Group(),body=new T.Group();root.add(body);
+  const L=legs(body,{hip:0.82,w:0.19,th:0.18,tl:0.38,sh:0.24,sl:0.4,fl:0.38,fh:0.14,fw:0.26,thighMat:mat.steel,shinMat:mat.white,footMat:mat.sky});
+  const torso=new T.Group();torso.position.y=0.8;body.add(torso);
+  mesh(rbox(0.5,0.18,0.5,0.06),mat.deep,torso).position.y=0.06;
+  mesh(rbox(0.54,0.52,0.64,0.16),mat.white,torso).position.y=0.38;
+  mesh(rbox(0.06,0.14,0.76,0.03),mat.gold,torso,0).position.set(0,0.22,0);
+  const core=new T.Mesh(new T.CylinderGeometry(0.12,0.12,0.04,20),GLOW);core.rotation.z=Math.PI/2;core.position.set(0.28,0.4,0);torso.add(core);
+  const ring=mesh(new T.TorusGeometry(0.14,0.03,8,20),mat.gold,torso,0);ring.rotation.y=Math.PI/2;ring.position.set(0.28,0.4,0);
+  const head=new T.Group();head.position.y=0.66;torso.add(head);
+  mesh(rbox(0.3,0.24,0.32,0.1),mat.white,head).position.y=0.1;
+  const visor=mesh(rbox(0.06,0.1,0.26,0.03),GLOW,head,0);visor.position.set(0.16,0.12,0);
+  mesh(cyl(0.015,0.015,0.2,6),mat.steel,head,0.15).position.set(-0.08,0.3,0.1);
+  const A={};A.l=arm(torso,1,{sy:0.56,sz:0.42,ua:0.18,ul:0.24,fa:0.2,fl:0.24,mat:mat.white,mat2:mat.sky,pad:0.3,padMat:mat.sky});
+  A.r=arm(torso,-1,{sy:0.56,sz:0.42,ua:0.18,ul:0.24,fa:0.2,fl:0.1,mat:mat.white,pad:0.3,padMat:mat.sky});
+  // gatling on right forearm, always present
+  const gun=new T.Group();A.r.hand.add(gun);gun.position.set(0,0,0);
+  mesh(rbox(0.26,0.26,0.26,0.07),mat.steel,gun).position.set(0,-0.05,0);
+  for(let i=0;i<4;i++){const a=i*Math.PI/2+0.4;const b=mesh(cyl(0.035,0.035,0.5,8),mat.dark,gun,0.12);b.position.set(Math.cos(a)*0.07,-0.36,Math.sin(a)*0.07);}
+  mesh(cyl(0.11,0.11,0.06,12),mat.gold,gun,0.08).position.y=-0.55;
+  const muzzle=new T.Group();muzzle.position.y=-0.62;gun.add(muzzle);
+  return {root,body,torso,head,L,A,muzzle,heavy:0.75,aim:'r',gunArm:A.r};},
+ shield(){const root=new T.Group(),body=new T.Group();root.add(body);
+  const L=legs(body,{hip:0.78,w:0.22,th:0.24,tl:0.36,sh:0.3,sl:0.38,fl:0.44,fh:0.16,fw:0.32,thighMat:mat.steel,shinMat:mat.tan,footMat:mat.tanDark});
+  const torso=new T.Group();torso.position.y=0.76;body.add(torso);
+  mesh(rbox(0.56,0.2,0.56,0.06),mat.deep,torso).position.y=0.06;
+  mesh(rbox(0.64,0.56,0.74,0.18),mat.tan,torso).position.y=0.4;
+  mesh(rbox(0.4,0.26,0.06,0.05),mat.sky,torso,0).position.set(0.15,0.42,0.38);
+  mesh(rbox(0.08,0.42,0.5,0.04),mat.sky,torso,0).position.set(0.33,0.4,0);
+  const head=new T.Group();head.position.y=0.7;torso.add(head);
+  mesh(rbox(0.3,0.22,0.36,0.1),mat.tan,head).position.y=0.08;
+  mesh(rbox(0.06,0.08,0.28,0.03),GLOW,head,0).position.set(0.15,0.1,0);
+  const A={};A.l=arm(torso,1,{sy:0.6,sz:0.47,ua:0.22,ul:0.24,fa:0.24,fl:0.26,mat:mat.tanDark,mat2:mat.tan,pad:0.36,padMat:mat.sky});
+  A.r=arm(torso,-1,{sy:0.6,sz:0.47,ua:0.22,ul:0.24,fa:0.24,fl:0.12,mat:mat.tanDark,pad:0.36,padMat:mat.sky});
+  // big hexagon energy shield on left forearm, always present
+  const sh=new T.Group();A.l.el.add(sh);sh.position.set(0.22,-0.18,0.16);sh.rotation.z=Math.PI/2;
+  const hex=new T.Mesh(new T.CylinderGeometry(0.52,0.52,0.05,6),SHIELD);hex.rotation.x=0;sh.add(hex);
+  const rim=mesh(new T.TorusGeometry(0.5,0.045,6,6),mat.sky,sh,0.1);rim.rotation.x=Math.PI/2;rim.rotation.z=Math.PI/6;
+  const boss=mesh(cyl(0.12,0.12,0.08,6),mat.gold,sh,0.12);
+  const gun=new T.Group();A.r.hand.add(gun);
+  mesh(rbox(0.26,0.3,0.26,0.07),mat.steel,gun).position.y=-0.08;
+  mesh(cyl(0.07,0.08,0.3,12),mat.dark,gun,0.1).position.y=-0.34;
+  const muzzle=new T.Group();muzzle.position.y=-0.5;gun.add(muzzle);
+  return {root,body,torso,head,L,A,muzzle,heavy:0.6,aim:'r',gunArm:A.r,shieldArm:A.l};},
+ sniper(){const root=new T.Group(),body=new T.Group();root.add(body);
+  const L=legs(body,{hip:0.62,w:0.11,th:0.14,tl:0.3,sh:0.13,sl:0.32,fl:0.24,fh:0.09,fw:0.13,thighMat:mat.deep,shinMat:mat.white,footMat:mat.dark});
+  const torso=new T.Group();torso.position.y=0.62;body.add(torso);
+  mesh(rbox(0.26,0.16,0.3,0.05),mat.dark,torso).position.y=0.06;
+  mesh(rbox(0.3,0.44,0.38,0.11),mat.white,torso).position.y=0.34;
+  mesh(rbox(0.32,0.12,0.4,0.05),mat.sky,torso,0).position.y=0.42;
+  mesh(rbox(0.1,0.38,0.4,0.05),mat.gold,torso,0).position.set(-0.14,0.32,0);
+  const head=new T.Group();head.position.y=0.6;torso.add(head);
+  mesh(new T.SphereGeometry(0.17,18,14),mat.skin,head).position.set(0.03,0.12,0);
+  const hood=mesh(new T.SphereGeometry(0.2,18,14,0,Math.PI*2,0,Math.PI*0.62),mat.deep,head);hood.position.set(-0.01,0.13,0);hood.rotation.z=0.35;
+  mesh(rbox(0.05,0.07,0.24,0.03),GLOW,head,0).position.set(0.18,0.14,0);
+  const A={};A.l=arm(torso,1,{sy:0.5,sz:0.21,ua:0.1,ul:0.22,fa:0.09,fl:0.2,mat:mat.white,mat2:mat.deep});
+  A.r=arm(torso,-1,{sy:0.5,sz:0.21,ua:0.1,ul:0.22,fa:0.09,fl:0.2,mat:mat.white,mat2:mat.deep});
+  // long rifle held at chest in both hands, always present
+  const rifle=new T.Group();rifle.position.set(0.18,0.34,-0.02);torso.add(rifle);
+  mesh(rbox(0.5,0.09,0.06,0.03),mat.dark,rifle).position.x=0.05;
+  mesh(rbox(0.22,0.12,0.07,0.03),mat.steel,rifle).position.set(-0.22,-0.02,0);
+  mesh(cyl(0.025,0.025,0.55,8),mat.steel,rifle,0.12).rotation.z=Math.PI/2;rifle.children.at(-1).position.x=0.5;
+  const scope=mesh(cyl(0.035,0.035,0.2,8),mat.deep,rifle,0.12);scope.rotation.z=Math.PI/2;scope.position.set(0.05,0.08,0);
+  const line=new T.Mesh(new T.BoxGeometry(0.5,0.015,0.065),GLOW);line.position.set(0.15,0,0);rifle.add(line);
+  const muzzle=new T.Group();muzzle.position.x=0.8;rifle.add(muzzle);
+  return {root,body,torso,head,L,A,muzzle,heavy:1,aim:'rifle',rifle};}
+};
+const flash=new T.Mesh(new T.SphereGeometry(0.16,14,10),new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:0.95}));
+let cur=null,curName=null;
+function setup(name){if(curName===name)return;if(cur)S.remove(cur.root);cur=UNITS[name]();curName=name;S.add(cur.root);cur.root.add(flash);}
+function reset(u){u.root.position.set(0,0,0);u.root.rotation.set(0,0,0);u.body.position.set(0,0,0);u.body.rotation.set(0,0,0);u.torso.rotation.set(0,0,0);u.head.rotation.set(0,0,0);
+ for(const k of ['l','r']){u.L[k].hip.rotation.set(0,0,0);u.L[k].knee.rotation.set(0,0,0);u.A[k].sh.rotation.set(0,0,0);u.A[k].el.rotation.set(0,0,0);}}
+function armsReady(u,rec){ // weapon arm points forward
+ if(u.aim==='rifle'){u.A.r.sh.rotation.z=1.1;u.A.r.el.rotation.z=0.5;u.A.l.sh.rotation.z=1.35;u.A.l.el.rotation.z=0.35;u.A.l.sh.rotation.x=0.25;u.A.r.sh.rotation.x=-0.25;u.rifle.position.x=0.18-rec*0.08;return;}
+ u.gunArm.sh.rotation.z=1.25-rec*0.25;u.gunArm.el.rotation.z=0.3;
+ if(u.shieldArm){u.shieldArm.sh.rotation.z=0.75;u.shieldArm.el.rotation.z=0.75;u.shieldArm.sh.rotation.x=0.15;}
+ else{u.A.l.sh.rotation.z=0.15;u.A.l.el.rotation.z=0.4;}}
+window.pose=(name,dirA,anim,f)=>{
+ setup(name);const u=cur;reset(u);flash.visible=false;u.root.rotation.y=-dirA;const h=u.heavy;
+ if(anim==='walk'){const p=f/8*Math.PI*2,s=Math.sin(p),c=Math.cos(p);
+  u.L.l.hip.rotation.z=s*0.55*h+0.05;u.L.r.hip.rotation.z=-s*0.55*h+0.05;
+  u.L.l.knee.rotation.z=-Math.max(0,-c)*0.9*h;u.L.r.knee.rotation.z=-Math.max(0,c)*0.9*h;
+  u.body.position.y=-Math.abs(s)*0.05*h;u.body.rotation.x=s*0.05*(2-h);u.torso.rotation.z=-0.08;
+  armsReady(u,0);if(u.aim==='rifle'){u.torso.rotation.y=s*0.06;}else{u.A.l.sh.rotation.z+= -s*0.35*h;}
+ }else if(anim==='attack'){const rec=[0,1,0.5,0.15][f];armsReady(u,rec);u.torso.rotation.z=-0.05+rec*0.06;u.L.l.hip.rotation.z=0.25;u.L.r.hip.rotation.z=-0.15;u.L.l.knee.rotation.z=-0.25;
+  if(f===1){flash.visible=true;}
+ }else if(anim==='death'){const k=f/4;armsReady(u,0);u.root.rotation.z=k*1.5;u.root.position.x=-k*0.25;u.root.position.y=Math.sin(k*Math.PI)*0.12;
+  u.L.l.knee.rotation.z=-k*0.6;u.L.r.knee.rotation.z=-k*0.4;u.A.l.sh.rotation.z=0.3+k*1.4;u.head.rotation.z=k*0.4;
+ }else{const p=f/4*Math.PI*2;armsReady(u,0);u.body.position.y=Math.sin(p)*0.012;u.torso.rotation.z=Math.sin(p)*0.02;u.head.rotation.y=Math.sin(p)*0.08;}
+ u.root.updateMatrixWorld(true);const v=new T.Vector3();u.muzzle.getWorldPosition(v);
+ if(flash.visible){flash.position.copy(u.root.worldToLocal(v.clone()));}
+ R.render(S,cam);const pv=v.clone().project(cam),o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),mx:(pv.x+1)/2*canvas.width,my:(1-pv.y)/2*canvas.height,ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>

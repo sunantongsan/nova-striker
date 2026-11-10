@@ -13,3 +13,7 @@ Known art gaps from the generator: battle-mech front walk frames lack the gatlin
 ## 3D pre-rendered silo (replaces the AI-drawn silo)
 
 `features/render3d/silo3d.html` is a three.js toon-shaded model (outlines, 4-step light ramp, woodland camouflage that blends with grass, olive panels, brass trim) with 5 tiers (pods, missile count, radar dishes, glow core, trim and colour change). `node features/render3d/render.cjs` renders `assets/silo3d392.webp` (per tier: 8 pop-up frames, 16 aim directions, 1 wreck) and `silo3d.json` (anchors, per-direction muzzle points). The camera matches the game grid (yaw 45°, screen depth 0.62). `silo3d392.js` maps levels 1–20 to tiers in steps of 4, keeps the open/close logic, and picks the direction frame from the turret's aim. The AI atlas is kept in staging only.
+
+## 3D troops
+
+`features/render3d/units3d.html` builds toon-shaded rigs (battle mech with gatling, shield mech with hexagon energy shield, hooded sniper with long rifle) animated procedurally. `node features/render3d/render-units.cjs [mech shield sniper]` renders `assets/units3d392-<unit>.webp` (8 grid directions × idle 4, walk 8, attack 4, death 5) and `units3d.json` (feet anchor, idle height, per-direction muzzle). `units3d392.js` draws kinds 2/4/6 ahead of the AI sheets, picks the direction from movement or aim, advances walk by distance, attack by recoil, and supplies muzzle points to `weaponMount`. Weapons and shields are part of the model, so they never disappear between frames.
