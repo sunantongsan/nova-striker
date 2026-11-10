@@ -21,3 +21,11 @@ Known art gaps from the generator: battle-mech front walk frames lack the gatlin
 ## Shock mortar (energy cannon)
 
 `features/render3d/cannon3d.html` models a black-and-red military shock mortar (octagonal armoured base with hazard tabs and sandbags, turntable, short heavy high-angle barrels with glowing red shock coils; 5 tiers: 1→3 barrels, shields, radar, ammo crates). `node features/render3d/render-cannon.cjs` renders `assets/cannon3d392.webp` (16 directions × idle/flash/recoil + wreck per tier) and `cannon3d.json`. `cannon3d392.js` replaces `drawEnergyCannon276`, muzzle points and wreck art, draws the shell as a dark round with a red-hot core and spark trail, and replaces the landing ring with a crackling red electric shock ring of the same radius (damage logic unchanged).
+
+Cluster shells: on landing the shock-mortar shell splits into 9 bomblets spread over the damage radius that pop one after another (fireball, smoke, ring, sparks). Visual only; damage logic unchanged.
+
+## 3D vehicles and remaining troops
+
+`features/render3d/vehicles3d.html` models the heavy bomber (swept navy wings, four engine pods with flickering exhaust), attack helicopter (spinning rotor, rocket pods), tank and plasma tank (separate hull and turret, track animation, barrel recoil). `node features/render3d/render-vehicles.cjs` renders `assets/veh3d392-<name>.webp` (16 directions × frames) and `vehicles3d.json` (ground origin, width, per-direction muzzle). `vehicles3d392.js` wraps `drawAircraft221` (bomber by heading, helicopter by aim, drawn at altitude with a gentle hover) and `drawTank` (hull by heading, turret by aim), and supplies muzzle points for kinds 1, 5 and 9.
+
+`units3d.html` also has the elite plasma trooper (violet armour, backpack, coil cannon), heavy assault mech (graphite and red, shoulder shock coils) and medic drone (quad-rotor, green cross, heal emitter). They are rendered with `render-units.cjs plasma heavy drone` and drawn for kinds 8, 10 and 3.

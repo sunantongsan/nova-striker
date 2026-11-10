@@ -1,0 +1,85 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="320"></canvas>
+<script type="module">
+// 392: pre-rendered 3D vehicles and aircraft. Every model faces local +x (yaw = -gridAngle).
+// layers: bomber body (prop/exhaust frames), heli body (rotor frames), tank hull + turret, plasma tank hull + turret.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.2,2.2,2.4,-2.0,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.3,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,1.35));
+const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([95,150,195,232,255]);const ramp=new T.DataTexture(g,5,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.ShaderMaterial({side:T.BackSide,uniforms:{w:{value:0.028}},
+ vertexShader:'uniform float w;void main(){vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);mv.xyz+=n*w;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:'void main(){gl_FragColor=vec4(0.13,0.19,0.31,1.0);}'});
+function mesh(geo,mat,parent,ol=1){const m=new T.Mesh(geo,mat);parent.add(m);if(ol)m.add(new T.Mesh(geo,OUT));return m;}
+const sph=(r,sx=1,sy=1,sz=1)=>{const g=new T.SphereGeometry(r,40,26);g.scale(sx,sy,sz);return g;};
+const cap=(r,l,sx=1,sz=1)=>{const g=new T.CapsuleGeometry(r,l,10,28);g.scale(sx,1,sz);return g;};
+const cyl=(a,b,h,s=28)=>new T.CylinderGeometry(a,b,h,s);
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const W=M(0xe6eef8),B=M(0x4f9fe0),NV=M(0x2b4f8f),G=M(0xf2a91e),D=M(0x27324a),ST=M(0x7a8aa0),PU=M(0x6a5ad8),
+ GLOW=new T.MeshBasicMaterial({color:0x5ff2ff}),FIRE=new T.MeshBasicMaterial({color:0xffb04a,transparent:true,opacity:.9}),
+ BLUR=new T.MeshBasicMaterial({color:0xdfefff,transparent:true,opacity:.35,side:T.DoubleSide}),HOT=new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.95});
+const MODELS={
+ bomber(){const r=new T.Group(),anim=[];
+  mesh(cap(0.32,1.5).rotateZ(Math.PI/2),W,r);                                   // fuselage
+  mesh(sph(0.3,1.2,0.75,1),GLOW,r,1).position.set(0.78,0.16,0);                  // canopy
+  mesh(sph(0.33,0.9,0.5,1.02),NV,r,0).position.set(-0.1,0.2,0);                   // spine stripe
+  for(const s of [1,-1]){const wing=mesh(rbox(0.62,0.09,1.35,0.06),NV,r);wing.position.set(-0.15,0,s*0.85);wing.rotation.y=-s*0.38;
+   mesh(rbox(0.64,0.1,0.16,0.04),G,wing,0).position.set(0,0.0,s*0.6);
+   for(const k of [0.5,1.0]){const eng=new T.Group();eng.position.set(0.05-k*0.32,-0.08,s*k*0.92);r.add(eng);
+    mesh(cap(0.12,0.38).rotateZ(Math.PI/2),W,eng);mesh(cyl(0.13,0.13,0.08).rotateZ(Math.PI/2),G,eng,0).position.x=0.2;
+    const ex=new T.Mesh(sph(0.1,1.6,0.8,0.8),FIRE);ex.position.x=-0.38;eng.add(ex);anim.push(ex);}
+   const tail=mesh(rbox(0.45,0.08,0.7,0.05),NV,r);tail.position.set(-0.95,0.05,s*0.42);tail.rotation.y=-s*0.45;}
+  const fin=mesh(rbox(0.45,0.55,0.08,0.05),B,r);fin.position.set(-1.0,0.32,0);fin.rotation.z=0.35;
+  for(const z of [0.13,-0.13]){const bomb=mesh(cap(0.08,0.24).rotateZ(Math.PI/2),D,r);bomb.position.set(0.05,-0.3,z);mesh(sph(0.06),M(0xd8322b),bomb,0).position.x=0.2;}
+  return {root:r,anim:t=>anim.forEach((e,i)=>e.scale.setScalar(t%2?0.8:1.15)),muzzle:null};},
+ heli(){const r=new T.Group();
+  mesh(sph(0.42,1.35,0.95,1),W,r).position.set(0.15,0,0);
+  mesh(sph(0.3,1.1,0.8,0.95),GLOW,r,1).position.set(0.5,0.08,0);
+  mesh(sph(0.43,1.1,0.55,1.02),B,r,0).position.set(0,0.22,0);
+  const boom=mesh(cap(0.1,1.1).rotateZ(Math.PI/2),W,r);boom.position.set(-0.85,0.12,0);
+  mesh(rbox(0.3,0.4,0.06,0.04),B,r).position.set(-1.45,0.32,0);
+  const tr=new T.Mesh(cyl(0.22,0.22,0.02,24).rotateX(Math.PI/2),BLUR);tr.position.set(-1.45,0.32,0.07);r.add(tr);
+  for(const s of [1,-1]){const sk=mesh(cap(0.04,0.9).rotateZ(Math.PI/2),ST,r);sk.position.set(0.15,-0.48,s*0.32);
+   const pod=mesh(cap(0.09,0.35).rotateZ(Math.PI/2),D,r);pod.position.set(0.25,-0.12,s*0.55);mesh(rbox(0.1,0.06,0.5,0.03),NV,r).position.set(0.15,-0.05,s*0.32);}
+  const mast=mesh(cyl(0.06,0.06,0.25),ST,r);mast.position.set(0.15,0.48,0);
+  const rot=new T.Group();rot.position.set(0.15,0.62,0);r.add(rot);
+  mesh(cyl(0.1,0.1,0.06),G,rot);
+  const blades=[];for(let k=0;k<4;k++){const b=mesh(rbox(1.15,0.03,0.12,0.02),NV,rot);b.position.x=0.58;const pv=new T.Group();pv.add(b);pv.rotation.y=k*Math.PI/2;rot.add(pv);blades.push(pv);}
+  const disc=new T.Mesh(cyl(1.2,1.2,0.01,40),BLUR);rot.add(disc);
+  const mz=new T.Group();mz.position.set(0.45,-0.12,0.55);r.add(mz);
+  return {root:r,anim:t=>{rot.rotation.y=t*Math.PI/6;},muzzle:mz};},
+ tankHull(plasma){const r=new T.Group(),treads=[];const body=plasma?PU:W,trim=plasma?B:NV;
+  for(const s of [1,-1]){const tr=mesh(rbox(1.5,0.36,0.34,0.17),D,r);tr.position.set(0,0.2,s*0.48);
+   for(let i=0;i<4;i++){const w=mesh(cyl(0.13,0.13,0.36,20).rotateX(Math.PI/2),ST,r,0);w.position.set(-0.5+i*0.33,0.18,s*0.48);treads.push(w);}
+   mesh(rbox(1.45,0.08,0.38,0.04),G,r,0).position.set(0,0.4,s*0.48);}
+  mesh(rbox(1.35,0.38,0.78,0.16),body,r).position.set(0,0.48,0);
+  mesh(rbox(0.5,0.12,0.6,0.05),trim,r,0).position.set(0.5,0.62,0);
+  if(plasma){for(const z of [0.3,-0.3]){const c=new T.Mesh(sph(0.07),GLOW);c.position.set(-0.6,0.55,z);r.add(c);}}
+  return {root:r,anim:t=>treads.forEach(w=>w.rotation.z=-t*0.8),muzzle:null};},
+ tankTurret(plasma){const r=new T.Group(),tur=new T.Group();tur.position.y=0.67;r.add(tur);const body=plasma?PU:W;
+  mesh(sph(0.36,1.15,0.6,1),body,tur).position.y=0.12;
+  mesh(sph(0.2,0.8,0.5,0.8),plasma?B:NV,tur,0).position.set(-0.05,0.26,0);
+  const barrel=new T.Group();barrel.position.set(0.3,0.15,0);tur.add(barrel);
+  mesh(cyl(0.08,0.09,0.9).rotateZ(-Math.PI/2),plasma?D:ST,barrel).position.x=0.45;
+  mesh(cyl(0.11,0.11,0.12).rotateZ(-Math.PI/2),G,barrel,0).position.x=0.85;
+  if(plasma){for(let i=0;i<3;i++){const ring=new T.Mesh(new T.TorusGeometry(0.11,0.025,8,24).rotateY(Math.PI/2),GLOW);ring.position.x=0.25+i*0.18;barrel.add(ring);}}
+  const mz=new T.Group();mz.position.x=0.95;barrel.add(mz);
+  return {root:r,anim:t=>{barrel.position.x=t?0.22:0.3;},muzzle:mz};}
+};
+const flash=new T.Mesh(new T.SphereGeometry(0.17,14,10),HOT);
+let cur=null,key=null;
+function setup(name){if(key===name)return;if(cur)S.remove(cur.root);const [n,arg]=name.split(':');cur=MODELS[n](arg==='plasma');key=name;S.add(cur.root);cur.root.add(flash);}
+window.pose=(name,dirA,f,fire)=>{setup(name);cur.root.rotation.y=-dirA;cur.anim(f);flash.visible=!!fire&&!!cur.muzzle;
+ cur.root.updateMatrixWorld(true);let mx=0,my=0;if(cur.muzzle){const v=new T.Vector3();cur.muzzle.getWorldPosition(v);if(flash.visible)flash.position.copy(cur.root.worldToLocal(v.clone()));R.render(S,cam);const pv=v.project(cam);mx=(pv.x+1)/2*canvas.width;my=(1-pv.y)/2*canvas.height;}else R.render(S,cam);
+ const o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),mx,my,ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};};
+window.ready=true;
+</script></body></html>
