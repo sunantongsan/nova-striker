@@ -17,3 +17,7 @@ Known art gaps from the generator: battle-mech front walk frames lack the gatlin
 ## 3D troops
 
 `features/render3d/units3d.html` builds smooth toon-shaded chibi rigs from capsules and spheres with uniform normal-offset outlines (ranger, battle mech with gatling, shield mech with hexagon energy shield, hooded sniper with long rifle) animated procedurally. `node features/render3d/render-units.cjs [mech shield sniper]` renders `assets/units3d392-<unit>.webp` (8 grid directions × idle 4, walk 8, attack 4, death 5) and `units3d.json` (feet anchor, idle height, per-direction muzzle). `units3d392.js` draws kinds 2/4/6 ahead of the AI sheets, picks the direction from movement or aim, advances walk by distance, attack by recoil, and supplies muzzle points to `weaponMount`. Weapons and shields are part of the model, so they never disappear between frames.
+
+## Shock mortar (energy cannon)
+
+`features/render3d/cannon3d.html` models a black-and-red military shock mortar (octagonal armoured base with hazard tabs and sandbags, turntable, short heavy high-angle barrels with glowing red shock coils; 5 tiers: 1→3 barrels, shields, radar, ammo crates). `node features/render3d/render-cannon.cjs` renders `assets/cannon3d392.webp` (16 directions × idle/flash/recoil + wreck per tier) and `cannon3d.json`. `cannon3d392.js` replaces `drawEnergyCannon276`, muzzle points and wreck art, draws the shell as a dark round with a red-hot core and spark trail, and replaces the landing ring with a crackling red electric shock ring of the same radius (damage logic unchanged).

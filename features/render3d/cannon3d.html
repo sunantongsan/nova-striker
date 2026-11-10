@@ -1,0 +1,81 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="352"></canvas>
+<script type="module">
+// 392: military shock-mortar (energy cannon) in black and red, pre-rendered like the silo.
+// Squat armoured base, turntable, short heavy high-angle barrel with red shock coils.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.75,2.75,3.6,-2.45,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfff2e6,0x4a4f66,1.35));
+const sun=new T.DirectionalLight(0xfff0d6,3.1);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0xffb0a0,1.3);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([90,145,195,232,255]);const ramp=new T.DataTexture(g,5,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.ShaderMaterial({side:T.BackSide,uniforms:{w:{value:0.04}},
+ vertexShader:'uniform float w;void main(){vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);mv.xyz+=n*w;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:'void main(){gl_FragColor=vec4(0.08,0.07,0.09,1.0);}'});
+function mesh(geo,mat,parent,ol=1){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){m.add(new T.Mesh(geo,OUT));}return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const cyl=(a,b,h,s=32)=>new T.CylinderGeometry(a,b,h,s);
+const TIERS=[
+ {barrels:1,len:1.2,r:0.3,coils:2,shields:0,dish:0,scale:0.92,boxes:1},
+ {barrels:1,len:1.35,r:0.33,coils:3,shields:1,dish:0,scale:0.97,boxes:2},
+ {barrels:2,len:1.3,r:0.27,coils:3,shields:1,dish:1,scale:1.02,boxes:2},
+ {barrels:2,len:1.45,r:0.3,coils:4,shields:2,dish:1,scale:1.06,boxes:3},
+ {barrels:3,len:1.5,r:0.28,coils:4,shields:2,dish:2,scale:1.1,boxes:3}
+];
+const BLK=M(0x2b2d33),GUN=M(0x3a3d45),PLT=M(0x4a4e58),RED=M(0xd8322b),RED2=M(0xa51f1d),STEEL=M(0x8a8f99),HAZ=M(0xf2b632),
+ GLOW=new T.MeshBasicMaterial({color:0xff4a3a}),HOT=new T.MeshBasicMaterial({color:0xff7a3c,transparent:true,opacity:0.92});
+let st=null;
+function build(t){const P=TIERS[t];if(st)S.remove(st.root);
+ const root=new T.Group();root.scale.setScalar(P.scale);S.add(root);
+ // octagonal armoured base, black with red band and yellow hazard tabs
+ const base=mesh(lathe([[0,0],[2.0,0],[2.08,0.1],[1.96,0.42],[1.78,0.62],[0,0.62]],8),BLK,root);base.rotation.y=Math.PI/8;
+ const bandm=mesh(lathe([[2.03,0.16],[2.05,0.2],[1.99,0.36],[1.97,0.38]],8),RED,root,0);bandm.rotation.y=Math.PI/8;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const tab=mesh(rbox(0.32,0.12,0.06,0.03),i%2?HAZ:PLT,root,1);tab.position.set(Math.cos(a)*1.98,0.27,Math.sin(a)*1.98);tab.rotation.y=-a+Math.PI/2;tab.rotation.x=-0.5;}
+ // sandbag-like bumpers around the rim for a military feel
+ for(let i=0;i<12;i++){const a=i/12*Math.PI*2+0.13;const bag=mesh(new T.SphereGeometry(0.2,16,10),M(0x5e5842),root);bag.scale.set(1.4,0.7,0.9);bag.position.set(Math.cos(a)*1.62,0.7,Math.sin(a)*1.62);bag.rotation.y=-a;}
+ for(let i=0;i<P.boxes;i++){const b=mesh(rbox(0.42,0.3,0.3,0.05),M(0x55513f),root);b.position.set(-1.05+i*0.2,0.78,0.9-i*0.5);b.rotation.y=0.4*i;mesh(rbox(0.43,0.06,0.31,0.02),RED2,b,0).position.y=0.06;}
+ const yaw=new T.Group();yaw.position.y=0.62;yaw.scale.setScalar(1.22);root.add(yaw);
+ mesh(cyl(1.0,1.1,0.24,48),GUN,yaw).position.y=0.12;
+ mesh(new T.TorusGeometry(1.0,0.06,12,48).rotateX(Math.PI/2),RED,yaw,0).position.y=0.24;
+ for(const z of [-0.62,0.62]){const cheek=mesh(rbox(0.9,0.75,0.2,0.12),PLT,yaw);cheek.position.set(-0.05,0.62,z*(1+0.15*(P.barrels-1)));
+  mesh(rbox(0.5,0.12,0.21,0.04),RED,cheek,0).position.set(0,0.18,0);}
+ for(let k=0;k<P.shields;k++){const sh=mesh(rbox(0.12,0.62,1.6,0.08),BLK,yaw);sh.position.set(0.78,0.45,0);sh.rotation.z=0.25;if(k)sh.position.x=-0.9,sh.rotation.z=-0.25,sh.scale.z=0.8;
+  mesh(rbox(0.13,0.1,1.2,0.03),HAZ,sh,0).position.y=0.18;}
+ const pitch=new T.Group();pitch.position.y=0.72;yaw.add(pitch);
+ const muzzles=[];
+ for(let i=0;i<P.barrels;i++){const z=(i-(P.barrels-1)/2)*(P.r*2.2);const bar=new T.Group();bar.position.z=z;pitch.add(bar);
+  const breech=mesh(new T.SphereGeometry(P.r*1.35,28,18),GUN,bar);breech.scale.set(1.2,1,1);breech.position.x=-0.15;
+  const tube=new T.Group();bar.add(tube);tube.rotation.z=-Math.PI/2;
+  mesh(cyl(P.r,P.r*1.12,P.len),BLK,tube).position.y=P.len/2;
+  mesh(cyl(P.r*1.3,P.r*1.3,0.16),RED2,tube).position.y=P.len-0.05;
+  mesh(cyl(P.r*0.78,P.r*0.78,0.05),M(0x0d0d10),tube,0).position.y=P.len+0.04;
+  for(let c=0;c<P.coils;c++){const ring=new T.Mesh(new T.TorusGeometry(P.r*1.12,0.045,10,32),GLOW);ring.rotation.x=Math.PI/2;ring.position.y=0.3+c*(P.len-0.55)/Math.max(1,P.coils-1);tube.add(ring);}
+  // recoil cylinders under the barrel
+  for(const s of [1,-1]){const rc=mesh(cyl(0.06,0.06,P.len*0.7,16),STEEL,tube);rc.position.set(s*P.r*0.6,P.len*0.35,P.r*0.9);}
+  const fin=mesh(rbox(0.06,0.4,0.5,0.03),RED,tube);fin.position.set(0,0.2,-P.r*0.95);
+  const mz=new T.Group();mz.position.y=P.len+0.08;tube.add(mz);muzzles.push(mz);}
+ for(let k=0;k<P.dish;k++){const d=new T.Group();d.position.set(-0.55,0.9,(k?-1:1)*0.75);yaw.add(d);
+  mesh(cyl(0.04,0.04,0.4,8),STEEL,d).position.y=0.15;const dd=mesh(new T.SphereGeometry(0.28,20,10,0,Math.PI*2,0,Math.PI/2.8),RED,d);dd.rotation.x=Math.PI;dd.rotation.z=0.6;dd.position.y=0.42;}
+ const flash=new T.Mesh(new T.SphereGeometry(0.42,16,12),HOT);flash.visible=false;root.add(flash);
+ const wreck=new T.Group();root.add(wreck);
+ for(let i=0;i<10;i++){const a=i*0.65+0.2,r=0.4+((i*37)%10)/12;const p=mesh(rbox(0.32+(i%3)*0.14,0.16,0.3,0.05),i%3?M(0x34363c):M(0x6a2a26),wreck);p.position.set(Math.cos(a)*r,0.7+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ const bent=mesh(cyl(0.28,0.3,1.0),BLK,wreck);bent.position.set(0.3,0.85,0.1);bent.rotation.set(0.4,0.3,1.25);
+ st={root,yaw,pitch,muzzles,wreck,flash,t};}
+window.pose=(t,yawA,fire,wreckd)=>{
+ if(!st||st.t!==t)build(t);
+ st.yaw.visible=!wreckd;st.wreck.visible=!!wreckd;
+ st.yaw.rotation.y=yawA;st.pitch.rotation.z=0.95-(fire===2?0.06:0);st.pitch.position.x=fire===2?-0.12:0;
+ st.root.updateMatrixWorld(true);const v=new T.Vector3();st.muzzles[0].getWorldPosition(v);
+ st.flash.visible=fire===1&&!wreckd;if(st.flash.visible){st.flash.position.copy(st.root.worldToLocal(v.clone()));}
+ R.render(S,cam);const pv=v.clone().project(cam);
+ return {img:canvas.toDataURL('image/png'),mx:(pv.x+1)/2*canvas.width,my:(1-pv.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>
