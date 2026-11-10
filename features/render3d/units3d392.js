@@ -1,6 +1,6 @@
-// 392: pre-rendered 3D troops (battle mech 2, sniper 4, shield mech 6). 8 grid directions,
+// 392: pre-rendered 3D troops (ranger 0, battle mech 2, sniper 4, shield mech 6). 8 grid directions,
 // idle / walk (by distance travelled) / attack (by recoil) / death. Atlases by render-units.cjs.
-var unit3dKinds392={2:{file:'mech',height:46,perTile:8},4:{file:'sniper',height:38,perTile:10},6:{file:'shield',height:48,perTile:7}};
+var unit3dKinds392={0:{file:'ranger',height:38,perTile:10},2:{file:'mech',height:46,perTile:8},4:{file:'sniper',height:38,perTile:10},6:{file:'shield',height:48,perTile:7}};
 Object.keys(unit3dKinds392).forEach(function(k){var s=unit3dKinds392[k];s.meta=unit3dMeta392[s.file];if(!s.meta){delete unit3dKinds392[k];return;}s.img=new Image();s.img.onload=function(){drawNeeded=true;};s.img.src='assets/units3d392-'+s.file+'.webp';});
 function unit3dDir392(a){return ((Math.round(a/(Math.PI/4))%8)+8)%8;}
 function unit3d392(t,u,enemy,z,flip){
