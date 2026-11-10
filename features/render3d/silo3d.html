@@ -15,23 +15,30 @@ const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(s
 const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
 const g=new Uint8Array([65,145,212,255]);const ramp=new T.DataTexture(g,4,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
 const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
-const OUT=new T.MeshBasicMaterial({color:0x1f2c48,side:T.BackSide});
+const OUT=new T.MeshBasicMaterial({color:0x22301c,side:T.BackSide});
+// Woodland camouflage that sits naturally on the grass: olive base, leaf-green, khaki and dark-moss blotches.
+function camo(seed,cols,rep){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');let r=seed;const rnd=()=>((r=(r*16807)%2147483647)/2147483647);
+ x.fillStyle=cols[0];x.fillRect(0,0,256,256);
+ for(let k=1;k<cols.length;k++){x.fillStyle=cols[k];for(let i=0;i<14-k*2;i++){const cx=rnd()*256,cy=rnd()*256,rr=18+rnd()*30;x.beginPath();for(let a=0;a<10;a++){const t=a/10*Math.PI*2,q=rr*(0.6+rnd()*0.6);x.lineTo(cx+Math.cos(t)*q*1.4,cy+Math.sin(t)*q);}x.closePath();
+  for(const dx of [-256,0,256])for(const dy of [-256,0,256]){x.save();x.translate(dx,dy);x.fill();x.restore();}}}
+ const tx=new T.CanvasTexture(c);tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.repeat.set(rep,rep);tx.colorSpace=T.SRGBColorSpace;tx.magFilter=T.NearestFilter;return tx;}
+const CM=(tx)=>new T.MeshToonMaterial({color:0xffffff,map:tx,gradientMap:ramp});
 function mesh(geo,mat,parent,ol=0.05){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){const o=new T.Mesh(geo,OUT);o.scale.setScalar(1+ol);m.add(o);}return m;}
 function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
 function rbox(w,h,d,r){const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
  const geo=new T.ExtrudeGeometry(s,{depth:Math.max(0.01,d-2*r*0.6),bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:3,curveSegments:6});geo.translate(0,0,-Math.max(0.01,d-2*r*0.6)/2);geo.computeVertexNormals();return geo;}
 // tier designs: each clearly richer than the last, same family
 const TIERS=[
- {pods:1,rows:2,cols:2,dish:0,scale:0.94,arm:0xdfe9f6,panel:0x4f9fe0,deep:0x2f6fb8,trim:0xf2a91e,tip:0xff7a5c,glow:0x5ff2ff,core:0},
- {pods:2,rows:2,cols:2,dish:1,scale:0.98,arm:0xdfe9f6,panel:0x3f95e0,deep:0x2a62b0,trim:0xf2a91e,tip:0x3fb8ff,glow:0x5ff2ff,core:0},
- {pods:2,rows:2,cols:3,dish:1,scale:1.02,arm:0xe4ecf8,panel:0x3a8ce0,deep:0x24589f,trim:0xf7b21f,tip:0x2fd5ff,glow:0x4ff7ff,core:1},
- {pods:3,rows:2,cols:2,dish:2,scale:1.06,arm:0xe8eefa,panel:0x3c7fe0,deep:0x2a4c9c,trim:0xffbf27,tip:0x6fe0ff,glow:0x6ff9ff,core:1},
- {pods:2,rows:3,cols:3,dish:2,scale:1.1,arm:0xf2f2fb,panel:0x5d6ff0,deep:0x3a3ca8,trim:0xffc93a,tip:0x9cf3ff,glow:0x8afcff,core:2}
+ {pods:1,rows:2,cols:2,dish:0,scale:0.94,camo:['#6f8f3c','#4f6f2b','#a4a65c','#33461f'],panel:0x5d7a33,deep:0x3d5226,trim:0xc9a34a,tip:0xd9632f,glow:0xb8ff6a,core:0},
+ {pods:2,rows:2,cols:2,dish:1,scale:0.98,camo:['#6c8c38','#4b6a28','#b0ac62','#2f421c'],panel:0x58772f,deep:0x3a4f23,trim:0xd2aa4e,tip:0xe0703a,glow:0xb8ff6a,core:0},
+ {pods:2,rows:2,cols:3,dish:1,scale:1.02,camo:['#698a37','#476526','#b8b268','#2c3f1b'],panel:0x547430,deep:0x364b21,trim:0xdcb354,tip:0xe85a32,glow:0x9dff7a,core:1},
+ {pods:3,rows:2,cols:2,dish:2,scale:1.06,camo:['#657f34','#435e24','#bfb46c','#283a18'],panel:0x4f6d2c,deep:0x31451e,trim:0xe6bd58,tip:0xef4f30,glow:0x8cff8a,core:1},
+ {pods:2,rows:3,cols:3,dish:2,scale:1.1,camo:['#5f7a31','#3d5621','#c7bb72','#243516'],panel:0x4a672a,deep:0x2c3f1c,trim:0xf2c75e,tip:0xf2452c,glow:0x7dffa0,core:2}
 ];
 let state=null;
 function build(t){
  const P=TIERS[t];if(state)S.remove(state.root);
- const ARM=M(P.arm),PANEL=M(P.panel),DEEP=M(P.deep),GOLD=M(P.trim),STEEL=M(0x6f84a0),DARK=M(0x27324a),TIP=M(P.tip,0x06283c),BODY=M(0xf6f8fc),GLOW=new T.MeshBasicMaterial({color:P.glow});
+ const camoTx=camo(7+t*13,P.camo,1.3),ARM=CM(camoTx),POD=CM(camo(11+t*13,P.camo,0.45)),PANEL=M(P.panel),DEEP=M(P.deep),GOLD=M(P.trim),STEEL=M(0x6d735e),DARK=M(0x262d1c),TIP=M(P.tip,0x06283c),BODY=M(0xd9d2b4),GLOW=new T.MeshBasicMaterial({color:P.glow});
  const root=new T.Group();root.scale.setScalar(P.scale);S.add(root);
  const base=new T.Group();root.add(base);
  mesh(lathe([[0,0],[2.1,0],[2.2,0.14],[2.12,0.45],[1.9,0.82],[1.62,1.0],[1.5,1.04],[0,1.04]]),ARM,base,0.02);
@@ -44,7 +51,7 @@ function build(t){
  const doors=[];
  for(const s of [1,-1]){const hinge=new T.Group();hinge.position.set(0,1.08,0);hinge.rotation.y=Math.PI/4;base.add(hinge);
   const arm=new T.Group();arm.position.x=s*1.42;hinge.add(arm);const lid=new T.Group();lid.position.x=-s*1.42;arm.add(lid);
-  mesh(new T.CylinderGeometry(1.42,1.42,0.16,40,1,false,s>0?Math.PI/2:-Math.PI/2,Math.PI),ARM,lid,0.03);
+  mesh(new T.CylinderGeometry(1.42,1.42,0.16,40,1,false,s>0?Math.PI/2:-Math.PI/2,Math.PI),POD,lid,0.03);
   const st=mesh(rbox(0.5,0.08,0.16,0.03),GOLD,lid,0.1);st.position.set(s*0.75,0.1,0);st.rotation.y=Math.PI/2;
   if(t>=1){const st2=mesh(rbox(0.9,0.06,0.12,0.03),PANEL,lid,0.1);st2.position.set(s*0.35,0.1,0);}
   doors.push({arm,s});}
@@ -58,7 +65,7 @@ function build(t){
  const span=P.pods*0.78;for(const z of [-span/2-0.1,span/2+0.1]){const sup=mesh(rbox(0.5,0.7,0.18,0.06),PANEL,yaw,0.06);sup.position.set(0,0.48,z);}
  const missiles=[],tips=[];const podH=0.3+P.rows*0.28,podW=0.12+P.cols*0.3;
  for(let k=0;k<P.pods;k++){const z=(k-(P.pods-1)/2)*(podW+0.08);const pod=new T.Group();pod.position.z=z;pitch.add(pod);
-  mesh(rbox(1.5,podH,podW,0.14),ARM,pod,0.04);
+  mesh(rbox(1.5,podH,podW,0.14),POD,pod,0.04);
   mesh(rbox(0.12,podH+0.04,podW+0.04,0.04),GOLD,pod,0).position.x=-0.2;
   if(t>=3)mesh(rbox(0.12,podH+0.04,podW+0.04,0.04),GOLD,pod,0).position.x=0.35;
   mesh(rbox(0.06,podH-0.12,podW-0.1,0.08),DEEP,pod,0).position.x=0.76;
@@ -71,8 +78,8 @@ function build(t){
   const d2=mesh(new T.SphereGeometry(0.32,22,10,0,Math.PI*2,0,Math.PI/2.8),PANEL,dish,0.06);d2.rotation.x=Math.PI;d2.rotation.z=0.7;d2.position.y=0.4;}
  // wreck pieces (only shown destroyed)
  const wreck=new T.Group();root.add(wreck);
- for(let i=0;i<9;i++){const a=i*0.7+0.3,r=0.6+((i*37)%10)/14;const p=mesh(rbox(0.35+(i%3)*0.12,0.18,0.3,0.05),i%3?M(0x8e9bb0):M(0x5f6c82),wreck,0.08);p.position.set(Math.cos(a)*r,1.0+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
- const bentPod=mesh(rbox(1.2,0.6,0.6,0.12),M(0x7f8aa0),wreck,0.05);bentPod.position.set(0.2,1.15,-0.1);bentPod.rotation.set(0.3,0.6,-0.5);
+ for(let i=0;i<9;i++){const a=i*0.7+0.3,r=0.6+((i*37)%10)/14;const p=mesh(rbox(0.35+(i%3)*0.12,0.18,0.3,0.05),i%3?M(0x7d7f68):M(0x55593f),wreck,0.08);p.position.set(Math.cos(a)*r,1.0+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ const bentPod=mesh(rbox(1.2,0.6,0.6,0.12),M(0x6c7254),wreck,0.05);bentPod.position.set(0.2,1.15,-0.1);bentPod.rotation.set(0.3,0.6,-0.5);
  state={root,base,doors,lift,yaw,pitch,missiles,wreck,armMat:ARM,P,podH};
 }
 window.pose=(t,open,yawA,wreckd)=>{
@@ -81,7 +88,7 @@ window.pose=(t,open,yawA,wreckd)=>{
  st.doors.forEach(d=>{d.arm.scale.x=Math.max(0.02,1-door*0.98);d.arm.position.y=door*0.04;d.arm.rotation.z=wreckd?d.s*0.35:0;});
  st.lift.position.y=-1.1+up*1.15;st.lift.visible=!wreckd&&up>0.12;
  st.yaw.rotation.y=yawA;st.pitch.rotation.z=0.12+up*0.3;
- st.wreck.visible=!!wreckd;st.armMat.color.set(wreckd?0x8f9aae:st.P.arm);
+ st.wreck.visible=!!wreckd;st.armMat.color.set(wreckd?0x9a9a88:0xffffff);
  R.render(S,cam);st.root.updateMatrixWorld(true);const v=new T.Vector3(1.05,0,0);st.pitch.localToWorld(v);v.project(cam);
  return {img:canvas.toDataURL('image/png'),mx:(v.x+1)/2*canvas.width,my:(1-v.y)/2*canvas.height};
 };
