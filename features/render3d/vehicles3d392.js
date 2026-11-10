@@ -1,7 +1,7 @@
 // 392: pre-rendered 3D vehicles — heavy bomber (7), attack helicopter (5), tank (1), plasma tank (9).
 // 16 directions per atlas (render-vehicles.cjs); tanks draw hull by heading and turret by aim.
 var veh3d392={};['bomber','heli','tankHull','tankTurret','tankHull:plasma','tankTurret:plasma'].forEach(function(n){var m=vehicles3dMeta392&&vehicles3dMeta392[n];if(!m)return;var img=new Image();img.onload=function(){drawNeeded=true;};img.src='assets/veh3d392-'+n.replace(':','-')+'.webp';veh3d392[n]={meta:m,img:img};});
-var veh3dSize392={bomber:[84,34],heli:[58,26],tank:[46,0]};
+var veh3dSize392={bomber:[104,36],heli:[64,26],tank:[54,0]};
 function veh3dReady392(n){var v=veh3d392[n];return v&&v.img.complete&&v.img.naturalWidth?v:null;}
 function veh3dDir392(a){var n=vehicles3dMeta392.dirs;return ((Math.round(a/(2*Math.PI/n))%n)+n)%n;}
 function veh3dK392(n){var key=n==='bomber'||n==='heli'?n:'tank',base=veh3d392[key==='tank'?(n.indexOf('plasma')>0?'tankHull:plasma':'tankHull'):n].meta.w;return veh3dSize392[key][0]/base;}

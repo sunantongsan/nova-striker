@@ -8,7 +8,7 @@ const canvas=document.getElementById('c');
 const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
 R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
 const S=new T.Scene();
-const cam=new T.OrthographicCamera(-2.2,2.2,2.4,-2.0,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.3,0);
+const cam=new T.OrthographicCamera(-2.1,2.1,2.3,-1.9,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.3,0);
 S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,1.35));
 const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
 const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
@@ -23,56 +23,114 @@ const cap=(r,l,sx=1,sz=1)=>{const g=new T.CapsuleGeometry(r,l,10,28);g.scale(sx,
 const cyl=(a,b,h,s=28)=>new T.CylinderGeometry(a,b,h,s);
 function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
  const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
-const W=M(0xe6eef8),B=M(0x4f9fe0),NV=M(0x2b4f8f),G=M(0xf2a91e),D=M(0x27324a),ST=M(0x7a8aa0),PU=M(0x6a5ad8),
- GLOW=new T.MeshBasicMaterial({color:0x5ff2ff}),FIRE=new T.MeshBasicMaterial({color:0xffb04a,transparent:true,opacity:.9}),
- BLUR=new T.MeshBasicMaterial({color:0xdfefff,transparent:true,opacity:.35,side:T.DoubleSide}),HOT=new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.95});
+const W=M(0xe3eaf3),LG=M(0xb9c6d6),B=M(0x3f8fd8),NV=M(0x24426f),G=M(0xf2a91e),D=M(0x232a3b),ST=M(0x5d6c84),PU=M(0x6b4fc8),PU2=M(0x4a3596),RD=M(0xd8322b),
+ GLASS=M(0x2f73b3,0x0b2a48),GLOW=new T.MeshBasicMaterial({color:0x5ff2ff}),PGLOW=new T.MeshBasicMaterial({color:0xd59bff}),
+ JET=new T.MeshBasicMaterial({color:0x8ff4ff,transparent:true,opacity:.9}),FIRE=new T.MeshBasicMaterial({color:0xffb04a,transparent:true,opacity:.9}),
+ BLUR=new T.MeshBasicMaterial({color:0xe8f4ff,transparent:true,opacity:.07,side:T.DoubleSide,depthWrite:false}),HOT=new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.95}),
+ NAVR=new T.MeshBasicMaterial({color:0xff4a3a}),NAVG=new T.MeshBasicMaterial({color:0x5dff7a});
+// flat shape (x,y) extruded to thickness t, lying in the x-z plane (y of the shape becomes z)
+function plate(pts,t,bev=0.03){const sh=new T.Shape();pts.forEach((q,i)=>i?sh.lineTo(q[0],q[1]):sh.moveTo(q[0],q[1]));
+ const g=new T.ExtrudeGeometry(sh,{depth:Math.max(0.005,t-2*bev),bevelEnabled:true,bevelSize:bev,bevelThickness:bev,bevelSegments:4,curveSegments:8});g.translate(0,0,-(t-2*bev)/2);g.rotateX(-Math.PI/2);g.computeVertexNormals();return g;}
+// vertical side-profile shape (x,y) extruded to width w along z
+function prof(pts,w,bev=0.05){const sh=new T.Shape();pts.forEach((q,i)=>i?sh.lineTo(q[0],q[1]):sh.moveTo(q[0],q[1]));
+ const g=new T.ExtrudeGeometry(sh,{depth:Math.max(0.005,w-2*bev),bevelEnabled:true,bevelSize:bev,bevelThickness:bev,bevelSegments:4,curveSegments:8});g.translate(0,0,-(w-2*bev)/2);g.computeVertexNormals();return g;}
+// smooth body of revolution along x (pts = [radius, x] from tail to nose)
+function lathe(pts){const g=new T.LatheGeometry(pts.map(q=>new T.Vector2(q[0],q[1])),40);g.rotateZ(-Math.PI/2);g.computeVertexNormals();return g;}
 const MODELS={
- bomber(){const r=new T.Group(),anim=[];
-  mesh(cap(0.32,1.5).rotateZ(Math.PI/2),W,r);                                   // fuselage
-  mesh(sph(0.3,1.2,0.75,1),GLOW,r,1).position.set(0.78,0.16,0);                  // canopy
-  mesh(sph(0.33,0.9,0.5,1.02),NV,r,0).position.set(-0.1,0.2,0);                   // spine stripe
-  for(const s of [1,-1]){const wing=mesh(rbox(0.62,0.09,1.35,0.06),NV,r);wing.position.set(-0.15,0,s*0.85);wing.rotation.y=-s*0.38;
-   mesh(rbox(0.64,0.1,0.16,0.04),G,wing,0).position.set(0,0.0,s*0.6);
-   for(const k of [0.5,1.0]){const eng=new T.Group();eng.position.set(0.05-k*0.32,-0.08,s*k*0.92);r.add(eng);
-    mesh(cap(0.12,0.38).rotateZ(Math.PI/2),W,eng);mesh(cyl(0.13,0.13,0.08).rotateZ(Math.PI/2),G,eng,0).position.x=0.2;
-    const ex=new T.Mesh(sph(0.1,1.6,0.8,0.8),FIRE);ex.position.x=-0.38;eng.add(ex);anim.push(ex);}
-   const tail=mesh(rbox(0.45,0.08,0.7,0.05),NV,r);tail.position.set(-0.95,0.05,s*0.42);tail.rotation.y=-s*0.45;}
-  const fin=mesh(rbox(0.45,0.55,0.08,0.05),B,r);fin.position.set(-1.0,0.32,0);fin.rotation.z=0.35;
-  for(const z of [0.13,-0.13]){const bomb=mesh(cap(0.08,0.24).rotateZ(Math.PI/2),D,r);bomb.position.set(0.05,-0.3,z);mesh(sph(0.06),M(0xd8322b),bomb,0).position.x=0.2;}
-  return {root:r,anim:t=>anim.forEach((e,i)=>e.scale.setScalar(t%2?0.8:1.15)),muzzle:null};},
- heli(){const r=new T.Group();
-  mesh(sph(0.42,1.35,0.95,1),W,r).position.set(0.15,0,0);
-  mesh(sph(0.3,1.1,0.8,0.95),GLOW,r,1).position.set(0.5,0.08,0);
-  mesh(sph(0.43,1.1,0.55,1.02),B,r,0).position.set(0,0.22,0);
-  const boom=mesh(cap(0.1,1.1).rotateZ(Math.PI/2),W,r);boom.position.set(-0.85,0.12,0);
-  mesh(rbox(0.3,0.4,0.06,0.04),B,r).position.set(-1.45,0.32,0);
-  const tr=new T.Mesh(cyl(0.22,0.22,0.02,24).rotateX(Math.PI/2),BLUR);tr.position.set(-1.45,0.32,0.07);r.add(tr);
-  for(const s of [1,-1]){const sk=mesh(cap(0.04,0.9).rotateZ(Math.PI/2),ST,r);sk.position.set(0.15,-0.48,s*0.32);
-   const pod=mesh(cap(0.09,0.35).rotateZ(Math.PI/2),D,r);pod.position.set(0.25,-0.12,s*0.55);mesh(rbox(0.1,0.06,0.5,0.03),NV,r).position.set(0.15,-0.05,s*0.32);}
-  const mast=mesh(cyl(0.06,0.06,0.25),ST,r);mast.position.set(0.15,0.48,0);
-  const rot=new T.Group();rot.position.set(0.15,0.62,0);r.add(rot);
-  mesh(cyl(0.1,0.1,0.06),G,rot);
-  const blades=[];for(let k=0;k<4;k++){const b=mesh(rbox(1.15,0.03,0.12,0.02),NV,rot);b.position.x=0.58;const pv=new T.Group();pv.add(b);pv.rotation.y=k*Math.PI/2;rot.add(pv);blades.push(pv);}
-  const disc=new T.Mesh(cyl(1.2,1.2,0.01,40),BLUR);rot.add(disc);
-  const mz=new T.Group();mz.position.set(0.45,-0.12,0.55);r.add(mz);
-  return {root:r,anim:t=>{rot.rotation.y=t*Math.PI/6;},muzzle:mz};},
- tankHull(plasma){const r=new T.Group(),treads=[];const body=plasma?PU:W,trim=plasma?B:NV;
-  for(const s of [1,-1]){const tr=mesh(rbox(1.5,0.36,0.34,0.17),D,r);tr.position.set(0,0.2,s*0.48);
-   for(let i=0;i<4;i++){const w=mesh(cyl(0.13,0.13,0.36,20).rotateX(Math.PI/2),ST,r,0);w.position.set(-0.5+i*0.33,0.18,s*0.48);treads.push(w);}
-   mesh(rbox(1.45,0.08,0.38,0.04),G,r,0).position.set(0,0.4,s*0.48);}
-  mesh(rbox(1.35,0.38,0.78,0.16),body,r).position.set(0,0.48,0);
-  mesh(rbox(0.5,0.12,0.6,0.05),trim,r,0).position.set(0.5,0.62,0);
-  if(plasma){for(const z of [0.3,-0.3]){const c=new T.Mesh(sph(0.07),GLOW);c.position.set(-0.6,0.55,z);r.add(c);}}
-  return {root:r,anim:t=>treads.forEach(w=>w.rotation.z=-t*0.8),muzzle:null};},
- tankTurret(plasma){const r=new T.Group(),tur=new T.Group();tur.position.y=0.67;r.add(tur);const body=plasma?PU:W;
-  mesh(sph(0.36,1.15,0.6,1),body,tur).position.y=0.12;
-  mesh(sph(0.2,0.8,0.5,0.8),plasma?B:NV,tur,0).position.set(-0.05,0.26,0);
-  const barrel=new T.Group();barrel.position.set(0.3,0.15,0);tur.add(barrel);
-  mesh(cyl(0.08,0.09,0.9).rotateZ(-Math.PI/2),plasma?D:ST,barrel).position.x=0.45;
-  mesh(cyl(0.11,0.11,0.12).rotateZ(-Math.PI/2),G,barrel,0).position.x=0.85;
-  if(plasma){for(let i=0;i<3;i++){const ring=new T.Mesh(new T.TorusGeometry(0.11,0.025,8,24).rotateY(Math.PI/2),GLOW);ring.position.x=0.25+i*0.18;barrel.add(ring);}}
-  const mz=new T.Group();mz.position.x=0.95;barrel.add(mz);
-  return {root:r,anim:t=>{barrel.position.x=t?0.22:0.3;},muzzle:mz};}
+ bomber(){const r=new T.Group(),anim=[];r.position.y=0.2;
+  const prof0=[[0,-1.5],[0.1,-1.46],[0.19,-1.2],[0.27,-0.6],[0.31,0.1],[0.3,0.7],[0.24,1.1],[0.13,1.38],[0.02,1.5],[0,1.5]];
+  const fus=mesh(lathe(prof0),NV,r);fus.scale.set(1,0.88,1);
+  const belly=mesh(lathe(prof0),LG,r,0);belly.scale.set(0.985,0.62,1.02);belly.position.y=-0.07;
+  mesh(new T.TorusGeometry(0.305,0.025,8,40).rotateY(Math.PI/2),G,r,0).position.x=-0.25;
+  const can=mesh(sph(0.2,1.9,0.72,0.95),GLASS,r);can.position.set(0.98,0.17,0);
+  mesh(sph(0.07,1.8,0.4,0.5),M(0xbfe9ff),r,0).position.set(1.08,0.27,0.05);
+  // swept main wing, gold tip bands, nav lights
+  const wing=mesh(plate([[0.38,0],[-0.42,1.75],[-0.78,1.75],[-0.62,0],[-0.78,-1.75],[-0.42,-1.75]],0.09),W,r);wing.position.y=-0.02;
+  for(const s of [1,-1]){const tip=mesh(plate([[-0.34,1.5*s],[-0.42,1.75*s],[-0.78,1.75*s],[-0.74,1.5*s]],0.1,0.02),G,r,0);tip.position.y=-0.02;
+   const nl=new T.Mesh(sph(0.045),s>0?NAVG:NAVR);nl.position.set(-0.6,0.0,1.78*s);r.add(nl);
+   mesh(plate([[0.2,0.32*s],[-0.25,1.25*s],[-0.36,1.25*s],[-0.1,0.32*s]],0.095,0.02),NV,r,0).position.y=-0.015;
+   // engines
+   for(const z of [0.62,1.12]){const le=0.38-0.8*(z/1.75),eng=new T.Group();eng.position.set(le-0.2,-0.13,s*z);r.add(eng);
+    mesh(cap(0.105,0.42).rotateZ(Math.PI/2),LG,eng);
+    mesh(new T.TorusGeometry(0.1,0.03,8,24).rotateY(Math.PI/2),G,eng,0).position.x=0.3;
+    mesh(cyl(0.075,0.075,0.04,20).rotateZ(Math.PI/2),D,eng,0).position.x=0.32;
+    mesh(cyl(0.085,0.1,0.1,20).rotateZ(Math.PI/2),D,eng,0).position.x=-0.3;
+    const ex=new T.Mesh(sph(0.08,2.2,0.85,0.85),JET);ex.position.x=-0.46;eng.add(ex);anim.push(ex);
+    mesh(rbox(0.25,0.1,0.05,0.02),W,eng,0).position.set(0,0.1,0);}
+   // twin tail fins and stabilisers
+   const fin=mesh(prof([[0,0],[-0.5,0],[-0.62,0.55],[-0.4,0.55]],0.06,0.02),B,r);fin.position.set(-0.85,0.12,s*0.24);fin.rotation.x=-s*0.28;
+   mesh(prof([[-0.58,0.42],[-0.62,0.55],[-0.4,0.55],[-0.37,0.42]],0.07,0.015),G,fin,0);
+  }
+  mesh(plate([[-0.95,0],[-1.3,0.75],[-1.48,0.75],[-1.42,0],[-1.48,-0.75],[-1.3,-0.75]],0.06,0.02),W,r).position.y=0.05;
+  // bomb bay + belly turret
+  mesh(rbox(0.7,0.04,0.3,0.02),D,r,0).position.set(0.05,-0.25,0);
+  mesh(sph(0.09,1,0.7,1),GLASS,r).position.set(-0.55,-0.22,0);
+  return {root:r,anim:t=>anim.forEach((e,i)=>{const k=(t+i)%2?0.8:1.15;e.scale.set(k*1.1,k,k);}),muzzle:null};},
+ heli(){const r=new T.Group();r.position.y=0.05;
+  const body=mesh(lathe([[0,-0.5],[0.25,-0.42],[0.36,-0.1],[0.36,0.25],[0.28,0.55],[0.12,0.72],[0,0.75]]),NV,r);body.scale.set(1,1.05,0.92);
+  mesh(lathe([[0,-0.5],[0.25,-0.42],[0.36,-0.1],[0.36,0.25],[0.28,0.55],[0.12,0.72],[0,0.75]]),LG,r,0).scale.set(0.98,0.7,0.95);r.children.at(-1).position.y=-0.1;
+  const can=mesh(sph(0.24,1.25,0.8,0.82),GLASS,r);can.position.set(0.38,0.16,0);
+  mesh(sph(0.06,1.6,0.5,0.6),M(0xbfe9ff),r,0).position.set(0.5,0.27,0.07);
+  const boom=mesh(lathe([[0.02,-1.0],[0.07,-0.95],[0.12,-0.2],[0.16,0.1],[0,0.15]]),NV,r);boom.position.set(-0.45,0.12,0);
+  mesh(prof([[0,0],[-0.3,0],[-0.38,0.42],[-0.2,0.42]],0.05,0.02),B,r).position.set(-1.25,0.12,0);
+  mesh(plate([[-1.25,0],[-1.4,0.28],[-1.5,0.28],[-1.45,0],[-1.5,-0.28],[-1.4,-0.28]],0.04,0.015),W,r).position.y=0.14;
+  const trot=new T.Group();trot.position.set(-1.4,0.38,0.06);r.add(trot);
+  trot.add(new T.Mesh(cyl(0.2,0.2,0.01,28).rotateX(Math.PI/2),BLUR));mesh(cyl(0.04,0.04,0.04).rotateX(Math.PI/2),G,trot,0);
+  const tbl=[];for(let k=0;k<2;k++){const b=mesh(rbox(0.38,0.04,0.015,0.01),D,trot,0);b.rotation.z=k*Math.PI/2;tbl.push(b);}
+  for(const s of [1,-1]){const sk=mesh(cap(0.03,0.85).rotateZ(Math.PI/2),D,r);sk.position.set(0.05,-0.45,s*0.3);
+   for(const x of [0.25,-0.15]){const st=mesh(cyl(0.022,0.022,0.2),D,r,0);st.position.set(x,-0.36,s*0.27);}
+   const sw=mesh(plate([[0.15,0.2*s],[0.05,0.55*s],[-0.15,0.55*s],[-0.15,0.2*s]],0.06,0.02),W,r);sw.position.y=-0.05;
+   const pod=mesh(cyl(0.1,0.1,0.38,16).rotateZ(Math.PI/2),D,r);pod.position.set(0.0,-0.14,s*0.5);
+   for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;const tip=new T.Mesh(sph(0.03),NAVR);tip.position.set(0.2,-0.14+Math.sin(a)*0.05,s*0.5+Math.cos(a)*0.05);r.add(tip);}
+   mesh(new T.TorusGeometry(0.1,0.02,8,20).rotateY(Math.PI/2),G,r,0).position.set(0.12,-0.14,s*0.5);}
+  // chin gun
+  const chin=mesh(sph(0.09),D,r);chin.position.set(0.55,-0.2,0);const gun=mesh(cyl(0.03,0.03,0.3,12).rotateZ(-Math.PI/2),ST,r,0);gun.position.set(0.72,-0.22,0);
+  const mast=mesh(cyl(0.07,0.09,0.2),D,r);mast.position.set(0.0,0.42,0);
+  const rot=new T.Group();rot.position.set(0.0,0.55,0);r.add(rot);
+  mesh(sph(0.1,1,0.6,1),G,rot);
+  for(let k=0;k<4;k++){const pv=new T.Group();pv.rotation.y=k*Math.PI/2;rot.add(pv);const b=mesh(rbox(1.25,0.025,0.1,0.012),D,pv);b.position.x=0.66;mesh(rbox(0.12,0.03,0.105,0.01),G,pv,0).position.x=1.22;}
+  const disc=new T.Mesh(cyl(1.3,1.3,0.005,48),BLUR);rot.add(disc);
+  const mz=new T.Group();mz.position.set(0.88,-0.22,0);r.add(mz);
+  return {root:r,anim:t=>{rot.rotation.y=t*Math.PI/6;trot.rotation.z=t*1.3;},muzzle:mz};},
+ tankHull(plasma){const r=new T.Group(),wheels=[],links=[];const H=plasma?PU:W,T2=plasma?PU2:NV;
+  for(const s of [1,-1]){
+   // track belt with tread links
+   const belt=mesh(rbox(1.6,0.34,0.3,0.17),D,r);belt.position.set(0,0.19,s*0.5);
+   for(let i=0;i<10;i++){const l=mesh(rbox(0.07,0.03,0.31,0.012),ST,r,0);l.position.set(-0.68+i*0.15,0.365,s*0.5);links.push(l);}
+   for(let i=0;i<5;i++){const w=new T.Group();w.position.set(-0.56+i*0.28,0.16,s*0.66);r.add(w);mesh(cyl(0.12,0.12,0.05,22).rotateX(Math.PI/2),ST,w);
+    mesh(cyl(0.05,0.05,0.06,12).rotateX(Math.PI/2),G,w,0);for(let k=0;k<3;k++){const bolt=mesh(sph(0.018),D,w,0);bolt.position.set(Math.cos(k*2.1)*0.08,Math.sin(k*2.1)*0.08,s*0.03);}wheels.push(w);}
+   // fender / side skirt
+   const fen=mesh(prof([[0.86,0.33],[0.72,0.44],[-0.78,0.44],[-0.84,0.33]],0.36,0.03),H,r);fen.position.z=s*0.5;
+   mesh(rbox(1.5,0.04,0.05,0.015),G,r,0).position.set(-0.04,0.445,s*0.665);
+   const hl=new T.Mesh(sph(0.05,0.6,1,1),GLOW);hl.position.set(0.86,0.42,s*0.32);r.add(hl);
+   mesh(cyl(0.07,0.07,0.06,16).rotateZ(Math.PI/2),D,r,0).position.set(0.84,0.42,s*0.32);}
+  // hull: sloped glacis, engine deck
+  mesh(prof([[0.92,0.3],[0.62,0.62],[-0.7,0.62],[-0.88,0.5],[-0.88,0.3]],0.82,0.06),H,r);
+  mesh(prof([[0.85,0.38],[0.66,0.56],[0.5,0.56],[0.7,0.38]],0.84,0.02),T2,r,0);
+  for(let i=0;i<3;i++){const v=mesh(rbox(0.06,0.03,0.5,0.012),D,r,0);v.position.set(-0.45-i*0.12,0.645,0);}
+  for(const z of [0.25,-0.25]){const ex=mesh(cyl(0.05,0.05,0.12,14).rotateZ(Math.PI/2),D,r,0);ex.position.set(-0.93,0.48,z);}
+  if(plasma){for(const z of [0.18,-0.18]){const c=new T.Mesh(cap(0.04,0.3).rotateZ(Math.PI/2),PGLOW);c.position.set(-0.55,0.66,z);r.add(c);}}
+  return {root:r,anim:t=>{wheels.forEach(w=>w.rotation.z=-t*1.1);links.forEach((l,i)=>l.position.x=-0.68+((i*0.15+t*0.075)%1.5));},muzzle:null};},
+ tankTurret(plasma){const r=new T.Group(),tur=new T.Group();tur.position.y=0.62;r.add(tur);const H=plasma?PU:W,T2=plasma?PU2:NV;
+  // hexagonal turret (top view), bevelled
+  const hex=mesh(plate([[0.5,0],[0.3,0.38],[-0.38,0.4],[-0.52,0.2],[-0.52,-0.2],[-0.38,-0.4],[0.3,-0.38]],0.26,0.06),H,tur);hex.position.y=0.13;
+  mesh(plate([[0.4,0],[0.24,0.3],[-0.3,0.3],[-0.4,0.15],[-0.4,-0.15],[-0.3,-0.3],[0.24,-0.3]],0.06,0.02),T2,tur,0).position.y=0.28;
+  mesh(new T.TorusGeometry(0.46,0.022,8,48),G,tur,0).rotation.x=Math.PI/2;tur.children.at(-1).position.y=0.02;
+  // commander cupola + hatch + antenna
+  const cup=mesh(cyl(0.12,0.14,0.08,20),D,tur);cup.position.set(-0.18,0.34,0.15);mesh(cyl(0.1,0.1,0.03,20),H,tur,0).position.set(-0.18,0.39,0.15);
+  const ant=mesh(cyl(0.012,0.012,0.6,8),D,tur,0);ant.position.set(-0.42,0.55,-0.22);mesh(sph(0.03),RD,tur,0).position.set(-0.42,0.86,-0.22);
+  for(const s of [1,-1]){const box=mesh(rbox(0.3,0.14,0.08,0.03),T2,tur);box.position.set(-0.1,0.13,s*0.44);
+   for(let k=0;k<2;k++){const sm=mesh(cyl(0.035,0.035,0.1,10).rotateX(Math.PI/2),D,tur,0);sm.position.set(0.28,0.2+k*0.07,s*0.37);}}
+  const mant=mesh(rbox(0.16,0.2,0.3,0.05),T2,tur);mant.position.set(0.5,0.14,0);
+  const barrel=new T.Group();barrel.position.set(0.5,0.14,0);tur.add(barrel);
+  if(plasma){mesh(cyl(0.11,0.1,0.75,24).rotateZ(-Math.PI/2),D,barrel).position.x=0.42;
+   for(let i=0;i<4;i++){const ring=new T.Mesh(new T.TorusGeometry(0.115,0.028,8,24).rotateY(Math.PI/2),PGLOW);ring.position.x=0.2+i*0.15;barrel.add(ring);}
+   mesh(cyl(0.15,0.13,0.12,24).rotateZ(-Math.PI/2),G,barrel,0).position.x=0.84;const tip=new T.Mesh(sph(0.08),PGLOW);tip.position.x=0.9;barrel.add(tip);}
+  else{mesh(cyl(0.055,0.065,1.0,20).rotateZ(-Math.PI/2),ST,barrel).position.x=0.55;
+   mesh(cyl(0.085,0.085,0.18,20).rotateZ(-Math.PI/2),D,barrel,0).position.x=0.5;
+   mesh(rbox(0.16,0.11,0.17,0.03),D,barrel).position.x=1.07;mesh(rbox(0.04,0.115,0.175,0.01),G,barrel,0).position.x=1.0;}
+  const mz=new T.Group();mz.position.x=plasma?0.98:1.16;barrel.add(mz);
+  return {root:r,anim:t=>{barrel.position.x=t?0.4:0.5;},muzzle:mz};}
 };
 const flash=new T.Mesh(new T.SphereGeometry(0.17,14,10),HOT);
 let cur=null,key=null;
