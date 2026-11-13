@@ -150,7 +150,24 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   assert.equal(roster[0],selected-1);
   await page.getByRole('button',{name:'จัดทัพให้',exact:true}).click();
   assert.equal(Number(await unit.locator('output').innerText()),selected);
+  await page.setViewportSize({width:740,height:360});
+  const formationWindow=page.locator('.compactFormation360');
+  await formationWindow.waitFor();
+  assert.ok((await formationWindow.boundingBox()).width<=601);
   await page.screenshot({path:out+'/coach394-direct-formation.png'});
+  await page.evaluate(()=>{
+   Game.close();
+   window.NovaBilling={catalog(){queueMicrotask(()=>window.novaBilling348('catalog',{products:[{id:'nova_1000',price:'฿30'}]}));}};
+   Game.shop348('nova');
+  });
+  const shop=page.locator('#skillShop342');
+  assert.equal(await page.locator('#app>header .title>#skillShop342').count(),1);
+  await page.locator('.compactStore360').waitFor();
+  const pack=page.locator('.packCard348').first();
+  assert.ok((await pack.locator('.packArt348').boundingBox()).height<=49);
+  assert.ok(await pack.getByRole('button',{name:'฿30',exact:true}).isEnabled());
+  await page.screenshot({path:out+'/coach394-mobile-store.png'});
+
   await page.evaluate(()=>{Game.close();Game.scout(1);});
   assert.equal(await page.locator('#deploy button[onclick="Game.unit(0)"] b').innerText(),String(selected));
   assert.equal(await page.locator('#deploy button[onclick="Game.unit(7)"]').count(),0);
