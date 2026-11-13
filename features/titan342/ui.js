@@ -108,11 +108,23 @@ function renderShop348(s){var lv=s.level||0,html='<section class="store348"><h2>
   Object.keys(Titan342.skills).filter(function(id){return Titan342.skills[id].level<=lv;}).forEach(function(id){var k=Titan342.skills[id],n=(s.skills||{})[id]||0,i=['slash','palm','dash','shield','nova'].indexOf(id)+4;html+='<article class="skillCard348">'+art345(i)+'<b>'+mt251(k.name,k.en)+'</b><small>Lv.'+n+' / 5</small>';if(n<5)html+='<div class="actions345">'+action345(1,(250*(n+1)*(n+1)).toLocaleString(),"Game.titanAction342('skill','"+id+"')",!!titanBusy342,'NOVA')+action345(2,((s.ads||{})['skill:'+id]||0)+' / '+5*(n+1),"Game.titanAd342('skill:"+id+"')",!!titanBusy342,mt251('วิดีโอ','Videos'))+'</div>';html+='</article>';});
  }else html+='<article class="skillCard348">'+art345(11)+'<b>'+mt251('โดรนก่อสร้าง','Builder drones')+'</b><button onclick="Game.droneShop()">'+mt251('เลือก','Open')+'</button></article><article class="skillCard348">'+art345(7)+'<b>'+mt251('โล่ป้องกันฐาน','Base shield')+'</b><button onclick="Game.shieldShop()">'+mt251('เลือก','Open')+'</button></article><article class="skillCard348">'+art345(0)+'<b>'+mt251('หุ่น NOVA','NOVA Mech')+'</b><button onclick="Game.titan342()">'+mt251('จัดการ','Manage')+'</button></article>';
  html+='</div><button class="wide" onclick="Game.shieldShop()">'+mt251('โล่ป้องกันการโจมตี','Attack protection shield')+'</button>';
- if(shopTab348==='nova')html+='<p class="storeNote348">'+shopEscape348(billingMessage348||mt251(root.NovaBilling?'ซื้อผ่าน Google Play · ตรวจราคาก่อนยืนยัน':'อัปเดตแอปเพื่อซื้อผ่าน Google Play',root.NovaBilling?'Google Play purchases · confirm the price':'Update the Android app to purchase through Google Play'))+'</p>';
+ if(shopTab348==='nova'){
+  var note=billingBusy348?mt251('กำลังติดต่อ Google Play…','Connecting to Google Play…'):billingMessage348;
+  if(!note&&!root.NovaBilling)note=mt251('เปิดเกมจากแอป Android เพื่อซื้อผ่าน Google Play','Open the Android app to buy with Google Play');
+  if(note)html+='<p class="storeNote348" role="status">'+shopEscape348(note)+'</p>';
+  if(root.NovaBilling&&!billingBusy348)html+='<button type="button" class="storeRetry348" onclick="Game.reloadNovaCatalog348()">'+mt251('โหลดราคาอีกครั้ง','Reload prices')+'</button>';
+ }
  html+='</section>';var old=modal.querySelector('.novaContent360')||modal.querySelector('.sheet'),scroll=old?old.scrollTop:0;open(html);modal.setAttribute('data-shop348','true');var sheet=modal.querySelector('.novaContent360')||modal.querySelector('.sheet');if(sheet)sheet.scrollTop=scroll;
 }
 function buildCountdown348(){var b=E.d.titanBuild348;if(!b||!b.ends)return mt251('รอทรัพยากร','Waiting');return duration(Math.max(0,(b.ends-Date.now()+(b.offset||0))/1000));}
-Game.shop348=function(tab){shopTab348=['nova','skills','support'].includes(tab)?tab:'nova';titanShopOnly342=true;titanPanelOpen342=true;renderShop348(titanState342||{});titanSend342('status');if(shopTab348==='nova'&&root.NovaBilling&&!billingBusy348){billingBusy348=true;root.NovaBilling.catalog();}};
+Game.shop348=function(tab){shopTab348=['nova','skills','support'].includes(tab)?tab:'nova';titanShopOnly342=true;titanPanelOpen342=true;if(shopTab348==='nova'&&root.NovaBilling&&!billingBusy348)Game.reloadNovaCatalog348();else renderShop348(titanState342||{});titanSend342('status');};
+Game.reloadNovaCatalog348=function(){
+ if(billingBusy348||!root.NovaBilling)return;
+ billingBusy348=true;billingMessage348='';renderShop348(titanState342||{});
+ try{root.NovaBilling.catalog();}catch(e){
+  root.novaBilling348('status',{message:mt251('ติดต่อ Google Play ไม่สำเร็จ ลองโหลดราคาอีกครั้ง','Could not contact Google Play. Reload prices to retry.')});
+ }
+};
 Game.skillShop342=function(){Game.shop348('skills');};
 Game.buyNova348=function(id){if(billingBusy348||!billingProducts348[id]||!root.NovaBilling)return;billingBusy348=true;renderShop348(titanState342||{});root.NovaBilling.buy(id);};
 root.novaBilling348=function(event,data){billingBusy348=false;data=data||{};if(event==='catalog'){billingProducts348={};(data.products||[]).forEach(function(p){if(novaPacks348.some(function(x){return x.id===p.id;}))billingProducts348[p.id]=p;});billingMessage348=data.message||'';}else if(event==='granted'){billingMessage348=mt251('รับ NOVA แล้ว','NOVA received');if(typeof data.gems==='number'){E.d.gems=data.gems;if(testWallet)testWallet.gems=data.gems;E.save();hud();}titanSend342('status');}else billingMessage348=data.message||mt251('ยังไม่สำเร็จ กดลองอีกครั้ง','Not completed. Try again.');if(modal.style.display==='flex'&&modal.hasAttribute('data-shop348'))renderShop348(titanState342||{});};

@@ -36,7 +36,7 @@
  bot376.innerHTML='<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 33V18h9V9h12v9h9v15Z M17 9V4h6v5 M10 23h4m12 0h4M17 16h6v7h-6Z M17 33v-6h6v6"/><path d="m3 10 6-6m-5 0h5v5M31 4h5v5m-5-5 6 6"/></svg>';
  bot376.onclick=function(){Game.missions();};
  homeDock376.querySelector('.rail-attack338').after(bot376);
- [$('dailyCheckin340'),$('skillShop342')].forEach(function(b){if(b)homeDock376.appendChild(b);});
+ var checkin=$('dailyCheckin340');if(checkin)homeDock376.appendChild(checkin);
  // Small descriptive labels make the existing icon rail learnable on touch screens.
  Array.from(document.querySelectorAll('#homebar > button')).forEach(function(b){var label=document.createElement('span');label.className='railLabel373';var names={titanEntry342:mt251('หุ่น NOVA','Mech'),botAttack376:mt251('มัลติเพลย์','Multiplayer'),dailyCheckin340:mt251('เช็คอิน','Check-in'),skillShop342:mt251('ร้านค้า','Shop')};label.textContent=names[b.id]||(b.classList.contains('rail-attack338')?mt251('ตีผู้เล่น','Players'):b.getAttribute('aria-label')||b.title);label.title=b.title;b.appendChild(label);});
  var playerSearch382=homeDock376.querySelector('.rail-attack338');

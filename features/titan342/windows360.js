@@ -5,6 +5,8 @@
  function normalize(){pending=false;if(normalizing)return;var sheet=modal.querySelector('.sheet');if(!sheet)return;normalizing=true;
  try{
   modal.setAttribute('data-nova360','true');sheet.classList.remove('dockMoved353','dockReady353','dockWindow354');
+  sheet.classList.toggle('compactStore360',!!sheet.querySelector('.store348'));
+  sheet.classList.toggle('compactFormation360',!!sheet.querySelector('.directFormation360'));
   sheet.querySelectorAll('.dockGrip353').forEach(function(n){n.remove();});
   if(!sheet.classList.contains('novaWindow360')){
    sheet.classList.add('novaWindow360');var oldnav=sheet.querySelector('.window-nav243'),back=oldnav&&Array.from(oldnav.querySelectorAll('button')).find(function(b){return !b.classList.contains('window-close243');}),title=sheet.querySelector('h2,h3');
