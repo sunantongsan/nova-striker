@@ -24,6 +24,29 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
  async function until(page,re,ms){const end=Date.now()+ms;while(Date.now()<end){const t=await text(page);if(re.test(t))return t;await page.waitForTimeout(400);}throw Error('Timed out waiting for '+re+' last: '+await text(page));}
  async function tapWorld(page,x,y){await page.mouse.click(x,y);await page.waitForTimeout(700);}
 
+ // Construction controls clear the bottom HUD, and resource cards show a single sprite.
+ {const {page,errors}=await session();
+  await page.setViewportSize({width:853,height:393});
+  await page.evaluate(()=>{
+   document.getElementById('welcome').hidden=true;
+   document.getElementById('baseNameGate').hidden=true;
+   document.getElementById('boot').style.display='none';
+   Game.close();
+   Game.inspectBuilding261(3);
+  });
+  await page.evaluate(()=>Game.moveBuilding261());
+  const controls=page.locator('#moveControls');
+  const rect=await controls.boundingBox();
+  assert.ok(rect&&rect.x>680&&rect.x+rect.width<=842&&rect.y+rect.height<300,'placement controls must clear the bottom HUD');
+  await page.screenshot({path:out+'/coach394-placement.png'});
+  await page.locator('#moveCancel').click();
+  assert.equal(await controls.isVisible(),false);
+  await page.evaluate(()=>Game.build('economy'));
+  const sizes=await page.locator('.build-card261').evaluateAll(cards=>cards.slice(0,3).map(card=>getComputedStyle(card.querySelector('.icon')).backgroundSize));
+  assert.deepEqual(sizes,['400% 400%','400% 400%','300% 300%']);
+  await page.screenshot({path:out+'/coach394-resource-icons.png'});
+  assert.deepEqual(errors,[]);await page.close();}
+
  // 1. New guest: the whole tutorial, every instruction pointing at a visible control.
  {const {page,errors}=await session();
   await page.click('#welcomeGuest');await until(page,/สวัสดี/,6000);await page.screenshot({path:out+'/coach394-hello.png'});
