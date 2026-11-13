@@ -1,7 +1,7 @@
 name: Verify Nova onboarding Android bundle
 on:
-  push:
-    branches: [verify/nova-onboarding-release-build]
+  pull_request:
+    paths: ['.github/workflows/verify-onboarding-bundle.yml']
 permissions:
   contents: read
 jobs:
