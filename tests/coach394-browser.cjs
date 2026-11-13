@@ -128,6 +128,16 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   if(await page.isVisible('#welcomeGuest'))await page.click('#welcomeGuest');await page.waitForTimeout(3500);
   assert.equal(await text(page),'','developed base must not see the first-play tutorial');
   assert.equal(await page.evaluate(()=>!!document.querySelector('#guideDock288:not([hidden])')),false,'old guide card stays hidden');
+  // Returning players get an inline, dismissible lesson only on their first visit.
+  await page.evaluate(()=>Game.training());
+  const tip=page.locator('#modal .menuCoach');
+  await tip.waitFor();
+  assert.match(await tip.innerText(),/ผลิตทหาร/);
+  await tip.getByRole('button').click();
+  await tip.waitFor({state:'detached'});
+  await page.evaluate(()=>{Game.close();Game.training();});
+  assert.equal(await tip.count(),0);
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('novaRTS1')).menuGuide.training),true);
   // ...but can replay it from Settings.
   await page.evaluate(()=>Game.coachStart394());await page.waitForTimeout(600);assert.match(await text(page),/สวัสดี/);
   assert.deepEqual(errors,[]);await page.close();}
