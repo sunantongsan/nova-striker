@@ -101,8 +101,9 @@ var novaPacks348=[{"id":"nova_1000","nova":1000,"thb":30},{"id":"nova_2100","nov
 function shopEscape348(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function packArt348(i){return '<span class="packArt348" aria-hidden="true" style="background-position:'+(i%2*100)+'% '+(Math.floor(i/2)*50)+'%"></span>';}
 function renderShop348(s){var lv=s.level||0,html='<section class="store348"><h2>'+mt251('ร้านค้า','Store')+'</h2><div class="storeHead348"><div>'+art345(1)+'<b>'+mt251('ร้านค้า NOVA','NOVA STORE')+'</b></div><strong>'+Number(E.d.gems||0).toLocaleString()+'</strong></div><div class="storeTabs348">';
- ['nova','skills','support'].forEach(function(id,i){html+='<button class="'+(id===shopTab348?'active':'')+'" onclick="Game.shop348(\''+id+'\')">'+art345([1,4,11][i])+'<span>'+mt251(['NOVA','สกิล','เสริมฐาน'][i],['NOVA','Skills','Support'][i])+'</span></button>';});html+='</div><div class="storeGrid348">';
- if(shopTab348==='nova')novaPacks348.forEach(function(pack,i){var live=billingProducts348[pack.id],ready=!!live&&!billingBusy348;html+='<article class="packCard348">'+packArt348(i)+'<b>'+pack.nova.toLocaleString()+'</b><small>NOVA</small><button '+(!ready?'disabled':'')+' onclick="Game.buyNova348(\''+pack.id+'\')">'+shopEscape348(live?live.price:'฿'+pack.thb)+'</button></article>';});
+ ['nova','skills','support','items','inventory'].forEach(function(id,i){html+='<button class="'+(id===shopTab348?'active':'')+'" onclick="Game.shop348(\''+id+'\')">'+art345([1,4,11,7,11][i])+'<span>'+mt251(['NOVA','สกิล','เสริมฐาน','ไอเท็ม','คลังของฉัน'][i],['NOVA','Skills','Support','Items','My inventory'][i])+'</span></button>';});html+='</div><div class="storeGrid348">';
+ if(shopTab348==='items'||shopTab348==='inventory')html+=armyPassCards348(shopTab348==='inventory');
+ else if(shopTab348==='nova')novaPacks348.forEach(function(pack,i){var live=billingProducts348[pack.id],ready=!!live&&!billingBusy348;html+='<article class="packCard348">'+packArt348(i)+'<b>'+pack.nova.toLocaleString()+'</b><small>NOVA</small><button '+(!ready?'disabled':'')+' onclick="Game.buyNova348(\''+pack.id+'\')">'+shopEscape348(live?live.price:'฿'+pack.thb)+'</button></article>';});
  else if(shopTab348==='skills'){
   if(!lv)html+='<article class="packCard348">'+art345(0)+'<button onclick="Game.titan342()">'+mt251('สร้างหุ่น','Build NOVA Mech')+'</button></article>';
   Object.keys(Titan342.skills).filter(function(id){return Titan342.skills[id].level<=lv;}).forEach(function(id){var k=Titan342.skills[id],n=(s.skills||{})[id]||0,i=['slash','palm','dash','shield','nova'].indexOf(id)+4;html+='<article class="skillCard348">'+art345(i)+'<b>'+mt251(k.name,k.en)+'</b><small>Lv.'+n+' / 5</small>';if(n<5)html+='<div class="actions345">'+action345(1,(250*(n+1)*(n+1)).toLocaleString(),"Game.titanAction342('skill','"+id+"')",!!titanBusy342,'NOVA')+action345(2,((s.ads||{})['skill:'+id]||0)+' / '+5*(n+1),"Game.titanAd342('skill:"+id+"')",!!titanBusy342,mt251('วิดีโอ','Videos'))+'</div>';html+='</article>';});
@@ -117,7 +118,7 @@ function renderShop348(s){var lv=s.level||0,html='<section class="store348"><h2>
  html+='</section>';var old=modal.querySelector('.novaContent360')||modal.querySelector('.sheet'),scroll=old?old.scrollTop:0;open(html);modal.setAttribute('data-shop348','true');var sheet=modal.querySelector('.novaContent360')||modal.querySelector('.sheet');if(sheet)sheet.scrollTop=scroll;
 }
 function buildCountdown348(){var b=E.d.titanBuild348;if(!b||!b.ends)return mt251('รอทรัพยากร','Waiting');return duration(Math.max(0,(b.ends-Date.now()+(b.offset||0))/1000));}
-Game.shop348=function(tab){shopTab348=['nova','skills','support'].includes(tab)?tab:'nova';titanShopOnly342=true;titanPanelOpen342=true;if(shopTab348==='nova'&&root.NovaBilling&&!billingBusy348)Game.reloadNovaCatalog348();else renderShop348(titanState342||{});titanSend342('status');};
+Game.shop348=function(tab){shopTab348=['nova','skills','support','items','inventory'].includes(tab)?tab:'nova';titanShopOnly342=true;titanPanelOpen342=true;if(shopTab348==='nova'&&root.NovaBilling&&!billingBusy348)Game.reloadNovaCatalog348();else renderShop348(titanState342||{});if(['items','inventory'].includes(shopTab348))Game.armyPassRefresh348();else titanSend342('status');};
 Game.reloadNovaCatalog348=function(){
  if(billingBusy348||!root.NovaBilling)return;
  billingBusy348=true;billingMessage348='';renderShop348(titanState342||{});
@@ -176,3 +177,72 @@ var countdownAt348=0,ui348=tickUI342;tickUI342=function(dt){ui348(dt);if(Date.no
 // Server-backed upgrade countdown; reaching zero requests settlement, never grants a tier locally.
 var timerTick355=tickUI342;tickUI342=function(dt){timerTick355(dt);var s=titanState342,el=$('upgradeCountdown355');if(!s||!s.upgrading355||screen!=='home')return;var left=Math.max(0,(Date.parse(s.upgrade_until355)-Date.now()+(s.offset342||0))/1000);if(el)el.textContent=duration(left);if(left<=0&&!titanBusy342&&Date.now()>(s.nextSettle355||0)){s.nextSettle355=Date.now()+5000;titanSend342('status');}};
 
+
+var armyPassState348=null,armyPassBusy348=null;
+function armyPassOwner348(){return !guest288&&(E.d.onlineCrystal||{}).owner||null;}
+function armyPassCards348(inventory){
+ var owner=armyPassOwner348(),state=armyPassState348&&armyPassState348.owner===owner?armyPassState348:null;
+ var html=[20,50].map(function(boost){
+  var quantity=state?Number(state.items[boost])||0:0;
+  return '<article class="packCard348">'+art345(7)+'<b>'+mt251('ใบเสริมทัพ ','Army pass ')+boost+'%</b>'+
+   '<small>'+mt251('ในคลัง ','Owned ')+(state?quantity:'—')+'</small>'+
+   (inventory?'':'<button onclick="Game.buyArmyPass348('+boost+')" '+(!owner||!state||armyPassBusy348||E.d.pendingArmyPass348||state.gems<boost?'disabled':'')+'>'+boost+' NOVA</button>')+'</article>';
+ }).join('');
+ if(!owner)html+='<p>'+mt251('เข้าสู่บัญชีเพื่อเปิดคลังไอเท็ม','Sign in to open your inventory')+'</p>';
+ if(owner)html+='<button type="button" onclick="Game.armyPassRefresh348()">'+mt251('อัปเดตคลัง','Refresh inventory')+'</button>';
+ return html;
+}
+function armyPassRender348(){
+ if(modal.style.display==='flex'&&modal.querySelector('.store348')&&['items','inventory'].includes(shopTab348))renderShop348(titanState342||{});
+}
+function armyPassSend348(p){
+ if(armyPassBusy348||!root.NovaCloud||!root.NovaCloud.warRequest)return;
+ var id='army-pass-'+nonce160();
+ var flight={id:id,owner:armyPassOwner348(),payload:p,save:E.d};
+ armyPassBusy348=flight;
+ flight.timer=setTimeout(function(){
+  if(armyPassBusy348!==flight)return;
+  armyPassBusy348=null;armyPassRender348();
+  toast(mt251('คลังยังไม่ตอบ ลองอัปเดตคลังอีกครั้ง','Inventory did not respond. Refresh to retry.'));
+ },15000);
+ try{root.NovaCloud.warRequest(p.armyPass==='status'?'test_status':'test_claim',JSON.stringify(p),id);}
+ catch(e){clearTimeout(flight.timer);armyPassBusy348=null;armyPassRender348();toast(mt251('เชื่อมต่อคลังไม่ได้','Could not reach inventory'));}
+}
+Game.armyPassRefresh348=function(){
+ var owner=armyPassOwner348();
+ if(!owner)return;
+ var pending=E.d.pendingArmyPass348;
+ armyPassSend348(pending&&pending.owner===owner?pending:{armyPass:'status'});
+};
+Game.buyArmyPass348=function(boost){
+ var owner=armyPassOwner348();
+ if(!owner||armyPassBusy348||E.d.pendingArmyPass348||![20,50].includes(boost))return;
+ confirmNova358(boost,function(){
+  if(armyPassOwner348()!==owner||E.d.pendingArmyPass348)return;
+  var pending={owner:owner,armyPass:'buy',boost:boost,request_id:nonce160()};
+  E.d.pendingArmyPass348=pending;
+  if(!E.save()){delete E.d.pendingArmyPass348;toast(tr('บันทึกไม่ได้'));return;}
+  Game.shop348('items');
+ });
+};
+var beforeArmyPassCloud348=root.novaCloudEvent;
+root.novaCloudEvent=function(event,message){
+ var id=message&&message.request_id;
+ if(typeof id!=='string'||!id.startsWith('army-pass-'))return beforeArmyPassCloud348.apply(this,arguments);
+ var flight=armyPassBusy348;
+ if(!flight||id!==flight.id)return;
+ clearTimeout(flight.timer);armyPassBusy348=null;
+ if(E.d!==flight.save||armyPassOwner348()!==flight.owner)return;
+ var data=message.data||{};
+ if(data.armyPasses&&Number.isSafeInteger(data.gems)){
+  armyPassState348={owner:flight.owner,items:data.armyPasses,gems:data.gems};
+  if(flight.payload.armyPass==='buy'){
+   E.d.gems=data.gems;if(testWallet)testWallet.gems=data.gems;
+   delete E.d.pendingArmyPass348;E.save();hud();
+  }
+ }else if(data.armyPassError==='insufficient_nova'){
+  delete E.d.pendingArmyPass348;E.save();
+  toast(mt251('NOVA ไม่พอ','Not enough NOVA'));
+ }else toast(mt251('ตรวจรายการไม่ได้ ลองอัปเดตคลังอีกครั้ง','Could not verify the request. Refresh the inventory.'));
+ armyPassRender348();
+};
