@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 39,
+  "nativeVersion": 40,
   "compatibleNativeVersions": [
     19,
     20,
@@ -22,10 +22,11 @@
     36,
     34,
     37,
-    38
+    38,
+    39
   ],
-  "contentVersion": 170,
-  "label": "1.12.0-coc-tutorial",
+  "contentVersion": 171,
+  "label": "1.12.1-no-ad-dialog",
   "maxBytes": 67108864,
   "titan342": true
 }
