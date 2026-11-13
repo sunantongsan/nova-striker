@@ -118,14 +118,21 @@ Game.confirmFormationBattle360=function(){
 (function(){
  var previousClose=close;
  close=function(){pendingFormationBattle360=null;return previousClose.apply(this,arguments);};
- ['scout','attackSelected'].forEach(function(action){
+ ['scout','practiceStart','attackSelected'].forEach(function(action){
   var start=Game[action];
   Game[action]=function(){
    if((action==='scout'&&typeof coach394!=='undefined'&&coach394)||
       (action==='attackSelected'&&(!liveTarget||warBusy||liveTarget.can_attack===false||E.d.pendingLiveStart)))return start.apply(this,arguments);
    if(logisticsBusy277(E))return start.apply(this,arguments);
-   var args=arguments;
-   pendingFormationBattle360={save:E.d,raid:E.raid,start:function(){start.apply(Game,args);}};
+   var args=arguments,prior=E.raid;
+   pendingFormationBattle360={save:E.d,raid:prior,start:function(){
+    var roster=action==='practiceStart'?formationRoster360(E,E.d.formation360):null;
+    start.apply(Game,args);
+    if(roster&&E.raid&&E.raid!==prior&&E.raid.practice){
+     E.raid.army=roster;E.raid.directPractice360=true;
+     deployKind=roster.findIndex(Boolean);hud();
+    }
+   }};
    Game.armyView360('formation');
   };
  });
