@@ -210,8 +210,8 @@ setTimeout(coachTick394,1800);
 (function(){
  var lessons=[
   {key:'training',section:'#armyHub278',target:'.novaTrain360:not(:disabled), .novaFilter360',
-   th:'แตะ + เพื่อผลิตทหาร แล้วเปิดแท็บจัดทัพเพื่อเลือกกำลังที่จะพาไปรบ',
-   en:'Tap + to train troops, then open Formation to prepare your army.'},
+   th:'แตะ + เพื่อผลิตทหาร ทหารที่ผลิตเสร็จจะออกรบทั้งหมดในการบุกครั้งถัดไป',
+   en:'Tap + to train troops. Every trained troop joins your next attack.'},
   {key:'formation',section:'#armyHub278',tab:'formation',target:'button[onclick="Game.autoFormation360()"]',
    th:'แตะ «จัดทัพให้» เพื่อเลือกทหารที่พร้อมรบ หรือกด + และ − เพื่อจัดเอง',
    en:'Tap Auto-fill to pick ready troops, or use + and − to choose them yourself.'},
