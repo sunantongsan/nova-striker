@@ -30,11 +30,11 @@
  root.addEventListener('resize',function(){var sheet=modal.querySelector('.sheet');if(sheet)sheet.classList.remove('novaMoved360');drag=null;});
  normalize();
 })();
-var armyPrevious360=Game.army278,refreshPrevious360=refreshArmy278,novaArmyView360='train';
+var refreshPrevious360=refreshArmy278,novaArmyView360='train';
 function armyTabs360(active){return '<div class="novaTabs360">'+[['train',mt251('ผลิต','Train')],['formation',mt251('จัดทัพ','Formation')],['queue',mt251('กำลังผลิต','Queue')]].map(function(a){return '<button aria-pressed="'+(active===a[0])+'" onclick="Game.armyView360(\''+a[0]+'\')">'+a[1]+'</button>';}).join('')+'</div>';}
 Game.armyView360=function(view){novaArmyView360=view;if(view==='queue')Game.production359('all');else Game.army278();};
 Game.army278=function(tab){if(logisticsBusy277(E)){toast(tr('จบการรบก่อนจัดทัพ'));return;}if(tab)armyTab278=tab;E.sync();
- if(novaArmyView360==='formation'){armyPrevious360.apply(this,arguments);var hub=$('armyHub278');if(hub){var entry=$('productionEntry359');if(entry)entry.remove();hub.insertAdjacentHTML('afterbegin',armyTabs360('formation'));}return;}
+ if(novaArmyView360==='formation'){renderFormation360();return;}
  novaArmyView360='train';armyOpen278=true;var filter=armyTab278||'all',html='<section class="novaArmy360" id="armyHub278"><h2>'+mt251('กองทัพ','Army')+'</h2>'+armyTabs360('train')+'<div class="novaFilter360">';
  [['all',mt251('ทั้งหมด','All')],['camp',mt251('ทหาร','Infantry')],['factory',mt251('ยานเกราะ','Vehicles')],['airbase',mt251('อากาศยาน','Aircraft')]].forEach(function(a){html+='<button aria-pressed="'+(filter===a[0])+'" onclick="Game.army278(\''+a[0]+'\')">'+a[1]+'</button>';});
  html+='</div><div class="novaCapacity360"><span>'+mt251('แตะ + เพื่อผลิต','Tap + to train')+'</span><b id="novaCapacity360"></b></div><div class="novaTroops360">';
@@ -45,3 +45,56 @@ refreshArmy278=function(){var hub=$('armyHub278');if(!hub||!hub.classList.contai
  U.forEach(function(u,i){var timer=$('novaTimer360_'+i),count=$('novaCount360_'+i),button=$('novaTrain360_'+i);if(count)count.textContent='×'+(E.d.army[i]||0);if(button)button.disabled=!!E.unitLock278(i)||E.d.power<u.cost;if(!timer)return;var jobs=E.d.queue.filter(function(q){return q.kind===i;}),left=jobs.length?Math.max(0,Math.ceil((Math.min(...jobs.map(function(q){return q.until;}))-E.now())/1000)):0;timer.hidden=!jobs.length;timer.classList.toggle('running360',!!jobs.length);if(jobs.length)timer.innerHTML='<span>◷ '+jobs.length+'</span><b>'+clock359(left)+'</b>';});};
 var queuePrevious360=Game.production359;
 Game.production359=function(){queuePrevious360.apply(this,arguments);var section=modal.querySelector('.production359');if(section)section.insertAdjacentHTML('afterbegin',armyTabs360('queue'));};
+
+function formationCapacity360(engine){
+ return ['camp','factory','airbase'].reduce(function(total,type){return total+engine.capacity278(type);},0);
+}
+function formationRoster360(engine,requested){
+ var remaining=formationCapacity360(engine);
+ return U.map(function(unit,i){
+  var available=Math.max(0,Math.floor(Number(engine.d.army[i])||0));
+  var desired=Array.isArray(requested)?Math.max(0,Math.floor(Number(requested[i])||0)):available;
+  var count=Math.min(available,desired,Math.floor(remaining/unit.space));
+  remaining-=count*unit.space;
+  return count;
+ });
+}
+function saveFormation360(next){
+ var previous=E.d.formation360;
+ E.d.formation360=next;
+ if(E.save())return true;
+ if(previous===undefined)delete E.d.formation360;else E.d.formation360=previous;
+ toast(tr('บันทึกไม่ได้'));
+ return false;
+}
+function renderFormation360(){
+ var roster=formationRoster360(E,E.d.formation360);
+ var html='<section id="armyHub278" class="directFormation360"><h2>'+mt251('จัดทัพ','Formation')+'</h2>'+armyTabs360('formation');
+ html+='<div class="novaCapacity360"><b>'+spaces(roster)+' / '+formationCapacity360(E)+'</b><button type="button" onclick="Game.autoFormation360()">'+mt251('จัดทัพให้','Auto-fill')+'</button></div>';
+ html+='<p>'+mt251('แตะ + หรือ − เพื่อเลือกทหาร เกมบันทึกชุดทัพให้ทันที','Tap + or − to choose troops. Your lineup is saved automatically.')+'</p>';
+ var rows=U.map(function(unit,i){
+  var stock=E.d.army[i]||0;
+  if(!stock)return '';
+  return '<div class="formationRow360">'+portrait278(i)+'<span><b>'+unit.name+'</b><small>'+mt251('พร้อม ','Ready ')+stock+' · '+unit.space+mt251(' ช่อง',' slots')+'</small></span>'+
+   '<button type="button" aria-label="'+mt251('ลด ','Remove ')+unit.name+'" onclick="Game.editFormation360('+i+',-1)" '+(!roster[i]?'disabled':'')+'>−</button><output>'+roster[i]+'</output>'+
+   '<button type="button" aria-label="'+mt251('เพิ่ม ','Add ')+unit.name+'" onclick="Game.editFormation360('+i+',1)" '+(roster[i]>=stock?'disabled':'')+'>+</button></div>';
+ }).join('');
+ open(html+(rows||'<p>'+mt251('ยังไม่มีทหารพร้อมรบ ไปที่แท็บผลิตเพื่อฝึกทหาร','No troops ready. Use Train to recruit troops.')+'</p>')+'</section>');
+}
+Game.editFormation360=function(i,delta){
+ if(logisticsBusy277(E)||!U[i]||(delta!==1&&delta!==-1))return;
+ E.sync();
+ var roster=formationRoster360(E,E.d.formation360),next=roster[i]+delta;
+ if(next<0||next>(E.d.army[i]||0))return;
+ if(delta>0&&spaces(roster)+U[i].space>formationCapacity360(E)){
+  toast(mt251('ความจุกองกำลังไม่พอ','Not enough army capacity'));return;
+ }
+ roster[i]=next;
+ if(saveFormation360(roster))renderFormation360();
+};
+Game.autoFormation360=function(){
+ if(logisticsBusy277(E))return;
+ E.sync();
+ if(saveFormation360(formationRoster360(E)))renderFormation360();
+};
+Game.fleet277=Game.manifest277=function(){Game.armyView360('formation');};
