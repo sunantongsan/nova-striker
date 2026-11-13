@@ -167,6 +167,9 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   assert.ok((await pack.locator('.packArt348').boundingBox()).height<=49);
   assert.ok(await pack.getByRole('button',{name:'€1.19',exact:true}).isEnabled());
   assert.match(await pack.locator('.novaReferencePrices348').innerText(),/฿30 · US\$0\.89/);
+  assert.doesNotMatch(await page.locator('.compactStore360').innerText(),/ราคาอ้างอิง/);
+  assert.equal(await page.locator('.packCard348').count(),6);
+  assert.ok(await page.locator('.compactStore360 .novaContent360').evaluate(el=>el.scrollHeight<=el.clientHeight+1));
   await page.screenshot({path:out+'/coach394-mobile-store.png'});
 
   await page.evaluate(()=>{Game.close();Game.scout(1);});
