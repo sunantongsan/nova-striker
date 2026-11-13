@@ -100,3 +100,28 @@
 }
 #app #selection#selection .actions261 .art345{width:24px;height:24px}
 #app #selection#selection .selection-heading b{font-size:15px!important}
+/* Keep shop prices and troop controls close to their artwork on phones. */
+#modal#modal[data-nova360] .sheet.novaWindow360:is(.compactStore360,.compactFormation360){
+ width:min(94vw,600px)!important;min-height:0!important;max-height:calc(100dvh - 24px)!important
+}
+#modal#modal[data-nova360] .sheet.novaWindow360:is(.compactStore360,.compactFormation360) .novaContent360.novaContent360{padding:6px 8px!important;min-height:0}
+#modal#modal[data-nova360] .sheet.novaWindow360:is(.compactStore360,.compactFormation360) .novaHead360.novaHead360{min-height:38px!important;padding:3px 7px!important}
+#modal#modal[data-nova360] .sheet.novaWindow360:is(.compactStore360,.compactFormation360) .novaHead360 h2{font-size:16px!important}
+#modal#modal[data-nova360] .sheet.novaWindow360:is(.compactStore360,.compactFormation360) .novaHead360 button{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}
+#modal#modal[data-nova360] .compactStore360 .storeGrid348{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px}
+#modal#modal[data-nova360] .compactStore360 .packCard348{padding:4px!important;min-width:0}
+#modal#modal[data-nova360] .compactStore360 .packArt348{width:48px;height:48px;margin:0 auto}
+#modal#modal[data-nova360] .compactStore360 .packCard348 button{min-height:36px;padding:3px}
+#modal#modal[data-nova360] .compactStore360 .storeHead348{padding:0 0 4px}
+#modal#modal[data-nova360] .compactStore360 .storeTabs348{margin-bottom:5px}
+#modal#modal[data-nova360] .compactFormation360 .novaTabs360{position:static;padding:2px!important;margin:0 0 4px!important}
+#modal#modal[data-nova360] .compactFormation360 .directFormation360>p{margin:3px 0;font-size:11px}
+#modal#modal[data-nova360] .compactFormation360 .formationRow360{grid-template-columns:29px minmax(0,1fr) 36px 22px 36px;margin:3px 0;padding:2px 4px;font-size:12px}
+#modal#modal[data-nova360] .compactFormation360 .formationRow360>:is(img,.art278,.icon){width:27px;height:27px}
+#modal#modal[data-nova360] .compactFormation360 .formationRow360>button{min-height:36px;margin:0}
+#modal#modal[data-nova360] .compactFormation360 .formationRow360>button>.art345,
+#modal#modal[data-nova360] .compactFormation360 .novaCapacity360 button>.art345,
+#modal#modal[data-nova360] .compactStore360 .storeRetry348>.art345{display:none!important}
+@media(orientation:landscape) and (min-width:670px){
+ #modal#modal[data-nova360] .compactStore360 .storeGrid348{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+}
