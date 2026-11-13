@@ -151,7 +151,11 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.getByRole('button',{name:'จัดทัพให้',exact:true}).click();
   assert.equal(Number(await unit.locator('output').innerText()),selected);
   await page.screenshot({path:out+'/coach394-direct-formation.png'});
-  await page.evaluate(()=>Game.close());
+  await page.evaluate(()=>{Game.close();Game.scout(1);});
+  assert.equal(await page.locator('#deploy button[onclick="Game.unit(0)"] b').innerText(),String(selected));
+  assert.equal(await page.locator('#deploy button[onclick="Game.unit(7)"]').count(),0);
+  assert.equal(await page.locator('#deploy [onclick*="Game.selectShip"]').count(),0);
+  await page.evaluate(()=>Game.home());
   // ...but can replay it from Settings.
   await page.evaluate(()=>Game.coachStart394());await page.waitForTimeout(600);assert.match(await text(page),/สวัสดี/);
   assert.deepEqual(errors,[]);await page.close();}
