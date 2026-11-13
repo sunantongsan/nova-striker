@@ -24,6 +24,8 @@ jobs:
         if: success() || failure()
       - run: node tests/audio380-browser.cjs
         if: success() || failure()
+      - run: node tests/coach394-browser.cjs
+        if: success() || failure()
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         continue-on-error: true
         if: always()

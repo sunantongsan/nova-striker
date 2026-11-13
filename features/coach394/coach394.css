@@ -1,0 +1,104 @@
+/* 394 — Clash-style tutorial overlay */
+#coach394{position:fixed;inset:0;z-index:30000;pointer-events:none;font-family:Tahoma,Arial,sans-serif}
+#coach394[hidden]{display:none!important}
+#coach394 .c394-dim{position:fixed;background:#0d2a4473;pointer-events:none;transition:background .2s}
+#coach394.c394-lock .c394-dim{pointer-events:auto}
+#coach394.c394-light .c394-dim{background:#0d2a4433}
+#coach394 .c394-ring{position:fixed;border:3px solid #ffe066;border-radius:14px;box-shadow:0 0 0 3px #fff8,0 0 18px #ffd84a;animation:c394ring 1s ease-in-out infinite;pointer-events:none}
+#coach394 .c394-ring[hidden],#coach394 .c394-hand[hidden]{display:none}
+@keyframes c394ring{50%{transform:scale(1.05);box-shadow:0 0 0 5px #fff6,0 0 26px #ffe066}}
+#coach394 .c394-hand{position:fixed;width:48px;height:52px;font-size:42px;line-height:52px;text-align:center;filter:drop-shadow(0 3px 2px #1b3a5588);animation:c394tap .9s ease-in-out infinite;pointer-events:none}
+#coach394 .c394-hand.c394-down{transform:rotate(180deg);animation-name:c394tapDown}
+@keyframes c394tap{50%{margin-top:-12px}}
+@keyframes c394tapDown{50%{margin-top:12px}}
+#coach394 .c394-bubble{position:fixed;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));max-width:420px;margin:0 auto;display:flex;gap:10px;align-items:center;box-sizing:border-box;padding:10px 12px 10px 8px;background:linear-gradient(#ffffff,#fff7df);border:3px solid #2f4b6e;border-radius:18px;box-shadow:0 4px 0 #2f4b6e,0 10px 24px #0d2a4466;color:#2a3f5c;pointer-events:auto;transition:top .25s ease}
+#coach394 .c394-bubble.c394-pop{animation:c394pop .3s ease-out}
+@keyframes c394pop{from{transform:scale(.85);opacity:0}}
+#coach394.c394-nudge .c394-bubble{animation:c394shake .35s}
+@keyframes c394shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#coach394 .c394-drone{flex:0 0 58px;width:58px;height:58px;border-radius:50%;background:#dff3ff url(assets/portraits393.webp) 100% 0%/400% 300% no-repeat;border:2px solid #9fd2ef;animation:c394float 2.4s ease-in-out infinite}
+@keyframes c394float{50%{transform:translateY(-3px)}}
+#coach394 .c394-copy{flex:1;min-width:0}
+#coach394 .c394-copy small{display:block;font:700 10px/14px Tahoma,Arial,sans-serif;color:#5d84a8;letter-spacing:.3px}
+#coach394 .c394-copy p{margin:2px 0 0;font:700 15px/21px Tahoma,Arial,sans-serif;color:#24395a}
+#coach394 .c394-actions{display:flex;gap:8px;margin-top:8px}
+#coach394 .c394-actions:empty{display:none}
+#coach394 .c394-actions button{flex:1;min-height:40px;margin:0;padding:4px 10px;border-radius:12px;font:800 15px/1 Tahoma,Arial,sans-serif;cursor:pointer}
+#coach394 .c394-go{background:linear-gradient(#b8f07a,#5fbf3a);border:2px solid #2f6b22;border-bottom-width:4px;color:#fff;text-shadow:0 1px 1px #2f6b22}
+#coach394 .c394-alt{background:linear-gradient(#ffffff,#e6eef5);border:2px solid #7f99b3;border-bottom-width:4px;color:#2f4b6e}
+#coach394 .c394-skip{position:absolute;top:-12px;right:10px;min-height:0;padding:2px 10px;border-radius:10px;background:#fff;border:2px solid #9fb6cc;color:#6f87a0;font:700 11px/16px Tahoma,Arial,sans-serif}
+
+/* 394 — phone HUD: Clash layout, nothing off-screen. Attack bottom-left, Army + Build bottom-right,
+   secondary shortcuts stacked in the corners. */
+@media (max-width:620px) and (orientation:portrait){
+ body.phone394 #app #homebar{overflow:visible!important;width:0!important;max-width:0!important;height:0!important;padding:0!important;margin:0!important}
+ body.phone394 #app #homebar>button{position:fixed!important;margin:0!important;flex:none!important;z-index:6}
+ body.phone394 #app #homebar>button .railLabel373{bottom:-1px!important;max-width:none!important;font-size:10px!important}
+ /* bottom row */
+ body.phone394 #app #homebar>#playerSearch382{left:max(8px,env(safe-area-inset-left))!important;right:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:74px!important;min-width:74px!important;height:66px!important;min-height:66px!important}
+ body.phone394 #app #homebar>#playerSearch382 .menu-art339{width:36px!important;height:34px!important}
+ body.phone394 #app #homebar>#botAttack376{left:calc(88px + env(safe-area-inset-left,0px))!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
+ body.phone394 #app #homebar>.rail-missions338{left:calc(146px + env(safe-area-inset-left,0px))!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important}
+ body.phone394 #app #homebar>.rail-army338{right:calc(84px + env(safe-area-inset-right,0px))!important;left:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:62px!important;min-width:62px!important;height:62px!important;min-height:62px!important}
+ body.phone394 #app #homebar>.rail-build338{right:max(8px,env(safe-area-inset-right))!important;left:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:70px!important;min-width:70px!important;height:66px!important;min-height:66px!important;background:linear-gradient(#c6f08a,#6cbf3e)!important;border-color:#e9ffcf!important;border-bottom-color:#3f7d26!important}
+ body.phone394 #app #homebar>.rail-army338 .menu-art339,body.phone394 #app #homebar>.rail-build338 .menu-art339{width:38px!important;height:38px!important}
+ /* right column above Build */
+ body.phone394 #app #homebar>.rail-nova338{right:max(10px,env(safe-area-inset-right))!important;left:auto!important;bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+ body.phone394 #app #homebar>#skillShop342{right:max(10px,env(safe-area-inset-right))!important;left:auto!important;bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
+ body.phone394 #app #homebar>#dailyCheckin340{right:max(10px,env(safe-area-inset-right))!important;left:auto!important;bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
+ /* left column above Attack */
+ body.phone394 #app #homebar>#titanEntry342{left:max(10px,env(safe-area-inset-left))!important;bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+ body.phone394 #app #homebar>#settingsButton{left:max(10px,env(safe-area-inset-left))!important;bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
+}
+
+/* 394 — compact windows: one screen, no sideways overflow */
+body.phone394 #modal#modal[data-nova360] .novaContent360{overflow-x:hidden!important}
+body.phone394 #modal#modal[data-nova360] .novaContent360 *{max-width:100%;box-sizing:border-box}
+body.phone394 #modal#modal[data-nova360] .shop-tabs261,body.phone394 #modal#modal[data-nova360] .novaTabs360,body.phone394 #modal#modal[data-nova360] .novaFilter360{gap:4px!important;padding:3px!important;margin:0 0 6px!important;flex-wrap:nowrap!important;overflow:hidden!important}
+body.phone394 #modal#modal[data-nova360] .shop-tabs261 button,body.phone394 #modal#modal[data-nova360] .novaTabs360 button,body.phone394 #modal#modal[data-nova360] .novaFilter360 button{min-height:32px!important;height:32px!important;padding:2px 4px!important;font-size:12px!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+body.phone394 #modal#modal[data-nova360] .shop-tabs261 .art345,body.phone394 #modal#modal[data-nova360] .novaTabs360 .art345{display:none!important}
+/* Build shop: 3 small cards per row */
+body.phone394 #modal#modal[data-nova360] .shop-grid261{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+body.phone394 #modal#modal[data-nova360] .build-card261{display:flex!important;flex-direction:column!important;align-items:center!important;gap:0!important;min-height:0!important;height:auto!important;padding:4px 3px!important;border-radius:12px!important;text-align:center!important;grid-template-columns:none!important}
+body.phone394 #modal#modal[data-nova360] .build-card261>*{position:static!important;grid-area:auto!important;margin:0!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 .count261{position:absolute!important;left:4px!important;right:auto!important;top:4px!important;font-size:9px!important;padding:1px 4px!important;z-index:1}
+body.phone394 #modal#modal[data-nova360] .build-card261 .icon{width:42px!important;height:42px!important;min-width:0!important;margin:0 auto!important;flex:none!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 b{display:block!important;width:100%!important;font-size:10.5px!important;line-height:14px!important;min-height:14px!important;max-height:14px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 small{display:block!important;width:100%!important;font-size:9px!important;line-height:12px!important;min-height:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 .card-actions261{display:flex!important;flex-direction:row!important;gap:3px!important;width:100%!important;margin-top:3px!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 .card-actions261 button{flex:1 1 0!important;min-width:0!important;min-height:28px!important;height:28px!important;padding:0 2px!important;font-size:11px!important;border-radius:9px!important;white-space:nowrap!important;overflow:hidden!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 .card-actions261 button.green+button{flex:0 0 26px!important;font-size:0!important}
+body.phone394 #modal#modal[data-nova360] .build-card261 .card-actions261 button.green+button::before{content:'⬆';font-size:14px}
+body.phone394 #modal#modal[data-nova360] .build-card261 .card-actions261 .art345{display:none!important}
+/* Army: 3 troop cards per row; the whole row of info fits on one screen */
+body.phone394 #modal#modal[data-nova360] .novaCapacity360{margin:0 0 4px!important;font-size:12px!important;min-height:0!important}
+body.phone394 #modal#modal[data-nova360] .novaTroops360{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360{display:flex!important;flex-direction:column!important;align-items:center!important;min-height:0!important;height:auto!important;padding:4px 4px 5px!important;border-radius:12px!important;grid-template-columns:none!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360>*{position:static!important;grid-area:auto!important;margin:0!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360>strong{order:3;width:100%!important;font-size:11px!important;line-height:14px!important;padding:0 10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaPortrait360{order:1;width:52px!important;height:52px!important;min-width:0!important;margin:1px auto!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaPortrait360 span{width:100%!important;height:100%!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaCost360{order:4;display:flex!important;justify-content:center!important;gap:6px!important;width:100%!important;font-size:10px!important;line-height:13px!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaMiniTimer360{order:5;width:100%!important;font-size:10px!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaTrain360{order:6;width:100%!important;min-height:30px!important;height:30px!important;margin-top:3px!important;padding:0!important;font-size:12px!important;border-radius:9px!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaTrain360 .art345{display:none!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaCount360{position:absolute!important;left:3px!important;top:3px!important;right:auto!important;bottom:auto!important;font-size:9px!important;padding:1px 4px!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaInfo360{position:absolute!important;right:3px!important;top:3px!important;left:auto!important;width:20px!important;min-width:0!important;max-width:20px!important;height:20px!important;min-height:0!important;padding:0!important;border-radius:50%!important;font:800 12px/16px Tahoma,Arial,sans-serif!important;text-indent:0!important;color:#fff!important;overflow:hidden!important}
+/* Campaign: 100 small stage tiles, 8 per row */
+body.phone394 #modal#modal[data-nova360] .novaContent360>p{font-size:11px!important;line-height:15px!important;margin:0 0 6px!important}
+body.phone394 #modal#modal[data-nova360] .missions{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:4px!important}
+body.phone394 #modal#modal[data-nova360] .missions button{min-height:38px!important;height:38px!important;padding:0!important;font-size:14px!important;line-height:16px!important;border-radius:9px!important;min-width:0!important;box-shadow:0 2px 0 #c98a12!important}
+body.phone394 #modal#modal[data-nova360] .missions button small{font-size:8px!important;line-height:10px!important;white-space:nowrap!important;overflow:hidden!important}
+body.phone394 #modal#modal[data-nova360] .missions button[disabled] small{display:none!important}
+body.phone394 #modal#modal[data-nova360] .missions button[disabled]{box-shadow:0 2px 0 #bfb59f!important;font-size:12px!important}
+/* Settings: two columns, short */
+body.phone394 #modal#modal[data-nova360] .settings394{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-content:start!important}
+body.phone394 #modal#modal[data-nova360] .settings394>button{min-height:44px!important;margin:0!important;padding:4px 6px!important;font-size:12.5px!important;line-height:16px!important;white-space:normal!important}
+body.phone394 #modal#modal[data-nova360] .settings394>label,body.phone394 #modal#modal[data-nova360] .settings394>div{grid-column:1/-1!important;margin:0!important}
+body.phone394 #modal#modal[data-nova360] .settings394>label input{width:100%!important}
+body.phone394 #modal#modal[data-nova360] .settings394 #nova-version-info{font-size:11px!important;line-height:1.4!important;padding:6px!important}
+body.phone394 #modal#modal[data-nova360] .settings394 #nova-support293{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding-top:6px!important}
+body.phone394 #modal#modal[data-nova360] .settings394 #nova-support293 button{margin:0!important;min-height:40px!important;font-size:12px!important}
+body.phone394 #modal#modal[data-nova360] .build-card261>span:not(.count261),body.phone394 #modal#modal[data-nova360] .build-card261>img{width:42px!important;height:42px!important;min-width:0!important;flex:none!important;margin:0 auto!important;background-size:auto 100%;object-fit:contain}
+body.phone394 #modal#modal[data-nova360] .build-card261>.logistics-icon277{background-size:200% 200%!important}
+body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaInfo360::before{content:'i'}

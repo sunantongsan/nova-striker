@@ -2682,6 +2682,7 @@ Game.openTutorialVideo=function(returnTo){
  watch.observe(modal,{attributes:true,attributeFilter:['style'],childList:true,subtree:true});
 };
 function addTutorialVideoButton(atStart){
+ if(!modal.querySelector||!document.createElement)return;
  var sheet=modal.querySelector('.novaContent360')||modal.querySelector('.sheet');
  if(!sheet)return;
  var button=document.createElement('button');
