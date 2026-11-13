@@ -128,6 +128,34 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   if(await page.isVisible('#welcomeGuest'))await page.click('#welcomeGuest');await page.waitForTimeout(3500);
   assert.equal(await text(page),'','developed base must not see the first-play tutorial');
   assert.equal(await page.evaluate(()=>!!document.querySelector('#guideDock288:not([hidden])')),false,'old guide card stays hidden');
+  // Returning players get an inline, dismissible lesson only on their first visit.
+  await page.evaluate(()=>Game.training());
+  const tip=page.locator('#modal .menuCoach');
+  await tip.waitFor();
+  assert.match(await tip.innerText(),/ผลิตทหาร/);
+  await tip.getByRole('button').click();
+  await tip.waitFor({state:'detached'});
+  await page.evaluate(()=>{Game.close();Game.training();});
+  assert.equal(await tip.count(),0);
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('novaRTS1')).menuGuide.training),true);
+  await page.evaluate(()=>Game.armyView360('formation'));
+  await page.locator('.directFormation360 .formationRow360').first().waitFor();
+  assert.equal(await page.locator('#ships278').count(),0);
+  const unit=page.locator('.directFormation360 .formationRow360').first();
+  const selected=Number(await unit.locator('output').innerText());
+  assert.ok(selected>0,'initial lineup should include ready troops');
+  await unit.getByRole('button',{name:/ลด/}).click();
+  assert.equal(Number(await unit.locator('output').innerText()),selected-1);
+  const roster=await page.evaluate(()=>JSON.parse(localStorage.getItem('novaRTS1')).formation360);
+  assert.equal(roster[0],selected-1);
+  await page.getByRole('button',{name:'จัดทัพให้',exact:true}).click();
+  assert.equal(Number(await unit.locator('output').innerText()),selected);
+  await page.screenshot({path:out+'/coach394-direct-formation.png'});
+  await page.evaluate(()=>{Game.close();Game.scout(1);});
+  assert.equal(await page.locator('#deploy button[onclick="Game.unit(0)"] b').innerText(),String(selected));
+  assert.equal(await page.locator('#deploy button[onclick="Game.unit(7)"]').count(),0);
+  assert.equal(await page.locator('#deploy [onclick*="Game.selectShip"]').count(),0);
+  await page.evaluate(()=>Game.home());
   // ...but can replay it from Settings.
   await page.evaluate(()=>Game.coachStart394());await page.waitForTimeout(600);assert.match(await text(page),/สวัสดี/);
   assert.deepEqual(errors,[]);await page.close();}

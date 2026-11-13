@@ -205,3 +205,54 @@ setTimeout(coachTick394,1800);
  if(root.MutationObserver)new MutationObserver(tidy).observe(modal,{childList:true,subtree:true});
  Game.adPrivacy248=function(){if(required())root.NovaAds.settings();};
 })();
+
+// Short, optional guidance inside the menu on its first visit.
+(function(){
+ var lessons=[
+  {key:'training',section:'#armyHub278',target:'.novaTrain360:not(:disabled), .novaFilter360',
+   th:'แตะ + เพื่อผลิตทหาร แล้วเปิดแท็บจัดทัพเพื่อเลือกกำลังที่จะพาไปรบ',
+   en:'Tap + to train troops, then open Formation to prepare your army.'},
+  {key:'formation',section:'#armyHub278',tab:'formation',target:'button[onclick="Game.autoFormation360()"]',
+   th:'แตะ «จัดทัพให้» เพื่อเลือกทหารที่พร้อมรบ หรือกด + และ − เพื่อจัดเอง',
+   en:'Tap Auto-fill to pick ready troops, or use + and − to choose them yourself.'},
+  {key:'construction',section:'.shop-grid261',target:'.shop-tabs261',
+   th:'เลือกหมวดอาคาร แล้วแตะสร้างเพื่อเลือกตำแหน่งบนฐาน',
+   en:'Choose a building category, then tap Build to place it in your base.'},
+  {key:'store',section:'.store348',target:'.storeTabs348',
+   th:'แตะแท็บเพื่อเลือกดู NOVA สกิล หรือของเสริมฐาน',
+   en:'Use the tabs to browse NOVA, skills, or base support.'}
+ ];
+ var card=null,highlight=null,active=null,save=null;
+ function clear(){
+  if(card)card.remove();
+  if(highlight)highlight.classList.remove('menuCoachHighlight');
+  card=highlight=active=null;
+ }
+ function refresh(){
+  if(save!==E.d){clear();save=E.d;}
+  if(!coachState394().done||!$('welcome').hidden||!coachModalOpen394()){clear();return;}
+  var content=modal.querySelector('.novaContent360')||modal.querySelector('.sheet');
+  if(!content){clear();return;}
+  var formation=!!content.querySelector('.novaTabs360 [aria-pressed="true"][onclick*="formation"]');
+  var lesson=lessons.find(function(item){
+   return (item.key!=='training'||!formation)&&(item.tab!=='formation'||formation)&&content.querySelector(item.section);
+  });
+  if(!lesson||(save.menuGuide&&save.menuGuide[lesson.key])){clear();return;}
+  if(active===lesson&&card&&card.parentNode===content)return;
+  clear();active=lesson;
+  highlight=content.querySelector(lesson.target);
+  if(highlight)highlight.classList.add('menuCoachHighlight');
+  card=document.createElement('aside');card.className='menuCoach';card.setAttribute('aria-label',mt251('ผู้ช่วย NOVA','NOVA Guide'));
+  var text=document.createElement('span');text.textContent=mt251(lesson.th,lesson.en);
+  var dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent=mt251('เข้าใจแล้ว','Got it');
+  dismiss.onclick=function(){
+   if(save!==E.d)return;
+   save.menuGuide=Object.assign({},save.menuGuide);
+   save.menuGuide[lesson.key]=true;
+   clear();E.save();
+  };
+  card.append(text,dismiss);content.prepend(card);
+ }
+ new MutationObserver(refresh).observe(modal,{childList:true,subtree:true});
+ new MutationObserver(refresh).observe(modal,{attributes:true,attributeFilter:['style']});
+})();
