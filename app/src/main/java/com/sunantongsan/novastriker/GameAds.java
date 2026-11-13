@@ -1,6 +1,5 @@
 package com.sunantongsan.novastriker;
 
-import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -149,24 +148,17 @@ final class GameAds {
         deliverPending();
         if (enabled()) requestConsent();
     }
-    private boolean enabled() { return !destroyed && prefs.getBoolean("enabled", false); }
+    private boolean enabled() { return !destroyed; }
+    // Ads are on by default, like other games. Google's consent form (UMP) appears by itself only
+    // where the law requires it; this opens Google's privacy options there and does nothing elsewhere.
+    @JavascriptInterface public boolean privacyRequired() {
+        return consent.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED;
+    }
     @JavascriptInterface public void settings() {
         activity.runOnUiThread(() -> {
-            if (destroyed || showing) return;
-            new AlertDialog.Builder(activity).setTitle("โฆษณาและความเป็นส่วนตัว")
-                .setMessage("เกมเล่นได้โดยไม่เปิดโฆษณา หากอายุ 18 ปีขึ้นไป คุณเลือกเปิดโฆษณาแบนเนอร์ โฆษณาระหว่างเปลี่ยนฉาก และโฆษณาแบบรับรางวัลเพื่อรับรางวัลที่แสดงในเกมได้ Google อาจใช้ IP รหัสอุปกรณ์ การโต้ตอบและข้อมูลวินิจฉัยเพื่อโฆษณาและป้องกันทุจริต เปลี่ยนได้ที่เมนูความเป็นส่วนตัว")
-                .setPositiveButton("อายุ 18+ และเปิดโฆษณา", (d,w) -> {
-                    prefs.edit().putBoolean("enabled", true).apply(); requestConsent();
-                })
-                .setNegativeButton("ไม่เปิด / อายุต่ำกว่า 18", (d,w) -> {
-                    prefs.edit().putBoolean("enabled", false).apply(); generation++; ready=null; rewardReady=null; clearBanner();
-                })
-                .setNeutralButton("จัดการความยินยอม", (d,w) -> {
-                    if (consent.getPrivacyOptionsRequirementStatus() == ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED) {
-                        ready=null; rewardReady=null; generation++; clearBanner();
-                        UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
-                    }
-                }).show();
+            if (destroyed || showing || !privacyRequired()) return;
+            ready=null; rewardReady=null; generation++; clearBanner();
+            UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
         });
     }
     private void requestConsent() {

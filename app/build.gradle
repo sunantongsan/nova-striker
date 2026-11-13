@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 39
-        versionName '1.9.39'
+        versionCode 40
+        versionName '1.9.40'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
         buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'String', 'NOVA_PATCH_BACKUP_ORIGIN', groovy.json.JsonOutput.toJson(providers.gradleProperty('novaPatchBackupOrigin').getOrElse('https://game.guardscan.xyz'))
