@@ -79,7 +79,10 @@ function renderFormation360(){
    '<button type="button" aria-label="'+mt251('ลด ','Remove ')+unit.name+'" onclick="Game.editFormation360('+i+',-1)" '+(!roster[i]?'disabled':'')+'>−</button><output>'+roster[i]+'</output>'+
    '<button type="button" aria-label="'+mt251('เพิ่ม ','Add ')+unit.name+'" onclick="Game.editFormation360('+i+',1)" '+(roster[i]>=stock?'disabled':'')+'>+</button></div>';
  }).join('');
+ var previous=modal.querySelector('.directFormation360'),scroll=previous&&previous.closest('.novaContent360');
+ var top=scroll?scroll.scrollTop:0;
  open(html+(rows||'<p>'+mt251('ยังไม่มีทหารพร้อมรบ ไปที่แท็บผลิตเพื่อฝึกทหาร','No troops ready. Use Train to recruit troops.')+'</p>')+'</section>');
+ if(top)requestAnimationFrame(function(){var current=modal.querySelector('.directFormation360');var body=current&&current.closest('.novaContent360');if(body)body.scrollTop=top;});
 }
 Game.editFormation360=function(i,delta){
  if(logisticsBusy277(E)||!U[i]||(delta!==1&&delta!==-1))return;
@@ -98,3 +101,8 @@ Game.autoFormation360=function(){
  if(saveFormation360(formationRoster360(E)))renderFormation360();
 };
 Game.fleet277=Game.manifest277=function(){Game.armyView360('formation');};
+
+(function(){
+ var button=$('skillShop342'),title=document.querySelector('#app>header .title');
+ if(button&&title){title.appendChild(button);button.title=mt251('ร้านค้า','Shop');button.setAttribute('aria-label',button.title);}
+})();
