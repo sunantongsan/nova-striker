@@ -126,3 +126,10 @@
  #modal#modal[data-nova360] .compactStore360 .storeGrid348{grid-template-columns:repeat(6,minmax(0,1fr))!important}
 }
 #modal#modal[data-nova360] .compactStore360 .novaReferencePrices348{display:block;margin:2px 0;font-size:10px;line-height:1.25;color:#415663}
+#modal#modal[data-nova360] .compactStore360 .storeTabs348 button{min-height:32px;padding:2px 4px}
+#modal#modal[data-nova360] .compactStore360 .storeTabs348 .art345{display:none}
+#modal#modal[data-nova360] .compactStore360 .packArt348{width:38px;height:38px}
+#modal#modal[data-nova360] .compactStore360 .novaReferencePrices348{margin:1px 0;white-space:nowrap;font-size:clamp(8px,1.45vw,10px)}
+#modal#modal[data-nova360] .compactStore360 .packCard348 button{min-height:32px}
+#modal#modal[data-nova360] .compactStore360 .storeNote348{margin:5px 0;font-size:11px}
+#modal#modal[data-nova360] .compactStore360 .storeRetry348{min-height:32px;margin:0;padding:2px 7px;font-size:11px}
