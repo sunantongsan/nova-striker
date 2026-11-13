@@ -157,7 +157,7 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.screenshot({path:out+'/coach394-direct-formation.png'});
   await page.evaluate(()=>{
    Game.close();
-   window.NovaBilling={catalog(){queueMicrotask(()=>window.novaBilling348('catalog',{products:[{id:'nova_1000',price:'฿30'}]}));}};
+   window.NovaBilling={catalog(){queueMicrotask(()=>window.novaBilling348('catalog',{products:[{id:'nova_1000',price:'€1.19'}]}));}};
    Game.shop348('nova');
   });
   const shop=page.locator('#skillShop342');
@@ -165,7 +165,8 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.locator('.compactStore360').waitFor();
   const pack=page.locator('.packCard348').first();
   assert.ok((await pack.locator('.packArt348').boundingBox()).height<=49);
-  assert.ok(await pack.getByRole('button',{name:'฿30',exact:true}).isEnabled());
+  assert.ok(await pack.getByRole('button',{name:'€1.19',exact:true}).isEnabled());
+  assert.match(await pack.locator('.novaReferencePrices348').innerText(),/฿30 · US\$0\.89/);
   await page.screenshot({path:out+'/coach394-mobile-store.png'});
 
   await page.evaluate(()=>{Game.close();Game.scout(1);});
