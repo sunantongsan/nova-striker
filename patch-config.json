@@ -25,8 +25,8 @@
     38,
     39
   ],
-  "contentVersion": 176,
-  "label": "1.12.6-confirm-formation",
+  "contentVersion": 177,
+  "label": "1.12.7-dual-currency",
   "maxBytes": 67108864,
   "titan342": true
 }

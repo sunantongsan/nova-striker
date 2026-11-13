@@ -125,3 +125,4 @@
 @media(orientation:landscape) and (min-width:670px){
  #modal#modal[data-nova360] .compactStore360 .storeGrid348{grid-template-columns:repeat(6,minmax(0,1fr))!important}
 }
+#modal#modal[data-nova360] .compactStore360 .novaReferencePrices348{display:block;margin:2px 0;font-size:10px;line-height:1.25;color:#415663}
