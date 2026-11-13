@@ -169,6 +169,9 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.screenshot({path:out+'/coach394-mobile-store.png'});
 
   await page.evaluate(()=>{Game.close();Game.scout(1);});
+  const confirmArmy=page.getByRole('button',{name:'ใช้ทัพนี้ออกรบ',exact:true});
+  await confirmArmy.waitFor();
+  await confirmArmy.click();
   assert.equal(await page.locator('#deploy button[onclick="Game.unit(0)"] b').innerText(),String(selected));
   assert.equal(await page.locator('#deploy button[onclick="Game.unit(7)"]').count(),0);
   assert.equal(await page.locator('#deploy [onclick*="Game.selectShip"]').count(),0);

@@ -69,6 +69,7 @@ function saveFormation360(next){
  toast(tr('บันทึกไม่ได้'));
  return false;
 }
+var pendingFormationBattle360=null;
 function renderFormation360(){
  var roster=formationRoster360(E,E.d.formation360);
  var html='<section id="armyHub278" class="directFormation360"><h2>'+mt251('จัดทัพ','Formation')+'</h2>'+armyTabs360('formation');
@@ -81,6 +82,7 @@ function renderFormation360(){
    '<button type="button" aria-label="'+mt251('ลด ','Remove ')+unit.name+'" onclick="Game.editFormation360('+i+',-1)" '+(!roster[i]?'disabled':'')+'>−</button><output>'+roster[i]+'</output>'+
    '<button type="button" aria-label="'+mt251('เพิ่ม ','Add ')+unit.name+'" onclick="Game.editFormation360('+i+',1)" '+(roster[i]>=stock?'disabled':'')+'>+</button></div>';
  }).join('');
+ if(pendingFormationBattle360)html+='<button type="button" class="wide green" onclick="Game.confirmFormationBattle360()">'+mt251('ใช้ทัพนี้ออกรบ','Battle with this army')+'</button>';
  var previous=modal.querySelector('.directFormation360'),scroll=previous&&previous.closest('.novaContent360');
  var top=scroll?scroll.scrollTop:0;
  open(html+(rows||'<p>'+mt251('ยังไม่มีทหารพร้อมรบ ไปที่แท็บผลิตเพื่อฝึกทหาร','No troops ready. Use Train to recruit troops.')+'</p>')+'</section>');
@@ -102,7 +104,39 @@ Game.autoFormation360=function(){
  E.sync();
  if(saveFormation360(formationRoster360(E)))renderFormation360();
 };
-Game.fleet277=Game.manifest277=function(){Game.armyView360('formation');};
+Game.fleet277=Game.manifest277=function(){pendingFormationBattle360=null;Game.armyView360('formation');};
+Game.confirmFormationBattle360=function(){
+ var battle=pendingFormationBattle360;
+ if(!battle||battle.save!==E.d||battle.raid!==E.raid||!modal.querySelector('.directFormation360'))return;
+ E.sync();
+ if(!formationRoster360(E,E.d.formation360).some(Boolean)){
+  toast(mt251('เลือกทหารก่อนออกรบ','Choose troops before attacking'));return;
+ }
+ pendingFormationBattle360=null;
+ battle.start();
+};
+(function(){
+ var previousClose=close;
+ close=function(){pendingFormationBattle360=null;return previousClose.apply(this,arguments);};
+ ['scout','practiceStart','attackSelected'].forEach(function(action){
+  var start=Game[action];
+  Game[action]=function(){
+   if((action==='scout'&&typeof coach394!=='undefined'&&coach394)||
+      (action==='attackSelected'&&(!liveTarget||warBusy||liveTarget.can_attack===false||E.d.pendingLiveStart)))return start.apply(this,arguments);
+   if(logisticsBusy277(E))return start.apply(this,arguments);
+   var args=arguments,prior=E.raid;
+   pendingFormationBattle360={save:E.d,raid:prior,start:function(){
+    var roster=action==='practiceStart'?formationRoster360(E,E.d.formation360):null;
+    start.apply(Game,args);
+    if(roster&&E.raid&&E.raid!==prior&&E.raid.practice){
+     E.raid.army=roster;E.raid.directPractice360=true;
+     deployKind=roster.findIndex(Boolean);hud();
+    }
+   }};
+   Game.armyView360('formation');
+  };
+ });
+})();
 
 (function(){
  var button=$('skillShop342'),title=document.querySelector('#app>header .title');
