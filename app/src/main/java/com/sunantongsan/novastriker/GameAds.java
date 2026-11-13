@@ -147,8 +147,7 @@ final class GameAds {
     void begin() {
         deliverTest248();
         deliverPending();
-        if (!prefs.contains("enabled")) settings();
-        else if (enabled()) requestConsent();
+        if (enabled()) requestConsent();
     }
     private boolean enabled() { return !destroyed && prefs.getBoolean("enabled", false); }
     @JavascriptInterface public void settings() {
