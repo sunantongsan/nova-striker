@@ -102,3 +102,6 @@ body.phone394 #modal#modal[data-nova360] .settings394 #nova-support293 button{ma
 body.phone394 #modal#modal[data-nova360] .build-card261>span:not(.count261),body.phone394 #modal#modal[data-nova360] .build-card261>img{width:42px!important;height:42px!important;min-width:0!important;flex:none!important;margin:0 auto!important;object-fit:contain}
 body.phone394 #modal#modal[data-nova360] .build-card261>.logistics-icon277{background-size:200% 200%!important}
 body.phone394 #modal#modal[data-nova360] .novaTroop360 .novaInfo360::before{content:'i'}
+#modal .menuCoach{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;padding:7px 9px;border:1px solid #d2ad55;border-radius:10px;background:#fff4cf;color:#24395a;font:700 12px/1.4 Tahoma,Arial,sans-serif}
+#modal .menuCoach>button{flex:none;min-height:36px;margin:0;padding:4px 8px}
+#modal .menuCoachHighlight{outline:2px solid #e6b141!important;outline-offset:-2px}
