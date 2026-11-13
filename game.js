@@ -1315,7 +1315,7 @@ var hudSupport228=hud;hud=function(){hudSupport228();var badge=$('builderBadge')
 var buildSupport228=Game.build;Game.build=function(){buildSupport228();modal.innerHTML=modal.innerHTML.replace('</h2>',tr('</h2><button class="wide" onclick="Game.droneShop()">⚒ โดรนช่างว่าง ')+E.builderFree()+'/'+E.builderCount()+tr(' • ซื้อเพิ่ม</button>'));};
 
 var guest288=false;
-// Account welcome: registration gates the UI, while native auth protects online data.
+// Local play is available before connecting an online account.
 (function(){
 var welcome=$('welcome');if(!welcome)return;
 var mode='signup',pending=false,timer=0,checking=false;
@@ -1324,17 +1324,17 @@ function unlock(){pending=false;clearTimeout(timer);$('welcomeSubmit').disabled=
 function busy(text){unlock();pending=true;$('welcomeSubmit').disabled=true;$('welcomeGoogle').disabled=true;if($('welcomeFacebook'))$('welcomeFacebook').disabled=true;if($('welcomePlayGames'))$('welcomePlayGames').disabled=true;if($('welcomeGuest'))$('welcomeGuest').disabled=true;message(text);timer=setTimeout(function(){unlock();message(tr('ยังไม่ได้รับผล กรุณาตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง'));},35000);}
 function remember(value){try{if(value)localStorage.setItem('novaAccountReady','1');else localStorage.removeItem('novaAccountReady');}catch(e){}}
 function enter(skipName){unlock();checking=false;welcome.hidden=true;remember(true);if(!skipName)Game.checkBaseName();}
-Game.welcomeForm=function(next){mode=next||'signup';unlock();$('welcomeEmail').value='';$('welcomePassword').value='';$('welcomePasswordRow').hidden=mode==='recover';$('welcomePassword').required=mode!=='recover';$('welcomePassword').minLength=mode==='login'?1:8;$('welcomePassword').autocomplete=mode==='signup'?'new-password':'current-password';$('welcomeTitle').textContent=mode==='signup'?tr('เริ่มภารกิจของคุณ'):mode==='recover'?tr('ตั้งรหัสผ่านใหม่'):tr('ยินดีต้อนรับกลับ');$('welcomeSubmit').textContent=mode==='signup'?tr('สร้างบัญชีและเริ่มเล่น'):mode==='recover'?tr('ส่งลิงก์ตั้งรหัสผ่าน'):tr('เข้าสู่ระบบ');$('welcomeSwitch').textContent=mode==='signup'?tr('มีบัญชีแล้ว? เข้าสู่ระบบ'):tr('ยังไม่มีบัญชี? สมัครสมาชิก');$('welcomeHint').textContent=mode==='signup'?tr('สมัครเพื่อเข้าเล่น • ฐานเดิมในเครื่องยังอยู่'):mode==='recover'?tr('เปิดลิงก์จากอีเมลบนมือถือเครื่องนี้'):tr('เข้าสู่บัญชีเดิมเพื่อเล่นต่อ');message('');};
+Game.welcomeForm=function(next){mode=next||'signup';unlock();$('welcomeEmail').value='';$('welcomePassword').value='';$('welcomePasswordRow').hidden=mode==='recover';$('welcomePassword').required=mode!=='recover';$('welcomePassword').minLength=mode==='login'?1:8;$('welcomePassword').autocomplete=mode==='signup'?'new-password':'current-password';$('welcomeTitle').textContent=mode==='signup'?tr('เริ่มภารกิจของคุณ'):mode==='recover'?tr('ตั้งรหัสผ่านใหม่'):tr('ยินดีต้อนรับกลับ');$('welcomeSubmit').textContent=mode==='signup'?tr('สร้างบัญชีและเริ่มเล่น'):mode==='recover'?tr('ส่งลิงก์ตั้งรหัสผ่าน'):tr('เข้าสู่ระบบ');$('welcomeSwitch').textContent=mode==='signup'?tr('มีบัญชีแล้ว? เข้าสู่ระบบ'):tr('ยังไม่มีบัญชี? สมัครสมาชิก');$('welcomeHint').textContent=mode==='signup'?mt251('เริ่มเล่นได้เลย หรือเข้าสู่บัญชีเดิมเพื่อเล่นต่อ','Start playing now, or sign in to resume your existing base'):mode==='recover'?tr('เปิดลิงก์จากอีเมลบนมือถือเครื่องนี้'):tr('เข้าสู่บัญชีเดิมเพื่อเล่นต่อ');message('');};
 Game.welcomeSwitch=function(){Game.welcomeForm(mode==='signup'?'login':'signup');};
 Game.welcomeSubmit=function(event){event.preventDefault();if(pending)return;var cloud=root.NovaCloud;if(!cloud||!cloud.available||!cloud.available()||!cloud.emailAuth){message(tr('กรุณาเปิดผ่านแอป Nova รุ่นที่รองรับบัญชีออนไลน์'));return;}var email=$('welcomeEmail').value.trim(),password=$('welcomePassword').value;if(!email||(mode!=='recover'&&password.length<(mode==='signup'?8:1))){message(tr('กรุณากรอกอีเมลและรหัสผ่านให้ครบ'));return;}checking=false;busy(tr('กำลังดำเนินการ…'));$('welcomePassword').value='';cloud.emailAuth(mode,email,password);};
 Game.welcomeGoogle=function(){var cloud=root.NovaCloud;if(pending)return;if(!cloud||!cloud.available||!cloud.available()||!cloud.login){message(tr('กรุณาเปิดผ่านแอป Nova รุ่นที่รองรับบัญชีออนไลน์'));return;}checking=false;busy(tr('เลือกบัญชี Google แล้วกลับมาที่เกม'));loginDestination='cloud';cloud.login();};
 Game.welcomeFacebook=function(){var cloud=root.NovaCloud;if(pending)return;if(!cloud||!cloud.available||!cloud.available()||!cloud.loginFacebook){message(root.NovaI18n.language==='en'?'Update NOVA from Google Play to use Facebook.':'อัปเดต NOVA จาก Google Play เพื่อใช้ Facebook');return;}checking=false;busy(tr('กำลังดำเนินการ…'));loginDestination='cloud';cloud.loginFacebook();};
-Game.welcomePlayGames=function(){var cloud=root.NovaCloud;if(pending)return;if(!cloud||!cloud.available||!cloud.available()||!cloud.loginPlayGames){message(root.NovaI18n.language==='en'?'Update NOVA from Google Play to use Play Games.':'อัปเดต NOVA จาก Google Play เพื่อใช้ Play Games');return;}checking=false;busy(tr('กำลังดำเนินการ…'));loginDestination='cloud';clearTimeout(timer);timer=setTimeout(function(){if(cloud.cancelPlayGames)cloud.cancelPlayGames();unlock();message(root.NovaI18n.language==='en'?'Play Games did not respond. Try again or choose another account.':'Play Games ไม่ตอบกลับ กรุณาลองใหม่หรือเลือกบัญชีอื่น');},50000);cloud.loginPlayGames();};
 Game.welcomeGuest=function(){if(pending)return;try{localStorage.setItem('novaGuest288','1');}catch(e){}guest288=true;unlock();checking=false;welcome.hidden=true;close();if(Game.beginGuide288)Game.beginGuide288();};
 var priorEvent=root.novaCloudEvent;
 root.novaCloudEvent=function(event,data){data=data||{};if(event==='signed_in'||event==='signed_out'){guest288=false;try{localStorage.removeItem('novaGuest288');}catch(e){}}if(event==='status'&&!welcome.hidden){checking=false;unlock();message(data.message);return;}if(event==='signed_out'){remember(false);welcome.hidden=false;Game.welcomeForm('signup');}if(event==='password_recovery'){unlock();welcome.hidden=true;priorEvent(event,data);return;}if(event==='signed_in'){enter(true);}if(event==='loaded'&&!welcome.hidden){var wasChecking=checking;enter();priorEvent(event,data);if(wasChecking||!data.save)close();return;}priorEvent(event,data);};
 var priorBack=root.novaBack;root.novaBack=function(){if(!welcome.hidden){if(mode!=='signup')Game.welcomeForm('signup');return;}priorBack();};
 close();welcome.hidden=false;Game.welcomeForm('signup');
+if($('welcomeGuest'))$('welcomeGuest').textContent=mt251('เริ่มเล่น','Play now');
 try{var cloud=root.NovaCloud;if(cloud&&cloud.hasAccount){if(cloud.hasAccount())enter();else if(localStorage.getItem('novaGuest288')==='1')Game.welcomeGuest();else remember(false);}else if(cloud&&cloud.available&&cloud.available()&&cloud.load){if(localStorage.getItem('novaAccountReady')==='1'){enter();return;}checking=true;message(tr('กำลังตรวจสอบบัญชีเดิม…'));cloud.load();}else if(localStorage.getItem('novaGuest288')==='1')Game.welcomeGuest();}catch(e){message(tr('ตรวจบัญชีไม่ได้ กรุณาเข้าสู่ระบบอีกครั้ง'));}
 })();
 
@@ -2635,6 +2635,21 @@ var settings390=Game.settings;Game.settings=function(){settings390.apply(this,ar
 var hudTip390=hud;hud=function(){hudTip390();tipTick390();};
 var open390=open;open=function(){tipHide390();return open390.apply(this,arguments);};
 (function loop390(){try{tipTick390();}catch(e){}setTimeout(loop390,2000);})();
+// Offer cloud backup once after a guest completes a practice battle.
+var guestHome=Game.home;
+Game.home=function(){
+ var completed=guest288&&screen==='raid'&&E.raid&&E.raid.result&&!E.raid.liveMode;
+ var result=guestHome.apply(this,arguments);
+ if(!completed||screen!=='home')return result;
+ var cloud=root.NovaCloud;
+ if(!cloud||!cloud.available||!cloud.available())return result;
+ try{
+  if(localStorage.getItem('novaGuestBackupPrompt'))return result;
+  localStorage.setItem('novaGuestBackupPrompt','1');
+ }catch(e){return result;}
+ open('<h2>'+mt251('เก็บเซฟฐานของคุณ','Keep your base progress')+'</h2><p>'+mt251('เชื่อมบัญชีเพื่อสำรองฐาน หรือเล่นต่อแล้วเชื่อมในตั้งค่าได้ทุกเมื่อ','Connect an account to back up your base, or keep playing and connect in Settings later.')+'</p><button class="wide green" onclick="Game.cloud()">'+mt251('เชื่อมบัญชี','Connect account')+'</button><button class="wide" onclick="Game.close()">'+mt251('เล่นต่อ','Keep playing')+'</button>');
+ return result;
+};
 // End 390 advisor.
 
 })(typeof globalThis!=='undefined'?globalThis:this);
