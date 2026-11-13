@@ -140,3 +140,7 @@
 .directFormation360 .formationRow360>img,.directFormation360 .formationRow360>.art278,.directFormation360 .formationRow360>.icon{width:38px;height:38px;object-fit:contain}
 .directFormation360 .formationRow360>button{min-height:40px;padding:2px}
 .directFormation360 .formationRow360>output{text-align:center;font-weight:bold}
+
+#app>header .title{position:relative}
+#app>header .title>#skillShop342{position:absolute;top:100%;left:0;display:grid;place-items:center;width:40px;height:40px;min-height:40px;margin:4px 0 0;padding:3px}
+#app>header .title>#skillShop342 img{display:block;width:30px;height:30px;object-fit:contain}
