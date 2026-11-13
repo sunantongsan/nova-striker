@@ -47,6 +47,42 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.screenshot({path:out+'/coach394-resource-icons.png'});
   assert.deepEqual(errors,[]);await page.close();}
 
+ // Busy building menus must fit all actions above the bottom HUD.
+ {const vm=require('node:vm'),ctx={console};vm.createContext(ctx);vm.runInContext(source,ctx);
+  const engine=new ctx.NovaRTS.Engine({getItem(){return null;},setItem(){}},()=>Date.now());
+  const mine=engine.d.buildings.find(b=>b.type==='mine');
+  mine.until=Date.now()+3600000;mine.constructing=true;
+  const {page}=await session(save=>{
+   localStorage.setItem('novaLanguage','th');
+   localStorage.setItem('novaRTS1',JSON.stringify(save));
+  },JSON.parse(JSON.stringify(engine.d)));
+  await page.evaluate(id=>{
+   document.getElementById('welcome').hidden=true;
+   document.getElementById('baseNameGate').hidden=true;
+   document.getElementById('boot').style.display='none';
+   Game.inspectBuilding261(id);
+   Game.close();
+  },mine.id);
+  const speed=page.locator('#selection .actions261 button[onclick*="Game.speedConfirm"]');
+  await speed.waitFor();
+  for(const [width,height] of [[853,393],[740,360],[390,844]]){
+   await page.setViewportSize({width,height});
+   const bounds=await page.locator('#selection').evaluate(panel=>{
+    const buttons=Array.from(panel.querySelectorAll('.actions261 button'),b=>b.getBoundingClientRect().toJSON());
+    const menu=panel.getBoundingClientRect().toJSON();
+    const hud=Math.min(...Array.from(document.querySelectorAll('#homebar>button'),b=>b.getBoundingClientRect()).filter(r=>r.height&&r.top>innerHeight-80).map(r=>r.top));
+    return {buttons,menu,hud};
+   });
+   assert.equal(bounds.buttons.length,4);
+   for(const b of bounds.buttons){
+    assert.ok(b.left>=bounds.menu.left&&b.right<=bounds.menu.right&&b.left>=0&&b.right<=width);
+    assert.ok(b.top>=bounds.menu.top&&b.bottom<=bounds.menu.bottom&&b.bottom<bounds.hud&&b.bottom<height);
+    assert.equal(b.top,bounds.buttons[0].top);
+   }
+   await page.screenshot({path:out+'/coach394-building-actions-'+width+'.png'});
+  }
+  await page.close();}
+
  // 1. New guest: the whole tutorial, every instruction pointing at a visible control.
  {const {page,errors}=await session();
   await page.click('#welcomeGuest');await until(page,/สวัสดี/,6000);await page.screenshot({path:out+'/coach394-hello.png'});

@@ -81,3 +81,22 @@
 #app #selection#selection .actions261 button.green{background:linear-gradient(var(--g1391),var(--g2391))!important;color:#fff!important;text-shadow:0 1.5px 0 var(--gd391)!important}
 #app #selection#selection .actions261 button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink391)!important}
 #app #selection#selection>button.wide{margin:8px auto 0!important;width:auto!important;min-width:160px;min-height:40px!important;padding:0 18px!important;border:3px solid #a0650a!important;border-radius:22px!important;background:linear-gradient(#fff1a0,var(--gold391))!important;color:#6b3f00!important;font-weight:900!important;box-shadow:0 3px 0 #a0650a!important}
+
+/* Keep building and wall actions within the visible play area above the HUD. */
+#app:not([data-battle300="true"]) #selection#selection{
+ left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+ bottom:calc(80px + var(--safe-bottom303,env(safe-area-inset-bottom,0px)))!important;
+ width:min(400px,calc(100% - 24px - var(--safe-left303,env(safe-area-inset-left,0px)) - var(--safe-right303,env(safe-area-inset-right,0px))))!important;
+ max-width:none!important;max-height:calc(100% - 146px - var(--safe-bottom303,env(safe-area-inset-bottom,0px)));
+ padding:4px 4px 8px!important;
+}
+#app #selection#selection .actions261,
+#app #selection#selection .wallBar393{flex-wrap:nowrap;gap:5px!important}
+#app #selection#selection .actions261 button,
+#app #selection#selection .wallBar393 .wallBtn393{
+ flex:0 1 64px!important;width:auto!important;min-width:0!important;
+ min-height:50px!important;padding:3px 2px!important;border-radius:12px!important;
+ font-size:11px!important;line-height:1.15!important;overflow-wrap:anywhere;
+}
+#app #selection#selection .actions261 .art345{width:24px;height:24px}
+#app #selection#selection .selection-heading b{font-size:15px!important}
