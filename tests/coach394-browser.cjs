@@ -138,6 +138,20 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.evaluate(()=>{Game.close();Game.training();});
   assert.equal(await tip.count(),0);
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('novaRTS1')).menuGuide.training),true);
+  await page.evaluate(()=>Game.armyView360('formation'));
+  await page.locator('.directFormation360 .formationRow360').first().waitFor();
+  assert.equal(await page.locator('#ships278').count(),0);
+  const unit=page.locator('.directFormation360 .formationRow360').first();
+  const selected=Number(await unit.locator('output').innerText());
+  assert.ok(selected>0,'initial lineup should include ready troops');
+  await unit.getByRole('button',{name:/ลด/}).click();
+  assert.equal(Number(await unit.locator('output').innerText()),selected-1);
+  const roster=await page.evaluate(()=>JSON.parse(localStorage.getItem('novaRTS1')).formation360);
+  assert.equal(roster[0],selected-1);
+  await page.getByRole('button',{name:'จัดทัพให้',exact:true}).click();
+  assert.equal(Number(await unit.locator('output').innerText()),selected);
+  await page.screenshot({path:out+'/coach394-direct-formation.png'});
+  await page.evaluate(()=>Game.close());
   // ...but can replay it from Settings.
   await page.evaluate(()=>Game.coachStart394());await page.waitForTimeout(600);assert.match(await text(page),/สวัสดี/);
   assert.deepEqual(errors,[]);await page.close();}
