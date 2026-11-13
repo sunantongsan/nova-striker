@@ -133,3 +133,14 @@
 #modal#modal[data-nova360] .compactStore360 .packCard348 button{min-height:32px}
 #modal#modal[data-nova360] .compactStore360 .storeNote348{margin:5px 0;font-size:11px}
 #modal#modal[data-nova360] .compactStore360 .storeRetry348{min-height:32px;margin:0;padding:2px 7px;font-size:11px}
+
+#modal#modal[data-nova360] .compactStore360 .novaContent360.novaContent360{scroll-padding-top:0}
+#modal#modal[data-nova360] .compactStore360 .storeTabs348{position:static!important;padding:0!important}
+#modal#modal[data-nova360] .compactStore360 .packCard348{gap:2px!important}
+#modal#modal[data-nova360] .compactStore360 .packCard348>b{font-size:14px!important;line-height:17px}
+#modal#modal[data-nova360] .compactStore360 .packCard348>small{margin:0!important;font-size:9px!important;line-height:13px}
+#modal#modal[data-nova360] .compactStore360 .packCard348>button{height:32px!important;min-height:32px!important;padding:2px!important;margin:0!important}
+#modal#modal[data-nova360] .compactStore360 .packCard348>button .art345{display:none!important}
+@media(orientation:landscape){
+ #modal#modal[data-nova360] .sheet.novaWindow360.compactStore360{max-height:calc(100dvh - 16px)!important}
+}
