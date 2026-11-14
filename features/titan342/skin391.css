@@ -144,3 +144,5 @@
 @media(orientation:landscape){
  #modal#modal[data-nova360] .sheet.novaWindow360.compactStore360{max-height:calc(100dvh - 16px)!important}
 }
+#modal#modal[data-nova360] .novaContent360 button.gold395,#modal#modal[data-nova360] button.gold395{border-color:#c98a12!important;background:linear-gradient(#fff6c9,#ffd75e)!important;color:#5a3300!important;text-shadow:none!important;box-shadow:0 3px 0 #c98a12!important}
+#modal#modal[data-nova360] button.gold395:disabled{background:linear-gradient(#f2efe7,#ddd6c6)!important;border-color:#bfb59f!important;box-shadow:0 3px 0 #bfb59f!important;color:#8d826b!important}
