@@ -25,11 +25,12 @@ await db.exec(fs.readFileSync('backend/nova_wallet_255.sql','utf8'));await db.ex
 await db.exec(fs.readFileSync('backend/nova_weekly_checkin_340.sql','utf8'));
 let balance=0;
 await db.exec(fs.readFileSync('backend/nova_checkin395.sql','utf8'));
+await db.exec(fs.readFileSync('backend/nova_test_ads396.sql','utf8'));await db.exec(fs.readFileSync('backend/nova_checkin_choice397.sql','utf8'));
 const today="(now() at time zone 'Asia/Bangkok')::date";
 // Free claim: 5 NOVA once per day, streak continues, replay grants nothing.
 await db.query('update nova_private.test_wallets set gems=0,claimed_day=null,checkin_streak233=0,checkin_reward233=0,checkin_ad395=null where user_id=$1',[other]);
 let s=await call('test_status',{checkin233:true},other);assert.equal(s.checkin233.next_reward,5);assert.equal(s.checkin233.ad_bonus395,15);assert.equal(s.checkin233.claimed,false);
-let r=await call('test_status',{checkin233:true,checkin395:'free'},other);assert.equal(r.test_gems,5);assert.equal(r.checkin233.claimed,true);assert.equal(r.checkin233.reward,5);assert.equal(r.checkin233.ad_bonus395,10);assert.equal(r.checkin233.streak,1);
+let r=await call('test_status',{checkin233:true,checkin395:'free'},other);assert.equal(r.test_gems,5);assert.equal(r.checkin233.claimed,true);assert.equal(r.checkin233.reward,5);assert.equal(r.checkin233.ad_bonus395,0);assert.equal(r.checkin233.streak,1);
 r=await call('test_claim',{checkin395:'free'},other);assert.equal(r.test_gems,5,'free replay');
 await assert.rejects(()=>call('test_status',{checkin395:'x'},other),/ไม่ถูกต้อง/);
 await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[other]);r=await call('test_status',{checkin395:'free'},other);assert.equal(r.test_gems,10);assert.equal(r.checkin233.streak,2);
@@ -48,16 +49,15 @@ for(const telegram of [false,true]){
  x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,15,'free after video gives nothing');
  await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[uid]);
  x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,20);assert.equal(x.checkin233.streak,2);
- x=await watch(10,30);assert.equal(x.checkin233.reward,15);assert.equal(x.checkin233.ad_bonus395,0);assert.equal(x.checkin233.streak,2);
  await assert.rejects(()=>call('research',{owner:uid,request_id:nonce(),kind:'checkin',[key]:'prepare'},uid,telegram),/วันนี้แล้ว/);
- // Video prepared before a free claim on the same day still caps the day at 15.
+ // A video prepared before choosing normal check-in grants nothing once 5 NOVA was taken.
  await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[uid]);
  const id=nonce(),p={owner:uid,request_id:id,kind:'checkin',[key]:'prepare'};x=await call('research',p,uid,telegram);assert.equal(x.ad_reward.amount,15);
- x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,35);
- await db.query('update nova_private.'+table+' set verified_at=now() where id=$1',[id]);x=await call('research',{...p,[key]:'claim',completed234:true},uid,telegram);assert.equal(x.test_gems,45);assert.equal(x.ad_reward.granted,10);assert.equal(x.checkin233.reward,15);
+ x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,25);
+ await db.query('update nova_private.'+table+' set verified_at=now() where id=$1',[id]);x=await call('research',{...p,[key]:'claim',completed234:true},uid,telegram);assert.equal(x.test_gems,25,'normal check-in already chosen');assert.equal(x.ad_reward.granted,0);assert.equal(x.checkin233.reward,5);
 }
 // 396: Google demo video while AdMob is pending (AdMob off, non-Telegram account).
-await db.exec(fs.readFileSync('backend/nova_test_ads396.sql','utf8'));await db.exec('update nova_private.admob_settings230 set enabled=false');
+await db.exec('update nova_private.admob_settings230 set enabled=false');
 await db.query('update nova_private.test_wallets set gems=0,claimed_day=null,checkin_streak233=0,checkin_reward233=0,checkin_ad395=null where user_id=$1',[other]);await db.query('delete from nova_private.test_checkin_receipts248 where owner=$1',[other]);
 const demo=async(expected,balance)=>{const id=nonce(),p={owner:other,request_id:id,checkin_test248:'prepare'};let x=await call('test_status',p,other);assert.equal(x.test_checkin248,true);assert.equal(x.test_receipt248.amount,expected);
  await assert.rejects(()=>call('test_claim',{...p,request_id:x.test_receipt248.id,checkin_test248:'claim'},other),/ให้ครบ/);
@@ -67,7 +67,6 @@ let dx=await demo(15,15);assert.equal(dx.checkin233.reward,15);assert.equal(dx.c
 await assert.rejects(()=>call('test_status',{owner:other,request_id:nonce(),checkin_test248:'prepare'},other),/วันนี้แล้ว/);
 await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[other]);await db.query('delete from nova_private.test_checkin_receipts248 where owner=$1',[other]);
 dx=await call('test_status',{checkin395:'free'},other);assert.equal(dx.test_gems,20);
-dx=await demo(10,30);assert.equal(dx.checkin233.reward,15);assert.equal(dx.checkin233.streak,2);
 await assert.rejects(()=>call('test_status',{owner:other,request_id:nonce(),checkin_test248:'prepare'},other),/วันนี้แล้ว/);
 assert.equal((await db.query("select has_function_privilege('anon','nova_private.test_command(text,jsonb)','execute') allowed")).rows[0].allowed,false);
-console.log('PASS checkin395 DB: free 5/day, video 15 (x3), +10 top-up after free, 15/day cap, replay, login, provider and Google demo-video coverage');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});
+console.log('PASS checkin395 DB: free 5/day, video 15 (x3), one choice per day (5 or 15), replay, login, provider and Google demo-video coverage');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});
