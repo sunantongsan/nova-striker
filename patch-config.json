@@ -27,8 +27,8 @@
     40,
     41
   ],
-  "contentVersion": 191,
-  "label": "1.12.21-squash401",
+  "contentVersion": 192,
+  "label": "1.12.22-guard-model401",
   "maxBytes": 67108864,
   "titan342": true
 }

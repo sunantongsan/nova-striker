@@ -483,20 +483,26 @@ var priority299=priority278;priority278=function(r,t){if(t.order299){if(t.order2
 
 // Base support 339: dedicated parking and a permanent ground missile sentry.
 function supportPark339(buildings){return buildings.find(function(b){return b.type==='airbase'&&!b.constructing;})||buildings.find(function(b){return (b.type==='camp'||b.type==='barracks')&&!b.constructing;})||{x:2,y:2};}
-function addSentry339(scene,group){var h=scene.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};scene[group].push({id:11000,kind:2,guard339:true,x:h.x+1.4,y:h.y+1.4,hp:480,max:480,cool:0,route:[],enhance:0,phase:0,height340:42,patrolStep340:0});}
+function addSentry339(scene,group){var h=scene.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};scene[group].push({id:11000,kind:2,guard339:true,x:h.x+1.4,y:h.y+1.4,hp:480,max:480,cool:0,route:[],enhance:0,phase:0,height340:0,patrolStep340:0});}
 function sentryMove340(t,p,dt,speed){var dx=p.x-t.x,dy=p.y-t.y,len=Math.hypot(dx,dy),step=Math.min(len,dt*speed);t.moving=len>.05;if(len){t.x+=dx/len*step;t.y+=dy/len*step;if(Math.abs(dx-dy)>.01)t.facing=dx-dy<0?-1:1;}return len-step;}
 function sentryLanding340(d,t){function clear(p){return p.x>=1&&p.y>=1&&p.x<=(d.mapSize||22)-2&&p.y<=(d.mapSize||22)-2&&!d.buildings.some(function(b){return b.hp!==0&&Math.abs(b.x-p.x)<.9&&Math.abs(b.y-p.y)<.9;});}if(clear(t))return{x:t.x,y:t.y};for(var radius=1;radius<=4;radius++)for(var i=0;i<8;i++){var p={x:t.x+Math.cos(i*Math.PI/4)*radius,y:t.y+Math.sin(i*Math.PI/4)*radius};if(clear(p))return p;}return null;}
 function sentryTick339(d,t,dt){
+ // 401: thrown fists land after their flight and blast a crater: splash damage to ground units, like artillery.
+ if(t.fists401&&t.fists401.length){t.fists401=t.fists401.filter(function(f){f.left-=dt;if(f.left>0)return true;
+  (d.enemies||[]).forEach(function(v){if(v.hp<=0||air277(v)||v.kind!==undefined&&U[v.kind]&&U[v.kind].air)return;var r=dist(v,f);if(r<=1.5)hit(d,v,64*(1-.45*r/1.5),t,'cannon');});
+  if(d.fx)d.fx.push({x:f.x,y:f.y,tx:f.x,ty:f.y,weapon:'impact',effect:'cannon',life:.7,maxLife:.7,color:'#ffb568',radius:44});return false;});}
  if(t.hp!==undefined&&t.hp<=0)return;t.cool=Math.max(0,(t.cool||0)-dt);t.phase=(t.phase||0)+dt;t.landFX340=Math.max(0,(t.landFX340||0)-dt);
- var target=(d.enemies||[]).filter(function(v){return v.hp>0&&canDamage285(v,t,'missile')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
+ var target=(d.enemies||[]).filter(function(v){return v.hp>0&&!air277(v)&&!(v.kind!==undefined&&U[v.kind]&&U[v.kind].air)&&canDamage285(v,t,'cannon')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
  if(target){t.aimTarget=target;t.aim=Math.atan2(target.y-t.y,target.x-t.x);t.facing=target.x-target.y<t.x-t.y?-1:1;t.patrolTarget340=null;
   if((t.height340||0)>0){if(!t.landing340)t.landing340=sentryLanding340(d,t);if(!t.landing340)return;if(dist(t,t.landing340)>.08){sentryMove340(t,t.landing340,dt,1.8);return;}t.height340=Math.max(0,t.height340-dt*65);if(t.height340===0){t.landFX340=.4;t.landing340=null;}return;}
-  t.moving=false;if(t.cool<=0){hit(d,target,48,t,'missile');d.fx.push(weaponFX(t,target,'missile'));t.cool=1.4;}return;
+  t.moving=false;if(t.cool<=0){var fx401=weaponFX(t,target,'missile'),fly401=.75+dist(t,target)*.06;fx401.effect='fist401';fx401.life=fx401.maxLife=fly401;d.fx.push(fx401);(t.fists401=t.fists401||[]).push({x:target.x,y:target.y,left:fly401});t.cool=1.8;}return;
  }
- t.aimTarget=null;t.landing340=null;t.height340=Math.min(42,(t.height340||0)+dt*70);
- if(t.height340<20)return;var h=d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10},corners=[[2.4,2.4],[-2.4,2.4],[-2.4,-2.4],[2.4,-2.4]];
+ t.aimTarget=null;t.landing340=null;
+ // 401: patrol by cartoon hops instead of jet flight: land/settle 0-.12, crouch .12-.25, airborne .25-1 (moving).
+ if((t.height340||0)>0&&t.hop401===undefined){t.height340=Math.max(0,t.height340-dt*65);if(t.height340>0)return;}
+ t.hop401=(t.hop401||0)+dt/0.8;t.hopAt401=Date.now();var hp401=t.hop401%1;if(hp401<0.25){t.height340=0;return;}t.height340=Math.sin((hp401-0.25)/0.75*Math.PI)*30;var h=d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10},corners=[[2.4,2.4],[-2.4,2.4],[-2.4,-2.4],[2.4,-2.4]];
  if(!t.patrolTarget340||dist(t,t.patrolTarget340)<.12){var c=corners[(t.patrolStep340||0)%4];t.patrolStep340=(t.patrolStep340||0)+1;t.patrolTarget340={x:Math.max(1,Math.min((d.mapSize||22)-2,h.x+c[0])),y:Math.max(1,Math.min((d.mapSize||22)-2,h.y+c[1]))};}
- sentryMove340(t,t.patrolTarget340,dt,1.15);
+ sentryMove340(t,t.patrolTarget340,dt,1.15/0.75);
 }
 var scoutSentry339=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scoutSentry339.call(this,target);if(ok)addSentry339(this.raid,'guards');return ok;};
 var defenseSentry339=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=defenseSentry339.call(this);if(!error)addSentry339(this.defense,'defenders');return error;};
@@ -572,7 +578,7 @@ function drawAircraft221(t,p){
 
 function drawBuilder228(t){if(t.hp<=0&&!t.dead)return;var p=point(t.x,t.y),z=zoom;if(p.x<-40||p.x>460||p.y<-20||p.y>viewHeight+60)return;ctx.save();if(t.hp<=0)ctx.globalAlpha=Math.min(1,t.dead);sprite(11,{x:p.x,y:p.y-12*z},30*z);box(p.x-6*z,p.y-32*z,12*z,5*z,'#ffce58');box(p.x-8*z,p.y-28*z,16*z,3*z,'#c78c26');ctx.strokeStyle='#ffe093';ctx.lineWidth=2*z;ctx.beginPath();ctx.moveTo(p.x+7*z,p.y-16*z);ctx.lineTo(p.x+13*z,p.y-9*z);ctx.lineTo(p.x+16*z,p.y-12*z);ctx.stroke();if(t.hp<t.max){box(p.x-12*z,p.y-39*z,24*z,3*z,'#15324c');box(p.x-12*z,p.y-39*z,24*z*Math.max(0,t.hp/t.max),3*z,'#ffda69');}ctx.restore();}
 function drawHomeBuilders228(){var hq=supportPark339(E.d.buildings),jobs=E.d.buildings.filter(function(b){return b.until;});if(!hq)return;var groups=[];var seen=new Set();jobs.forEach(function(b){var key=b.type==='wall'&&!b.constructing?'walls:'+(b.builderBatch228||b.started||b.until):b.id;if(!seen.has(key)){groups.push(b);seen.add(key);}});(E.d.serverUpgrades225||[]).forEach(function(j){if(j.category==='infrastructure'){var b=E.d.buildings.find(function(b){return b.type===j.item;});if(b)groups.push(b);}});for(var i=0;i<E.builderCount();i++){var b=groups[i]||hq,a=groups[i]?frame*.025+i*2:i*1.3,x=b.x+Math.cos(a)*.55,y=b.y+Math.sin(a)*.55;drawBuilder228({x:x,y:y,hp:180,max:180});}}
-function drawFighter(t,enemy){if(t.guard339){if(t.hp>0)drawMiner251(t);return;}if(t.builder){drawBuilder228(t);return;}if(t.alien){enemy=true;t=Object.assign({},t,{kind:undefined});}if(t.hp<=0&&!t.dead)return;var p=point(t.x,t.y),z=zoom,u=t.kind===undefined?null:U[t.kind],tracked=isTracked(t);if(p.x+70*z<0||p.x-70*z>viewWidth||p.y+30*z<0||p.y-80*z>viewHeight)return;ctx.save();if(t.hp<=0)ctx.globalAlpha=Math.min(1,t.dead);var hop=tracked||u&&u.air?0:t.hop?Math.sin(Math.min(1,t.hop/.55)*Math.PI)*16/Math.sqrt(u?u.space:1)*z:0;
+function drawFighter(t,enemy){if(t.guard339){if(t.hp>0||(t.dead||0)>0)drawMiner251(t);return;}if(t.builder){drawBuilder228(t);return;}if(t.alien){enemy=true;t=Object.assign({},t,{kind:undefined});}if(t.hp<=0&&!t.dead)return;var p=point(t.x,t.y),z=zoom,u=t.kind===undefined?null:U[t.kind],tracked=isTracked(t);if(p.x+70*z<0||p.x-70*z>viewWidth||p.y+30*z<0||p.y-80*z>viewHeight)return;ctx.save();if(t.hp<=0)ctx.globalAlpha=Math.min(1,t.dead);var hop=tracked||u&&u.air?0:t.hop?Math.sin(Math.min(1,t.hop/.55)*Math.PI)*16/Math.sqrt(u?u.space:1)*z:0;
  ctx.fillStyle='rgba(20,40,45,.3)';ctx.beginPath();ctx.ellipse(p.x,p.y+2*z,(t.kind===7?24:t.kind===5?13:tracked?15:7)*z,(t.kind===7?7:4)*z,0,0,Math.PI*2);ctx.fill();
  if(t.kind===5||t.kind===7)drawAircraft221(t,p);else if(tracked)drawTank(t,p);else{var bob=u&&u.air?Math.sin(frame*.08+(t.id||0))*1.3*z:t.moving?Math.sin(t.walk||0)*.8*z:0,aim=t.aim===undefined?-Math.PI/2:t.aim,flip=Math.cos(aim)-Math.sin(aim)<0?-1:1;ctx.save();ctx.translate(p.x,p.y-hop+bob);ctx.scale(flip,1);if(t.hp<=0)ctx.rotate(.8);sprite(enemy?15:u.sprite,{x:0,y:0},34*z);ctx.restore();}
  if(t.hit&&!tracked)disk(p.x,p.y-15*z,5*z,'rgba(255,245,195,.4)');if(t.hit&&tracked){ctx.strokeStyle='#ffdb91';ctx.lineWidth=1.5*z;ctx.beginPath();ctx.moveTo(p.x-8*z,p.y-10*z);ctx.lineTo(p.x-14*z,p.y-17*z);ctx.moveTo(p.x+7*z,p.y-12*z);ctx.lineTo(p.x+13*z,p.y-19*z);ctx.stroke();}
@@ -1731,7 +1737,7 @@ var help251=Game.help;Game.help=function(){Game.droneGuide251();};
 function minerSpot251(){for(var k=0;k<40;k++){var x=1.5+Math.random()*18,y=1.5+Math.random()*18;if(!E.d.buildings.some(function(b){return Math.abs(b.x-x)<1.15&&Math.abs(b.y-y)<1.15;}))return{x:x,y:y};}return{x:1,y:1};}
 function updateRobots251(){
  if(screen!=='home')return;var now=Date.now(),dt=Math.max(0,Math.min(.1,(now-(robotTick251||now))/1000));robotTick251=now;
- if(!robots251.length){var h=E.d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};robots251.push({x:h.x+2.4,y:h.y+2.4,phase:0,facing:1,height340:42,guard339:true});}robots251.length=1;
+ if(!robots251.length){var h=E.d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};robots251.push({x:h.x+2.4,y:h.y+2.4,phase:0,facing:1,height340:0,guard339:true});}robots251.length=1;
  robots251.forEach(function(r){var d={enemies:[],buildings:E.d.buildings,mapSize:homeMap391()};if(r.restAt341===undefined)r.restAt341=now+9000+Math.random()*9000;if(now>=r.restAt341){if(!r.restPoint341)r.restPoint341=sentryLanding340(d,r);if(r.restPoint341&&dist(r,r.restPoint341)>.08){sentryMove340(r,r.restPoint341,dt,1.15);return;}if(r.restPoint341&&(r.height340||0)>0){r.height340=Math.max(0,r.height340-dt*40);if(!r.height340){r.landFX340=.4;r.restUntil341=now+3000+Math.random()*4000;}return;}if(r.restUntil341&&now<r.restUntil341){r.moving=false;return;}r.restPoint341=null;r.restUntil341=0;r.restAt341=now+11000+Math.random()*14000;}sentryTick339(d,r,dt);});
 }
 var guardArt340=new Image(),guardLoaded340=false;guardArt340.onload=function(){guardLoaded340=true;drawNeeded=true;};guardArt340.src='assets/guard-jet-340.webp';var guardFlight340=new Image(),flightLoaded340=false;guardFlight340.onload=function(){flightLoaded340=true;drawNeeded=true;};guardFlight340.src='assets/guard-flight-340.webp';
