@@ -1,0 +1,28 @@
+name: Nova reward balance validation
+on:
+  push:
+    branches: [fix/rewards396]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm test
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/rewards396-browser.cjs
+      - run: node scripts/patch.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nova-rewards396-verified
+          path: |
+            patch-dist/
+            test-artifacts/rewards396*.png
+          retention-days: 7
