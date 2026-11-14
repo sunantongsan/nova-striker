@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "channel": "test",
-  "nativeVersion": 41,
+  "nativeVersion": 42,
   "compatibleNativeVersions": [
     19,
     20,
@@ -24,10 +24,11 @@
     37,
     38,
     39,
-    40
+    40,
+    41
   ],
-  "contentVersion": 184,
-  "label": "1.12.14-battle-rewards399",
+  "contentVersion": 185,
+  "label": "1.12.15-hud400",
   "maxBytes": 67108864,
   "titan342": true
 }

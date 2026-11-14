@@ -98,6 +98,18 @@ final class GameAds {
         });
     }
 
+    // 399: until AdMob approves the account, banner and interstitial use Google's demo units.
+    // The game switches to the real units when the server enables live AdMob (admob230), no Play release needed.
+    private static final String TEST_BANNER = "ca-app-pub-3940256099942544/6300978111", TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
+    private boolean liveAds() { return !BuildConfig.DEBUG && prefs.getBoolean("liveAds399", false); }
+    @JavascriptInterface public void liveAds399(boolean live) {
+        activity.runOnUiThread(() -> {
+            if (destroyed || prefs.getBoolean("liveAds399", false) == live) return;
+            prefs.edit().putBoolean("liveAds399", live).apply();
+            generation++; ready=null; clearBanner();
+            if (initialized) load();
+        });
+    }
     @JavascriptInterface public void bannerLayoutAllowed(boolean allowed) {
         activity.runOnUiThread(() -> { if(!destroyed) activity.setBannerLayoutAllowed(allowed); });
     }
@@ -118,7 +130,7 @@ final class GameAds {
         final int gen=generation;
         banner=view;
         view.setAdSize(AdSize.BANNER);
-        view.setAdUnitId(BuildConfig.DEBUG ? "ca-app-pub-3940256099942544/6300978111" : "ca-app-pub-4585492700643566/9131827435");
+        view.setAdUnitId(liveAds() ? "ca-app-pub-4585492700643566/9131827435" : TEST_BANNER);
         view.setAdListener(new AdListener() {
             @Override public void onAdLoaded() {
                 if (banner!=view || destroyed || gen!=generation) return;
@@ -183,7 +195,7 @@ final class GameAds {
         final int requestGeneration=generation;
         Bundle extras = new Bundle(); extras.putString("npa", "1");
         AdRequest request = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
-        String unit = BuildConfig.DEBUG ? "ca-app-pub-3940256099942544/1033173712" : "ca-app-pub-4585492700643566/3978484391";
+        String unit = liveAds() ? "ca-app-pub-4585492700643566/3978484391" : TEST_INTERSTITIAL;
         InterstitialAd.load(activity, unit, request, new InterstitialAdLoadCallback() {
             @Override public void onAdLoaded(InterstitialAd ad) {
                 loading=false;

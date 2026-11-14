@@ -1,0 +1,22 @@
+/* 400: framed base card (owner portrait + base name) and slim, see-through resource readouts. */
+html body #app>header .title{background:linear-gradient(160deg,#ffffffe6,#e3f3ffd9)!important;border:2px solid #9ccbee!important;border-radius:16px!important;box-shadow:0 3px 0 #7aa7cf,0 4px 10px #1d4f7a33!important;padding:3px 12px 3px 3px!important;gap:8px!important;align-items:center!important;max-width:min(260px,44vw)!important;min-width:0!important;flex:0 1 auto!important}
+html body #app>header .title>#commanderButton{flex:0 0 46px!important;width:46px!important;height:46px!important;border-radius:12px!important;border:2px solid #ffd75e!important;box-shadow:0 2px 0 #c98a12!important;overflow:hidden}
+html body #app>header .title>div{display:flex!important;flex-direction:column-reverse!important;justify-content:center!important;min-width:0!important;background:transparent!important;padding:0!important}
+html body #app>header .title>div #mode{display:block!important;font:900 14px/1.5 Tahoma,Arial,sans-serif!important;color:#173a52!important;text-shadow:none!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important;opacity:1!important}
+html body #app>header .title>div>b{display:block!important;font:800 9px/1.2 Tahoma,Arial,sans-serif!important;letter-spacing:1px!important;color:#5b84a3!important;text-shadow:none!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html body #app>header .title>div>b .title-tag227{color:#2f8fd0!important;text-shadow:none!important}
+html body #app>header .title>#builderBadge{position:absolute!important;left:50px!important;top:calc(100% + 6px)!important;margin:0!important;z-index:2}
+html body #app>header .title>#skillShop342{left:auto!important;right:auto!important}
+/* Resources: no boxes, just icon + text, smaller. */
+html body #app>header .resources>span,html body #app>header .resources>.gembalance{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;min-height:20px!important;padding:0 4px!important;gap:3px!important}
+html body #app>header .resources>span:before,html body #app>header .resources>span:after{display:none!important}
+html body #app>header .resources b{font:800 12px/1.1 Tahoma,Arial,sans-serif!important;color:#fff!important;text-shadow:0 1px 0 #10314a,1px 0 0 #10314a,-1px 0 0 #10314a,0 -1px 0 #10314a,0 2px 3px #0008!important}
+html body #app>header .resources .resourceArt303,html body #app>header .resources .nova-core-icon{width:18px!important;height:18px!important;filter:drop-shadow(0 1px 1px #10314a)!important}
+html body #app>header .resources em{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+@media(orientation:portrait){html body #app>header .title{max-width:min(260px,62vw)!important}}
+/* With the top-right banner: keep the card whole and give the reserved banner strip a soft pastel backdrop. */
+html[data-nova-banner39] body #app>header{height:auto!important;min-height:64px!important;align-items:flex-start!important}
+html[data-nova-banner39] body #app>header .title{height:auto!important;flex:0 0 auto!important;max-width:min(230px,32vw)!important}
+html[data-nova-banner39] body,html[data-nova-banner39] body #app{background:linear-gradient(#e6f6ff,#cdeefa)!important}
+html body #app>header .title>div,html body #app>header .title>div #mode,html body #app>header .title>div>b{height:auto!important;max-height:none!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important;position:static!important}
+html body #app>header .title>div #mode{padding-top:2px!important}

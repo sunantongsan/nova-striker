@@ -2792,6 +2792,10 @@ var cloud399=root.novaCloudEvent;root.novaCloudEvent=function(event,data){
 var heartbeat399=liveHeartbeat;liveHeartbeat=function(){if(!document.hidden)camp399Retry();heartbeat399();};
 var home399=Game.home;Game.home=function(){var out=home399.apply(this,arguments);camp399Retry();return out;};
 
+// 400: tell the native app whether live AdMob is on (server admob230); until then banner/interstitial use Google demo ads.
+var liveAds400=null;
+var cloudAds400=root.novaCloudEvent;root.novaCloudEvent=function(event,data){var d=data&&data.data;if(event==='war'&&d&&typeof d.admob230==='boolean'&&d.admob230!==liveAds400){liveAds400=d.admob230;try{if(root.NovaAds&&root.NovaAds.liveAds399)root.NovaAds.liveAds399(liveAds400);}catch(e){}}cloudAds400(event,data);};
+
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 
