@@ -1,5 +1,5 @@
 <!doctype html><html><body style="margin:0;background:transparent">
-<canvas id="c" width="256" height="256"></canvas>
+<canvas id="c" width="368" height="368"></canvas>
 <script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
 <script type="module">
 // 401: base guard robot (owner's model) auto-rigged and posed for pre-rendered sprites.
@@ -13,7 +13,7 @@ S.add(new T.HemisphereLight(0xfff6e8,0x6a86b8,2.1));
 const sun=new T.DirectionalLight(0xfff0d6,3.4);sun.position.set(-3,10,7);S.add(sun);
 const rim=new T.DirectionalLight(0x9fe3ff,1.8);rim.position.set(7,3,-5);S.add(rim);
 // Same projection direction as the troop renders; frame sized for a ~1 unit tall robot incl. flight.
-const cam=new T.OrthographicCamera(-0.7,0.7,0.78,-0.62,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.45,0);cam.position.add(new T.Vector3(0,0.45,0).sub(new T.Vector3(0,0,0)).multiplyScalar(0));
+const cam=new T.OrthographicCamera(-0.64,0.64,0.74,-0.54,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.45,0);cam.position.add(new T.Vector3(0,0.45,0).sub(new T.Vector3(0,0,0)).multiplyScalar(0));
 const params=new URLSearchParams(location.search);
 const gltf=await new GLTFLoader().loadAsync(params.get('model'));
 let src=null;gltf.scene.traverse(o=>{if(o.isMesh&&!src)src=o;});
@@ -65,19 +65,28 @@ function reset(){order.forEach(k=>{B[k].position.copy(rest[k].p);B[k].rotation.c
 function legs(sL,kL,sR,kR){B.hipL.rotation.x=-sL;B.knL.rotation.x=kL;B.hipR.rotation.x=-sR;B.knR.rotation.x=kR;}
 function arms(aL,eL,aR,eR,spread){B.shL.rotation.x=-aL;B.elL.rotation.x=-eL;B.shR.rotation.x=-aR;B.elR.rotation.x=-eR;B.shL.rotation.z=spread||0;B.shR.rotation.z=-(spread||0);}
 window.pose=(dirA,anim,f)=>{
- reset();wrap.rotation.y=Math.PI/2-dirA;
+ reset();window.__ground=(anim==='idle'||anim==='walk'||anim==='attack');wrap.rotation.y=Math.PI/2-dirA;
  const TAU=Math.PI*2;
  if(anim==='idle'){const p=f/4*TAU,s=Math.sin(p);B.pelvis.position.y=rest.pelvis.p.y-0.008*(1-Math.cos(p));B.body.rotation.x=0.03*s;B.body.rotation.y=0.06*Math.sin(p);arms(0.04*s,0.08,-0.04*s,0.08,0.04);legs(0,0.02,0,0.02);}
- else if(anim==='walk'){const p=f/8*TAU,s=Math.sin(p),c=Math.cos(p);
+ else if(anim==='walk'){const p=f/6*TAU,s=Math.sin(p),c=Math.cos(p);
   legs(0.55*s,Math.max(0,-c)*0.9,-0.55*s,Math.max(0,c)*0.9);
   B.pelvis.position.y=rest.pelvis.p.y-0.035*Math.abs(Math.cos(p))+0.01;B.pelvis.rotation.z=0.06*s;B.body.rotation.z=-0.08*s;B.body.rotation.x=0.10;B.body.rotation.y=0.12*s;
   arms(-0.5*s,0.25+0.2*Math.max(0,s),0.5*s,0.25+0.2*Math.max(0,-s),0.08);}
+ else if(anim==='jump'){const J=[
+  {py:0,b:0.28,l:[0.55,1.05,0.5,1.0],a:[-0.35,0.35,-0.35,0.35,0.2]},
+  {py:0.02,b:-0.12,l:[-0.2,0.05,-0.12,0.08],a:[0.9,0.2,0.9,0.2,0.35]},
+  {py:0,b:0.0,l:[0.45,0.7,0.25,0.5],a:[0.6,0.4,0.6,0.4,0.6]},
+  {py:0,b:0.12,l:[0.95,1.45,0.85,1.35],a:[0.25,0.6,0.25,0.6,0.85]},
+  {py:0,b:-0.08,l:[0.05,0.15,-0.12,0.1],a:[0.95,0.1,0.95,0.1,0.7]},
+  {py:0,b:0.32,l:[0.65,1.25,0.6,1.2],a:[0.35,0.3,0.35,0.3,0.25]}][f];
+  B.body.rotation.x=J.b;B.pelvis.rotation.x=J.b*0.4;legs(...J.l);arms(...J.a);holder.position.y=J.py;window.__ground=(f===0||f===5);}
  else if(anim==='fly'){const p=f/4*TAU,s=Math.sin(p);holder.position.y=0.03*s;B.body.rotation.x=0.22;B.pelvis.rotation.x=0.18;
   legs(-0.25+0.08*s,0.55-0.1*s,-0.15-0.08*s,0.45+0.1*s);arms(-0.35,0.35,-0.35,0.35,0.35+0.05*s);flames.forEach((g,i)=>{g.visible=true;g.scale.set(1,0.85+0.3*Math.abs(Math.sin(p+i)),1);});}
  else if(anim==='attack'){const k=[0.2,1,0.6,0.25][f];B.body.rotation.x=-0.12+0.32*k;B.pelvis.position.y=rest.pelvis.p.y-0.02*k;legs(0.25,0.3,-0.2,0.15);arms(-0.6+0.4*k,0.5,-0.6+0.4*k,0.5,0.25);
   eye.visible=f>=1;beam.visible=f===1||f===2;beam.scale.setScalar(f===1?1.3:0.9);}
  else if(anim==='death'){const k=f/4;holder.rotation.x=-k*1.05;holder.position.z=-k*0.05;holder.position.y=Math.sin(k*Math.PI)*0.06-k*0.05;legs(-k*0.4,k*0.8,-k*0.2,k*0.6);arms(k*0.5,k*0.3,k*0.35,k*0.4,0.25*k);B.body.rotation.z=0.25*k;}
  holder.updateMatrixWorld(true);wrap.updateMatrixWorld(true);
+ if(window.__ground){const a=new T.Vector3(),b=new T.Vector3();B.anL.getWorldPosition(a);B.anR.getWorldPosition(b);holder.worldToLocal(a);holder.worldToLocal(b);holder.position.y+=0.10-Math.min(a.y,b.y);holder.updateMatrixWorld(true);}
  flames.forEach(g=>{if(!g.visible)return;const v=new T.Vector3();B['an'+g.userData.side].getWorldPosition(v);holder.worldToLocal(v);g.position.copy(v);g.position.y-=0.07;g.rotation.set(0,0,0);});holder.updateMatrixWorld(true);
  R.render(S,cam);
  const o=new T.Vector3(0,0,0).project(cam);const ev=new T.Vector3();eye.getWorldPosition(ev);const e=ev.project(cam);

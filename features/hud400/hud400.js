@@ -112,9 +112,9 @@ function squashGuard401(r,h,t){
 })();
 
 // 401: base guard robot = the owner's 3D model, auto-rigged and pre-rendered (features/render3d/guard3d.html).
-// 5 rendered directions + 3 mirrored; idle / walk / fly (baked thrusters) / attack (eye blast) / death.
+// 5 rendered directions + 3 mirrored; idle / walk / jump (cartoon hop: crouch, launch, tuck, reach, squash) / attack (eye blast) / death.
 // Colour by the base's HQ level: 1-3 sky blue, 4-6 gold, 7+ ruby.
-var guardMeta401={"cw":160,"ch":160,"dirs":[0,1,3,4,5],"anims":{"idle":[0,4],"walk":[4,8],"fly":[12,4],"attack":[16,4],"death":[20,5]},"muzzle":[[18.3,-56.5],[2.3,-51.4],[-23.5,-64.2],[-18.3,-74.7],[-2.3,-79.8]],"ax":80,"ay":130.1,"h":98.1},guardImgs401={},guardRow401={0:[0,1],1:[1,1],2:[0,-1],3:[2,1],4:[3,1],5:[4,1],6:[3,-1],7:[2,-1]},GUARD_H401=60;
+var guardMeta401={"cw":184,"ch":184,"cols":13,"dirs":[0,1,3,4,5],"anims":{"idle":[0,4],"walk":[4,6],"jump":[10,6],"attack":[16,4],"death":[20,5]},"muzzle":[[23,-72.9],[2.9,-66.4],[-29.6,-82.6],[-23,-95.7],[-2.9,-102.2]],"ax":92,"ay":157.9,"h":123.9},guardImgs401={},guardRow401={0:[0,1],1:[1,1],2:[0,-1],3:[2,1],4:[3,1],5:[4,1],6:[3,-1],7:[2,-1]},GUARD_H401=64;
 function guardTier401(){var bs=screen==='raid'&&E.raid?E.raid.buildings:screen==='defense'&&E.defense?E.defense.buildings:E.d.buildings,hq=(bs||[]).find(function(b){return b.type==='hq';}),lv=hq&&hq.lv||1;return lv>=7?'t3':lv>=4?'t2':'t1';}
 function guardImg401(tier){var im=guardImgs401[tier];if(!im){im=guardImgs401[tier]=new Image();im.onload=function(){drawNeeded=true;};im.src='assets/guard401-'+tier+'.webp';}return im.complete&&im.naturalWidth?im:null;}
 function guardDir401(r){var dx=0,dy=0;if(r.lx401!==undefined){dx=r.x-r.lx401;dy=r.y-r.ly401;}r.lx401=r.x;r.ly401=r.y;
@@ -126,17 +126,20 @@ drawMiner251=function(r){
  var g=guardMeta401,p=point(r.x,r.y),h=r.height340||0,now=performance.now(),t=now/1000+(r.phase||0),d=guardDir401(r),rm=guardRow401[d],anim,f;
  if(r.hp<=0){if(!r.die401)r.die401=now;anim='death';f=Math.min(4,Math.floor((now-r.die401)/150));}
  else{r.die401=0;
-  if(h>4){anim='fly';f=Math.floor(t*9)%4;}
+  var ph=r.hop401!==undefined?r.hop401%1:-1;
+  if(ph>=0&&(h>0.5||(ph>=0.12&&ph<0.25&&Date.now()-(r.hopAt401||0)<300))){anim='jump';var q=(ph-0.25)/0.75;f=ph<0.12?5:ph<0.25?0:q<0.12?1:q<0.42?2:q<0.62?3:q<0.9?4:5;}
+  else if(h>0.5){var sq=r.sq401;anim='jump';f=sq&&sq.vz<-5?4:sq&&sq.vz>5?2:3;}
+  else if(ph>=0&&ph<0.12&&Date.now()-(r.hopAt401||0)<300){anim='jump';f=5;}
   else if(r.cool!==undefined&&r.cool>1.0&&r.aimTarget){anim='attack';f=Math.min(3,Math.floor((1.4-r.cool)/0.1));}
-  else if(now-(r.moveAt401||0)<150){anim='walk';f=Math.floor((r.odo401||0)*9)%8;}
+  else if(now-(r.moveAt401||0)<150){anim='walk';f=Math.floor((r.odo401||0)*7)%6;}
   else{anim='idle';f=Math.floor(t*4)%4;}}
- var col=g.anims[anim][0]+f,k=GUARD_H401/g.h;
+ var cell=rm[0]*25+g.anims[anim][0]+f,k=GUARD_H401/g.h;
  ctx.save();ctx.translate(p.x,p.y);ctx.scale(zoom,zoom);
  if(r.hp<=0)ctx.globalAlpha=Math.max(0,Math.min(1,(r.dead||0)/1.4+.15));
  ctx.fillStyle='rgba(8,22,32,.23)';ctx.beginPath();ctx.ellipse(0,3,18+h*.08,6+h*.02,0,0,Math.PI*2);ctx.fill();
  if(r.landFX340){var pr=1-r.landFX340/.4;ctx.globalAlpha=(1-pr)*.35;ctx.strokeStyle='#b9dded';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,3,12+pr*20,4+pr*7,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
  ctx.translate(0,-h);if(typeof squashGuard401==='function'&&r.hp>0)squashGuard401(r,h,t);ctx.scale(rm[1],1);
- ctx.drawImage(img,col*g.cw,rm[0]*g.ch,g.cw,g.ch,-g.ax*k,-g.ay*k,g.cw*k,g.ch*k);
+ ctx.drawImage(img,(cell%g.cols)*g.cw,Math.floor(cell/g.cols)*g.ch,g.cw,g.ch,-g.ax*k,-g.ay*k,g.cw*k,g.ch*k);
  ctx.restore();
 };
 var guardMount401=weaponMount;
