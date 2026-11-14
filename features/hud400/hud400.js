@@ -130,7 +130,8 @@ drawMiner251=function(r){
   if(ph>=0&&(h>0.5||(ph>=0.12&&ph<0.25&&Date.now()-(r.hopAt401||0)<300))){anim='jump';var q=(ph-0.25)/0.75;f=ph<0.12?5:ph<0.25?0:q<0.12?1:q<0.42?2:q<0.62?3:q<0.9?4:5;}
   else if(h>0.5){var sq=r.sq401;anim='jump';f=sq&&sq.vz<-5?4:sq&&sq.vz>5?2:3;}
   else if(ph>=0&&ph<0.12&&Date.now()-(r.hopAt401||0)<300){anim='jump';f=5;}
-  else if(r.cool!==undefined&&r.cool>0.9&&r.aimTarget){anim='attack';f=Math.min(3,Math.floor((1.8-r.cool)/0.15));}
+  else if(r.charge402>0){anim='attack';f=Math.min(3,Math.floor((1-r.charge402/.8)*4));}
+  else if(r.fired402&&Date.now()-r.fired402<520){anim='attack';f=3;}
   else if(now-(r.moveAt401||0)<150){anim='walk';f=Math.floor((r.odo401||0)*7)%6;}
   else{anim='idle';f=Math.floor(t*4)%4;}}
  var cell=rm[0]*25+g.anims[anim][0]+f,k=GUARD_H401/g.h;
@@ -138,9 +139,9 @@ drawMiner251=function(r){
  if(r.hp<=0)ctx.globalAlpha=Math.max(0,Math.min(1,(r.dead||0)/1.4+.15));
  ctx.fillStyle='rgba(8,22,32,.23)';ctx.beginPath();ctx.ellipse(0,3,18+h*.08,6+h*.02,0,0,Math.PI*2);ctx.fill();
  if(r.landFX340){var pr=1-r.landFX340/.4;ctx.globalAlpha=(1-pr)*.35;ctx.strokeStyle='#b9dded';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,3,12+pr*20,4+pr*7,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
- ctx.translate(0,-h);if(typeof squashGuard401==='function'&&r.hp>0)squashGuard401(r,h,t);ctx.scale(rm[1],1);
+ ctx.translate(0,-h);if(typeof squashGuard401==='function'&&r.hp>0)squashGuard401(r,h,t);if(r.hp>0)pose402(r);ctx.scale(rm[1],1);
  ctx.drawImage(img,(cell%g.cols)*g.cw,Math.floor(cell/g.cols)*g.ch,g.cw,g.ch,-g.ax*k,-g.ay*k,g.cw*k,g.ch*k);
- ctx.restore();
+ ctx.restore();if(r.hp>0&&r.charge402>0)orb402(r);
 };
 var guardMount401=weaponMount;
 weaponMount=function(o){
@@ -149,14 +150,32 @@ weaponMount=function(o){
  return guardMount401(o);
 };
 
-// 401: the guard's thrown fist: spins along a high arc and lands in a crater (crater from drawCraters272).
-var fistImgs401={};function fistImg401(tier){var im=fistImgs401[tier];if(!im){im=fistImgs401[tier]=new Image();im.onload=function(){drawNeeded=true;};im.src='assets/fist401-'+tier+'.webp';}return im.complete&&im.naturalWidth?im:null;}
-var fx401=drawFX;drawFX=function(f){
- if(!f||f.effect!=='fist401')return fx401.apply(this,arguments);
- var img=fistImg401(guardTier401());if(!img)return fx401.apply(this,arguments);
- var a=point(f.x,f.y),b=point(f.tx,f.ty),v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.8)));if(f.muzzle){a.x+=f.muzzle.x*zoom;a.y+=f.muzzle.y*zoom;}
- var x=a.x+(b.x-a.x)*v,y=a.y+(b.y-a.y)*v-Math.sin(v*Math.PI)*(70+Math.hypot(b.x-a.x,b.y-a.y)*.35)*zoom,s=30*zoom*(1+.25*Math.sin(v*Math.PI));
- ctx.save();ctx.globalAlpha=.25;ctx.fillStyle='#08161f';ctx.beginPath();ctx.ellipse(a.x+(b.x-a.x)*v,a.y+(b.y-a.y)*v,s*.45,s*.18,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
- ctx.translate(x,y);ctx.rotate(v*Math.PI*3*(b.x<a.x?-1:1));ctx.scale(1+.15*Math.sin(v*Math.PI*6),1-.15*Math.sin(v*Math.PI*6));
- ctx.drawImage(img,-s/2,-s/2,s,s);ctx.restore();drawNeeded=true;
+// 402: energy wave attack. The guard crouches and pulls back while a glowing ball gathers in front of its chest
+// (sparks spiral in), then lunges forward and pushes a wide beam out as far as the shock mortar fires.
+var WAVE402={t1:['#e9fbff','#6fe0ff','#2aa8ff'],t2:['#fffbe6','#ffe27a','#ffaa1f'],t3:['#fff0f2','#ff9aa8','#ff3b5c']};
+function hand402(o){// screen offset (unzoomed) of the energy ball: chest height, pushed toward the target.
+ var a=o.aim!==undefined?o.aim:Math.PI/4,p0=point(o.x,o.y),p1=point(o.x+Math.cos(a),o.y+Math.sin(a)),dx=(p1.x-p0.x)/zoom,dy=(p1.y-p0.y)/zoom,l=Math.hypot(dx,dy)||1;
+ return {x:dx/l*20,y:dy/l*9-GUARD_H401*.5-(o.height340||0),dx:dx/l,dy:dy/l};}
+function pose402(r){var now=Date.now(),e;
+ if(r.charge402>0){e=1-r.charge402/.8;var c=Math.min(1,e*1.6);ctx.scale(1+.1*c,1-.12*c+Math.sin(e*60)*.012*e);return;}// crouch and tremble while charging
+ if(r.fired402&&(e=(now-r.fired402)/1000)<.6){var k=Math.exp(-e*7);ctx.scale(1-.1*k,1+.16*k*Math.cos(e*22));}}// lunge into the push
+function orb402(r){var c=WAVE402[guardTier401()],e=1-r.charge402/.8,m=hand402(r),p=point(r.x,r.y),x=p.x+m.x*zoom,y=p.y+m.y*zoom,rad=(4+e*11+Math.sin(Date.now()/40)*1.2)*zoom;
+ ctx.save();
+ var g=ctx.createRadialGradient(x,y,0,x,y,rad*2.6);g.addColorStop(0,c[0]);g.addColorStop(.3,c[1]);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad*2.6,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=c[0];ctx.beginPath();ctx.arc(x,y,rad*.55,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle=c[1];ctx.lineWidth=1.6*zoom;for(var i=0;i<7;i++){var a=i*.9+Date.now()/160,d=(1-((Date.now()/300+i*.37)%1))*30*zoom+rad;ctx.globalAlpha=.8;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*d,y+Math.sin(a)*d*.7);ctx.lineTo(x+Math.cos(a-.35)*(d-7*zoom),y+Math.sin(a-.35)*(d-7*zoom)*.7);ctx.stroke();}
+ ctx.restore();drawNeeded=true;}
+var fx402=drawFX;drawFX=function(f){
+ if(!f||f.effect!=='wave402')return fx402.apply(this,arguments);
+ var c=WAVE402[guardTier401()],v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.62))),reach=f.reach402||.4,src={x:f.x,y:f.y,aim:Math.atan2(f.ty-f.y,f.tx-f.x),height340:0},m=hand402(src),a=point(f.x,f.y),b=point(f.tx,f.ty);
+ a.x+=m.x*zoom;a.y+=m.y*zoom;b.y-=12*zoom;
+ var head=Math.min(1,v/reach),hx=a.x+(b.x-a.x)*head,hy=a.y+(b.y-a.y)*head,fade=v<reach?1:Math.max(0,1-(v-reach)/(1-reach)),w=(14+Math.sin(v*70)*2)*zoom*(.35+.65*fade);
+ ctx.save();ctx.lineCap='round';
+ [[w*2.2,c[2],.4],[w*1.35,c[1],.85],[w*.6,c[0],1]].forEach(function(L){ctx.globalAlpha=L[2]*fade;ctx.strokeStyle=L[1];ctx.lineWidth=L[0];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(hx,hy);ctx.stroke();});
+ // swirling edge so the beam looks alive
+ ctx.globalAlpha=.7*fade;ctx.strokeStyle=c[0];ctx.lineWidth=1.4*zoom;var len=Math.hypot(hx-a.x,hy-a.y)||1,nx=-(hy-a.y)/len,ny=(hx-a.x)/len;ctx.beginPath();for(var i=0;i<=24;i++){var q=i/24,o=Math.sin(q*18-v*40)*w*.8;var px=a.x+(hx-a.x)*q+nx*o,py=a.y+(hy-a.y)*q+ny*o;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();
+ // bulging head while it travels, a flash at the hands
+ var hr=w*(v<reach?1.5:1.2+.8*(1-fade));var g=ctx.createRadialGradient(hx,hy,0,hx,hy,hr*1.8);g.addColorStop(0,c[0]);g.addColorStop(.4,c[1]);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=fade;ctx.fillStyle=g;ctx.beginPath();ctx.arc(hx,hy,hr*1.8,0,Math.PI*2);ctx.fill();
+ var g2=ctx.createRadialGradient(a.x,a.y,0,a.x,a.y,w*1.6);g2.addColorStop(0,c[0]);g2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(a.x,a.y,w*1.6,0,Math.PI*2);ctx.fill();
+ ctx.restore();drawNeeded=true;
 };

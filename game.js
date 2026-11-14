@@ -486,23 +486,30 @@ function supportPark339(buildings){return buildings.find(function(b){return b.ty
 function addSentry339(scene,group){var h=scene.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10};scene[group].push({id:11000,kind:2,guard339:true,x:h.x+1.4,y:h.y+1.4,hp:480,max:480,cool:0,route:[],enhance:0,phase:0,height340:0,patrolStep340:0});}
 function sentryMove340(t,p,dt,speed){var dx=p.x-t.x,dy=p.y-t.y,len=Math.hypot(dx,dy),step=Math.min(len,dt*speed);t.moving=len>.05;if(len){t.x+=dx/len*step;t.y+=dy/len*step;if(Math.abs(dx-dy)>.01)t.facing=dx-dy<0?-1:1;}return len-step;}
 function sentryLanding340(d,t){function clear(p){return p.x>=1&&p.y>=1&&p.x<=(d.mapSize||22)-2&&p.y<=(d.mapSize||22)-2&&!d.buildings.some(function(b){return b.hp!==0&&Math.abs(b.x-p.x)<.9&&Math.abs(b.y-p.y)<.9;});}if(clear(t))return{x:t.x,y:t.y};for(var radius=1;radius<=4;radius++)for(var i=0;i<8;i++){var p={x:t.x+Math.cos(i*Math.PI/4)*radius,y:t.y+Math.sin(i*Math.PI/4)*radius};if(clear(p))return p;}return null;}
+// 402: the guard's energy wave reaches as far as the shock mortar; hops are long and high.
+var CHARGE402=.8,HOP402=1.4;
+function sentryRange402(d){var h=(d.buildings||[]).find(function(b){return b.type==='hq';});return defenseRange223('cannonturret','wave',h&&h.lv||1);}
 function sentryTick339(d,t,dt){
- // 401: thrown fists land after their flight and blast a crater: splash damage to ground units, like artillery.
- if(t.fists401&&t.fists401.length){t.fists401=t.fists401.filter(function(f){f.left-=dt;if(f.left>0)return true;
-  (d.enemies||[]).forEach(function(v){if(v.hp<=0||air277(v)||v.kind!==undefined&&U[v.kind]&&U[v.kind].air)return;var r=dist(v,f);if(r<=1.5)hit(d,v,64*(1-.45*r/1.5),t,'cannon');});
-  if(d.fx)d.fx.push({x:f.x,y:f.y,tx:f.x,ty:f.y,weapon:'impact',effect:'cannon',life:.7,maxLife:.7,color:'#ffb568',radius:44});return false;});}
- if(t.hp!==undefined&&t.hp<=0)return;t.cool=Math.max(0,(t.cool||0)-dt);t.phase=(t.phase||0)+dt;t.landFX340=Math.max(0,(t.landFX340||0)-dt);
- var target=(d.enemies||[]).filter(function(v){return v.hp>0&&!air277(v)&&!(v.kind!==undefined&&U[v.kind]&&U[v.kind].air)&&canDamage285(v,t,'cannon')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
+ // 402: energy wave: the beam hits after it crosses the field and blasts a crater: splash damage to ground units, like artillery.
+ if(t.waves402&&t.waves402.length){t.waves402=t.waves402.filter(function(f){f.left-=dt;if(f.left>0)return true;
+  (d.enemies||[]).forEach(function(v){if(v.hp<=0||air277(v)||v.kind!==undefined&&U[v.kind]&&U[v.kind].air)return;var r=dist(v,f);if(r<=1.6)hit(d,v,70*(1-.45*r/1.6),t,'cannon');});
+  if(d.fx)d.fx.push({x:f.x,y:f.y,tx:f.x,ty:f.y,weapon:'impact',effect:'cannon',life:.75,maxLife:.75,color:'#9fe9ff',radius:50});return false;});}
+ if(t.hp!==undefined&&t.hp<=0){t.charge402=0;return;}t.cool=Math.max(0,(t.cool||0)-dt);t.phase=(t.phase||0)+dt;t.landFX340=Math.max(0,(t.landFX340||0)-dt);
+ var range402=sentryRange402(d),target=(d.enemies||[]).filter(function(v){return v.hp>0&&!air277(v)&&!(v.kind!==undefined&&U[v.kind]&&U[v.kind].air)&&canDamage285(v,t,'cannon')&&dist(t,v)<=range402;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
  if(target){t.aimTarget=target;t.aim=Math.atan2(target.y-t.y,target.x-t.x);t.facing=target.x-target.y<t.x-t.y?-1:1;t.patrolTarget340=null;
   if((t.height340||0)>0){if(!t.landing340)t.landing340=sentryLanding340(d,t);if(!t.landing340)return;if(dist(t,t.landing340)>.08){sentryMove340(t,t.landing340,dt,1.8);return;}t.height340=Math.max(0,t.height340-dt*65);if(t.height340===0){t.landFX340=.4;t.landing340=null;}return;}
-  t.moving=false;if(t.cool<=0){var fx401=weaponFX(t,target,'missile'),fly401=.75+dist(t,target)*.06;fx401.effect='fist401';fx401.life=fx401.maxLife=fly401;d.fx.push(fx401);(t.fists401=t.fists401||[]).push({x:target.x,y:target.y,left:fly401});t.cool=1.8;}return;
+  t.moving=false;
+  // 402: charge an energy ball between the hands (0.8 s), then push it out as a long beam.
+  if(t.charge402>0){t.charge402=Math.max(0,t.charge402-dt);if(t.charge402>1e-6)return;t.charge402=0;var fx402=weaponFX(t,target,'missile'),travel402=.16+dist(t,target)*.012;fx402.effect='wave402';fx402.life=fx402.maxLife=.62;fx402.reach402=travel402/.62;d.fx.push(fx402);(t.waves402=t.waves402||[]).push({x:target.x,y:target.y,left:travel402});t.fired402=Date.now();t.cool=2.4;return;}
+  if(t.cool<=0){t.charge402=CHARGE402;t.chargeAt402=Date.now();}return;
  }
+ t.charge402=0;
  t.aimTarget=null;t.landing340=null;
  // 401: patrol by cartoon hops instead of jet flight: land/settle 0-.12, crouch .12-.25, airborne .25-1 (moving).
  if((t.height340||0)>0&&t.hop401===undefined){t.height340=Math.max(0,t.height340-dt*65);if(t.height340>0)return;}
- t.hop401=(t.hop401||0)+dt/0.8;t.hopAt401=Date.now();var hp401=t.hop401%1;if(hp401<0.25){t.height340=0;return;}t.height340=Math.sin((hp401-0.25)/0.75*Math.PI)*30;var h=d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10},corners=[[2.4,2.4],[-2.4,2.4],[-2.4,-2.4],[2.4,-2.4]];
+ t.hop401=(t.hop401||0)+dt/HOP402;t.hopAt401=Date.now();var hp401=t.hop401%1;if(hp401<0.25){t.height340=0;return;}t.height340=Math.sin((hp401-0.25)/0.75*Math.PI)*62;var h=d.buildings.find(function(b){return b.type==='hq';})||{x:10,y:10},corners=[[3.6,3.6],[-3.6,3.6],[-3.6,-3.6],[3.6,-3.6]];
  if(!t.patrolTarget340||dist(t,t.patrolTarget340)<.12){var c=corners[(t.patrolStep340||0)%4];t.patrolStep340=(t.patrolStep340||0)+1;t.patrolTarget340={x:Math.max(1,Math.min((d.mapSize||22)-2,h.x+c[0])),y:Math.max(1,Math.min((d.mapSize||22)-2,h.y+c[1]))};}
- sentryMove340(t,t.patrolTarget340,dt,1.15/0.75);
+ sentryMove340(t,t.patrolTarget340,dt,3.1/(HOP402*.75));
 }
 var scoutSentry339=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=function(target){var ok=scoutSentry339.call(this,target);if(ok)addSentry339(this.raid,'guards');return ok;};
 var defenseSentry339=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=defenseSentry339.call(this);if(!error)addSentry339(this.defense,'defenders');return error;};
