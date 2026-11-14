@@ -1,6 +1,6 @@
 // 392: pre-rendered 3D troops (ranger 0, battle mech 2, medic drone 3, sniper 4, shield mech 6, plasma trooper 8, heavy assault mech 10).
 // idle / walk (by distance travelled) / attack (by recoil) / death. Atlases by render-units.cjs.
-var unit3dKinds392={0:{file:'ranger',height:38,perTile:10},2:{file:'mech',height:46,perTile:8},3:{file:'drone',height:44,perTile:6},4:{file:'sniper',height:38,perTile:10},6:{file:'shield',height:48,perTile:7},8:{file:'plasma',height:40,perTile:9},10:{file:'heavy',height:56,perTile:6}};
+var unit3dKinds392={0:{file:'ranger',height:42,perTile:10},2:{file:'mech',height:46,perTile:8},3:{file:'drone',height:44,perTile:6},4:{file:'sniper',height:38,perTile:10},6:{file:'shield',height:48,perTile:7},8:{file:'plasma',height:40,perTile:9},10:{file:'heavy',height:56,perTile:6}};
 Object.keys(unit3dKinds392).forEach(function(k){var s=unit3dKinds392[k];s.meta=unit3dMeta392[s.file];if(!s.meta){delete unit3dKinds392[k];return;}s.img=new Image();s.img.onload=function(){drawNeeded=true;};s.img.src='assets/units3d392-'+s.file+'.webp';});
 function unit3dDir392(a){return ((Math.round(a/(Math.PI/4))%8)+8)%8;}
 function unit3d392(t,u,enemy,z,flip){

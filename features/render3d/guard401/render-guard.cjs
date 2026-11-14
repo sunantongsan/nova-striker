@@ -1,3 +1,4 @@
+// 402: attack = energy wave (charge at the hip, push both palms); meta.muzzle = hands while charging, meta.push = palms when firing.
 // Render guard sprite sheets: rows = unique dirs [0,1,3,4,5] (2,6,7 are mirrors), cols: idle4 walk8 fly4 attack4 death5.
 const fs=require('fs'),path=require('path');const dir='/home/claude/glb/view';
 const sharp=require('/home/claude/nova-striker/node_modules/sharp');
@@ -16,6 +17,7 @@ for(const tier of ['t1','t2','t3']){await p.evaluate(f=>setMap(f),`/glb/r_${tier
    const buf=await sharp(Buffer.from(r.img.split(',')[1],'base64')).resize(CW,CW).png().toBuffer();{const cell=row*c+col;comps.push({input:buf,left:(cell%COLS)*CW,top:Math.floor(cell/COLS)*CW});}
    meta.ax=+(r.ox*SC).toFixed(1);meta.ay=+(r.oy*SC).toFixed(1);
    if(tier==='t1'&&anim==='attack'&&f===1)meta.muzzle[row]=[+((r.mx-r.ox)*SC).toFixed(1),+((r.my-r.oy)*SC).toFixed(1)];
+   if(tier==='t1'&&anim==='attack'&&f===3)(meta.push=meta.push||[])[row]=[+((r.mx-r.ox)*SC).toFixed(1),+((r.my-r.oy)*SC).toFixed(1)];// 402: palms at the end of the push
    if(tier==='t1'&&anim==='idle'&&f===0){const raw=await sharp(buf).ensureAlpha().raw().toBuffer();for(let y=0;y<CW;y++)for(let x=0;x<CW;x++)if(raw[(y*CW+x)*4+3]>60&&y<top)top=y;}
    col++;}}
  {const u=await p.evaluate(()=>fistShot(Math.PI/4*1.5));await sharp(Buffer.from(u.split(',')[1],'base64')).trim().resize(96,96,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toFile(`/home/claude/glb/fist401-${tier}.png`);}

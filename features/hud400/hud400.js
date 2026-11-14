@@ -52,17 +52,19 @@
 // (or a building's footprint), so gameplay, hit boxes and saves are untouched.
 var squash401={units:new WeakMap(),buildings:{},now:0};
 function spring401(e,amp,freq,damp){return amp*Math.exp(-e*damp)*Math.cos(e*freq);}
-// Flying guard robot: crouch before lift-off, stretch while climbing/diving, squash on touch-down, breathe while hovering.
+// 402: guard robot, exaggerated cartoon (Disney-style) squash & stretch: deep crouch before each hop, long stretch on
+// launch, stretch along the fall, a big pancake squash on landing that wobbles back, and a springy idle bounce.
 function squashGuard401(r,h,t){
- var now=performance.now()/1000,s=r.sq401||(r.sq401={h:h,at:now,vz:0,land:-9,crouch:-9});
- var dt=Math.max(.001,now-s.at),vz=(h-s.h)/dt;if(dt<.2)s.vz=s.vz*.6+vz*.4;
- if(s.h<=0&&h>0)s.crouch=now;if(s.h>0&&h<=0)s.land=now;s.h=h;s.at=now;
- var sy=1,e;
- if((e=now-s.crouch)<.45)sy+=e<.12?-.22*(e/.12):spring401(e-.12,.24,16,7);
- else if((e=now-s.land)<.6)sy+=spring401(e,-.3,20,7);
- else if(h>2)sy+=Math.max(-.12,Math.min(.2,Math.abs(s.vz)/260))+Math.sin(t*3.1)*.035;
- else sy+=Math.sin(t*2.2)*.02;
- ctx.scale(1/Math.sqrt(sy),sy);
+ var now=performance.now()/1000,s=r.sq401||(r.sq401={h:h,at:now,vz:0,land:-9,crouch:-9,impact:0});
+ var dt=Math.max(.001,now-s.at),vz=(h-s.h)/dt;if(dt<.2)s.vz=s.vz*.55+vz*.45;
+ if(s.h<=0&&h>0)s.crouch=now;if(s.h>0&&h<=0){s.land=now;s.impact=Math.min(1,Math.abs(s.vz)/200+.45);}s.h=h;s.at=now;
+ var ph=r.hop401!==undefined?r.hop401%1:-1,sy=1,e;
+ if(h<=0&&ph>=.12&&ph<.25&&!(r.charge402>0))sy-=.42*Math.sin((ph-.12)/.13*Math.PI/2);// anticipation: squat low
+ else if((e=now-s.crouch)<.5)sy+=e<.08?.55*(e/.08):spring401(e-.08,.55,15,6);// launch: shoot up long and thin
+ else if((e=now-s.land)<.75)sy+=spring401(e,-.5*s.impact,18,5.5);// landing: pancake, then wobble
+ else if(h>2)sy+=Math.max(-.18,Math.min(.38,s.vz/160))+Math.sin(t*5)*.03;// stretch rising and falling, round at the apex
+ else sy+=Math.abs(Math.sin(t*3.2))*.07-.02;// springy idle bounce
+ sy=Math.max(.42,sy);ctx.scale(1/Math.pow(sy,.6),sy);
 }
 (function(){
  // Troops: bouncy walk, hit squash, shot kick, squash-flat on defeat, floating air units.
@@ -114,7 +116,7 @@ function squashGuard401(r,h,t){
 // 401: base guard robot = the owner's 3D model, auto-rigged and pre-rendered (features/render3d/guard3d.html).
 // 5 rendered directions + 3 mirrored; idle / walk / jump (cartoon hop: crouch, launch, tuck, reach, squash) / attack (eye blast) / death.
 // Colour by the base's HQ level: 1-3 sky blue, 4-6 gold, 7+ ruby.
-var guardMeta401={"cw":184,"ch":184,"cols":13,"dirs":[0,1,3,4,5],"anims":{"idle":[0,4],"walk":[4,6],"jump":[10,6],"attack":[16,4],"death":[20,5]},"muzzle":[[23,-72.9],[2.9,-66.4],[-29.6,-82.6],[-23,-95.7],[-2.9,-102.2]],"ax":92,"ay":157.9,"h":123.9},guardImgs401={},guardRow401={0:[0,1],1:[1,1],2:[0,-1],3:[2,1],4:[3,1],5:[4,1],6:[3,-1],7:[2,-1]},GUARD_H401=64;
+var guardMeta401={"cw":184,"ch":184,"cols":13,"dirs":[0,1,3,4,5],"anims":{"idle":[0,4],"walk":[4,6],"jump":[10,6],"attack":[16,4],"death":[20,5]},"muzzle":[[1.6,-33.3],[-14.6,-36.6],[-16.8,-55.5],[-1.6,-60.1],[14.6,-56.9]],"ax":92,"ay":157.9,"push":[[45.5,-32.5],[6.7,-19.5],[-57.6,-50.2],[-45.5,-76],[-6.7,-89]],"h":123.9},guardImgs401={},guardRow401={0:[0,1],1:[1,1],2:[0,-1],3:[2,1],4:[3,1],5:[4,1],6:[3,-1],7:[2,-1]},GUARD_H401=64;
 function guardTier401(){var bs=screen==='raid'&&E.raid?E.raid.buildings:screen==='defense'&&E.defense?E.defense.buildings:E.d.buildings,hq=(bs||[]).find(function(b){return b.type==='hq';}),lv=hq&&hq.lv||1;return lv>=7?'t3':lv>=4?'t2':'t1';}
 function guardImg401(tier){var im=guardImgs401[tier];if(!im){im=guardImgs401[tier]=new Image();im.onload=function(){drawNeeded=true;};im.src='assets/guard401-'+tier+'.webp';}return im.complete&&im.naturalWidth?im:null;}
 function guardDir401(r){var dx=0,dy=0;if(r.lx401!==undefined){dx=r.x-r.lx401;dy=r.y-r.ly401;}r.lx401=r.x;r.ly401=r.y;
@@ -130,8 +132,8 @@ drawMiner251=function(r){
   if(ph>=0&&(h>0.5||(ph>=0.12&&ph<0.25&&Date.now()-(r.hopAt401||0)<300))){anim='jump';var q=(ph-0.25)/0.75;f=ph<0.12?5:ph<0.25?0:q<0.12?1:q<0.42?2:q<0.62?3:q<0.9?4:5;}
   else if(h>0.5){var sq=r.sq401;anim='jump';f=sq&&sq.vz<-5?4:sq&&sq.vz>5?2:3;}
   else if(ph>=0&&ph<0.12&&Date.now()-(r.hopAt401||0)<300){anim='jump';f=5;}
-  else if(r.charge402>0){anim='attack';f=Math.min(3,Math.floor((1-r.charge402/.8)*4));}
-  else if(r.fired402&&Date.now()-r.fired402<520){anim='attack';f=3;}
+  else if(r.charge402>0){anim='attack';var cp402=1-r.charge402/.8;f=cp402<.4?0:(cp402>.75&&Math.floor(now/60)%2?0:1);}
+  else if(r.fired402&&Date.now()-r.fired402<560){anim='attack';f=Date.now()-r.fired402<90?2:3;}
   else if(now-(r.moveAt401||0)<150){anim='walk';f=Math.floor((r.odo401||0)*7)%6;}
   else{anim='idle';f=Math.floor(t*4)%4;}}
  var cell=rm[0]*25+g.anims[anim][0]+f,k=GUARD_H401/g.h;
@@ -153,13 +155,13 @@ weaponMount=function(o){
 // 402: energy wave attack. The guard crouches and pulls back while a glowing ball gathers in front of its chest
 // (sparks spiral in), then lunges forward and pushes a wide beam out as far as the shock mortar fires.
 var WAVE402={t1:['#e9fbff','#6fe0ff','#2aa8ff'],t2:['#fffbe6','#ffe27a','#ffaa1f'],t3:['#fff0f2','#ff9aa8','#ff3b5c']};
-function hand402(o){// screen offset (unzoomed) of the energy ball: chest height, pushed toward the target.
- var a=o.aim!==undefined?o.aim:Math.PI/4,p0=point(o.x,o.y),p1=point(o.x+Math.cos(a),o.y+Math.sin(a)),dx=(p1.x-p0.x)/zoom,dy=(p1.y-p0.y)/zoom,l=Math.hypot(dx,dy)||1;
- return {x:dx/l*20,y:dy/l*9-GUARD_H401*.5-(o.height340||0),dx:dx/l,dy:dy/l};}
+function hand402(o,which){// screen offset (unzoomed) of the hands: 'muzzle' while charging (at the hip), 'push' at the end of the thrust.
+ var a=o.aim!==undefined?o.aim:Math.PI/4,d=((Math.round(a/(Math.PI/4))%8)+8)%8,rm=guardRow401[d],m=guardMeta401[which||'muzzle'][rm[0]],k=GUARD_H401/guardMeta401.h;
+ return {x:m[0]*k*rm[1],y:m[1]*k-(o.height340||0)};}
 function pose402(r){var now=Date.now(),e;
- if(r.charge402>0){e=1-r.charge402/.8;var c=Math.min(1,e*1.6);ctx.scale(1+.1*c,1-.12*c+Math.sin(e*60)*.012*e);return;}// crouch and tremble while charging
- if(r.fired402&&(e=(now-r.fired402)/1000)<.6){var k=Math.exp(-e*7);ctx.scale(1-.1*k,1+.16*k*Math.cos(e*22));}}// lunge into the push
-function orb402(r){var c=WAVE402[guardTier401()],e=1-r.charge402/.8,m=hand402(r),p=point(r.x,r.y),x=p.x+m.x*zoom,y=p.y+m.y*zoom,rad=(4+e*11+Math.sin(Date.now()/40)*1.2)*zoom;
+ if(r.charge402>0){e=1-r.charge402/.8;var c=Math.min(1,e*1.5),q=1-.24*c+Math.sin(now/22)*.035*c;ctx.scale(1/Math.pow(q,.7),q);return;}// coil down and tremble while charging
+ if(r.fired402&&(e=(now-r.fired402)/1000)<.8){var q2=1+spring401(e,.34,16,5);ctx.scale(1/Math.pow(q2,.7),q2);}}// spring up into the push, wobble back
+function orb402(r){var c=WAVE402[guardTier401()],e=1-r.charge402/.8,m=hand402(r,'muzzle'),p=point(r.x,r.y),x=p.x+m.x*zoom,y=p.y+m.y*zoom,rad=(4+e*11+Math.sin(Date.now()/40)*1.2)*zoom;
  ctx.save();
  var g=ctx.createRadialGradient(x,y,0,x,y,rad*2.6);g.addColorStop(0,c[0]);g.addColorStop(.3,c[1]);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad*2.6,0,Math.PI*2);ctx.fill();
  ctx.fillStyle=c[0];ctx.beginPath();ctx.arc(x,y,rad*.55,0,Math.PI*2);ctx.fill();
@@ -167,7 +169,7 @@ function orb402(r){var c=WAVE402[guardTier401()],e=1-r.charge402/.8,m=hand402(r)
  ctx.restore();drawNeeded=true;}
 var fx402=drawFX;drawFX=function(f){
  if(!f||f.effect!=='wave402')return fx402.apply(this,arguments);
- var c=WAVE402[guardTier401()],v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.62))),reach=f.reach402||.4,src={x:f.x,y:f.y,aim:Math.atan2(f.ty-f.y,f.tx-f.x),height340:0},m=hand402(src),a=point(f.x,f.y),b=point(f.tx,f.ty);
+ var c=WAVE402[guardTier401()],v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.62))),reach=f.reach402||.4,src={x:f.x,y:f.y,aim:Math.atan2(f.ty-f.y,f.tx-f.x),height340:0},m=hand402(src,'push'),a=point(f.x,f.y),b=point(f.tx,f.ty);
  a.x+=m.x*zoom;a.y+=m.y*zoom;b.y-=12*zoom;
  var head=Math.min(1,v/reach),hx=a.x+(b.x-a.x)*head,hy=a.y+(b.y-a.y)*head,fade=v<reach?1:Math.max(0,1-(v-reach)/(1-reach)),w=(14+Math.sin(v*70)*2)*zoom*(.35+.65*fade);
  ctx.save();ctx.lineCap='round';

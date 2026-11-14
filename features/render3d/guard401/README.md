@@ -6,3 +6,7 @@ faces bridging separate limbs removed), poses idle/walk/jump/attack/death (jump 
 `render-guard.cjs` writes 5 unique directions (2, 6, 7 are drawn mirrored) x 25 frames at 184 px per tier, 13 columns.
 Tier textures tint the original albedo (detail kept): t1 sky blue (HQ 1-3), t2 gold (HQ 4-6), t3 ruby (HQ 7+).
 A 2 px navy outline is added after rendering. Runtime: `features/hud400/hud400.js` (drawMiner251 / weaponMount overrides).
+
+402: attack is now an energy wave: frames 0-1 gather a ball at the right hip (body twisted, crouched), 2-3 lunge and push both
+palms forward. `meta.muzzle` = hands while charging, `meta.push` = palms at the end of the push (beam origin).
+The navy outline is applied after `render-guard.cjs` (alpha > 90, MaxFilter 5, blur 0.6, colour 30,48,92).
