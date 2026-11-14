@@ -1,0 +1,114 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="352"></canvas>
+<script type="module">
+// 403: ground rocket battery = ship-style box launcher (owner's reference photo: pedestal, side housing,
+// yoke and a tilted launcher box with a honeycomb of round tubes). Bright NOVA palette, toon shaded.
+// Same pose() contract and camera as ../silo3d.html so ../render.cjs layout and silo3d392.js stay unchanged.
+import * as T from '../three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.75,2.75,3.6,-2.45,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfffaf0,0x5a78b0,0.8));
+const sun=new T.DirectionalLight(0xfff2dc,2.6);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0xa8e6ff,0.9);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([70,140,215,255]);const ramp=new T.DataTexture(g,4,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.MeshBasicMaterial({color:0x17213d,side:T.BackSide});
+function mesh(geo,mat,parent,ol=0.04){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){const o=new T.Mesh(geo,OUT);o.scale.setScalar(1+ol);m.add(o);}return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:3,curveSegments:6});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+// Tiers (4 levels each): bigger box, more tubes, more parts.
+const TIERS=[
+ {scale:0.9, rows:3,cols:3,box:[1.7,1.0,1.05],trim:0x3b6fd6,accent:0xf28a2e,tip:0xf05a3a,radar:0,springs:0,glow:0,gold:0},
+ {scale:0.95,rows:4,cols:4,box:[1.8,1.12,1.15],trim:0x3b6fd6,accent:0xf28a2e,tip:0xf05a3a,radar:0,springs:1,glow:0,gold:0},
+ {scale:1.0, rows:5,cols:4,box:[1.9,1.25,1.22],trim:0x3466d2,accent:0xf28a2e,tip:0xf04a32,radar:1,springs:1,glow:0,gold:0},
+ {scale:1.04,rows:5,cols:5,box:[2.0,1.35,1.38],trim:0x2f5fcf,accent:0xf7a23a,tip:0xee3d2e,radar:1,springs:1,glow:1,gold:1},
+ {scale:1.08,rows:6,cols:5,box:[2.1,1.5,1.45],trim:0x2b58c8,accent:0xffb340,tip:0xea3328,radar:2,springs:1,glow:1,gold:1}
+];
+let state=null;
+function build(t){
+ const P=TIERS[t];if(state)S.remove(state.root);
+ const BODY=M(0xe4e8ee),WHITE=M(0xf4f4f1),BLUE=M(0x2c5fd0),NAVY=M(0x1f3270),TRIM=M(P.trim),ACC=M(P.accent),STEEL=M(0x8d97a8),DARK=M(0x39404e),HOLE=M(0x2a2f3a),RIMC=M(0xaab4c3),TIP=M(P.tip),GOLD=M(0xf2c75e),GLOW=new T.MeshBasicMaterial({color:0x7fe8ff});
+ const TRIM2=P.gold?GOLD:TRIM;
+ const root=new T.Group();root.scale.setScalar(P.scale*0.86);S.add(root);
+ // ---- square plinth like the other NOVA buildings ----
+ const base=new T.Group();root.add(base);
+ mesh(lathe([[0,0],[2.05,0],[2.1,0.1],[2.0,0.34],[0,0.34]],8),NAVY,base,0.02).rotation.y=Math.PI/8;
+ mesh(lathe([[0,0.3],[1.9,0.3],[1.92,0.36],[1.85,0.4],[0,0.4]],8),WHITE,base,0.02).rotation.y=Math.PI/8;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/4;const c=mesh(rbox(0.36,0.3,0.3,0.07),i%2?ACC:BLUE,base,0.06);c.position.set(Math.cos(a)*1.86,0.2,Math.sin(a)*1.86);c.rotation.y=-a;}
+ // turntable
+ mesh(lathe([[0,0.34],[1.55,0.34],[1.6,0.42],[1.5,0.58],[0,0.58]]),BODY,base,0.02);
+ const ring=mesh(new T.TorusGeometry(1.52,0.06,10,56),TRIM2,base,0.12);ring.rotation.x=Math.PI/2;ring.position.y=0.5;
+ // shock springs around the pedestal (photo: coil springs at the foot)
+ if(P.springs)for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;const sp=new T.Group();sp.position.set(Math.cos(a)*1.25,0.34,Math.sin(a)*1.25);base.add(sp);
+  for(let k=0;k<4;k++){const c=mesh(new T.TorusGeometry(0.13,0.035,6,14),STEEL,sp,0.1);c.rotation.x=Math.PI/2;c.position.y=0.05+k*0.065;}}
+ // ---- rotating mount ----
+ const yaw=new T.Group();yaw.position.y=0.58;root.add(yaw);
+ mesh(new T.CylinderGeometry(1.15,1.25,0.26,40),NAVY,yaw,0.03).position.y=0.13;
+ const yr=mesh(new T.TorusGeometry(1.17,0.05,8,40),TRIM2,yaw,0.1);yr.rotation.x=Math.PI/2;yr.position.y=0.25;
+ // flared foot plates of the yoke (photo: curved webs at the base)
+ for(const z of [-0.78,0.78]){const web=mesh(rbox(1.1,0.5,0.22,0.08),BODY,yaw,0.04);web.position.set(-0.05,0.45,z);}
+ // big side housing (photo: tall left cabinet with a warning label)
+ const hz=-(P.box[2]/2+0.42);
+ const house=mesh(rbox(0.95,1.95,0.62,0.12),BLUE,yaw,0.03);house.position.set(-0.05,1.2,hz);
+ const hs=mesh(rbox(0.98,0.14,0.65,0.04),WHITE,yaw,0);hs.position.set(-0.05,0.55,hz);
+ const hs2=mesh(rbox(0.98,0.1,0.65,0.04),TRIM2,yaw,0);hs2.position.set(-0.05,2.05,hz);
+ const label=mesh(rbox(0.36,0.3,0.04,0.04),ACC,yaw,0.08);label.position.set(0.12,1.15,hz-0.33);
+ for(let i=0;i<3;i++){const v=mesh(rbox(0.5,0.05,0.04,0.02),DARK,yaw,0);v.position.set(-0.12,1.55+i*0.12,hz-0.32);}
+ if(P.glow){const l=new T.Mesh(rbox(0.12,0.5,0.04,0.03),GLOW);l.position.set(0.32,1.25,hz-0.33);yaw.add(l);}
+ // opposite yoke arm
+ const az=P.box[2]/2+0.24;
+ const arm=mesh(rbox(0.85,1.55,0.26,0.1),BLUE,yaw,0.04);arm.position.set(0.05,1.05,az);arm.rotation.z=-0.12;
+ const as=mesh(rbox(0.88,0.12,0.28,0.04),WHITE,yaw,0);as.position.set(0.05,0.6,az);
+ // radar / sensor on top of the housing
+ if(P.radar){const r=new T.Group();r.position.set(-0.05,2.12,hz);yaw.add(r);
+  mesh(new T.CylinderGeometry(0.07,0.09,0.3,10),STEEL,r,0.08).position.y=0.15;
+  const dome=mesh(new T.SphereGeometry(0.26,20,12,0,Math.PI*2,0,Math.PI/2),WHITE,r,0.06);dome.position.y=0.3;
+  const db=mesh(new T.CylinderGeometry(0.27,0.27,0.08,20),TRIM2,r,0.06);db.position.y=0.3;
+  if(P.radar>1){const ant=mesh(new T.CylinderGeometry(0.025,0.025,0.55,6),STEEL,r,0.15);ant.position.set(0.25,0.45,0);const tipb=new T.Mesh(new T.SphereGeometry(0.06,10,8),GLOW);tipb.position.set(0.25,0.75,0);r.add(tipb);}}
+ // ---- tilting launcher box ----
+ const pitch=new T.Group();pitch.position.y=1.55;yaw.add(pitch);
+ const axle=mesh(new T.CylinderGeometry(0.16,0.16,P.box[2]+0.95,16),STEEL,pitch,0.06);axle.rotation.x=Math.PI/2;
+ const L=P.box[0]+0.45,H=P.box[1],D=P.box[2];
+ const box=new T.Group();box.position.x=0.25;pitch.add(box);
+ const shell=mesh(new T.BoxGeometry(L,H,D),BODY,box,0.025);
+ // panel lines and rear ribbing (photo: slatted underside)
+ for(const y of [H/2+0.02]){const top=mesh(rbox(L*0.92,0.06,D*0.8,0.03),WHITE,box,0);top.position.y=y;}
+ const st=mesh(new T.BoxGeometry(0.34,H+0.04,D+0.04),BLUE,box,0.02);st.position.x=-L*0.15;
+ const st2=mesh(new T.BoxGeometry(0.1,H+0.04,D+0.04),TRIM,box,0);st2.position.x=L*0.28;
+ for(let i=0;i<5;i++){const rib=mesh(new T.BoxGeometry(0.07,0.28,D*0.9),STEEL,box,0.05);rib.position.set(-L*0.42+i*0.2,-H/2-0.12,0);}
+ // side grilles toward the rear (photo: louvred panel behind the tube block)
+ for(const sz of [D/2+0.015,-D/2-0.015])for(let i=0;i<6;i++){const fin=mesh(new T.BoxGeometry(0.06,H*0.62,0.04),STEEL,box,0);fin.position.set(-L*0.42+i*0.11,-0.02,sz);}
+ const back=mesh(new T.BoxGeometry(0.5,H*0.7,D*0.75),NAVY,box,0.04);back.position.x=-L/2-0.2;
+ // front face plate with honeycomb tubes
+ const face=new T.Group();face.position.x=L/2;box.add(face);
+ mesh(new T.BoxGeometry(0.12,H+0.12,D+0.12),WHITE,face,0.03).position.x=0.04;
+ const fr=mesh(new T.BoxGeometry(0.06,H+0.16,D+0.16),TRIM2,face,0);fr.position.x=-0.04;
+ const rows=P.rows,cols=P.cols,ph=(H-0.12)/rows,pw=(D-0.1)/(cols+0.5),rr=Math.min(ph,pw)*0.5;
+ for(let r=0;r<rows;r++){const off=r%2?pw*0.5:0,n=r%2?cols-1+ (cols>4?0:0):cols;
+  for(let c=0;c<n;c++){const y=(r-(rows-1)/2)*ph,z=(c-(n-1)/2)*pw+0*off;
+   const rim=mesh(new T.CylinderGeometry(rr,rr,0.06,18),RIMC,face,0.12);rim.rotation.z=Math.PI/2;rim.position.set(0.11,y,z);
+   const hole=mesh(new T.CylinderGeometry(rr*0.74,rr*0.74,0.07,18),HOLE,face,0);hole.rotation.z=Math.PI/2;hole.position.set(0.115,y,z);
+   const nose=mesh(new T.ConeGeometry(rr*0.5,rr*0.9,14),TIP,face,0);nose.rotation.z=-Math.PI/2;nose.position.set(0.12+rr*0.25,y,z);}}
+ // wreck
+ const wreck=new T.Group();root.add(wreck);
+ for(let i=0;i<9;i++){const a=i*0.7+0.3,r=0.5+((i*37)%10)/12;const p=mesh(rbox(0.35+(i%3)*0.12,0.18,0.3,0.05),i%3?M(0xaab2bf):M(0x7d8594),wreck,0.08);p.position.set(Math.cos(a)*r,0.62+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ const bent=mesh(new T.BoxGeometry(1.5,0.8,0.9),M(0xa3abb8),wreck,0.04);bent.position.set(0.3,0.9,0.1);bent.rotation.set(0.3,0.5,-0.45);
+ const bent2=mesh(rbox(0.8,1.0,0.5,0.1),M(0x98a1af),wreck,0.04);bent2.position.set(-0.6,0.95,-0.6);bent2.rotation.set(0.5,0.2,0.7);
+ state={root,yaw,pitch,wreck,P,L};
+}
+window.pose=(t,open,yawA,wreckd)=>{
+ if(!state||state.t!==t){build(t);state.t=t;}
+ const st=state;
+ st.yaw.visible=!wreckd;st.wreck.visible=!!wreckd;
+ st.yaw.rotation.y=yawA;
+ // stowed: box level; raised: tilted up ~32 deg like the reference photo
+ st.pitch.rotation.z=0.3+Math.min(1,open)*0.48;
+ R.render(S,cam);st.root.updateMatrixWorld(true);const v=new T.Vector3(0.25+st.L/2+0.2,0,0);st.pitch.localToWorld(v);v.project(cam);
+ return {img:canvas.toDataURL('image/png'),mx:(v.x+1)/2*canvas.width,my:(1-v.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>

@@ -2,7 +2,7 @@
 // Per tier: 8 pop-up frames, 16 aim directions (launcher raised), 1 wreck. Atlas by render.cjs.
 var silo3dArt392=new Image();silo3dArt392.onload=function(){drawNeeded=true;};silo3dArt392.src='assets/silo3d392.webp';
 function silo3dTier392(b){return Math.max(0,Math.min(silo3dMeta392.tiers.length-1,Math.floor(((b.lv||1)-1)/4)));}
-function silo3dK392(){return tile*1.35/silo3dMeta392.tiers[0].width;}
+function silo3dK392(){return tile*1.75/silo3dMeta392.tiers[0].width;}
 function silo3dBase392(p){return p.y+tile*zoom*2.25*.12;}
 function silo3dDir392(b){var a=b.aim===undefined?Math.PI/4:b.aim,n=silo3dMeta392.dirs;return ((Math.round(a/(2*Math.PI/n))%n)+n)%n;}
 function silo3dHostiles392(b){
@@ -16,14 +16,19 @@ function silo3dOpen392(b){
  b.open392=Math.max(0,Math.min(1,(b.open392||0)+(want?dt/.6:-dt/.9)));
  if(b.open392>0&&b.open392<1)drawNeeded=true;return b.open392;
 }
-function silo3dCell392(b,col,p){
- var m=silo3dMeta392,t=silo3dTier392(b),tm=m.tiers[t],k=silo3dK392()*zoom;
- ctx.drawImage(silo3dArt392,col*m.cw,t*m.ch,m.cw,m.ch,p.x-tm.ax*k,silo3dBase392(p)-tm.ay*k,m.cw*k,m.ch*k);
+// 403: cartoon squash & stretch after each salvo - a damped spring anchored at the base.
+function silo3dBounce392(b){
+ var t=(Date.now()-(b.fire392||0))/1000;if(!(t>=0&&t<.75))return {x:1,y:1};
+ drawNeeded=true;var w=Math.exp(-5.5*t)*Math.cos(t*24);return {x:1+.16*w,y:1-.22*w};
+}
+function silo3dCell392(b,col,p,bounce){
+ var m=silo3dMeta392,t=silo3dTier392(b),tm=m.tiers[t],k=silo3dK392()*zoom,sx=bounce?bounce.x:1,sy=bounce?bounce.y:1;
+ ctx.drawImage(silo3dArt392,col*m.cw,t*m.ch,m.cw,m.ch,p.x-tm.ax*k*sx,silo3dBase392(p)-tm.ay*k*sy,m.cw*k*sx,m.ch*k*sy);
 }
 drawRocket227=function(b,p){
  if(!silo3dArt392.complete||!silo3dArt392.naturalWidth){newBuildingArt(b,p,tile*zoom*2.25);return;}
  var open=silo3dOpen392(b),col=open>=.999?8+silo3dDir392(b):Math.min(7,Math.round(open*7));
- silo3dCell392(b,col,p);
+ silo3dCell392(b,col,p,open>.9?silo3dBounce392(b):null);
  if((b.recoil||0)>.06&&open>.9){var mm=weaponMount(b),fx=p.x+mm.x*zoom,fy=p.y+mm.y*zoom,q=(b.recoil||0)/.18;
   ctx.save();var g=ctx.createRadialGradient(fx,fy,0,fx,fy,13*zoom*q+3);g.addColorStop(0,'rgba(255,252,220,.95)');g.addColorStop(.45,'rgba(255,190,80,.75)');g.addColorStop(1,'rgba(255,120,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(fx,fy,13*zoom*q+3,0,7);ctx.fill();
   ctx.globalAlpha=.45;ctx.fillStyle='#eef2f5';for(var i=0;i<3;i++){ctx.beginPath();ctx.arc(fx-(i*4+3)*zoom*Math.sign(mm.x||1),fy+(i*2+3)*zoom,(3+i*1.6)*zoom,0,7);ctx.fill();}ctx.restore();}
