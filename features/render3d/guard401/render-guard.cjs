@@ -18,6 +18,7 @@ for(const tier of ['t1','t2','t3']){await p.evaluate(f=>setMap(f),`/glb/r_${tier
    if(tier==='t1'&&anim==='attack'&&f===1)meta.muzzle[row]=[+((r.mx-r.ox)*SC).toFixed(1),+((r.my-r.oy)*SC).toFixed(1)];
    if(tier==='t1'&&anim==='idle'&&f===0){const raw=await sharp(buf).ensureAlpha().raw().toBuffer();for(let y=0;y<CW;y++)for(let x=0;x<CW;x++)if(raw[(y*CW+x)*4+3]>60&&y<top)top=y;}
    col++;}}
+ {const u=await p.evaluate(()=>fistShot(Math.PI/4*1.5));await sharp(Buffer.from(u.split(',')[1],'base64')).trim().resize(96,96,{fit:'contain',background:{r:0,g:0,b:0,alpha:0}}).png().toFile(`/home/claude/glb/fist401-${tier}.png`);}
  const out=`/home/claude/glb/guard401-${tier}.webp`;
  await sharp({create:{width:COLS*CW,height:Math.ceil(DIRS.length*c/COLS)*CW,channels:4,background:{r:0,g:0,b:0,alpha:0}}}).composite(comps).webp({quality:88,effort:6}).toFile(out);
  console.log(tier,fs.statSync(out).size);}

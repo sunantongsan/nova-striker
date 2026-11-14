@@ -487,11 +487,15 @@ function addSentry339(scene,group){var h=scene.buildings.find(function(b){return
 function sentryMove340(t,p,dt,speed){var dx=p.x-t.x,dy=p.y-t.y,len=Math.hypot(dx,dy),step=Math.min(len,dt*speed);t.moving=len>.05;if(len){t.x+=dx/len*step;t.y+=dy/len*step;if(Math.abs(dx-dy)>.01)t.facing=dx-dy<0?-1:1;}return len-step;}
 function sentryLanding340(d,t){function clear(p){return p.x>=1&&p.y>=1&&p.x<=(d.mapSize||22)-2&&p.y<=(d.mapSize||22)-2&&!d.buildings.some(function(b){return b.hp!==0&&Math.abs(b.x-p.x)<.9&&Math.abs(b.y-p.y)<.9;});}if(clear(t))return{x:t.x,y:t.y};for(var radius=1;radius<=4;radius++)for(var i=0;i<8;i++){var p={x:t.x+Math.cos(i*Math.PI/4)*radius,y:t.y+Math.sin(i*Math.PI/4)*radius};if(clear(p))return p;}return null;}
 function sentryTick339(d,t,dt){
+ // 401: thrown fists land after their flight and blast a crater: splash damage to ground units, like artillery.
+ if(t.fists401&&t.fists401.length){t.fists401=t.fists401.filter(function(f){f.left-=dt;if(f.left>0)return true;
+  (d.enemies||[]).forEach(function(v){if(v.hp<=0||air277(v)||v.kind!==undefined&&U[v.kind]&&U[v.kind].air)return;var r=dist(v,f);if(r<=1.5)hit(d,v,64*(1-.45*r/1.5),t,'cannon');});
+  if(d.fx)d.fx.push({x:f.x,y:f.y,tx:f.x,ty:f.y,weapon:'impact',effect:'cannon',life:.7,maxLife:.7,color:'#ffb568',radius:44});return false;});}
  if(t.hp!==undefined&&t.hp<=0)return;t.cool=Math.max(0,(t.cool||0)-dt);t.phase=(t.phase||0)+dt;t.landFX340=Math.max(0,(t.landFX340||0)-dt);
- var target=(d.enemies||[]).filter(function(v){return v.hp>0&&canDamage285(v,t,'missile')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
+ var target=(d.enemies||[]).filter(function(v){return v.hp>0&&!air277(v)&&!(v.kind!==undefined&&U[v.kind]&&U[v.kind].air)&&canDamage285(v,t,'cannon')&&dist(t,v)<=6;}).sort(function(a,b){return dist(t,a)-dist(t,b);})[0];
  if(target){t.aimTarget=target;t.aim=Math.atan2(target.y-t.y,target.x-t.x);t.facing=target.x-target.y<t.x-t.y?-1:1;t.patrolTarget340=null;
   if((t.height340||0)>0){if(!t.landing340)t.landing340=sentryLanding340(d,t);if(!t.landing340)return;if(dist(t,t.landing340)>.08){sentryMove340(t,t.landing340,dt,1.8);return;}t.height340=Math.max(0,t.height340-dt*65);if(t.height340===0){t.landFX340=.4;t.landing340=null;}return;}
-  t.moving=false;if(t.cool<=0){hit(d,target,48,t,'missile');d.fx.push(weaponFX(t,target,'missile'));t.cool=1.4;}return;
+  t.moving=false;if(t.cool<=0){var fx401=weaponFX(t,target,'missile'),fly401=.75+dist(t,target)*.06;fx401.effect='fist401';fx401.life=fx401.maxLife=fly401;d.fx.push(fx401);(t.fists401=t.fists401||[]).push({x:target.x,y:target.y,left:fly401});t.cool=1.8;}return;
  }
  t.aimTarget=null;t.landing340=null;
  // 401: patrol by cartoon hops instead of jet flight: land/settle 0-.12, crouch .12-.25, airborne .25-1 (moving).

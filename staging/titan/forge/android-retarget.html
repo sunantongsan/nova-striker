@@ -1,0 +1,66 @@
+<!doctype html><html><body style="margin:0"><canvas id="c" width="512" height="512"></canvas>
+<script type="importmap">{"imports":{"three":"./three/build/three.module.js","three/addons/":"./three/examples/jsm/"}}</script>
+<script type="module">
+// 401: put the owner's android (unrigged) on the ATLAS-09 skeleton so every existing titan clip plays on it.
+import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const L=new GLTFLoader();
+window.build=async()=>{
+ const atlas=await L.loadAsync('/glb/atlas-09.glb'),andr=await L.loadAsync('/glb/android.glb');
+ let ask;atlas.scene.traverse(o=>{if(o.isSkinnedMesh)ask=o.skeleton;});ask.pose();atlas.scene.updateMatrixWorld(true);
+ let src;andr.scene.traverse(o=>{if(o.isMesh&&!src)src=o;});src.updateWorldMatrix(true,false);
+ const geo=src.geometry.clone();geo.applyMatrix4(src.matrixWorld);geo.computeBoundingBox();const y0=geo.boundingBox.min.y;geo.translate(0,-y0,0);
+ const H=geo.boundingBox.max.y-geo.boundingBox.min.y,S=H/18;
+ // Joint landmarks measured on the android (metres, feet at 0, +x = robot left, +z forward).
+ const J={root:[0,0,0],pelvis:[0,0.87,0],chest:[0,1.02,0],head:[0,1.63,0.01],
+  'shoulder.L':[0.12,1.55,0],'upper_arm.L':[0.29,1.53,0],'forearm.L':[0.36,1.15,0],'hand.L':[0.385,0.89,0.02],
+  'shoulder.R':[-0.12,1.55,0],'upper_arm.R':[-0.29,1.53,0],'forearm.R':[-0.36,1.15,0],'hand.R':[-0.385,0.89,0.02],
+  'thigh.L':[0.1,0.86,0],'shin.L':[0.11,0.47,0.01],'foot.L':[0.12,0.11,0],'thigh.R':[-0.1,0.86,0],'shin.R':[-0.11,0.47,0.01],'foot.R':[-0.12,0.11,0]};
+ const B={},order=[];const wq={};
+ for(const ab of ask.bones){const name=ab.name.replace(/(L|R)$/,'.$1').replace(/\.\./,'.');}
+ // atlas bone names arrive sanitized ("upper_armL"); map back to dotted names
+ const dotted=n=>n.replace(/(shoulder|upper_arm|forearm|hand|thigh|shin|foot)(L|R)$/,'$1.$2');
+ for(const ab of ask.bones){const n=dotted(ab.name);const b=new T.Bone();b.name=n;B[n]=b;order.push(n);const q=new T.Quaternion();ab.getWorldQuaternion(q);wq[n]=q;b.quaternion.copy(ab.quaternion);}
+ for(const ab of ask.bones){const n=dotted(ab.name),p=ab.parent&&ask.bones.includes(ab.parent)?dotted(ab.parent.name):null;const b=B[n];
+  if(p){B[p].add(b);const d=new T.Vector3(...J[n]).sub(new T.Vector3(...J[p]));d.applyQuaternion(wq[p].clone().invert());b.position.copy(d);}else b.position.set(...J[n]);}
+ const rootBone=B.root;
+ // weights
+ const P=geo.attributes.position,n=P.count,si=new Uint16Array(n*4),sw=new Float32Array(n*4),idx={};order.forEach((k,i)=>idx[k]=i);
+ const ss=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);};
+ for(let i=0;i<n;i++){const x=P.getX(i),y=P.getY(i),ax=Math.abs(x),s=x>=0?'L':'R',w={};
+  if((y<0.9&&ax<0.235)||y<0.76){const knee=ss(0.40,0.54,y),ank=ss(0.08,0.16,y),hip=ss(0.80,0.92,y);w['foot.'+s]=(1-ank)*(1-hip);w['shin.'+s]=ank*(1-knee)*(1-hip);w['thigh.'+s]=knee*(1-hip);w.pelvis=hip;}
+  else if(ax>0.235&&y<1.6&&y>0.70){const wr=ss(0.84,0.93,y),el=ss(1.10,1.22,y),sh=ss(1.45,1.56,y);w['hand.'+s]=1-wr;w['forearm.'+s]=wr*(1-el);w['upper_arm.'+s]=wr*el*(1-sh);w['shoulder.'+s]=wr*el*sh;}
+  else if(y>=1.6){const k=ss(1.60,1.68,y);w.head=k;w.chest=1-k;}
+  else{const c=ss(0.95,1.08,y);w.chest=c;w.pelvis=1-c;if(ax>0.16&&y>1.40){const sh=ss(0.16,0.235,ax);w['shoulder.'+s]=sh*0.8;w.chest*=1-sh*0.8;}}
+  const e=Object.entries(w).filter(a=>a[1]>0.001).sort((a,b)=>b[1]-a[1]).slice(0,4);const tot=e.reduce((q,a)=>q+a[1],0)||1;
+  if(!e.length){si[i*4]=idx.pelvis;sw[i*4]=1;}else e.forEach((a,j)=>{si[i*4+j]=idx[a[0]];sw[i*4+j]=a[1]/tot;});}
+ {const grp=k=>/\.L$/.test(k)?(/thigh|shin|foot/.test(k)?'lL':'aL'):/\.R$/.test(k)?(/thigh|shin|foot/.test(k)?'lR':'aR'):(k==='pelvis'||k==='root')?'p':'c';const ok=new Set(['aL|c','aR|c','c|lL','c|lR','lL|p','lR|p','c|p']);
+  const vg=Array.from({length:n},(_,i)=>grp(order[si[i*4]]));const I=geo.index?geo.index.array:Array.from({length:n},(_,i)=>i),keep=[];let cut=0;
+  for(let t=0;t<I.length;t+=3){const g=[...new Set([vg[I[t]],vg[I[t+1]],vg[I[t+2]]])].sort();if(g.length>2||(g.length===2&&!ok.has(g.join('|')))){cut++;continue;}keep.push(I[t],I[t+1],I[t+2]);}geo.setIndex(keep);window.cut=cut;}
+ geo.setAttribute('skinIndex',new T.Uint16BufferAttribute(si,4));geo.setAttribute('skinWeight',new T.Float32BufferAttribute(sw,4));
+ const m=src.material.clone();m.metalness=0.35;m.roughness=0.5;m.metalnessMap=null;m.roughnessMap=null;m.name='NovaAndroid';
+ const mesh=new T.SkinnedMesh(geo,m);mesh.name='android';
+ const rig=new T.Group();rig.name='NOVA_ANDROID_RIG';rig.add(rootBone);rig.add(mesh);rig.updateMatrixWorld(true);
+ mesh.bind(new T.Skeleton(order.map(k=>B[k])));
+ // clips: rotations as authored; pelvis/root translation rescaled about the new rest; scale tracks dropped.
+ const restP={pelvis:B.pelvis.position.clone(),root:B.root.position.clone()};
+ const atlasRest={};for(const ab of ask.bones)atlasRest[dotted(ab.name)]=ab.position.clone();
+ const clips=atlas.animations.map(a=>{const tracks=[];for(const t of a.tracks){const [node,prop]=[t.name.slice(0,t.name.lastIndexOf('.')),t.name.slice(t.name.lastIndexOf('.')+1)];const bn=dotted(node);if(!B[bn])continue;
+   if(prop==='quaternion')tracks.push(new T.QuaternionKeyframeTrack(bn+'.quaternion',t.times,t.values));
+   else if(prop==='position'&&(bn==='pelvis'||bn==='root')){const v=Float32Array.from(t.values);const r0=atlasRest[bn],r1=restP[bn];for(let k=0;k<v.length;k+=3){v[k]=r1.x+(v[k]-r0.x)*S;v[k+1]=r1.y+(v[k+1]-r0.y)*S;v[k+2]=r1.z+(v[k+2]-r0.z)*S;}tracks.push(new T.VectorKeyframeTrack(bn+'.position',t.times,v));}}
+  return new T.AnimationClip(a.name,a.duration,tracks);});
+ window.rig=rig;window.clips=clips;window.B=B;window.mesh=mesh;
+ return {H,cut:window.cut,bones:order.length,clips:clips.map(c=>c.name+':'+c.tracks.length)};
+};
+window.exportGLB=async()=>{if(mixer)mixer.stopAllAction();window.mesh.skeleton.pose();window.rig.rotation.set(0,0,0);window.rig.updateMatrixWorld(true);const ex=new GLTFExporter();const res=await ex.parseAsync(window.rig,{binary:true,animations:window.clips,maxTextureSize:1024});const u8=new Uint8Array(res);let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s);};
+// preview: play a clip at time t, render from a camera angle
+const R=new T.WebGLRenderer({canvas:c,antialias:true,alpha:true,preserveDrawingBuffer:true});R.setClearColor(0x8fd16a);R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.3;
+const SC=new T.Scene();SC.add(new T.HemisphereLight(0xd4eeff,0x354552,3));const key=new T.DirectionalLight(0xffeedb,4);key.position.set(-4,6,5);SC.add(key);const rim=new T.DirectionalLight(0x56dcff,3);rim.position.set(4,3,-4);SC.add(rim);
+const cam=new T.OrthographicCamera(-1.25,1.25,1.25,-1.25,0.1,50);cam.position.set(5,4.3,6);cam.lookAt(0,0.95,0);
+let mixer;window.preview=(clip,t,yaw)=>{if(!mixer){mixer=new T.AnimationMixer(window.rig);SC.add(window.rig);}mixer.stopAllAction();const a=mixer.clipAction(window.clips.find(c=>c.name===clip)||window.clips[0]);a.reset().play();a.time=t;mixer.update(0);window.rig.rotation.y=yaw||0;R.render(SC,cam);return c.toDataURL('image/png');};
+window.longTris=(clip,t)=>{preview(clip,t,0);const m=window.mesh,g=m.geometry,P=g.attributes.position,I=g.index.array,v=new T.Vector3(),pos=[];const si=g.attributes.skinIndex,sw=g.attributes.skinWeight;const names=m.skeleton.bones.map(b=>b.name);
+ for(let i=0;i<P.count;i++){v.fromBufferAttribute(P,i);m.applyBoneTransform(i,v);pos.push(v.clone());}
+ const out=[];for(let k=0;k<I.length;k+=3){const a=I[k],b=I[k+1],c=I[k+2];const L=Math.max(pos[a].distanceTo(pos[b]),pos[b].distanceTo(pos[c]),pos[a].distanceTo(pos[c]));const L0=Math.max(...[[a,b],[b,c],[a,c]].map(([x,y])=>Math.hypot(P.getX(x)-P.getX(y),P.getY(x)-P.getY(y),P.getZ(x)-P.getZ(y))));if(L>L0*3&&L>0.05)out.push([+L.toFixed(3),+L0.toFixed(3),[a,b,c].map(i=>names[si.getX(i)]+':'+sw.getX(i).toFixed(2)+'/'+names[si.getY(i)]+':'+sw.getY(i).toFixed(2)+'@'+P.getX(i).toFixed(2)+','+P.getY(i).toFixed(2)+','+P.getZ(i).toFixed(2)).join(' ')]);}
+ out.sort((x,y)=>y[0]-x[0]);return [out.length,out.slice(0,8)];};
+window.portrait=(hex)=>{window.mesh.material.color.setHex(hex);R.setClearColor(0x000000,0);const u=preview('Sentinel',1,0.45);R.setClearColor(0x8fd16a,1);return u;};
+window.ok=1;
+</script></body></html>

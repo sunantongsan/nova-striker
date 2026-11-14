@@ -130,7 +130,7 @@ drawMiner251=function(r){
   if(ph>=0&&(h>0.5||(ph>=0.12&&ph<0.25&&Date.now()-(r.hopAt401||0)<300))){anim='jump';var q=(ph-0.25)/0.75;f=ph<0.12?5:ph<0.25?0:q<0.12?1:q<0.42?2:q<0.62?3:q<0.9?4:5;}
   else if(h>0.5){var sq=r.sq401;anim='jump';f=sq&&sq.vz<-5?4:sq&&sq.vz>5?2:3;}
   else if(ph>=0&&ph<0.12&&Date.now()-(r.hopAt401||0)<300){anim='jump';f=5;}
-  else if(r.cool!==undefined&&r.cool>1.0&&r.aimTarget){anim='attack';f=Math.min(3,Math.floor((1.4-r.cool)/0.1));}
+  else if(r.cool!==undefined&&r.cool>0.9&&r.aimTarget){anim='attack';f=Math.min(3,Math.floor((1.8-r.cool)/0.15));}
   else if(now-(r.moveAt401||0)<150){anim='walk';f=Math.floor((r.odo401||0)*7)%6;}
   else{anim='idle';f=Math.floor(t*4)%4;}}
  var cell=rm[0]*25+g.anims[anim][0]+f,k=GUARD_H401/g.h;
@@ -147,4 +147,16 @@ weaponMount=function(o){
  if(o&&o.guard339&&guardImg401(guardTier401())){var d=guardDir401({x:o.x,y:o.y,aim:o.aim,aimTarget:o.aimTarget,a401:o.a401}),rm=guardRow401[d],mz=guardMeta401.muzzle[rm[0]],k=GUARD_H401/guardMeta401.h,h=o.height340||0;
   return {x:mz[0]*k*rm[1],y:mz[1]*k-h,height:-mz[1]*k+h};}
  return guardMount401(o);
+};
+
+// 401: the guard's thrown fist: spins along a high arc and lands in a crater (crater from drawCraters272).
+var fistImgs401={};function fistImg401(tier){var im=fistImgs401[tier];if(!im){im=fistImgs401[tier]=new Image();im.onload=function(){drawNeeded=true;};im.src='assets/fist401-'+tier+'.webp';}return im.complete&&im.naturalWidth?im:null;}
+var fx401=drawFX;drawFX=function(f){
+ if(!f||f.effect!=='fist401')return fx401.apply(this,arguments);
+ var img=fistImg401(guardTier401());if(!img)return fx401.apply(this,arguments);
+ var a=point(f.x,f.y),b=point(f.tx,f.ty),v=Math.max(0,Math.min(1,1-f.life/(f.maxLife||.8)));if(f.muzzle){a.x+=f.muzzle.x*zoom;a.y+=f.muzzle.y*zoom;}
+ var x=a.x+(b.x-a.x)*v,y=a.y+(b.y-a.y)*v-Math.sin(v*Math.PI)*(70+Math.hypot(b.x-a.x,b.y-a.y)*.35)*zoom,s=30*zoom*(1+.25*Math.sin(v*Math.PI));
+ ctx.save();ctx.globalAlpha=.25;ctx.fillStyle='#08161f';ctx.beginPath();ctx.ellipse(a.x+(b.x-a.x)*v,a.y+(b.y-a.y)*v,s*.45,s*.18,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.translate(x,y);ctx.rotate(v*Math.PI*3*(b.x<a.x?-1:1));ctx.scale(1+.15*Math.sin(v*Math.PI*6),1-.15*Math.sin(v*Math.PI*6));
+ ctx.drawImage(img,-s/2,-s/2,s,s);ctx.restore();drawNeeded=true;
 };
