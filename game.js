@@ -1558,7 +1558,7 @@ var normalCheckin248=Game.checkin;Game.checkin=function(){
  var p=E.d.pendingTestCheckin248;
  if(p&&p.owner!==testWallet.owner){toast(tr('กรุณาใช้บัญชีเดิม'));return;}
  if(p&&p.completed248){claimTest248();return;}
- if(checkinState233&&checkinState233.claimed)return;
+ if(checkinState233&&checkinState233.claimed&&!(checkinState233.ad_bonus395>0))return;
  if(!testWallet.test_checkin248){normalCheckin248();return;}
  if(!root.NovaAds||!root.NovaAds.rewardTest248){testPanel248(tr('กรุณาอัปเดตแอป Android เพื่อใช้โฆษณาทดสอบ'));return;}
  if(testShowing248)return;
@@ -2496,7 +2496,7 @@ var unpackSentry339=liveUnpack;liveUnpack=function(f){unpackSentry339(f);if(f&&f
 // Release 340: left calendar, seven-day ad-backed rewards and server-clock refresh.
 var dailyView340=false,dailyClockOffset340=0,dailyPollAt340=Date.now()+2200,dailyReady340=false,dailyPollBusy340=null;
 function dailyStatus340(d){if(d&&d.checkin233){checkinState233=d.checkin233;if(d.checkin233.server_time)dailyClockOffset340=Date.now()-Date.parse(d.checkin233.server_time);dailyPollAt340=Date.now()+60000;}}
-function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.streak||0):0,day=c&&c.claimed?((Math.max(1,streak)-1)%7)+1:(streak%7)+1,got=c&&c.claimed?Number(c.reward)||0:0,bonus=c?(c.ad_bonus395===undefined?(c.claimed?0:15):Number(c.ad_bonus395)||0):15,video=!!(testWallet&&testWallet.admob230&&root.NovaAds&&root.NovaAds.rewardVerified),busy=!c||warBusy;
+function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.streak||0):0,day=c&&c.claimed?((Math.max(1,streak)-1)%7)+1:(streak%7)+1,got=c&&c.claimed?Number(c.reward)||0:0,bonus=c?(c.ad_bonus395===undefined?(c.claimed?0:15):Number(c.ad_bonus395)||0):15,video=!!(testWallet&&root.NovaAds&&(testWallet.admob230&&root.NovaAds.rewardVerified||testWallet.test_checkin248&&root.NovaAds.rewardTest248)),busy=!c||warBusy;
  // 395: free 5 NOVA per day, or 15 NOVA (x3) with a video. A free claim can be topped up by +10 with one video.
  var buttons=c&&c.claimed?'<p class="daily-rule340"><b>'+mt251('รับแล้ววันนี้ ','Collected today: ')+got+' NOVA</b></p>':'<button class="wide green" '+(busy?'disabled':'')+' onclick="Game.checkinFree395()">'+mt251('🎁 รับฟรี 5 NOVA','🎁 Claim 5 NOVA free')+'</button>';
  if(bonus>0)buttons+='<button class="wide gold395" '+(busy||!video?'disabled':'')+' onclick="Game.checkin()">'+(c&&c.claimed?mt251('🎬 ดูวิดีโอรับเพิ่ม +'+bonus+' NOVA (รวม 15)','🎬 Watch a video for +'+bonus+' NOVA (15 total)'):mt251('🎬 ดูวิดีโอรับ x3 = 15 NOVA','🎬 Watch a video: x3 = 15 NOVA'))+'</button>'+(video?'':'<small>'+mt251('วิดีโอยังไม่พร้อมในตอนนี้','Videos are not available right now')+'</small>');
