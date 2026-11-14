@@ -1413,7 +1413,7 @@ Game.checkin=function(){
  if(warBusy){if(lastWarRequest&&lastWarRequest.action==='test_status')wantCheckin237=true;else toast(tr('กำลังตรวจรายการ กรุณารอสักครู่'));return;}
  if(!testWallet||!testWallet.owner){wantCheckin237=true;Game.refreshCheckin233();return;}
  if(E.d.pendingAd230){Game.quickAd237('checkin');return;}
- if(checkinState233&&checkinState233.claimed)return;
+ if(checkinState233&&checkinState233.claimed&&!(checkinState233.ad_bonus395>0))return;
  if(!testWallet.admob230||!root.NovaAds||!root.NovaAds.rewardVerified){toast(tr('โฆษณารางวัลยังไม่เปิดให้บริการ'));return;}
  var p={owner:testWallet.owner,request_id:nonce160(),kind:'checkin',job:null};E.d.pendingAd230=p;
  if(!E.save()){delete E.d.pendingAd230;toast(tr('บันทึกไม่ได้ ยังไม่เริ่มโฆษณา'));return;}
@@ -2496,8 +2496,11 @@ var unpackSentry339=liveUnpack;liveUnpack=function(f){unpackSentry339(f);if(f&&f
 // Release 340: left calendar, seven-day ad-backed rewards and server-clock refresh.
 var dailyView340=false,dailyClockOffset340=0,dailyPollAt340=Date.now()+2200,dailyReady340=false,dailyPollBusy340=null;
 function dailyStatus340(d){if(d&&d.checkin233){checkinState233=d.checkin233;if(d.checkin233.server_time)dailyClockOffset340=Date.now()-Date.parse(d.checkin233.server_time);dailyPollAt340=Date.now()+60000;}}
-function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.streak||0):0,day=c&&c.claimed?((Math.max(1,streak)-1)%7)+1:(streak%7)+1,reward=c&&c.claimed?c.reward:(c&&c.next_reward|| (day===7?200:50));
- return '<section class="daily-card340 checkin237"><div class="daily-title340"><img src="assets/checkin-calendar-340.webp" alt=""><div><h2>'+mt251('เช็คอินรายวัน','Daily check-in')+'</h2><p>'+mt251('วันที่ 1–6 รับ 50 • วันที่ 7 รับ 200 NOVA','Days 1–6: 50 • Day 7: 200 NOVA')+'</p></div></div><div class="daily-week340 checkin-grid237">'+Array.from({length:7},function(_,i){var n=i+1,done=n<day||(c&&c.claimed&&n===day);return '<div class="daily-day340 '+(n===day?'today340 ':'')+(done?'done340':'')+'"><small>'+mt251('วันที่ ','Day ')+n+'</small><b>'+(n===7?200:50)+'</b><span>NOVA</span>'+(done?'<i>✓</i>':'')+'</div>';}).join('')+'</div><p class="daily-rule340">'+mt251('ดูวิดีโอให้จบเพื่อรับรางวัล • ขาดวันเริ่มใหม่','Finish the video to collect • A missed day resets your streak')+'</p><button class="wide green" '+(!c||c.claimed||warBusy?'disabled':'')+' onclick="Game.checkin()">'+(c&&c.claimed?mt251('รับรางวัลวันนี้แล้ว','Collected today'):mt251('เช็คอินรับ ','Check in for ')+reward+' NOVA')+'</button><small>'+mt251('เริ่มวันใหม่เวลา 00:00 น. ประเทศไทย','New day at 00:00 Thailand time')+'</small></section>';
+function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.streak||0):0,day=c&&c.claimed?((Math.max(1,streak)-1)%7)+1:(streak%7)+1,got=c&&c.claimed?Number(c.reward)||0:0,bonus=c?(c.ad_bonus395===undefined?(c.claimed?0:15):Number(c.ad_bonus395)||0):15,video=!!(testWallet&&testWallet.admob230&&root.NovaAds&&root.NovaAds.rewardVerified),busy=!c||warBusy;
+ // 395: free 5 NOVA per day, or 15 NOVA (x3) with a video. A free claim can be topped up by +10 with one video.
+ var buttons=c&&c.claimed?'<p class="daily-rule340"><b>'+mt251('รับแล้ววันนี้ ','Collected today: ')+got+' NOVA</b></p>':'<button class="wide green" '+(busy?'disabled':'')+' onclick="Game.checkinFree395()">'+mt251('🎁 รับฟรี 5 NOVA','🎁 Claim 5 NOVA free')+'</button>';
+ if(bonus>0)buttons+='<button class="wide gold395" '+(busy||!video?'disabled':'')+' onclick="Game.checkin()">'+(c&&c.claimed?mt251('🎬 ดูวิดีโอรับเพิ่ม +'+bonus+' NOVA (รวม 15)','🎬 Watch a video for +'+bonus+' NOVA (15 total)'):mt251('🎬 ดูวิดีโอรับ x3 = 15 NOVA','🎬 Watch a video: x3 = 15 NOVA'))+'</button>'+(video?'':'<small>'+mt251('วิดีโอยังไม่พร้อมในตอนนี้','Videos are not available right now')+'</small>');
+ return '<section class="daily-card340 checkin237"><div class="daily-title340"><img src="assets/checkin-calendar-340.webp" alt=""><div><h2>'+mt251('เช็คอินรายวัน','Daily check-in')+'</h2><p>'+mt251('รับฟรีวันละ 5 NOVA • ดูวิดีโอได้ x3 เป็น 15 NOVA','5 NOVA free every day • Watch a video for x3 = 15 NOVA')+'</p></div></div><div class="daily-week340 checkin-grid237">'+Array.from({length:7},function(_,i){var n=i+1,done=n<day||(c&&c.claimed&&n===day);return '<div class="daily-day340 '+(n===day?'today340 ':'')+(done?'done340':'')+'"><small>'+mt251('วันที่ ','Day ')+n+'</small><b>5</b><span>NOVA</span><small>🎬 x3 = 15</small>'+(done?'<i>✓</i>':'')+'</div>';}).join('')+'</div>'+buttons+'<small>'+mt251('เริ่มวันใหม่เวลา 00:00 น. ประเทศไทย','New day at 00:00 Thailand time')+'</small></section>';
 }
 checkinPanel233=function(){return welcomePanel247()+dailyCalendarHTML340()+'<button class="wide" onclick="Game.legacyBalance339()">'+mt251('รับยอด NOVA เดิมที่ยังไม่เคลม','Recover previous unclaimed NOVA')+'</button>';};
 var treasury340=treasury;treasury=function(){if(dailyView340)open(dailyCalendarHTML340());else treasury340();};
@@ -2707,6 +2710,30 @@ Game.activities=function(){
  if(E.hq()===1) addTutorialVideoButton(true);
 };
 // End 390 advisor.
+
+// 395: free daily check-in claim and same-day video top-up crediting.
+Game.checkinFree395=function(){
+ if(guest288){toast(mt251('กรุณาเข้าสู่ระบบเพื่อเช็คอิน','Sign in to check in'));return;}
+ if(warBusy){toast(tr('กำลังตรวจรายการ กรุณารอสักครู่'));return;}
+ if(checkinState233&&checkinState233.claimed)return;
+ dailyView340=true;warRequest('test_status',{checkin233:true,checkin395:'free'});
+};
+function credit395(d){var c=d&&d.checkin233,owner=d&&d.owner;if(!c||!owner||!c.claimed||!(c.reward>0))return 0;
+ if((E.d.checkinCredits233||{})[owner]!==c.day)return 0;
+ var m=E.d.checkinCredits395||{},cur=m[owner],next=Object.assign({},m);next[owner]={day:c.day,amount:Number(c.reward)};
+ if(!cur||cur.day!==c.day){E.d.checkinCredits395=next;E.save();return 0;}
+ var extra=Number(c.reward)-cur.amount;if(!(extra>0))return 0;
+ var before=JSON.stringify(E.d);E.d.gems+=extra;E.d.checkinCredits395=next;if(!E.save()){E.d=JSON.parse(before);return 0;}return extra;}
+function dailySuccess395(amount){completionAudio250();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย!','Congratulations!')+'</h2><img src="assets/checkin-calendar-340.webp" alt="" style="width:80px;height:80px;object-fit:contain"><p><b>+'+amount+' NOVA</b></p><button class="wide green" onclick="Game.close()">'+mt251('ตกลง','OK')+'</button></section>');}
+var warEvent395=warEvent;warEvent=function(event,message){
+ if(message&&message.request_id&&message.request_id!==warActive){warEvent395(event,message);return;}
+ var req=lastWarRequest&&lastWarRequest.payload,free=!!(req&&req.checkin395==='free'),gems=E.d.gems;
+ warEvent395(event,message);
+ if(event!=='war'||!message||!message.data)return;
+ var extra=credit395(message.data),gained=E.d.gems-gems;
+ if(free&&gained>0){dailyView340=false;dailySuccess395(gained);hud();}
+ else if(extra>0){dailyView340=false;dailySuccess395(extra);hud();}
+};
 
 })(typeof globalThis!=='undefined'?globalThis:this);
 
