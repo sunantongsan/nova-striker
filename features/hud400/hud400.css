@@ -37,3 +37,9 @@ html[data-nova-house401] body #app>header .title{height:auto!important;flex:0 0 
 html[data-nova-house401] .resources{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));flex:1!important;gap:2px!important;min-width:0}
 html[data-nova-house401] .resources>span,html[data-nova-house401] .resources>.gembalance{min-height:24px!important;margin:0!important}
 html[data-nova-house401] .zoom{top:calc(76px + var(--safe-top303,0px))!important}
+/* 401: cartoon squash & stretch for controls and windows. `scale` composes with any existing transform. */
+:where(#homebar>button,#dailyCheckin340,#skillShop342,#builderBadge,.gembalance,#modal button,#coach394 button,nav button){transition:scale .28s cubic-bezier(.34,1.8,.5,1)}
+:where(#homebar>button,#dailyCheckin340,#skillShop342,#builderBadge,.gembalance,#modal button,#coach394 button,nav button):active{scale:1.08 .86;transition:scale .07s ease-out}
+#modal.pop401>*{animation:pop401 .38s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop401{0%{scale:.6 .45;opacity:0}55%{scale:1.06 .95;opacity:1}78%{scale:.98 1.03}100%{scale:1 1}}
+@media (prefers-reduced-motion:reduce){#modal.pop401>*{animation:none}}
