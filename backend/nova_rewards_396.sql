@@ -230,8 +230,8 @@ declare uid uuid:=auth.uid();mode text:=payload->>'raid260';rid uuid;i nova_priv
   if i.id is not null and (i.owner<>uid or i.battle<>r.battle) then raise exception 'รายการไม่ตรงบัญชี';end if;
   if mode in ('prepare','normal') and i.id is null and r.claimed_at is null then
    provider:=case when exists(select 1 from nova_private.telegram_accounts231 where user_id=uid) then 'monetag' when exists(select 1 from nova_private.admob_settings230 where enabled) then 'admob' else 'test' end;
-   if provider='test' and not exists(select 1 from nova_private.test_checkin_settings248 where enabled) then raise exception 'โฆษณายังไม่พร้อม';end if;
-   if provider='monetag' and not exists(select 1 from nova_private.monetag_settings231 where enabled) then raise exception 'โฆษณายังไม่พร้อม';end if;
+   if mode<>'normal' and provider='test' and not exists(select 1 from nova_private.test_checkin_settings248 where enabled) then raise exception 'โฆษณายังไม่พร้อม';end if;
+   if mode<>'normal' and provider='monetag' and not exists(select 1 from nova_private.monetag_settings231 where enabled) then raise exception 'โฆษณายังไม่พร้อม';end if;
    insert into nova_private.raid_intents260(id,owner,battle,provider) values(rid,uid,r.battle,provider) returning * into i;
    if provider='admob' then insert into nova_private.admob_intents230(owner,id,kind,amount) values(uid,rid,'raid',0);
    elsif provider='monetag' then insert into nova_private.monetag_intents231(owner,id,kind,amount) values(uid,rid,'raid',0);end if;
