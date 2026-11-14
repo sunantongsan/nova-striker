@@ -30,5 +30,7 @@ G.refreshCheckin233();reply(ck({day:'2026-11-15',claimed:true,streak:2,reward:15
 a.s.NovaAds={rewardTest248(){},acknowledgeTest248(){}};
 G.openDaily340();reply({...ck({day:'2026-11-16',streak:2}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/class="wide gold395" +onclick/.test(html)&&html.includes('15 NOVA')&&html.includes('checkinFree395'));
 G.checkin();assert.equal(a.requests.at(-1).p.checkin_test248,'prepare','video check-in uses demo video');
+// 398: day 7 buttons.
+G.openDaily340();reply({...ck({day:'2026-11-17',streak:6,next_reward:15,video395:45,ad_bonus395:45}),test_checkin248:true});html=a.el('modal').innerHTML;assert(html.includes('รับ 15 NOVA')||html.includes('Check in: 15 NOVA'));assert(html.includes('45 NOVA'));
 assert.equal(a.errors.length,0,JSON.stringify(a.errors));
 console.log('PASS checkin395 UI: free 5 button, x3 video offer, one choice per day, replay safety');
