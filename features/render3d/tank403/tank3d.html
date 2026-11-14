@@ -1,0 +1,106 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="712"></canvas>
+<script type="module">
+// 403: resource storage = "football" water tower (owner's reference photo): a tall blue column with orange
+// bands, flared finned foot, and a faceted ball on top whose round domes show the liquid inside
+// (Ore X gold, Ore Y green, Fluid Z red). The liquid level in the domes and in the sight glass on the
+// column shows how full the storage is. Taller with every tier. Rendered by render-tanks.cjs.
+import * as T from '../three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.localClippingEnabled=true;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.75,2.75,9.6,-2.65,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfffaf0,0x5a78b0,0.8));
+const sun=new T.DirectionalLight(0xfff2dc,2.6);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0xa8e6ff,0.9);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([70,140,215,255]);const ramp=new T.DataTexture(g,4,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c,e=0)=>new T.MeshToonMaterial({color:c,gradientMap:ramp,emissive:e});
+const OUT=new T.MeshBasicMaterial({color:0x17213d,side:T.BackSide});
+function mesh(geo,mat,parent,ol=0.04){const m=new T.Mesh(geo,mat);parent.add(m);if(ol){const o=new T.Mesh(geo,OUT);o.scale.setScalar(1+ol);m.add(o);}return m;}
+function lathe(pts,seg=40){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:3,curveSegments:6});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const LIQ={x:{c:0xffc400,hi:0xfff2a0,deep:0xe07a00},y:{c:0x3fdc4a,hi:0xc8ffb0,deep:0x1d9a3a},z:{c:0xf0283a,hi:0xffb0a8,deep:0xa50f22}};
+// tier: column height, ball radius, extras
+const TIERS=[{h:3.6,b:0.8,bands:1,ladder:0,lamp:1,gold:0},{h:4.1,b:0.86,bands:2,ladder:0,lamp:1,gold:0},{h:4.6,b:0.92,bands:2,ladder:1,lamp:1,gold:0},{h:5.1,b:0.98,bands:2,ladder:1,lamp:1,gold:1},{h:5.6,b:1.04,bands:3,ladder:1,lamp:2,gold:1}];
+const PHI=(1+Math.sqrt(5))/2;
+const FACES=[[0,1,PHI],[0,1,-PHI],[0,-1,PHI],[0,-1,-PHI],[1,PHI,0],[1,-PHI,0],[-1,PHI,0],[-1,-PHI,0],[PHI,0,1],[PHI,0,-1],[-PHI,0,1],[-PHI,0,-1]].map(v=>new T.Vector3(...v).normalize());
+const level=new T.Plane(new T.Vector3(0,-1,0),0); // keeps y < level
+let state=null;
+function build(kind,t){
+ const P=TIERS[t],L=LIQ[kind];if(state)S.remove(state.root);
+ const WHITE=M(0xf4f4f1),BLUE=M(0x2a6fe0),NAVY=M(0x1f3270),ORANGE=M(0xf59a1c),STEEL=M(0x8d97a8),GOLD=M(0xf2c75e),BAND=P.gold?GOLD:ORANGE;
+ const LQ=new T.MeshToonMaterial({color:L.c,gradientMap:ramp,emissive:L.deep,emissiveIntensity:0.75,clippingPlanes:[level]});
+ const EMPTY=new T.MeshPhongMaterial({color:0xcfe6f7,shininess:90,specular:0xffffff,emissive:0x2b4568,emissiveIntensity:0.35});
+ const SHINE=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.7});
+ const root=new T.Group();S.add(root);
+ // octagonal NOVA base like the other storages
+ const base=new T.Group();root.add(base);
+ mesh(lathe([[0,0],[1.55,0],[1.59,0.1],[1.51,0.28],[0,0.28]],8),NAVY,base,0.02).rotation.y=Math.PI/8;
+ mesh(lathe([[0,0.25],[1.42,0.25],[1.44,0.31],[1.36,0.35],[0,0.35]],8),WHITE,base,0.02).rotation.y=Math.PI/8;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/4;const c=mesh(rbox(0.28,0.24,0.24,0.06),i%2?ORANGE:BLUE,base,0.06);c.position.set(Math.cos(a)*1.42,0.17,Math.sin(a)*1.42);c.rotation.y=-a;}
+ const tower=new T.Group();root.add(tower);
+ const y0=0.35,H=P.h,rc=0.3,top=y0+H;
+ // flared foot with fins (photo: wide skirt and triangular gussets)
+ mesh(lathe([[0,y0],[0.72,y0],[0.68,y0+0.1],[0.45,y0+0.4],[rc+0.03,y0+0.95],[0,y0+0.95]]),BLUE,tower,0.025);
+ for(let i=0;i<6;i++){const a=i/6*Math.PI*2+0.3;const fin=new T.Shape();fin.moveTo(0,0);fin.lineTo(0.62,0);fin.lineTo(0,0.85);fin.closePath();
+  const geo=new T.ExtrudeGeometry(fin,{depth:0.07,bevelEnabled:false});geo.translate(0,0,-0.035);const f=mesh(geo,BLUE,tower,0.05);f.position.set(Math.cos(a)*(rc-0.02),y0,Math.sin(a)*(rc-0.02));f.rotation.y=-a;}
+ // manhole and control box at the foot
+ const mh=mesh(new T.CylinderGeometry(0.2,0.2,0.08,20),BLUE,tower,0.08);mh.position.set(0.42,y0+0.36,0.42);mh.lookAt(5,y0+0.36,5);mh.rotateX(Math.PI/2);
+ const box=mesh(rbox(0.22,0.3,0.12,0.03),STEEL,tower,0.08);box.position.set(rc+0.08,y0+1.0,-0.15);box.rotation.y=0.6;
+ // shaft
+ mesh(new T.CylinderGeometry(rc*0.9,rc,H,28),BLUE,tower,0.03).position.y=y0+H/2;
+ const bandYs=[y0+0.95,top-0.55,y0+H*0.55].slice(0,P.bands);
+ for(const by of bandYs){const b=mesh(new T.CylinderGeometry(rc+0.03,rc+0.03,0.16,28),BAND,tower,0.06);b.position.y=by;}
+ // sight glass on the column: liquid level
+ const gx=new T.Group();gx.position.set(Math.cos(0.55)*(rc+0.06),0,Math.sin(0.55)*(rc+0.06));tower.add(gx);
+ const gy0=y0+1.15,gh=H-1.8;
+ mesh(new T.CylinderGeometry(0.07,0.07,gh+0.1,10),WHITE,gx,0.1).position.y=gy0+gh/2;
+ const gEmpty=new T.Mesh(new T.CylinderGeometry(0.05,0.05,gh,10),EMPTY);gEmpty.position.set(0.012,gy0+gh/2,0.012);gx.add(gEmpty);
+ const gLiq=new T.Mesh(new T.CylinderGeometry(0.052,0.052,1,10),new T.MeshToonMaterial({color:L.c,gradientMap:ramp,emissive:L.deep,emissiveIntensity:0.75}));gLiq.position.x=0.012;gLiq.position.z=0.012;gx.add(gLiq);
+ if(P.ladder){const lz=new T.Group();lz.position.set(-Math.cos(0.4)*(rc+0.1),0,-Math.sin(0.4)*(rc+0.1));lz.rotation.y=0.4;tower.add(lz);
+  for(const s of [-0.09,0.09])mesh(new T.CylinderGeometry(0.02,0.02,H-1.2,6),STEEL,lz,0.15).position.set(0,y0+0.9+(H-1.2)/2,s);
+  for(let k=0;k<Math.floor((H-1.2)/0.22);k++){const rung=mesh(new T.CylinderGeometry(0.015,0.015,0.18,6),STEEL,lz,0);rung.position.set(0,y0+1.0+k*0.22,0);rung.rotation.x=Math.PI/2;}}
+ // neck flaring into the ball
+ const bc=top+P.b*0.82; // ball centre
+ mesh(lathe([[0,top-0.6],[rc,top-0.6],[rc+0.06,top-0.25],[P.b*0.42,top+0.02],[P.b*0.36,top+0.1],[0,top+0.1]]),BLUE,tower,0.025);
+ // clear glass ball on top; the coloured liquid inside shows how full the storage is
+ const ball=new T.Group();ball.position.y=bc;tower.add(ball);
+ const GLASS=new T.MeshPhongMaterial({color:0xe8f6ff,transparent:true,opacity:0.2,shininess:140,specular:0xffffff,depthWrite:false});
+ const lr=P.b*0.95;
+ const liq=new T.Mesh(new T.SphereGeometry(lr,40,28),LQ);ball.add(liq);
+ const surf=new T.Mesh(new T.CircleGeometry(1,40),new T.MeshBasicMaterial({color:L.hi}));surf.rotation.x=-Math.PI/2;ball.add(surf);
+ const glass=new T.Mesh(new T.SphereGeometry(P.b,40,28),GLASS);glass.renderOrder=2;ball.add(glass);
+ // outline only around the silhouette (a solid back-face outline would darken the clear glass)
+ const rimO=new T.Mesh(new T.TorusGeometry(P.b*1.01,0.025,8,64),new T.MeshBasicMaterial({color:0x17213d}));rimO.lookAt(cam.position.clone().sub(new T.Vector3(0,bc,0)));ball.add(rimO);
+ // glossy highlights on the glass
+ const hl=new T.Mesh(new T.SphereGeometry(P.b*1.002,24,16,2.0,0.55,0.55,0.5),SHINE);hl.renderOrder=3;ball.add(hl);
+ const hl2=new T.Mesh(new T.SphereGeometry(P.b*1.002,16,10,2.75,0.2,0.95,0.25),SHINE);hl2.renderOrder=3;ball.add(hl2);
+ // top hatch, lamp, ring
+ const ttop=bc+P.b;
+ mesh(new T.CylinderGeometry(0.16,0.2,0.14,14),WHITE,tower,0.08).position.y=ttop+0.02;
+ if(P.lamp){const lamp=new T.Mesh(new T.SphereGeometry(0.1,12,10),new T.MeshBasicMaterial({color:0xff5040}));lamp.position.y=ttop+0.42;tower.add(lamp);mesh(new T.CylinderGeometry(0.025,0.025,0.32,6),STEEL,tower,0.15).position.y=ttop+0.22;}
+ if(P.lamp>1)for(const s of [-1,1]){const ant=mesh(new T.CylinderGeometry(0.02,0.02,0.5,6),GOLD,tower,0.15);ant.position.set(s*0.22,ttop+0.2,-s*0.1);const tip=new T.Mesh(new T.SphereGeometry(0.06,10,8),new T.MeshBasicMaterial({color:0x7fe8ff}));tip.position.set(s*0.22,ttop+0.47,-s*0.1);tower.add(tip);}
+ // wreck: snapped column and smashed ball on the base
+ const wreck=new T.Group();root.add(wreck);
+ mesh(lathe([[0,y0],[0.95,y0],[0.55,y0+0.35],[rc+0.04,y0+0.85],[rc,y0+1.1],[0,y0+1.0]]),M(0x5b7fc0),wreck,0.025);
+ const fallen=mesh(new T.CylinderGeometry(rc,rc,1.6,20),M(0x5b7fc0),wreck,0.03);fallen.rotation.z=Math.PI/2;fallen.rotation.y=0.7;fallen.position.set(0.25,y0+0.3,-0.55);
+ const smash=mesh(new T.DodecahedronGeometry(0.6,0),M(0x5b7fc0),wreck,0.04);smash.position.set(-0.75,y0+0.45,0.45);smash.rotation.set(0.4,0.3,0.9);smash.scale.y=0.7;
+ const puddle=new T.Mesh(new T.CircleGeometry(1.0,24),new T.MeshBasicMaterial({color:L.deep,transparent:true,opacity:0.8}));puddle.rotation.x=-Math.PI/2;puddle.position.set(-0.3,y0+0.01,0.2);wreck.add(puddle);
+ state={root,tower,wreck,kind,t,bc,b:P.b,lr,surf,gLiq,gy0,gh,lampY:ttop+0.42};
+}
+window.pose=(kind,t,fill,wreckd)=>{
+ if(!state||state.kind!==kind||state.t!==t)build(kind,t);
+ const st=state,f=Math.max(0,Math.min(1,fill));
+ st.tower.visible=!wreckd;st.wreck.visible=!!wreckd;
+ const ly=-st.lr+f*2*st.lr; // liquid surface height inside the ball (ball-local)
+ level.constant=f<=0.001?-99:st.bc+ly;
+ st.surf.visible=f>0.01&&f<0.995;const sr=Math.sqrt(Math.max(0,st.lr*st.lr-ly*ly));st.surf.scale.set(sr,sr,1);st.surf.position.y=ly;
+ const h=Math.max(0.001,f*st.gh);st.gLiq.visible=f>0.01;st.gLiq.scale.y=h;st.gLiq.position.y=st.gy0+h/2;
+ R.render(S,cam);const v=new T.Vector3(0,st.lampY,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),lx:(v.x+1)/2,ly:(1-v.y)/2}; // aircraft warning lamp, as a fraction of the frame
+};
+window.setRes=(w,h)=>R.setSize(w,h,false); // icons render larger
+window.ready=true;
+</script></body></html>
