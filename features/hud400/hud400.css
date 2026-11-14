@@ -20,3 +20,40 @@ html[data-nova-banner39] body #app>header .title{height:auto!important;flex:0 0 
 html[data-nova-banner39] body,html[data-nova-banner39] body #app{background:linear-gradient(#e6f6ff,#cdeefa)!important}
 html body #app>header .title>div,html body #app>header .title>div #mode,html body #app>header .title>div>b{height:auto!important;max-height:none!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important;position:static!important}
 html body #app>header .title>div #mode{padding-top:2px!important}
+
+/* 401: a readable cart below the base card; builders grouped with daily actions. */
+html body #app>header .title>#skillShop342{
+ left:0!important;right:auto!important;top:calc(100% + 8px)!important;
+ display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:0;
+ width:80px!important;height:88px!important;min-height:88px!important;margin:0!important;padding:3px!important;
+ border:1px solid #fff2bb!important;border-bottom:3px solid #c99332!important;border-radius:18px!important;
+ background:linear-gradient(155deg,#fffef5f2,#ffeabccf)!important;
+ box-shadow:inset 0 1px 0 #fff,0 3px 8px #31556a40!important;
+ touch-action:manipulation;pointer-events:auto;
+}
+html body #app>header .title>#skillShop342 img{
+ display:block;width:64px!important;height:64px!important;object-fit:contain;
+ filter:drop-shadow(0 2px 1px #795c3840);pointer-events:none;
+}
+html body #app>header .title>#skillShop342 .shopLabel401{
+ color:#65451b;font:800 12px/16px Tahoma,Arial,sans-serif;text-shadow:0 1px #fff;white-space:nowrap;
+}
+html body #app #homebar>#builderBadge{
+ position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+ flex:0 0 60px!important;width:60px!important;min-width:60px!important;height:44px!important;min-height:44px!important;
+ margin:0!important;padding:3px!important;border:1px solid #fff2bb!important;border-bottom:3px solid #c99332!important;
+ border-radius:13px!important;background:linear-gradient(#fff8d9,#f5d684)!important;
+ color:#65451b!important;font:800 13px/18px Tahoma,Arial,sans-serif!important;text-shadow:0 1px #fff8!important;
+ box-shadow:0 2px 5px #31556a35!important;white-space:nowrap;touch-action:manipulation;
+}
+html body #app #skillShop342:focus-visible,html body #app #builderBadge:focus-visible{outline:3px solid #168bd2!important;outline-offset:2px}
+html body #app #skillShop342:active{filter:brightness(1.08);transform:translateY(1px)}
+html body #app[data-battle300="true"] #builderBadge,html body #app[data-battle300="true"] #skillShop342{display:none!important}
+@media(max-height:340px){
+ html body #app>header .title>#skillShop342{width:72px!important;height:78px!important;min-height:78px!important;top:calc(100% + 6px)!important}
+ html body #app>header .title>#skillShop342 img{width:56px!important;height:56px!important}
+}
+@media(max-width:620px) and (orientation:portrait){
+ html body.phone394 #app #homebar>#builderBadge{position:fixed!important;left:auto!important;right:max(8px,env(safe-area-inset-right))!important;top:auto!important;bottom:calc(252px + env(safe-area-inset-bottom,0px))!important}
+}
+
