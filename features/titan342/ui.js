@@ -147,7 +147,7 @@ var deployOnlineTitan342=E.deployTitan342;E.deployTitan342=function(x,y){if(this
 var skillOnlineTitan342=Game.titanSkill342;Game.titanSkill342=function(id){if(liveRoom&&liveRoom.v===2&&selectedTitan342){if(liveRoom.host)skillOnlineTitan342(id);titanQueuedSkill342=id;return;}skillOnlineTitan342(id);};
 var tickOnlineTitan342=tickUI342;tickUI342=function(dt){tickOnlineTitan342(dt);if(liveRoom&&liveRoom.v===2&&screen==='raid'&&Date.now()>titanControlAt342&&!titanBusy342){var t=selectedTitan342;var own=E.raid.troops.concat(E.raid.guards).find(function(u){return u.titan342&&u.owner===titanOwner342&&u.hp>0;});if(!own)return;titanControlAt342=Date.now()+350;var input=t&&t.owner===titanOwner342?t.input342||{x:0,y:0}:{x:0,y:0},length=Math.max(1,Math.hypot(input.x,input.y));titanSend342('control',{room:liveRoom.id,seq:++titanControlSeq342,dx:input.x/length,dy:input.y/length,manual:!!t,skill:titanQueuedSkill342});titanQueuedSkill342=null;}};
 
-(function(){var shop=document.createElement('button');shop.id='skillShop342';shop.type='button';shop.title='ร้านสกิล';shop.setAttribute('aria-label','ร้านสกิล');shop.innerHTML='<img src="assets/titan-shop342.webp" alt="">';shop.onclick=function(){Game.shop348('nova');};$('dailyCheckin340').after(shop);})();
+(function(){var shop=document.createElement('button');shop.id='skillShop342';shop.type='button';shop.title='ร้านสกิล';shop.setAttribute('aria-label','ร้านสกิล');shop.innerHTML='<img src="assets/shop-cart400.webp" alt="">';shop.onclick=function(){Game.shop348('nova');};$('dailyCheckin340').after(shop);})();
 
 var openGuardian343=open;open=function(html){modal.removeAttribute('data-guardian343');modal.removeAttribute('data-shop348');return openGuardian343(html);};
 
