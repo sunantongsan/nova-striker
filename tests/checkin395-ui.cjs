@@ -26,5 +26,9 @@ G.openDaily340();reply(ck({claimed:true,streak:1,reward:15,ad_bonus395:0}));html
 // Next day straight to video: 15 credited once.
 G.refreshCheckin233();reply(ck({day:'2026-11-15',claimed:true,streak:2,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+30);
 G.refreshCheckin233();reply(ck({day:'2026-11-15',claimed:true,streak:2,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+30);
+// 396: Google demo video enables the video button and allows the +10 top-up request.
+a.s.NovaAds={rewardTest248(){},acknowledgeTest248(){}};
+G.openDaily340();reply({...ck({day:'2026-11-16',claimed:true,streak:3,reward:5,ad_bonus395:10}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/class="wide gold395" +onclick/.test(html),'demo video button enabled');
+G.checkin();assert.equal(a.requests.at(-1).p.checkin_test248,'prepare','top-up uses demo video');
 assert.equal(a.errors.length,0,JSON.stringify(a.errors));
 console.log('PASS checkin395 UI: free 5 button, x3 video offer, +10 top-up crediting, replay safety');
