@@ -17,15 +17,17 @@ function tankFill403(b){
   return .7;}
  return storeFill403(KIND403[TANK403[b.type]]);
 }
+// one world unit of the 3D model = 0.335 x the building size, the same for every tier (the ball grows, the foot does not)
+function tankK403(size){return size*.335/tankMeta403.unit;}
 function drawTank403(b,p,size,col){
- var m=tankMeta403,t=tankTier403(b),tm=m.tiers[t],row=TANK403[b.type]*m.tiers.length+t,k=size*.95/tm.width;
- ctx.drawImage(tankArt403,col*m.cw,row*m.ch,m.cw,m.ch,p.x-tm.ax*k,p.y+size*.12-tm.ay*k,m.cw*k,m.ch*k);
+ var m=tankMeta403,t=tankTier403(b),tm=m.tiers[t],row=TANK403[b.type]*m.tiers.length+t,k=tankK403(size);
+ ctx.drawImage(tankArt403,col*m.cw,row*m.ch,m.cw,m.ch,p.x-tm.ax*k,p.y+size*.06-tm.ay*k,m.cw*k,m.ch*k);
 }
 // Aircraft warning lamp on top of every tower: blinks red (0.6 s on / 0.6 s off), each tower slightly out of step.
 var lampSeen403=0;
 function tankLamp403(b,p,size){
  var m=tankMeta403,t=tankTier403(b),tm=m.tiers[t],L=tm.lamp;if(!L)return;lampSeen403=Date.now();
- var k=size*.95/tm.width,x=p.x+(L[0]-tm.ax)*k,y=p.y+size*.12+(L[1]-tm.ay)*k,ph=((Date.now()+(b.x*37+b.y*53)*29)%1200)/1200;
+ var k=tankK403(size),x=p.x+(L[0]-tm.ax)*k,y=p.y+size*.06+(L[1]-tm.ay)*k,ph=((Date.now()+(b.x*37+b.y*53)*29)%1200)/1200;
  if(ph>.5)return;var a=Math.sin(ph/.5*Math.PI),r=size*.11;
  ctx.save();var g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(255,255,235,'+a+')');g.addColorStop(.25,'rgba(255,70,50,'+(.95*a)+')');g.addColorStop(1,'rgba(255,40,30,0)');
  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.restore();
