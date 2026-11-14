@@ -18,8 +18,21 @@ jobs:
       - run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.57.0
       - run: npx playwright install --with-deps chromium
       - run: node tests/shop401-browser.cjs
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - id: screenshots
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: shop401-phone-preview
           path: test-artifacts/shop401-*.png
+
+      - name: Inline preview fallback when artifact storage is full
+        if: always() && steps.screenshots.outcome == 'failure'
+        run: |
+          node <<'JS'
+          const fs=require('fs'),sharp=require('sharp');
+          (async()=>{for(const name of fs.readdirSync('test-artifacts').filter(n=>/^shop401-.*\.png$/.test(n))){
+            const b=await sharp('test-artifacts/'+name).jpeg({quality:65}).toBuffer(),s=b.toString('base64');
+            for(let i=0;i<s.length;i+=4000)console.log('PREVIEW401 '+name+' '+i+' '+s.slice(i,i+4000));
+          }})();
+          JS
