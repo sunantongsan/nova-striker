@@ -1,0 +1,12 @@
+/* 408: HUD hugs the screen corners like Clash of Clans. A punch-hole camera in landscape sits at the middle
+   of the short edge, so the top-left card does not need the whole cutout strip reserved beside it. */
+html body #app>header{padding-left:0!important}
+html body #app #opponent364{left:10px!important;top:66px!important}
+html body #loot403{left:10px!important;top:calc(66px + var(--safe-top303,0px))!important}
+html[data-scout408="player"] body #loot403{top:calc(104px + var(--safe-top303,0px))!important}
+/* 408: bottom rows were flush with (or 2px past) the bottom edge, so rounded screen corners cut them off. */
+html body #app#app>nav{bottom:calc(8px + var(--safe-bottom303,0px))!important;margin-bottom:0!important}
+html body #app[data-battle300="true"]>nav #deploy,html body #app>nav #deploy{margin-bottom:0!important}
+html body #playerSearch382,html body .playerSearch382{bottom:calc(10px + var(--safe-bottom303,0px))!important}
+html[data-sel405] #app:not([data-battle300="true"]) #selection#selection{bottom:calc(12px + var(--safe-bottom303,0px))!important}
+html body #app#app[data-battle300="true"]>nav{height:calc(82px + env(safe-area-inset-bottom,0px))!important}
