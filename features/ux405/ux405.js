@@ -20,7 +20,7 @@
 })();
 (function(){var st=document.createElement('style');st.id='ux405';st.textContent=[
  // Only the buttons inside the action bar catch taps; everything around them reaches the map.
- '#app:not([data-battle300="true"]) #selection#selection{pointer-events:none!important;max-height:none!important;transition:bottom .18s ease-out}',
+ '#app:not([data-battle300="true"]) #selection#selection{pointer-events:none!important;max-height:none!important}',
  '#app:not([data-battle300="true"]) #selection#selection button,#app:not([data-battle300="true"]) #selection#selection a,#app:not([data-battle300="true"]) #selection#selection input,#app:not([data-battle300="true"]) #selection#selection select{pointer-events:auto!important}',
  // Clash-style: while a building is selected its actions take the bottom strip and the main menu steps aside.
  'html[data-sel405] #app:not([data-battle300="true"]) #selection#selection{bottom:calc(4px + var(--safe-bottom303,0px))!important}',
