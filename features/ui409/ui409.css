@@ -8,3 +8,8 @@ html[data-sel405] #app:not([data-battle300="true"]) #selection#selection>button.
 html[data-sel405] #app:not([data-battle300="true"]) #selection#selection>p,html[data-sel405] #app:not([data-battle300="true"]) #selection#selection>small{text-align:right!important}
 /* 409: the upgrade button in the building window is smaller and sits on the right, like Clash. */
 #modal button[onclick^="Game.confirmUpgrade261"]{display:flex!important;align-self:flex-end!important;justify-self:end!important;align-items:center;justify-content:center;width:min(220px,100%)!important;min-height:44px!important;margin-left:auto!important;margin-right:0!important;font-size:15px!important}
+/* 410: the menu is only faded out while a building is selected, but the invisible "Attack!" button inside it
+   still caught taps (pointer-events:auto on the child) right under the action buttons, so "Upgrade" opened
+   the attack window. Hidden menu = nothing in it can be tapped. Bar sits right at the edge. */
+html[data-sel405] #app:not([data-battle300="true"])>nav,html[data-sel405] #app:not([data-battle300="true"])>nav *,html[data-sel405] #playerSearch382,html[data-sel405] .playerSearch382,html[data-sel405] #homebar,html[data-sel405] #homebar *{visibility:hidden!important;pointer-events:none!important}
+html[data-sel405] #app:not([data-battle300="true"]) #selection#selection{right:8px!important;z-index:40!important}
