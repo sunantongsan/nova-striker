@@ -5,20 +5,25 @@
 // swallowed so nothing fires twice. Right after a window closes, the building bar ignores taps for a
 // moment, so a quick second tap meant for the window cannot land on "Move" underneath.
 (function(){
- var down=null,firedAt=0,firedBtn=null,synthetic=false,modalClosedAt=0,SLOP=14;
+ var down=null,firedAt=0,firedBtn=null,synthetic=false,modalClosedAt=0,SLOP=22;
+ // 409: the same button again after a redraw (same action, same place in the bar / window)
+ function twin(b){if(b.isConnected)return b;var box=b.__box409,act=b.getAttribute('onclick');if(!box||!act||!box.isConnected)return null;var all=box.querySelectorAll('button');for(var i=0;i<all.length;i++)if(all[i].getAttribute('onclick')===act&&!all[i].disabled)return all[i];return null;}
  function barOrWindowButton(el){var b=el&&el.closest&&el.closest('button');if(!b||b.disabled)return null;return b.closest('#selection,#modal,#novaConfirm358')?b:null;}
  function inBar(b){return !!(b&&b.closest('#selection'));}
  document.addEventListener('pointerdown',function(e){
   if(e.isPrimary===false)return;var b=barOrWindowButton(e.target);
-  down=b?{b:b,x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId}:null;
+  if(b)b.__box409=b.closest('#selection,#modal,#novaConfirm358');
+  down=b?{b:b,x:e.clientX,y:e.clientY,t:e.timeStamp||performance.now(),id:e.pointerId,r:b.getBoundingClientRect()}:null;
   if(b)b.classList.add('press407');
  },true);
  function finish(e,cancelled){
   var d=down;down=null;if(!d||e.pointerId!==d.id)return;d.b.classList.remove('press407');
-  if(Date.now()-d.t>900)return;
-  var r=d.b.getBoundingClientRect(),x=cancelled?d.x:e.clientX,y=cancelled?d.y:e.clientY;
+  // 409: measured from the finger's own timestamps, so a busy phone (long frames) does not drop the tap
+  if((e.timeStamp||performance.now())-d.t>2000)return;
+  var b=twin(d.b);if(!b||b.disabled)return;
+  var r=b.getBoundingClientRect();if(!r.width)r=d.r;var x=cancelled?d.x:e.clientX,y=cancelled?d.y:e.clientY;
   if(x<r.left-SLOP||x>r.right+SLOP||y<r.top-SLOP||y>r.bottom+SLOP)return;
-  if(!d.b.isConnected||d.b.disabled)return;
+  d.b=b;
   if(inBar(d.b)&&Date.now()-modalClosedAt<300)return;
   firedAt=Date.now();firedBtn=d.b;synthetic=true;try{d.b.click();}finally{synthetic=false;}
  }
