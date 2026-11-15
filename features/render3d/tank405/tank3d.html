@@ -1,0 +1,127 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="712"></canvas>
+<script type="module">
+// 405 (from 403b): resource storage = "football" water tower (owner's reference photo), rendered as real 3D:
+// physically based painted metal, a clear transmissive glass ball with the liquid inside (Ore X gold,
+// Ore Y green, Fluid Z red), soft reflections from a studio environment and a cast shadow.
+// No separate base plate: the blue finned foot is the footprint. The glass ball grows with every tier.
+import * as T from '../three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.localClippingEnabled=true;
+R.toneMapping=T.NoToneMapping;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
+const S=new T.Scene();
+const VIEW={l:-2.75,r:2.75,t:9.6,b:-2.65};
+const cam=new T.OrthographicCamera(VIEW.l,VIEW.r,VIEW.t,VIEW.b,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+// studio environment for reflections: soft sky dome with a few bright panels
+{const env=new T.Scene();const dome=new T.Mesh(new T.SphereGeometry(20,32,16),new T.MeshBasicMaterial({side:T.BackSide,vertexColors:true}));
+ const col=[],pos=dome.geometry.attributes.position;for(let i=0;i<pos.count;i++){const y=pos.getY(i)/20;const c=new T.Color().setHSL(0.58,0.35,0.35+0.45*Math.max(0,y));if(y<0)c.setRGB(0.32,0.42,0.28);col.push(c.r,c.g,c.b);}
+ dome.geometry.setAttribute('color',new T.Float32BufferAttribute(col,3));env.add(dome);
+ for(const [x,y,z,s] of [[-8,10,6,6],[9,6,-6,4],[0,14,0,8],[6,3,9,3]]){const p=new T.Mesh(new T.PlaneGeometry(s,s),new T.MeshBasicMaterial({color:0xffffff,side:T.DoubleSide}));p.position.set(x,y,z);p.lookAt(0,0,0);env.add(p);}
+ const pm=new T.PMREMGenerator(R);S.environment=pm.fromScene(env,0.02).texture;}
+S.add(new T.HemisphereLight(0xfff6e8,0x4a6a3a,0.6));
+const sun=new T.DirectionalLight(0xfff0d6,2.4);sun.position.set(-2,14,3);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-4,right:4,top:9,bottom:-4,near:0.5,far:40});sun.shadow.bias=-0.0004;sun.shadow.radius=4;S.add(sun);
+const rim=new T.DirectionalLight(0xbfe8ff,0.8);rim.position.set(7,4,-6);S.add(rim);
+const ground=new T.Mesh(new T.PlaneGeometry(14,14),new T.ShadowMaterial({opacity:0.32}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;S.add(ground);
+const paint=(c,r=0.38,m=0.25)=>new T.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+function mesh(geo,mat,parent){const m=new T.Mesh(geo,mat);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+const LIQ={x:{c:0xffb000,e:0xb86a00},y:{c:0x10c02a,e:0x067a16},z:{c:0xe00a22,e:0x8a0010}};
+// 405: twenty tiers, one per storage level. Every level grows (taller column, bigger glass ball,
+// wider foot) and gains a visible part; every four levels starts a new "era" with a new silhouette:
+// Lv1-4 plain tower · Lv5-8 support struts + side pipe · Lv9-12 catwalk balcony, steel trim
+// · Lv13-16 gold trim, equator ring on the ball, antennas · Lv17-20 platinum, gyroscope rings, crown.
+function spec(t){const era=Math.floor(t/4),sub=t%4;return{era,sub,h:3.0+t*0.13,b:0.72+t*0.05,rc:0.28+t*0.006,foot:0.8+t*0.014,
+ bands:1+sub,fins:4+era,ladder:t>=2,legs:era>=1?(era>=3?4:3):0,pipe:era>=1,catwalk:era>=2,pod:sub===3||era>=3?(era>=3?(sub>=2?2:1):1):0,
+ ring:era>=3,gyro:era>=4,crown:era>=4,ant:era>=3?1+(sub>=2?1:0):(t>=6?1:0),bolts:sub>=1};}
+const level=new T.Plane(new T.Vector3(0,-1,0),0);
+let state=null;
+function build(kind,t){
+ const P=spec(t),L=LIQ[kind];if(state)S.remove(state.root);
+ const BLUE=paint(0x1f63d8,0.32,0.3),BLUE2=paint(0x1850b8,0.4,0.3),ORANGE=paint(0xf5911c,0.35,0.2),STEEL=paint(0xb9c2cf,0.25,0.85),GOLD=paint(0xf3c35a,0.22,0.9),PLAT=paint(0xeef3ff,0.12,0.95),WHITE=paint(0xf4f8ff,0.35,0.1);
+ const BAND=[ORANGE,ORANGE,STEEL,GOLD,PLAT][P.era];
+ const LQ=new T.MeshPhysicalMaterial({color:L.c,roughness:0.45,metalness:0,emissive:L.e,emissiveIntensity:0.9,envMapIntensity:0.12,clearcoat:0,clippingPlanes:[level]});
+ const GLASS=new T.MeshPhysicalMaterial({color:0xf2fbff,roughness:0.02,metalness:0,clearcoat:1,clearcoatRoughness:0.02,specularIntensity:1,envMapIntensity:2.5,transparent:true,opacity:0.07,depthWrite:false});
+ const root=new T.Group();S.add(root);
+ const y0=0,H=P.h,rc=P.rc,top=y0+H,F=P.foot;
+ // flared finned foot
+ mesh(lathe([[0,y0],[F,y0],[F+0.02,y0+0.06],[F-0.04,y0+0.14],[F*0.6,y0+0.45],[rc+0.03,y0+1.0],[0,y0+1.0]]),BLUE,root);
+ const ring0=mesh(new T.TorusGeometry(F-0.02,0.05,12,48),BAND,root);ring0.rotation.x=Math.PI/2;ring0.position.y=y0+0.09;
+ for(let i=0;i<P.fins;i++){const a=i/P.fins*Math.PI*2+0.3;const fin=new T.Shape();fin.moveTo(0,0);fin.lineTo(F*0.85,0);fin.quadraticCurveTo(0.25,0.25,0,0.95);fin.closePath();
+  const geo=new T.ExtrudeGeometry(fin,{depth:0.07,bevelEnabled:true,bevelSize:0.015,bevelThickness:0.015,bevelSegments:2});geo.translate(0,0,-0.035);const f=mesh(geo,BLUE2,root);f.position.set(Math.cos(a)*(rc-0.02),y0,Math.sin(a)*(rc-0.02));f.rotation.y=-a;}
+ const nb=P.bolts?16:10;for(let i=0;i<nb;i++){const a=i/nb*Math.PI*2;mesh(new T.CylinderGeometry(0.035,0.035,0.05,8),P.era>=3?GOLD:STEEL,root).position.set(Math.cos(a)*(F-0.1),y0+0.16,Math.sin(a)*(F-0.1));}
+ const mh=mesh(new T.CylinderGeometry(0.2,0.2,0.07,24),BLUE2,root);mh.position.set(F*0.44,y0+0.42,F*0.44);mh.lookAt(5,y0+0.42,5);mh.rotateX(Math.PI/2);
+ // column (platinum era gets a white stripe)
+ mesh(new T.CylinderGeometry(rc*0.9,rc,H,40),BLUE,root).position.y=y0+H/2;
+ if(P.era>=4){const s=mesh(new T.CylinderGeometry(rc*0.93,rc*0.97,H*0.5,40),WHITE,root);s.position.y=y0+H*0.55;}
+ for(let i=0;i<P.bands;i++){const by=y0+1.1+(H-1.7)*(P.bands===1?1:i/(P.bands-1));const b=mesh(new T.CylinderGeometry(rc+0.025,rc+0.025,0.15,40),BAND,root);b.position.y=by;}
+ // support struts from the foot rim to the column
+ for(let i=0;i<P.legs;i++){const a=i/P.legs*Math.PI*2+0.75;const fx=Math.cos(a)*(F-0.05),fz=Math.sin(a)*(F-0.05),tyy=y0+H*0.55,tx=Math.cos(a)*(rc+0.02),tz=Math.sin(a)*(rc+0.02);
+  const v=new T.Vector3(tx-fx,tyy-0.1,tz-fz),len=v.length();const leg=mesh(new T.CylinderGeometry(0.05,0.07,len,10),P.era>=3?GOLD:STEEL,root);leg.position.set((fx+tx)/2,(0.1+tyy)/2,(fz+tz)/2);leg.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());
+  const foot=mesh(new T.SphereGeometry(0.09,12,8),BAND,root);foot.position.set(fx,0.1,fz);}
+ // side pipe
+ if(P.pipe){const px=Math.cos(2.3)*(rc+0.12),pz=Math.sin(2.3)*(rc+0.12);const pp=mesh(new T.CylinderGeometry(0.06,0.06,H-0.9,12),STEEL,root);pp.position.set(px,y0+0.75+(H-0.9)/2,pz);
+  for(const yy of [y0+1.0,top-0.4]){const cl=mesh(new T.BoxGeometry(0.16,0.07,0.16),BAND,root);cl.position.set(px,yy,pz);}}
+ // ladder
+ if(P.ladder){const lz=new T.Group();lz.position.set(-Math.cos(0.4)*(rc+0.09),0,-Math.sin(0.4)*(rc+0.09));lz.rotation.y=0.4;root.add(lz);
+  for(const s of [-0.09,0.09])mesh(new T.CylinderGeometry(0.018,0.018,H-1.3,8),STEEL,lz).position.set(0,y0+1.0+(H-1.3)/2,s);
+  for(let k=0;k<Math.floor((H-1.3)/0.22);k++){const rung=mesh(new T.CylinderGeometry(0.014,0.014,0.18,6),STEEL,lz);rung.position.set(0,y0+1.1+k*0.22,0);rung.rotation.x=Math.PI/2;}}
+ // catwalk balcony with railing
+ if(P.catwalk){const cy=top-0.75,cr2=rc+0.42;const deck=mesh(new T.CylinderGeometry(cr2,cr2,0.07,40),STEEL,root);deck.position.y=cy;
+  const rail=mesh(new T.TorusGeometry(cr2,0.022,8,48),BAND,root);rail.rotation.x=Math.PI/2;rail.position.y=cy+0.32;
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;mesh(new T.CylinderGeometry(0.016,0.016,0.32,6),STEEL,root).position.set(Math.cos(a)*cr2,cy+0.16,Math.sin(a)*cr2);}}
+ // collar cup holding the ball
+ const bc=top+P.b*0.9;
+ mesh(lathe([[0,top-0.5],[rc,top-0.5],[rc+0.05,top-0.2],[P.b*0.42,top+0.06],[P.b*0.4,top+0.14],[P.b*0.3,top+0.14],[0,top+0.1]]),BLUE,root);
+ const cr=mesh(new T.TorusGeometry(P.b*0.41,0.04,10,40),BAND,root);cr.rotation.x=Math.PI/2;cr.position.y=top+0.1;
+ // side pods: small extra glass globes on brackets
+ const pods=[];for(let i=0;i<P.pod;i++){const a=i?-0.9:2.2,pr=0.26+P.era*0.03,d=rc+0.55;const g=new T.Group();g.position.set(Math.cos(a)*d,top-0.9+i*0.5,Math.sin(a)*d);root.add(g);
+  const br=mesh(new T.BoxGeometry(0.5,0.06,0.08),STEEL,root);br.position.set(Math.cos(a)*(rc+0.25),top-0.9+i*0.5-pr*0.6,Math.sin(a)*(rc+0.25));br.rotation.y=-a;
+  const cup=mesh(new T.CylinderGeometry(pr*0.5,pr*0.35,0.12,16),BAND,g);cup.position.y=-pr*0.85;
+  const pl=new T.Mesh(new T.SphereGeometry(pr*0.9,24,16),LQ.clone());g.add(pl);pods.push(pl);
+  const pg=new T.Mesh(new T.SphereGeometry(pr,24,16),GLASS);pg.renderOrder=2;g.add(pg);}
+ // glass ball + liquid
+ const ball=new T.Group();ball.position.y=bc;root.add(ball);
+ const lr=P.b*0.94;
+ const liq=new T.Mesh(new T.SphereGeometry(lr,56,40),LQ);ball.add(liq);
+ const glass=new T.Mesh(new T.SphereGeometry(P.b,64,48),GLASS);glass.renderOrder=2;ball.add(glass);
+ const rimMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);n=normalize(normalMatrix*normal);v=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+  fragmentShader:'varying vec3 n;varying vec3 v;void main(){float f=pow(1.0-abs(dot(normalize(n),vec3(0.0,0.0,1.0))),2.6);gl_FragColor=vec4(vec3(0.9,0.97,1.0),clamp(f*0.5,0.0,0.5));}'});
+ const rimS=new T.Mesh(new T.SphereGeometry(P.b*1.005,64,48),rimMat);rimS.renderOrder=3;ball.add(rimS);
+ const hiMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.38,depthWrite:false});
+ const hi1=new T.Mesh(new T.SphereGeometry(P.b*1.01,32,16,2.15,0.5,0.5,0.42),hiMat);hi1.renderOrder=4;ball.add(hi1);
+ const hi2=new T.Mesh(new T.SphereGeometry(P.b*1.01,16,8,2.75,0.16,0.98,0.22),hiMat);hi2.renderOrder=4;ball.add(hi2);
+ const back=new T.Mesh(new T.SphereGeometry(P.b,64,48),new T.MeshPhysicalMaterial({color:0xdff3ff,roughness:0.05,transparent:true,opacity:0.05,side:T.BackSide,depthWrite:false}));back.renderOrder=1;ball.add(back);
+ // equator ring / gyroscope rings around the ball
+ if(P.ring){const r1=mesh(new T.TorusGeometry(P.b*1.08,0.055,12,64),P.era>=4?PLAT:GOLD,ball);r1.rotation.x=Math.PI/2;r1.renderOrder=5;r1.castShadow=false;}
+ if(P.gyro){const r2=mesh(new T.TorusGeometry(P.b*1.16,0.04,12,64),GOLD,ball);r2.rotation.set(Math.PI/2+0.9,0,0.5);r2.renderOrder=5;r2.castShadow=false;const r3=mesh(new T.TorusGeometry(P.b*1.16,0.04,12,64),GOLD,ball);r3.rotation.set(Math.PI/2-0.9,0,-0.5);r3.renderOrder=5;r3.castShadow=false;}
+ // top fitting, warning lamp, antennas, crown
+ const ttop=bc+P.b;
+ mesh(lathe([[0,ttop-0.04],[0.22,ttop-0.04],[0.2,ttop+0.08],[0.12,ttop+0.14],[0,ttop+0.15]]),P.era>=3?GOLD:STEEL,root);
+ mesh(new T.CylinderGeometry(0.025,0.025,0.3,8),STEEL,root).position.y=ttop+0.28;
+ const lamp=new T.Mesh(new T.SphereGeometry(0.09,16,12),new T.MeshStandardMaterial({color:0xff3a2a,emissive:0x8a0a00,roughness:0.2}));lamp.position.y=ttop+0.46;root.add(lamp);
+ for(let k=0;k<P.ant;k++){const s=k?-1:1;mesh(new T.CylinderGeometry(0.018,0.018,0.5,6),GOLD,root).position.set(s*0.2,ttop+0.25,-s*0.1);const tip=new T.Mesh(new T.SphereGeometry(0.05,10,8),new T.MeshBasicMaterial({color:0x7fe8ff}));tip.position.set(s*0.2,ttop+0.52,-s*0.1);root.add(tip);}
+ if(P.crown){for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const sp=mesh(new T.ConeGeometry(0.06,0.32,8),GOLD,root);sp.position.set(Math.cos(a)*0.3,ttop+0.02,Math.sin(a)*0.3);sp.rotation.set(Math.sin(a)*0.5,0,-Math.cos(a)*0.5);}
+  const gem=new T.Mesh(new T.OctahedronGeometry(0.1),new T.MeshStandardMaterial({color:L.c,emissive:L.e,emissiveIntensity:1.2,roughness:0.1}));gem.position.set(0,ttop+0.2,0.32);root.add(gem);}
+ // wreck
+ const wreck=new T.Group();root.add(wreck);
+ mesh(lathe([[0,y0],[0.82,y0],[0.78,y0+0.14],[0.5,y0+0.45],[rc+0.03,y0+1.0],[rc,y0+1.25],[0,y0+1.15]]),paint(0x4a6aa8,0.6,0.2),wreck);
+ const fallen=mesh(new T.CylinderGeometry(rc,rc,1.8,24),paint(0x4a6aa8,0.6,0.2),wreck);fallen.rotation.z=Math.PI/2;fallen.rotation.y=0.7;fallen.position.set(0.4,0.3,-0.7);
+ for(let i=0;i<9;i++){const a=i*0.9,r=0.5+(i%3)*0.25;const sh=mesh(new T.TetrahedronGeometry(0.12+(i%3)*0.05),new T.MeshPhysicalMaterial({color:0xe8f6ff,roughness:0.05,clearcoat:1,transparent:true,opacity:0.6}),wreck);sh.position.set(Math.cos(a)*r,0.08,Math.sin(a)*r);sh.rotation.set(i,i*2,i*3);}
+ const pud=new T.Mesh(new T.CircleGeometry(0.9,32),new T.MeshPhysicalMaterial({color:L.c,emissive:L.e,emissiveIntensity:0.4,roughness:0.05,clearcoat:1,transparent:true,opacity:0.85}));pud.rotation.x=-Math.PI/2;pud.position.set(-0.4,0.01,0.3);wreck.add(pud);
+ const tower=root.children.filter(c=>c!==wreck);
+ state={root,tower,wreck,kind,t,bc,lr,liq,pods,lampY:ttop+0.46};
+}
+// fill is 0 (empty) or 1 (full); the game blends the two pictures at the liquid line.
+window.pose=(kind,t,fill,wreckd)=>{
+ if(!state||state.kind!==kind||state.t!==t)build(kind,t);
+ const st=state,full=fill>0.5;
+ st.tower.forEach(c=>c.visible=!wreckd);st.wreck.visible=!!wreckd;
+ level.constant=full?99:-99;st.liq.visible=full;st.pods.forEach(p=>p.visible=full);
+ R.render(S,cam);const pr=y=>(1-new T.Vector3(0,y,0).project(cam).y)/2;const v=new T.Vector3(0,st.lampY,0).project(cam),o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),lx:(v.x+1)/2,ly:(1-v.y)/2,ox:(o.x+1)/2,oy:(1-o.y)/2,l0:pr(st.bc-st.lr),l1:pr(st.bc+st.lr)};
+};
+window.setRes=(w,h)=>R.setSize(w,h,false);
+window.ready=true;
+</script></body></html>
