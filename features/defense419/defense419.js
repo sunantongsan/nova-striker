@@ -54,6 +54,19 @@ var foeEngine419=null;
 Engine.prototype.startDefense=function(){foeEngine419=this;var err;try{err=startFoe419.apply(this,arguments);}finally{foeEngine419=null;}if(!err&&this.defense)this.defense.engine419=this;return err;};
 
 // ---------- the attackers fight like the real troops ----------
+// Real buildings first (never walls) - the nearest one there is a way to.
+// Only when every building is sealed off does it break the wall that stands in the shortest way.
+function pickFoeTarget419(e,u,bs,range,max,air){
+ e.route=[];var real=bs.filter(function(b){return b.type!=='wall'&&canDamage285(b,e,u.weapon);}).sort(function(a,b){return dist(e,a)-dist(e,b);});
+ if(!real.length)return null;
+ if(air){e.targetId='b'+real[0].id;e.route=[{x:real[0].x,y:real[0].y}];return real[0];}
+ var best=null,bestLen=1e9;
+ for(var i=0;i<real.length&&i<6;i++){var rt=route(e,real[i],bs,range,max);if(rt!==null&&rt.length<bestLen){best=real[i];bestLen=rt.length;e.route=rt;}}
+ if(best){e.targetId='b'+best.id;e.pathAge=.65;e.wallAge419=0;return best;}
+ var goal=real[0],walls=bs.filter(function(b){return b.type==='wall';}),wall=null,score=1e9;
+ walls.forEach(function(w){var sc=dist(e,w)+dist(w,goal)*1.4;if(sc<score){var rt=route(e,w,bs,Math.max(1.05,Math.min(range,1.6)),max);if(rt!==null){score=sc;wall=w;e.route=rt;}}});
+ if(!wall)return null;e.targetId='b'+wall.id;e.pathAge=.65;e.wallAge419=2;return wall;
+}
 function foeTick419(eng,d,dt){
  var bs=d.buildings.filter(function(b){return b.hp>0&&!trap278(b);}),max=(d.mapSize||22)-1,live=d.enemies.filter(function(e){return e.hp>0;});
  d.enemies.forEach(function(e){
@@ -67,9 +80,10 @@ function foeTick419(eng,d,dt){
   if(defender){if(dist(e,defender)<=range)e.route=[];else if(e.pathAge<=0||e.targetId!=='d'+defender.id){e.route=air?[{x:defender.x,y:defender.y}]:route(e,defender,bs,range,max);e.pathAge=.6;}
    if(e.route!==null){target=defender;e.targetId='d'+defender.id;}}
   if(!target){target=bs.find(function(b){return 'b'+b.id===e.targetId;});
+   // a wall is only a stop-gap: look again every so often for an open way to a real building
+   if(target&&target.type==='wall'&&(e.wallAge419=(e.wallAge419||0)-dt)<=0)target=null;
    if(target&&!air&&(e.pathAge<=0||!e.route)){e.route=route(e,target,bs,range,max);e.pathAge=.65;if(e.route===null)target=null;}
-   if(!target){e.route=[];var list=bs.filter(function(b){return canDamage285(b,e,u.weapon);}).sort(function(a,b){return dist(e,a)-dist(e,b);});
-    for(var i=0;i<list.length&&i<8;i++){var rt=air?[{x:list[i].x,y:list[i].y}]:route(e,list[i],bs,range,max);if(rt!==null){target=list[i];e.targetId='b'+target.id;e.route=rt;e.pathAge=.65;break;}}}}
+   if(!target)target=pickFoeTarget419(e,u,bs,range,max,air);}
   if(!target){e.moving=false;return;}e.aimTarget=target;
   var dd=dist(e,target);
   if(dd<=range+.05){e.moving=false;e.aim=Math.atan2(target.y-e.y,target.x-e.x);
@@ -83,6 +97,8 @@ function foeTick419(eng,d,dt){
 var foeDepth419=0;
 function wrapFoe419(prev){return function(dt){
  var d=this.defense;if(foeDepth419||!d||d.result)return prev.apply(this,arguments);
+ // time ran out and the HQ still stands: the defense held
+ if(d.time-dt<=0&&d.buildings.some(function(b){return b.type==='hq'&&b.hp>0;})){d.time=0;this.finishDefense(true);return;}
  foeDepth419++;var saved=[];
  try{d.enemies.forEach(function(e){if(e.foe419){saved.push([e,e.stun||0]);e.stun=1e9;}});
   var out=prev.apply(this,arguments);
