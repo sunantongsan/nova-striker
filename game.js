@@ -519,6 +519,18 @@ root.NovaRTS={speedPrice365:novaSpeedPrice365,supportPark339:supportPark339,sent
 // 412: saves written since patch 210 hold Fluid Z buildings, the 411 defenses and 15 army slots, but those are registered
 // by features/red410 only after E is built. Register placeholders first so the save is not rejected (and replaced by a new base).
 (function(){var b0=B.cannonturret||B.gun||B.hq;['zdrill','ztank','inferno','skyguard'].forEach(function(t){if(!B[t])B[t]=Object.assign({},b0,{name:t,cap:0,require:99,stub412:true});});while(U.length<15)U.push(Object.assign({},U[0],{stub412:true}));})();
+// 418: never throw a stored base away. If the save would fail the Engine's check (a building type or troop slot this
+// version does not know, a bad number), keep an untouched copy (novaRTS1Rescue418) and repair the save instead:
+// unknown buildings are parked in d.parked418 and come back once their type is known again.
+(function(){try{var raw=localStorage.getItem('novaRTS1');if(!raw)return;var d=JSON.parse(raw);if(!d||d.version!==1||!Array.isArray(d.buildings)||!d.buildings.some(function(b){return b&&b.type==='hq';}))return;
+ var bad=false,keep=[],park=Array.isArray(d.parked418)?d.parked418:[];
+ d.buildings.forEach(function(b){if(!b||!B[b.type]||!Number.isFinite(b.x)||!Number.isFinite(b.y)){bad=true;if(b)park.push(b);return;}if(!(b.lv>=1&&b.lv<=MAX_BUILDING_LEVEL)){bad=true;b.lv=Math.max(1,Math.min(MAX_BUILDING_LEVEL,b.lv|0||1));}keep.push(b);});
+ if(Array.isArray(park)&&park.length&&!bad){var back=park.filter(function(b){return B[b.type]&&!keep.some(function(k){return k.x===b.x&&k.y===b.y;});});if(back.length){bad=true;keep=keep.concat(back);park=park.filter(function(b){return back.indexOf(b)<0;});}}
+ if(!Array.isArray(d.army)){bad=true;d.army=[];}if(d.army.length>U.length){bad=true;d.army418=d.army.slice(U.length);d.army=d.army.slice(0,U.length);}
+ while(d.army.length<4){bad=true;d.army.push(0);}d.army=d.army.map(function(n){if(!Number.isFinite(n)||n<0){bad=true;return 0;}return n;});
+ if(!Array.isArray(d.queue)){bad=true;d.queue=[];}['gold','power'].forEach(function(k){if(!Number.isFinite(d[k])){bad=true;d[k]=0;}});
+ if(!bad)return;var old=localStorage.getItem('novaRTS1Rescue418');if(!old||(JSON.parse(old).buildings||[]).length<=d.buildings.length)localStorage.setItem('novaRTS1Rescue418',raw);
+ d.buildings=keep;if(park.length)d.parked418=park;else delete d.parked418;localStorage.setItem('novaRTS1',JSON.stringify(d));}catch(e){}})();
 var E=new Engine(localStorage),canvas=document.getElementById('world'),ctx=canvas.getContext('2d'),screen='home',modal=document.getElementById('modal'),selected=null,wallMode='one',wallPending=null,placing=null,moving=null,deployKind=0,paused=false,zoom=1,panX=0,panY=0,tile=29,originX=210,originY=62,atlas=new Image(),extra=new Image(),extraArt=false,art=false,frame=0,last=0,drag=null,drawNeeded=true;
 atlas.onload=function(){art=true;drawNeeded=true;};atlas.onerror=function(){toast(tr('ใช้ภาพสำรองระหว่างโหลดภาพ'));};atlas.src='assets/rts-atlas.webp';extra.onload=function(){extraArt=true;drawNeeded=true;};extra.src='assets/rts-expansion.webp';
 function $(id){return document.getElementById(id);}function toast(s){$('toast').textContent=tr(s);$('toast').style.display=s?'block':'none';clearTimeout(toast.timer);toast.timer=setTimeout(function(){$('toast').style.display='none';},2500);}
