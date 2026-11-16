@@ -1,12 +1,8 @@
 name: Native Android PR validation
 on:
-  pull_request:
-    paths:
-      - 'app/**'
-      - 'scripts/patch*.cjs'
-      - 'tests/*Patch*.java'
-      - 'tests/patch-chunks.cjs'
-      - '.github/workflows/native-pr.yml'
+  # Paused to save GitHub Actions quota; run by hand from the Actions tab when needed.
+  # Game patches are built and published by Vercel on every push.
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

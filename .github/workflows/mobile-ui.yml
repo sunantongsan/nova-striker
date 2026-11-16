@@ -1,6 +1,7 @@
 name: Mobile UI regression
 on:
-  pull_request:
+  # Paused to save GitHub Actions quota; run by hand from the Actions tab when needed.
+  # Game patches are built and published by Vercel on every push.
   workflow_dispatch:
 permissions:
   contents: read

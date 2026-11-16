@@ -1,7 +1,8 @@
 name: Nova faithful scenery and construction shop
 on:
-  push:
-    branches: [fix/presentation384]
+  # Paused to save GitHub Actions quota; run by hand from the Actions tab when needed.
+  # Game patches are built and published by Vercel on every push.
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
