@@ -1,0 +1,166 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="670" height="690"></canvas>
+<script type="module">
+// 412: the two 411 defenses remade from the owner's reference photos, in the bright Nova style.
+//  skyguard — ปืนต่อสู้อากาศยาน: classic towed AA gun on a turntable (handwheels, seat, long barrels).
+//             Tier 0/1/2 = 1 / 2 / 4 barrels (single, twin, quad with ammo drums).
+//  inferno  — ป้อมเลเซอร์: round sci-fi platform, big central laser turret and four corner guns.
+//             Central barrels 2 / 3 / 4; corner guns tiny (idle) / medium twin / large twin.
+// Each kind is split into a static BASE picture and a GUN picture rendered in 16 directions, so the game can turn
+// the guns toward the target. pose(kind,tier,layer,dir) -> {img,ox,oy,tips:[[x,y],...],main:[x,y]}.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-3.4,3.4,4.6,-2.4,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x7b8fb8,1.45));
+const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([105,155,200,235,255]);const ramp=new T.DataTexture(g,5,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c)=>new T.MeshToonMaterial({color:c,gradientMap:ramp});
+const OUT=new T.ShaderMaterial({side:T.BackSide,uniforms:{w:{value:0.03}},
+ vertexShader:'uniform float w;void main(){vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);mv.xyz+=n*w;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:'void main(){gl_FragColor=vec4(0.16,0.24,0.38,1.0);}'});
+function mesh(geo,mat,parent,ol=1){const m=new T.Mesh(geo,mat);parent.add(m);if(ol)m.add(new T.Mesh(geo,OUT));return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const cyl=(a,b,h,s=40)=>new T.CylinderGeometry(a,b,h,s);
+const sph=(r,sx=1,sy=1,sz=1)=>{const q=new T.SphereGeometry(r,40,28);q.scale(sx,sy,sz);return q;};
+const torus=(r,t,seg=56)=>new T.TorusGeometry(r,t,12,seg).rotateX(Math.PI/2);
+// cylinder lying along +x, starting at x=0
+const xcyl=(a,b,len,s=32)=>{const q=new T.CylinderGeometry(b,a,len,s);q.rotateZ(-Math.PI/2);q.translate(len/2,0,0);return q;};
+const WHITE=M(0xeef4fb),CREAM=M(0xf6e7c4),SAND=M(0xe9cf98),SKY=M(0x4f9fe0),DEEP=M(0x3a7fcc),GOLD=M(0xf2a91e),CORAL=M(0xf2545b),
+ STEEL=M(0xa9bdd6),LIGHT=M(0xd5e3f2),MINT=M(0x7fd8c9),
+ CYAN=new T.MeshBasicMaterial({color:0x52e8ff}),ICE=new T.MeshBasicMaterial({color:0xc8f8ff}),RGLOW=new T.MeshBasicMaterial({color:0xff5a4a});
+let cur=null;
+function pad(outer,t,rad=1){const root=new T.Group();root.scale.set(0.84*rad,1,0.84*rad);outer.add(root);
+ const p=mesh(lathe([[0,0],[1.95,0],[2.02,0.08],[1.92,0.36],[1.72,0.5],[0,0.5]],8),WHITE,root);p.rotation.y=Math.PI/8;
+ const skirt=mesh(lathe([[1.99,0.1],[2.01,0.14],[1.95,0.3],[1.93,0.32]],8),SKY,root,0);skirt.rotation.y=Math.PI/8;
+ mesh(torus(1.74,0.04),GOLD,root,0).position.y=0.5;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8;const tab=mesh(rbox(0.3,0.12,0.06,0.03),i%2?GOLD:SKY,root,1);tab.position.set(Math.cos(a)*1.93,0.22,Math.sin(a)*1.93);tab.rotation.y=-a+Math.PI/2;tab.rotation.x=-0.45;}
+ return root;}
+function tipAt(parent,x,y=0,z=0){const o=new T.Group();o.position.set(x,y,z);parent.add(o);return o;}
+function wheel(parent,r){const w=new T.Group();parent.add(w);mesh(new T.TorusGeometry(r,0.035,10,32),GOLD,w,0);
+ for(let i=0;i<3;i++){const s=mesh(rbox(r*2,0.04,0.04,0.015),WHITE,w,0);s.rotation.z=i*Math.PI/3;}
+ mesh(cyl(0.06,0.06,0.08,16).rotateX(Math.PI/2),SKY,w,0);
+ const h=mesh(cyl(0.025,0.025,0.16,10).rotateX(Math.PI/2),WHITE,w,0);h.position.set(r*0.75,r*0.4,0.08);return w;}
+
+// ---------------- Sky Guard (AA gun) ----------------
+function skyBase(t){const outer=new T.Group();pad(outer,t);
+ // fixed ring the carriage turns on
+ mesh(cyl(1.0,1.12,0.22),SKY,outer).position.y=0.58;mesh(torus(1.05,0.05),GOLD,outer,0).position.y=0.7;
+ for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;const leg=mesh(rbox(0.5,0.16,0.26,0.06),CREAM,outer);leg.position.set(Math.cos(a)*1.25,0.56,Math.sin(a)*1.25);leg.rotation.y=-a;
+  const foot=mesh(cyl(0.16,0.2,0.1,20),SKY,outer);foot.position.set(Math.cos(a)*1.48,0.53,Math.sin(a)*1.48);}
+ return {root:outer,tips:[]};}
+function skyGun(t,yaw){const outer=new T.Group();const root=new T.Group();root.scale.setScalar(1.12);outer.add(root);
+ const y=new T.Group();y.position.y=0.69;y.rotation.y=-yaw;root.add(y);
+ // carriage: turntable drum + body
+ mesh(cyl(0.86,0.9,0.18),CREAM,y).position.y=0.09;
+ const body=mesh(rbox(1.25,0.55,1.0,0.14),CREAM,y);body.position.set(-0.05,0.45,0);
+ mesh(rbox(1.27,0.08,1.02,0.03),SKY,y,0).position.set(-0.05,0.3,0);
+ // trunnion side plates
+ const W=[0.3,0.42,0.55][t];
+ for(const s of [-1,1]){const pl=mesh(rbox(0.7,0.75,0.1,0.08),CREAM,y);pl.position.set(0.1,0.95,s*(W+0.08));
+  const bolt=mesh(cyl(0.11,0.11,0.06,20).rotateX(Math.PI/2),GOLD,y,0);bolt.position.set(0.15,1.12,s*(W+0.14));}
+ // handwheels + gunner seat on the left, sight on the right
+ const hw=wheel(y,0.17);hw.position.set(-0.45,0.62,-0.58);
+ const hw2=wheel(y,0.15);hw2.position.set(0.15,0.55,-0.58);
+ const seat=new T.Group();seat.position.set(-0.75,0.55,-0.42);y.add(seat);
+ mesh(rbox(0.32,0.07,0.3,0.03),SKY,seat).position.y=0.28;mesh(rbox(0.07,0.3,0.28,0.03),SKY,seat).position.set(-0.15,0.42,0);
+ mesh(cyl(0.04,0.04,0.3,10),WHITE,seat,0).position.y=0.12;
+ const sight=new T.Group();sight.position.set(-0.2,0.85,0.62);y.add(sight);
+ mesh(cyl(0.035,0.035,0.4,10),WHITE,sight,0).position.y=0.2;mesh(rbox(0.26,0.13,0.13,0.04),SKY,sight).position.set(0.05,0.42,0);
+ const lens=new T.Mesh(sph(0.045),ICE);lens.position.set(0.19,0.42,0);sight.add(lens);
+ // cradle at the trunnions, elevated
+ const cr=new T.Group();cr.position.set(0.15,1.12,0);cr.rotation.z=0.62;y.add(cr);
+ mesh(rbox(0.9,0.36,W*2+0.04,0.1),WHITE,cr).position.set(0.05,0,0);
+ mesh(rbox(0.92,0.07,W*2+0.06,0.03),GOLD,cr,0).position.set(0.05,0.12,0);
+ // barrels
+ const L=[1.75,1.75,1.6][t];
+ const spots=t===0?[[0,0]]:t===1?[[0,-0.24],[0,0.24]]:[[0.17,-0.24],[0.17,0.24],[-0.17,-0.24],[-0.17,0.24]];
+ const br=t===2?0.072:0.085,tips=[];
+ for(const [dy,dz] of spots){const b=new T.Group();b.position.set(0.3,dy,dz);cr.add(b);
+  mesh(xcyl(0.15,0.15,0.75),WHITE,b);// recoil sleeve
+  mesh(xcyl(0.155,0.155,0.07),SKY,b,0).position.x=0.6;
+  mesh(xcyl(br+0.025,br,L*0.45),LIGHT,b).position.x=0.72;
+  mesh(xcyl(br,br,L*0.6),LIGHT,b).position.x=0.72+L*0.42;
+  mesh(xcyl(br+0.035,br+0.035,0.07),SKY,b,0).position.x=0.72+L*0.55;
+  const mz=mesh(xcyl(br+0.04,br+0.03,0.18),GOLD,b);mz.position.x=0.72+L;
+  tips.push(tipAt(b,0.72+L+0.2));
+  if(t===2){const drum=mesh(cyl(0.2,0.2,0.12,28).rotateX(Math.PI/2),SKY,b);drum.position.set(0.35,0,dz>0?0.19:-0.19);
+   mesh(cyl(0.12,0.12,0.13,20).rotateX(Math.PI/2),GOLD,b,0).position.set(0.35,0,dz>0?0.2:-0.2);}}
+ if(t===2){// light armour shield in front of the gunner, like the quad mount
+  const sh=mesh(rbox(0.08,0.55,1.3,0.06),SKY,y);sh.position.set(0.62,0.62,0);sh.rotation.z=-0.2;}
+ return {root:outer,tips};}
+
+// ---------------- Laser Fortress ----------------
+const CORNERS=[0,1,2,3].map(i=>{const a=i/4*Math.PI*2+Math.PI/4;return [Math.cos(a)*1.32,Math.sin(a)*1.32];});
+function laserBase(t){const outer=new T.Group();const p=pad(outer,t,1.04);
+ // cyan light strips on the pad
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8;const s=new T.Mesh(rbox(0.5,0.03,0.07,0.02),CYAN);s.position.set(Math.cos(a)*1.45,0.515,Math.sin(a)*1.45);s.rotation.y=-a+Math.PI/2;p.add(s);}
+ mesh(torus(1.2,0.035),CYAN,outer,0).position.y=0.53;
+ // central stepped pedestal
+ mesh(cyl(0.88,1.0,0.26,8).rotateY(Math.PI/8),SKY,outer).position.y=0.63;
+ mesh(cyl(0.7,0.8,0.22,8).rotateY(Math.PI/8),WHITE,outer).position.y=0.86;
+ mesh(torus(0.75,0.04),GOLD,outer,0).position.y=0.97;
+ // corner gun pedestals
+ for(const [x,z] of CORNERS){mesh(cyl(0.3,0.38,0.32,24),WHITE,outer).position.set(x,0.66,z);
+  mesh(torus(0.31,0.035),SKY,outer,0).position.set(x,0.82,z);const l=new T.Mesh(sph(0.05),CYAN);l.position.set(x*1.22,0.62,z*1.22);outer.add(l);}
+ // little side thruster vents / panels between corners
+ for(let i=0;i<4;i++){const a=i/4*Math.PI*2;const v=mesh(rbox(0.36,0.22,0.24,0.06),SKY,outer);v.position.set(Math.cos(a)*1.45,0.62,Math.sin(a)*1.45);v.rotation.y=-a;
+  const gl=new T.Mesh(rbox(0.26,0.08,0.02,0.02),CYAN);gl.position.set(Math.cos(a)*1.58,0.64,Math.sin(a)*1.58);gl.rotation.y=-a+Math.PI/2;outer.add(gl);}
+ return {root:outer,tips:[]};}
+function laserBarrel(parent,len,r,tips){const b=new T.Group();parent.add(b);
+ mesh(xcyl(r*1.25,r*1.25,len*0.28),WHITE,b);
+ mesh(xcyl(r*1.3,r*1.3,0.06),SKY,b,0).position.x=len*0.26;
+ mesh(xcyl(r,r*0.92,len*0.72),LIGHT,b).position.x=len*0.28;
+ for(const f of [0.45,0.62,0.79]){const s=new T.Mesh(xcyl(r*1.02,r*1.02,0.05,20),CYAN);s.position.x=len*f;b.add(s);}
+ mesh(xcyl(r*1.25,r*1.1,0.12),DEEP,b).position.x=len-0.02;
+ const glow=new T.Mesh(sph(r*0.8),CYAN);glow.position.x=len+0.08;b.add(glow);
+ tips.push(tipAt(b,len+0.14));return b;}
+function cornerGun(parent,t,x,z,yaw,tips){if(t<0)return;const s=[0.55,0.8,1.0][t];const g=new T.Group();g.position.set(x,0.82,z);g.scale.setScalar(s);g.rotation.y=-yaw;parent.add(g);
+ mesh(sph(0.3,1,0.7,1),WHITE,g).position.y=0.14;mesh(torus(0.29,0.03),GOLD,g,0).position.y=0.08;
+ const eye=new T.Mesh(sph(0.07),CYAN);eye.position.set(0.26,0.2,0);g.add(eye);
+ const p=new T.Group();p.position.set(0.12,0.22,0);p.rotation.z=0.32;g.add(p);
+ const tt=[];if(t===0)laserBarrel(p,0.55,0.06,tt).position.set(0,0,0);
+ else for(const dz of [-0.1,0.1])laserBarrel(p,t===2?0.85:0.7,0.06,tt).position.set(0,0,dz);
+ tips.push(...tt);}
+function laserGun(t,yaw){const outer=new T.Group();const tips=[],main=[];
+ // corner guns (always visible; they fire from tier 1)
+ const ctips=[];for(const [x,z] of CORNERS)cornerGun(outer,t,x,z,yaw,ctips);
+ const root=new T.Group();root.position.y=0.97;root.rotation.y=-yaw;outer.add(root);
+ mesh(cyl(0.62,0.66,0.16,32),SKY,root).position.y=0.08;
+ const head=new T.Group();head.position.y=0.55;root.add(head);
+ mesh(sph(0.62,1.05,0.68,0.95),WHITE,head);
+ mesh(rbox(0.9,0.26,1.05,0.12),SKY,head).position.set(-0.28,0.08,0);
+ mesh(torus(0.6,0.035),GOLD,head,0).position.y=-0.05;
+ // glowing core ring on the front (like the reference's blue eye)
+ const ring=new T.Mesh(new T.TorusGeometry(0.22,0.05,12,36),CYAN);ring.rotation.y=Math.PI/2;ring.position.set(0.55,-0.06,0);head.add(ring);
+ const core=new T.Mesh(sph(0.13),ICE);core.position.set(0.56,-0.06,0);head.add(core);
+ // antenna fins
+ for(const s of [-1,1]){const f=mesh(rbox(0.5,0.22,0.06,0.04),DEEP,head);f.position.set(-0.35,0.36,s*0.3);f.rotation.z=0.2;}
+ const p=new T.Group();p.position.set(0.25,0.18,0);p.rotation.z=0.42;head.add(p);
+ const n=[2,3,4][t],L=[1.55,1.7,1.8][t],r=[0.13,0.12,0.11][t];
+ const spots=n===2?[[0,-0.24],[0,0.24]]:n===3?[[-0.08,-0.28],[-0.08,0.28],[0.2,0]]:[[0.12,-0.2],[0.12,0.2],[-0.14,-0.2],[-0.14,0.2]];
+ for(const [dy,dz] of spots){const b=laserBarrel(p,L,r,main);b.position.set(0,dy,dz);}
+ return {root:outer,tips:main.concat(ctips),nMain:main.length};}
+
+function wreck(kind){const root=new T.Group();root.add(kind==='inferno'?laserBase(0).root:skyBase(0).root);
+ const k=kind==='inferno';
+ for(let i=0;i<11;i++){const a=i*0.65+0.2,r=0.2+((i*37)%10)/12;const p=mesh(rbox(0.3+(i%3)*0.14,0.15,0.28,0.05),i%3?(k?WHITE:CREAM):SKY,root);p.position.set(Math.cos(a)*r,0.98+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ // a fallen barrel
+ const b=mesh(xcyl(0.09,0.09,1.6),LIGHT,root);b.position.set(-0.5,1.05,0.3);b.rotation.set(0.2,0.6,-0.12);
+ return {root,tips:[]};}
+window.pose=(kind,t,layer,dir)=>{
+ if(cur)S.remove(cur.root);const yaw=(dir||0)/16*Math.PI*2;
+ cur=layer==='wreck'?wreck(kind):kind==='inferno'?(layer==='base'?laserBase(t):laserGun(t,yaw)):(layer==='base'?skyBase(t):skyGun(t,yaw));
+ S.add(cur.root);cur.root.updateMatrixWorld(true);R.render(S,cam);
+ const px=v=>{const q=v.clone().project(cam);return [(q.x+1)/2*canvas.width,(1-q.y)/2*canvas.height];};
+ const tips=cur.tips.map(o=>{const v=new T.Vector3();o.getWorldPosition(v);return px(v);});
+ const o=px(new T.Vector3(0,0,0));
+ return {img:canvas.toDataURL('image/png'),ox:o[0],oy:o[1],tips,nMain:cur.nMain||tips.length};
+};
+window.ready=true;
+</script></body></html>

@@ -115,11 +115,17 @@ Game.unitInfo278=function(i){var r=info410.apply(this,arguments);if(red410(i)){v
 // ---------- 411: two new defenses ----------
 // inferno  หอเพลิงอนุภาค (HQ10): one beam that keeps burning the same target harder and harder (x1 -> x10 over 4 s);
 //          hits ground and air. Built with Ore X, upgraded with Fluid Z.
-// skyguard ปืนต่อต้านอากาศยาน (HQ6): air only, missile salvo with splash. Ore X.
-var def410Meta=defense410Meta,def410Art=new Image();def410Art.onload=function(){drawNeeded=true;};def410Art.src='assets/defense410.webp';
-var DEF410={inferno:{row:0,scale:1.85,ground:.8},skyguard:{row:1,scale:1.55,ground:.76}};
-B.inferno={name:mt251('หอเพลิงอนุภาค','Particle Inferno'),cost:0,power:0,cap:1,sprite:910,hp:1900,require:10,time:0};
-B.skyguard={name:mt251('ปืนต่อต้านอากาศยาน','Sky Guard'),cost:0,power:0,cap:1,sprite:911,hp:1300,require:6,time:0};
+// skyguard ปืนต่อสู้อากาศยาน (HQ6): air only, flak with splash. Ore X.
+// 412: inferno is now ป้อมเลเซอร์ (Laser Fortress). Both turn their guns toward the target (16 directions);
+//      Lv1-3 / 4-8 / 9+: AA gun 1 / 2 / 4 barrels, laser fortress 2 / 3 / 4 main barrels and four corner guns
+//      that grow and start firing from Lv4.
+var DEF410={inferno:1,skyguard:1};
+function tier412(lv){lv=lv||1;return lv>=9?2:lv>=4?1:0;}
+var BARRELS412={skyguard:[1,2,4],inferno:[2,3,4]},SKYSHOT412=[1,.6,.35],SIDESHOT412=[0,.5,.6],SIDEGAP412=[1,.2,.15];
+function skyDps412(lv){var t=tier412(lv);return skyDamage410(lv)*SKYSHOT412[t]*BARRELS412.skyguard[t]/1.1;}
+function sideDps412(lv){var t=tier412(lv);return t?infernoDps410(lv)*SIDESHOT412[t]/SIDEGAP412[t]:0;}
+B.inferno={name:mt251('ป้อมเลเซอร์','Laser Fortress'),cost:0,power:0,cap:1,sprite:910,hp:1900,require:10,time:0};
+B.skyguard={name:mt251('ปืนต่อสู้อากาศยาน','Sky Guard AA Gun'),cost:0,power:0,cap:1,sprite:911,hp:1300,require:6,time:0};
 progression369.inferno={};progression369.skyguard={};
 for(var dl410=1;dl410<=20;dl410++){
  progression369.inferno[dl410]={amount:Math.round(1200000*Math.pow(1.18,dl410-1)/1000)*1000,seconds:Math.round(3600*4*Math.pow(dl410,1.5)),resource:'gold'};
@@ -143,12 +149,13 @@ var costHTML410=costHTML261;
 costHTML261=function(c){var h=costHTML410.apply(this,arguments);if(c&&c.z410){var short=(E.d.zfluid410||0)<c.z410;h=h.replace(/<\/div>\s*$/,'<span class="'+(short?'short261':'')+'">'+zIcon410()+' '+c.z410.toLocaleString()+'</span></div>');}return h;};
 var group411=buildGroup261;buildGroup261=function(k){return k==='inferno'||k==='skyguard'?'defense':group411.apply(this,arguments);};
 var card410=cardSprite;
-cardSprite=function(i){if(i===910||i===911)return '<span class="icon def410" style="background-position:0% '+(i===910?0:100)+'%"></span>';return card410.apply(this,arguments);};
+cardSprite=function(i){if(i===910||i===911)return '<span class="icon def410" style="background-position:'+(i===910?100:0)+'% 0%"></span>';return card410.apply(this,arguments);};
 // upgrade window rows
 var rows411=buildingRows361;
 buildingRows361=function(b){var rows=rows411.apply(this,arguments),lv=b.lv,n=Math.min(20,lv+1);
  if(b.type==='inferno')rows.push([mt251('ลำแสง / วินาที (เริ่ม → สูงสุด ×10)','Beam / second (start, up to x10)'),infernoDps410(lv),infernoDps410(n)],[mt251('ระยะยิง (ช่อง)','Range (tiles)'),5.5,5.5]);
- if(b.type==='skyguard')rows.push([mt251('โจมตี / นัด (เฉพาะอากาศ)','Damage / shot (air only)'),skyDamage410(lv),skyDamage410(n)],[mt251('ระยะยิง (ช่อง)','Range (tiles)'),7,7]);
+ if(b.type==='skyguard')rows.push([mt251('โจมตี / วินาที (เฉพาะอากาศ)','Damage / second (air only)'),Math.round(skyDps412(lv)),Math.round(skyDps412(n))],[mt251('จำนวนลำกล้อง','Barrels'),BARRELS412.skyguard[tier412(lv)],BARRELS412.skyguard[tier412(n)]],[mt251('ระยะยิง (ช่อง)','Range (tiles)'),7,7]);
+ if(b.type==='inferno')rows.push([mt251('ลำกล้องหลัก','Main barrels'),BARRELS412.inferno[tier412(lv)],BARRELS412.inferno[tier412(n)]],[mt251('ปืนข้าง 4 กระบอก / วินาที','4 side guns / second'),Math.round(sideDps412(lv)),Math.round(sideDps412(n))]);
  return rows;};
 function infernoDps410(lv){return Math.round(22*defenseGrowth351(lv));}
 function skyDamage410(lv){return Math.round(120*defenseGrowth351(lv));}
@@ -165,11 +172,15 @@ function fire410(scene,buildings,enemies,dt,campaign,stage){
    if(!t){t=enemies.filter(function(e){return e.hp>0&&dist(e,b)<=5.5&&canDamage285(e,b);}).sort(function(a,c){return dist(a,b)-dist(c,b);})[0];b.beam410=t?{t:t,on:0,acc:0}:null;}
    if(!t)return;var s=b.beam410;s.on+=dt;s.acc+=dt;b.aim=Math.atan2(t.y-b.y,t.x-b.x);b.aimTarget=t;
    if(s.acc>=.2){var ramp=1+9*Math.min(1,s.on/4);hit(scene,t,22*lvBoost*ramp*s.acc,b,'plasma');s.acc=0;}
+   // 412: corner guns fire laser bolts at the same target from Lv4, one gun after another
+   var tr=tier412(b.lv);if(tr>0&&t.hp>0){b.side412=(b.side412||0)-dt;if(b.side412<=0){b.side412=SIDEGAP412[tr];b.sideN412=((b.sideN412||0)+1)%4;
+    hit(scene,t,22*lvBoost*SIDESHOT412[tr],b,'plasma');b.gun412=BARRELS412.inferno[tr]+b.sideN412;var f=weaponFX(b,t,'plasma');b.gun412=0;f.color='#7cf0ff';scene.fx.push(f);}}
    if(t.hp<=0)b.beam410=null;return;}
   b.cool410=(b.cool410||0)-dt;if(b.cool410>0)return;
   var a=enemies.filter(function(e){return e.hp>0&&isAir410(e)&&dist(e,b)<=7;}).sort(function(x,y){return dist(x,b)-dist(y,b);})[0];if(!a)return;
-  var dmg=120*lvBoost;hit(scene,a,dmg,b,'missile');enemies.forEach(function(e){if(e!==a&&e.hp>0&&isAir410(e)&&dist(e,a)<=1.4)hit(scene,e,dmg*.6,b,'missile');});
-  scene.fx.push(weaponFX(b,a,'missile'));b.cool410=1.1;});
+  // 412: one barrel per shot, cycling; more barrels fire faster (x1 / x1.2 / x1.4 damage per second)
+  var tr=tier412(b.lv),nb=BARRELS412.skyguard[tr],dmg=120*lvBoost*SKYSHOT412[tr];hit(scene,a,dmg,b,'cannon');enemies.forEach(function(e){if(e!==a&&e.hp>0&&isAir410(e)&&dist(e,a)<=1.4)hit(scene,e,dmg*.6,b,'cannon');});
+  b.shot412=((b.shot412||0)+1)%nb;b.gun412=b.shot412;var f=weaponFX(b,a,'cannon');b.gun412=0;f.color='#ffd36b';scene.fx.push(f);b.cool410=1.1/nb;});
 }
 var depth410=0;
 wrap410.tick=function(prev){return function(dt){if(this.raid)boostTitan410(this.raid.troops);depth410++;var out;try{out=prev.apply(this,arguments);}finally{depth410--;}if(depth410)return out;var r=this.raid;
@@ -177,26 +188,42 @@ wrap410.tick=function(prev){return function(dt){if(this.raid)boostTitan410(this.
  return out;};};
 wrap410.tickDefense=function(prev){return function(dt){if(this.defense)boostTitan410(this.defense.defenders);depth410++;var out;try{out=prev.apply(this,arguments);}finally{depth410--;}if(depth410)return out;var d=this.defense;if(d&&!d.result)try{fire410(d,d.buildings,d.enemies,dt,false);}catch(e){}return out;};};
 ['tick','tickDefense'].forEach(function(k){var f=Engine.prototype[k];if(f&&!f.w410){Engine.prototype[k]=wrap410[k](f);Engine.prototype[k].w410=true;}});wrapE410(E);
-// art: tier by level (1-6, 7-13, 14-20); wreck in column 3
-function defTier410(b){var lv=b.lv||1;return lv>=14?2:lv>=7?1:0;}
-function defDraw410(b,p,size,col){var d=DEF410[b.type],c=def410Meta.cell,w=size*d.scale;ctx.drawImage(def410Art,col*c,d.row*c,c,c,p.x-w/2,p.y-w*d.ground,w,w);
- if(col<3){var tip=def410Meta.tip[b.type][col];b.tipPx410={x:p.x-w/2+tip[0]*w,y:p.y-w*d.ground+tip[1]*w};}}
+// 412 art: per kind a static base and the guns in 16 directions (features/render3d/defense412.html).
+var D412=defense412Meta,ART412={};Object.keys(D412.kinds).forEach(function(k){var i=new Image();i.onload=function(){drawNeeded=true;};i.src=D412.kinds[k].file;ART412[k]=i;});
+function art412(b){var i=ART412[b.type];return i&&i.complete&&i.naturalWidth?i:null;}
+function cell412(k,n,img,x,y,w,h){var cw=img.naturalWidth/D412.cols,ch=cw*k.ch/k.cw;ctx.drawImage(img,(n%D412.cols)*cw,Math.floor(n/D412.cols)*ch,cw,ch,x,y,w,h);}
+function wrapA412(a){a%=Math.PI*2;if(a>Math.PI)a-=Math.PI*2;if(a<-Math.PI)a+=Math.PI*2;return a;}
+function dir412(b){var a=b.view412===undefined?(b.aim===undefined?Math.PI:b.aim):b.view412;return ((Math.round(a/(Math.PI*2)*16)%16)+16)%16;}
+// turn smoothly toward the aim
+function turn412(b){var now=Date.now(),goal=b.aim===undefined?Math.PI:b.aim;if(b.view412===undefined){b.view412=goal;b.vt412=now;return;}
+ var dt=Math.min(.1,(now-(b.vt412||now))/1000),d=wrapA412(goal-b.view412),m=(b.type==='skyguard'?7:5)*dt;b.vt412=now;
+ if(Math.abs(d)>.001){b.view412=wrapA412(b.view412+Math.max(-m,Math.min(m,d)));drawNeeded=true;}}
+function defDraw412(b,p,size,wreck){var img=art412(b),k=D412.kinds[b.type];if(!img)return false;
+ var w=size*k.wpx/347,h=w*k.ch/k.cw,x=p.x-w*k.ax,y=p.y-h*k.ay;b.wz412=w/zoom;b.hz412=h/zoom;
+ if(wreck){cell412(k,51,img,x,y,w,h);b.tips412=null;return true;}
+ var tr=tier412(b.lv);turn412(b);var d=dir412(b);cell412(k,tr*17+16,img,x,y,w,h);cell412(k,tr*17+d,img,x,y,w,h);
+ var tips=k.tips[tr][d],nm=k.nMain[tr],main=tips.slice(0,nm).map(function(q){return {x:x+q[0]*w,y:y+q[1]*h};});
+ b.tips412=main;b.tipPx410=main.length?{x:main.reduce(function(n,q){return n+q.x;},0)/main.length,y:main.reduce(function(n,q){return n+q.y;},0)/main.length}:null;return true;}
+var mount412=weaponMount;
+weaponMount=function(o){if(o&&(o.type==='inferno'||o.type==='skyguard')&&o.wz412&&D412.kinds[o.type]){var k=D412.kinds[o.type],tips=k.tips[tier412(o.lv)][dir412(o)],q=tips[Math.min(o.gun412||0,tips.length-1)];
+  if(q){var yy=(q[1]-k.ay)*o.hz412;return {x:(q[0]-k.ax)*o.wz412,y:yy,height:-yy};}}return mount412.apply(this,arguments);};
 var evolved410=evolvedArt265;
-evolvedArt265=function(b,p,size){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,defTier410(b));if(b.lv>1){var marks=(b.lv-1)%4+1;for(var i=0;i<marks;i++)disk(p.x+(i-(marks-1)/2)*5*zoom,p.y+size*.1,1.5*zoom,'#ffe391');}return true;}return evolved410.apply(this,arguments);};
+evolvedArt265=function(b,p,size){if(DEF410[b.type]&&defDraw412(b,p,size,false)){if(b.lv>1){var marks=(b.lv-1)%4+1;for(var i=0;i<marks;i++)disk(p.x+(i-(marks-1)/2)*5*zoom,p.y+size*.1,1.5*zoom,'#ffe391');}return true;}return evolved410.apply(this,arguments);};
 var wreck410=drawWreck;
-drawWreck=function(b,p,size,enemy){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,3);return;}return wreck410.apply(this,arguments);};
+drawWreck=function(b,p,size,enemy){if(DEF410[b.type]&&defDraw412(b,p,size,true))return;return wreck410.apply(this,arguments);};
 var newArt410=newBuildingArt;
-newBuildingArt=function(b,p,size){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,defTier410(b));return;}return newArt410.apply(this,arguments);};
+newBuildingArt=function(b,p,size){if(DEF410[b.type]&&defDraw412(b,p,size,false))return;return newArt410.apply(this,arguments);};
 // inferno beam on top of the scene
 var draw410=draw;
 draw=function(){var out=draw410.apply(this,arguments);try{var sc=screen==='raid'?E.raid:screen==='defense'?E.defense:null;if(!sc)return out;
  (sc.buildings||[]).forEach(function(b){var s=b.beam410;if(b.type!=='inferno'||!s||!s.t||s.t.hp<=0||b.hp<=0||!b.tipPx410)return;
-  var q=point(s.t.x,s.t.y),h=(s.t.height340||0)+(isAir410(s.t)?40:14),tx=q.x,ty=q.y-h*zoom,a=b.tipPx410,k=Math.min(1,s.on/4),wob=Math.sin(Date.now()/40)*1.2*zoom;
+  var q=point(s.t.x,s.t.y),h=(s.t.height340||0)+(isAir410(s.t)?40:14),tx=q.x,ty=q.y-h*zoom,k=Math.min(1,s.on/4),wob=Math.sin(Date.now()/40)*1.2*zoom,from=b.tips412&&b.tips412.length?b.tips412:[b.tipPx410],thin=from.length>1?.7:1;
   ctx.save();ctx.lineCap='round';
-  [[(5+7*k)*zoom,'rgba(235,40,40,.35)'],[(2.6+4*k)*zoom,'rgba(250,70,60,.85)'],[(1.2+1.5*k)*zoom,'rgba(255,225,205,.95)']].forEach(function(L){ctx.strokeStyle=L[1];ctx.lineWidth=L[0];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+tx)/2+wob,(a.y+ty)/2-10*zoom,tx,ty);ctx.stroke();});
-  var g=ctx.createRadialGradient(tx,ty,0,tx,ty,(8+10*k)*zoom);g.addColorStop(0,'rgba(255,240,220,.9)');g.addColorStop(.4,'rgba(255,90,60,.6)');g.addColorStop(1,'rgba(255,60,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(tx,ty,(8+10*k)*zoom,0,7);ctx.fill();
+  from.forEach(function(a){[[(5+7*k)*zoom*thin,'rgba(60,190,255,.32)'],[(2.6+4*k)*zoom*thin,'rgba(90,225,255,.85)'],[(1.2+1.5*k)*zoom*thin,'rgba(235,252,255,.95)']].forEach(function(L){ctx.strokeStyle=L[1];ctx.lineWidth=L[0];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+tx)/2+wob,(a.y+ty)/2-6*zoom,tx,ty);ctx.stroke();});
+   ctx.fillStyle='rgba(220,250,255,.9)';ctx.beginPath();ctx.arc(a.x,a.y,(2+2*k)*zoom,0,7);ctx.fill();});
+  var g=ctx.createRadialGradient(tx,ty,0,tx,ty,(8+10*k)*zoom);g.addColorStop(0,'rgba(240,252,255,.9)');g.addColorStop(.4,'rgba(80,215,255,.6)');g.addColorStop(1,'rgba(60,190,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(tx,ty,(8+10*k)*zoom,0,7);ctx.fill();
   ctx.restore();drawNeeded=true;});}catch(e){}return out;};
-(function(){var st=document.createElement('style');st.id='def410';st.textContent='.icon.def410{background:url(assets/defense410.webp) 0 0/400% 200% no-repeat!important;width:56px;height:56px}';document.head.appendChild(st);})();
+(function(){var st=document.createElement('style');st.id='def410';st.textContent='.icon.def410{background:url(assets/defense412-icons.webp) 0 0/200% 100% no-repeat!important;width:56px;height:56px}';document.head.appendChild(st);})();
 
 // ---------- 411: NOVA mech power-up with Fluid Z ----------
 // Buying and tiers stay NOVA (server). On top of that, 20 local power-up levels paid with Fluid Z:
