@@ -93,7 +93,7 @@ function startEnergyBurst282(scene,source,target,damage){
  var count=energyShots419(source);source.energyShot281=0;
  fireEnergy276(scene,source,target,damage/count);
  scene.energyBurst282=scene.energyBurst282||[];
- for(var i=1;i<count;i++){var a=i*2.4,r=.18+.06*i;scene.energyBurst282.push({delay:i*.12,source:source,target:{x:target.x+Math.cos(a)*r,y:target.y+Math.sin(a)*r},damage:damage/count});}
+ for(var i=1;i<count;i++)scene.energyBurst282.push({delay:i*.12,source:source,target:{x:target.x,y:target.y},damage:damage/count});
 }
 function tickEnergy276(scene,dt,group){
  var burst=scene.energyBurst282||[];scene.energyBurst282=[];
