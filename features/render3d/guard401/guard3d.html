@@ -13,7 +13,7 @@ S.add(new T.HemisphereLight(0xfff6e8,0x6a86b8,2.1));
 const sun=new T.DirectionalLight(0xfff0d6,3.4);sun.position.set(-3,10,7);S.add(sun);
 const rim=new T.DirectionalLight(0x9fe3ff,1.8);rim.position.set(7,3,-5);S.add(rim);
 // Same projection direction as the troop renders; frame sized for a ~1 unit tall robot incl. flight.
-const cam=new T.OrthographicCamera(-0.64,0.64,0.74,-0.54,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,0.45,0);cam.position.add(new T.Vector3(0,0.45,0).sub(new T.Vector3(0,0,0)).multiplyScalar(0));
+const cam=new T.OrthographicCamera(-0.64,0.64,0.74,-0.54,0.1,100);cam.position.set(10,16.04,10);cam.lookAt(0,0.45,0);cam.position.add(new T.Vector3(0,0.45,0).sub(new T.Vector3(0,0,0)).multiplyScalar(0));
 const params=new URLSearchParams(location.search);
 const gltf=await new GLTFLoader().loadAsync(params.get('model'));
 let src=null;gltf.scene.traverse(o=>{if(o.isMesh&&!src)src=o;});

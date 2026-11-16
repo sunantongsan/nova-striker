@@ -18,7 +18,7 @@ function facing392(t){
  t.lx392=t.x;t.ly392=t.y;
  var moving=!!t.moving&&Math.hypot(dx,dy)>1e-4;
  if(!moving||t.recoil>0){var a=t.aim===undefined?(t.heading===undefined?-Math.PI/2:t.heading):t.aim;dx=Math.cos(a);dy=Math.sin(a);}
- var sx=dx-dy,sy=(dx+dy)*.62;
+ var sx=dx-dy,sy=(dx+dy)*ISO412;
  if(Math.abs(sx)>1e-4)t.flip392=sx<0?-1:1;if(Math.abs(sy)>1e-4)t.back392=sy<-.05;
  return {flip:t.flip392||1,back:!!t.back392,moving:moving||!!t.moving};
 }

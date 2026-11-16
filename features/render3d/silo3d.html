@@ -9,7 +9,7 @@ const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuf
 R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.localClippingEnabled=true;
 R.clippingPlanes=[new T.Plane(new T.Vector3(0,1,0),0.02)]; // nothing renders below the ground
 const S=new T.Scene();
-const cam=new T.OrthographicCamera(-2.75,2.75,3.6,-2.45,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+const cam=new T.OrthographicCamera(-2.75,2.75,3.6,-2.45,0.1,100);cam.position.set(10,16.04,10);cam.lookAt(0,1.0,0);
 S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,1.3));
 const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
 const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);

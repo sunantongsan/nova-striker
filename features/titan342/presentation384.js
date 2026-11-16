@@ -5,7 +5,7 @@ scenery384.onload=function(){terrainKey219='';drawNeeded=true;};
 var terrainFallback384=paintTerrain219;
 paintTerrain219=function(map,raid){
  if(!scenery384.complete||!scenery384.naturalWidth)return terrainFallback384(map,raid);
- var i=planetChoice298,c=point((map-1)/2,(map-1)/2),width=map*tile*zoom*2/.64,height=map*tile*.62*zoom*2/.54;
+ var i=planetChoice298,c=point((map-1)/2,(map-1)/2),width=map*tile*zoom*2/.64,height=map*tile*ISO412*zoom*2/.54;
  ctx.clearRect(0,0,viewWidth,viewHeight);box(0,0,viewWidth,viewHeight,planetPalette298().sky);
  var sw=scenery384.naturalWidth/2,sh=scenery384.naturalHeight/2;
  ctx.drawImage(scenery384,i%2*sw,Math.floor(i/2)*sh,sw,sh,c.x-width*.5,c.y-height*.48,width,height);
@@ -13,8 +13,8 @@ paintTerrain219=function(map,raid){
 };
 Game.environmentOverview384=function(){
  if(screen!=='home')return;fitCanvas();var map=22;
- zoom=Math.min(1.2,Math.max(.35,Math.max(viewWidth/(map*tile*2/.64),viewHeight/(map*tile*.62*2/.54))));
- panX=0;panY=viewHeight*.49-originY-(map-1)*tile*.62*zoom;terrainKey219='';drawNeeded=true;
+ zoom=Math.min(1.2,Math.max(.35,Math.max(viewWidth/(map*tile*2/.64),viewHeight/(map*tile*ISO412*2/.54))));
+ panX=0;panY=viewHeight*.49-originY-(map-1)*tile*ISO412*zoom;terrainKey219='';drawNeeded=true;
 };
 var selectEnvironment384=Game.choosePlanet298;
 Game.choosePlanet298=function(i){selectEnvironment384(i);if(planetChoice298===i){Game.close();Game.environmentOverview384();}};

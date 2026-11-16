@@ -9,8 +9,8 @@ function drawWall(b,enemy,preview){
  function segment(axis){
   // Keep the painted bevels, panels and pillars. Affine projection aligns the two feet with adjacent tile centers.
   var row=Math.floor((lv-1)/4),foot1=[.83,.80,.78,.75,.73][row],foot2=[.71,.69,.66,.65,.61][row],scale=tile*z/(cw*.61),sy=scale*1.25,a=axis===0?-scale:scale;
-  var left={x:p.x+(axis===0?.5:-.5)*tile*z,y:p.y+.5*tile*.62*z};
-  var shear=(-tile*.62*z-sy*((foot2-foot1)*ch))/(.61*cw);
+  var left={x:p.x+(axis===0?.5:-.5)*tile*z,y:p.y+.5*tile*ISO412*z};
+  var shear=(-tile*ISO412*z-sy*((foot2-foot1)*ch))/(.61*cw);
   ctx.save();ctx.transform(a,shear,0,sy,left.x-a*cw*.24,left.y-shear*cw*.24-sy*ch*foot1);
   ctx.drawImage(wallModules384,(lv-1)%4*cw,Math.floor((lv-1)/4)*ch,cw,ch,0,0,cw,ch);ctx.restore();
  }

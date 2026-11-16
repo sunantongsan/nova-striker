@@ -13,7 +13,7 @@ const canvas=document.getElementById('c');
 const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
 R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
 const S=new T.Scene();
-const cam=new T.OrthographicCamera(-3.4,3.4,7.0,-2.4,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+const cam=new T.OrthographicCamera(-3.4,3.4,7.0,-2.4,0.1,100);cam.position.set(10,16.04,10);cam.lookAt(0,1.0,0);
 S.add(new T.HemisphereLight(0xfff6e8,0x6b7a98,1.05));
 const sun=new T.DirectionalLight(0xfff0d6,2.3);sun.position.set(-3,10,7);S.add(sun);
 const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);

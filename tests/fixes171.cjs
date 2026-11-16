@@ -2,10 +2,10 @@ const vm=require('vm'),fs=require('fs'),assert=require('assert');require('../gam
 // Heavy tracked vehicles never hop or get shoved by a blast, while infantry still react.
 for(const kind of [1,9]){let t={kind,x:4,y:4,hp:1000,max:1000},scene={buildings:[],fx:[],mapSize:22};N.hit(scene,t,50,{x:3,y:4},'cannon');assert.equal(t.hop,0);assert.equal(t.x,4);assert.equal(t.y,4);}
 let foot={kind:0,x:4,y:4,hp:1000};N.hit({buildings:[],fx:[]},foot,50,{x:3,y:4},'cannon');assert(foot.hop>0);
-for(const type of ['tank','gun','missileturret'])for(let i=0;i<32;i++){const angle=i*Math.PI/16,source=type==='tank'?{kind:1,x:4,y:4}:{type,x:4,y:4},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};let fx=N.weaponFX(source,target,'cannon'),mount=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.51;assert(Math.abs(mount.x*dy-(mount.y+mount.height)*dx)<1e-8,'muzzle and target have same bearing');assert.deepEqual(fx.muzzle,mount);}
+for(const type of ['tank','gun','missileturret'])for(let i=0;i<32;i++){const angle=i*Math.PI/16,source=type==='tank'?{kind:1,x:4,y:4}:{type,x:4,y:4},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};let fx=N.weaponFX(source,target,'cannon'),mount=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.75*.823;assert(Math.abs(mount.x*dy-(mount.y+mount.height)*dx)<1e-8,'muzzle and target have same bearing');assert.deepEqual(fx.muzzle,mount);}
 // The rotating energy head and emitted projectile share a continuous bearing.
 for(let i=0;i<32;i++){const angle=i*Math.PI/16,source={type:'cannonturret',x:4,y:4,lv:1},target={x:4+Math.cos(angle)*4,y:4+Math.sin(angle)*4};
- const fx=N.weaponFX(source,target,'energy276'),m=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.51;
+ const fx=N.weaponFX(source,target,'energy276'),m=N.weaponMount(source),dx=Math.cos(angle)-Math.sin(angle),dy=(Math.cos(angle)+Math.sin(angle))*.75*.823;
  assert(Math.abs(m.x*dy-(m.y+m.height)*dx)<1e-8);assert.deepEqual(fx.muzzle,m);
 }
 // Real UI request lifecycle: login continuation, timeout, stale replies, retry and successful claim.

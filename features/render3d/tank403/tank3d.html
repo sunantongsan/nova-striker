@@ -12,7 +12,7 @@ R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.localClippingEnabled=
 R.toneMapping=T.NoToneMapping;R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
 const S=new T.Scene();
 const VIEW={l:-2.75,r:2.75,t:9.6,b:-2.65};
-const cam=new T.OrthographicCamera(VIEW.l,VIEW.r,VIEW.t,VIEW.b,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+const cam=new T.OrthographicCamera(VIEW.l,VIEW.r,VIEW.t,VIEW.b,0.1,100);cam.position.set(10,16.04,10);cam.lookAt(0,1.0,0);
 // studio environment for reflections: soft sky dome with a few bright panels
 {const env=new T.Scene();const dome=new T.Mesh(new T.SphereGeometry(20,32,16),new T.MeshBasicMaterial({side:T.BackSide,vertexColors:true}));
  const col=[],pos=dome.geometry.attributes.position;for(let i=0;i<pos.count;i++){const y=pos.getY(i)/20;const c=new T.Color().setHSL(0.58,0.35,0.35+0.45*Math.max(0,y));if(y<0)c.setRGB(0.32,0.42,0.28);col.push(c.r,c.g,c.b);}

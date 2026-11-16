@@ -76,7 +76,7 @@ window.pose=(dirA,anim,f)=>{
  R.render(S,cam);const v=muzzle.getWorldPosition(new T.Vector3()),pv=v.clone().project(cam),o=new T.Vector3(0,0,0).project(cam);
  return {img:canvas.toDataURL('image/png'),mx:(pv.x+1)/2*canvas.width,my:(1-pv.y)/2*canvas.height,ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};
 };
-window.setZoom=z=>{cam.zoom=z;cam.position.set(10,11.17,10);cam.lookAt(0,0.9-(z-1)*1.7,0);cam.updateProjectionMatrix();};
+window.setZoom=z=>{cam.zoom=z;cam.position.set(10,16.04,10);cam.lookAt(0,0.9-(z-1)*1.7,0);cam.updateProjectionMatrix();};
 window.setZoom(+(params.get('zoom')||1.45));
 window.clipNames=()=>Object.keys(clips);
 window.ready=true;
