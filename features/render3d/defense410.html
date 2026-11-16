@@ -1,0 +1,94 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="512" height="650"></canvas>
+<script type="module">
+// 410: two new defenses in the bright Nova style (white / sky blue / gold, red Fluid Z glow).
+//  inferno  — หอเพลิงอนุภาค: glass bulb of Fluid Z on a ringed column; the beam leaves the bulb tip.
+//  skyguard — ปืนต่อต้านอากาศยาน: domed turret with a ring of upward missile tubes and a radar dish.
+// pose(kind,tier,wreck) renders one picture; tiers 0..2 grow taller and richer.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.6,2.6,4.2,-2.4,0.1,100);cam.position.set(10,11.17,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x7b8fb8,1.45));
+const sun=new T.DirectionalLight(0xfff0d6,3.0);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([105,155,200,235,255]);const ramp=new T.DataTexture(g,5,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c)=>new T.MeshToonMaterial({color:c,gradientMap:ramp});
+const OUT=new T.ShaderMaterial({side:T.BackSide,uniforms:{w:{value:0.035}},
+ vertexShader:'uniform float w;void main(){vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);mv.xyz+=n*w;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:'void main(){gl_FragColor=vec4(0.16,0.24,0.38,1.0);}'});
+function mesh(geo,mat,parent,ol=1){const m=new T.Mesh(geo,mat);parent.add(m);if(ol)m.add(new T.Mesh(geo,OUT));return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const cyl=(a,b,h,s=40)=>new T.CylinderGeometry(a,b,h,s);
+const sph=(r,sx=1,sy=1,sz=1)=>{const q=new T.SphereGeometry(r,40,28);q.scale(sx,sy,sz);return q;};
+const torus=(r,t)=>new T.TorusGeometry(r,t,12,56).rotateX(Math.PI/2);
+const WHITE=M(0xeef4fb),SKY=M(0x4f9fe0),DEEP=M(0x3a7fcc),GOLD=M(0xf2a91e),CORAL=M(0xf2545b),BLUSH=M(0xf7c8c4),STEEL=M(0x9fb3cc),
+ RGLOW=new T.MeshBasicMaterial({color:0xff5a4a}),PINK=new T.MeshBasicMaterial({color:0xffb3a8}),
+ GLASS=new T.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:0.32,roughness:0.05,metalness:0,clearcoat:1});
+let cur=null;
+function base(outer,t){const root=new T.Group();root.scale.set(0.84,1,0.84);outer.add(root);
+ // rounded octagonal pad, white with blue skirt and gold trim (matches Nova buildings)
+ const pad=mesh(lathe([[0,0],[1.95,0],[2.02,0.08],[1.92,0.36],[1.72,0.5],[0,0.5]],8),WHITE,root);pad.rotation.y=Math.PI/8;
+ const skirt=mesh(lathe([[1.99,0.1],[2.01,0.14],[1.95,0.3],[1.93,0.32]],8),SKY,root,0);skirt.rotation.y=Math.PI/8;
+ mesh(torus(1.74,0.04),GOLD,root,0).position.y=0.5;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8;const tab=mesh(rbox(0.3,0.12,0.06,0.03),i%2?GOLD:SKY,root,1);tab.position.set(Math.cos(a)*1.93,0.22,Math.sin(a)*1.93);tab.rotation.y=-a+Math.PI/2;tab.rotation.x=-0.45;}
+ for(let i=0;i<3;i++){const a=i/3*Math.PI*2+0.9;const box=mesh(rbox(0.46,0.3,0.34,0.07),i%2?SKY:WHITE,root);box.position.set(Math.cos(a)*1.25,0.64,Math.sin(a)*1.25);box.rotation.y=-a;mesh(rbox(0.47,0.07,0.35,0.02),GOLD,box,0).position.y=0.08;}
+ for(let i=0;i<4+t*2;i++){const a=i/(4+t*2)*Math.PI*2+0.4;const lamp=new T.Mesh(sph(0.07),i%2?RGLOW:PINK);lamp.position.set(Math.cos(a)*1.55,0.53,Math.sin(a)*1.55);root.add(lamp);}
+}
+function inferno(t){
+ const outer=new T.Group();base(outer,t);const root=new T.Group();root.scale.setScalar(1.22);outer.add(root);const H=[1.7,2.05,2.4][t];
+ // column with coral rings
+ mesh(cyl(0.62,0.82,0.5),SKY,root).position.y=0.75;
+ mesh(torus(0.7,0.06),GOLD,root,0).position.y=1.0;
+ mesh(cyl(0.38,0.5,H),WHITE,root).position.y=1.0+H/2;
+ for(let i=0;i<2+t;i++){const ring=mesh(torus(0.44-i*0.02,0.07),CORAL,root,0);ring.position.y=1.25+i*(H-0.4)/Math.max(1,1+t);}
+ // three fins
+ for(let i=0;i<3;i++){const a=i/3*Math.PI*2;const fin=mesh(rbox(0.12,H*0.62,0.5,0.05),DEEP,root);fin.position.set(Math.cos(a)*0.48,1.0+H*0.34,Math.sin(a)*0.48);fin.rotation.y=-a;}
+ // feed pipes with red fluid
+ for(let i=0;i<3;i++){const a=i/3*Math.PI*2+Math.PI/3;const p=new T.Mesh(cyl(0.07,0.07,H*0.7,16),RGLOW);p.position.set(Math.cos(a)*0.42,1.05+H*0.38,Math.sin(a)*0.42);root.add(p);}
+ // collar and glass bulb with glowing Fluid Z core
+ const top=1.0+H;mesh(cyl(0.62,0.4,0.22),GOLD,root).position.y=top+0.05;
+ const bulb=new T.Mesh(sph(0.62,1,1.05,1),GLASS);bulb.position.y=top+0.68;root.add(bulb);
+ const core=new T.Mesh(sph(0.36+t*0.04,1,1.1,1),RGLOW);core.position.y=top+0.66;root.add(core);
+ const hot=new T.Mesh(sph(0.17),PINK);hot.position.set(0.12,top+0.78,0.12);root.add(hot);
+ mesh(torus(0.62,0.05),GOLD,root,0).position.y=top+0.3;
+ // crown prongs that grow with the tier
+ for(let i=0;i<3+t;i++){const a=i/(3+t)*Math.PI*2;const pr=mesh(new T.ConeGeometry(0.07,0.42+t*0.08,14),GOLD,root);pr.position.set(Math.cos(a)*0.5,top+1.25,Math.sin(a)*0.5);pr.rotation.z=Math.cos(a)*0.35;pr.rotation.x=-Math.sin(a)*0.35;}
+ const tip=new T.Group();tip.position.y=top+0.68;root.add(tip);
+ return {root:outer,tip};
+}
+function skyguard(t){
+ const outer=new T.Group();base(outer,t);const root=new T.Group();root.scale.setScalar(1.3);outer.add(root);
+ mesh(cyl(0.95,1.1,0.42),SKY,root).position.y=0.7;mesh(torus(1.0,0.05),GOLD,root,0).position.y=0.9;
+ const yaw=new T.Group();yaw.position.y=0.9;root.add(yaw);
+ const dome=mesh(sph(0.92,1,0.62,1),WHITE,yaw);dome.position.y=0.15;
+ mesh(sph(0.5,1,0.4,1),SKY,yaw,0).position.set(0.42,0.42,0);
+ const eye=new T.Mesh(sph(0.16,0.5,0.7,1.2),new T.MeshBasicMaterial({color:0x5ff2ff}));eye.position.set(0.86,0.36,0);yaw.add(eye);
+ // missile pods: tubes tilted up and out
+ const n=[4,6,8][t];
+ for(let i=0;i<n;i++){const a=i/n*Math.PI*2;const pod=new T.Group();pod.position.set(Math.cos(a)*0.58,0.52,Math.sin(a)*0.58);pod.rotation.set(Math.sin(a)*0.45,0,-Math.cos(a)*0.45);yaw.add(pod);
+  mesh(cyl(0.13,0.15,0.9,24),i%2?WHITE:BLUSH,pod).position.y=0.45;mesh(cyl(0.135,0.135,0.05,24),CORAL,pod,0).position.y=0.6;mesh(cyl(0.155,0.155,0.07,24),GOLD,pod,0).position.y=0.12;
+  const tip=mesh(new T.ConeGeometry(0.11,0.28,20),CORAL,pod);tip.position.y=1.03;}
+ // radar dish
+ const d=new T.Group();d.position.set(-0.55,0.75,-0.35);yaw.add(d);mesh(cyl(0.05,0.05,0.6,10),STEEL,d).position.y=0.3;
+ const DW=M(0xeef4fb);DW.side=T.DoubleSide;const dish=mesh(new T.SphereGeometry(0.38,28,12,0,Math.PI*2,0,Math.PI/2.6),DW,d,0);dish.rotation.x=Math.PI;dish.rotation.z=0.7;dish.position.y=0.68;
+ const blink=new T.Mesh(sph(0.07),RGLOW);blink.position.set(-0.1,0.95,0);d.add(blink);
+ yaw.rotation.y=0.35;
+ const tip=new T.Group();tip.position.y=2.0;root.add(tip);
+ return {root:outer,tip};
+}
+function wreck(){const root=new T.Group();base(root,0);
+ for(let i=0;i<10;i++){const a=i*0.65+0.2,r=0.3+((i*37)%10)/14;const p=mesh(rbox(0.3+(i%3)*0.14,0.15,0.28,0.05),i%3?WHITE:SKY,root);p.position.set(Math.cos(a)*r,0.62+(i%2)*0.08,Math.sin(a)*r);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ return {root,tip:new T.Group()};}
+window.pose=(kind,t,wr)=>{
+ if(cur)S.remove(cur.root);cur=wr?wreck():kind==='inferno'?inferno(t):skyguard(t);S.add(cur.root);
+ cur.root.updateMatrixWorld(true);const v=new T.Vector3();cur.tip.getWorldPosition(v);
+ R.render(S,cam);const pv=v.clone().project(cam),o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),tx:(pv.x+1)/2*canvas.width,ty:(1-pv.y)/2*canvas.height,ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>

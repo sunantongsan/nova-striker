@@ -111,3 +111,112 @@ Game.unitInfo278=function(i){var r=info410.apply(this,arguments);if(red410(i)){v
 })();
 // 3D battle sprites for the red troops (features/render3d/units3d.html: surge, ember, colossus, lancer).
 [['surge',42,10],['ember',46,6],['colossus',66,6],['lancer',52,7]].forEach(function(a,i){var s={file:a[0],height:a[1],perTile:a[2]};s.meta=unit3dMeta392[s.file];if(!s.meta)return;s.img=new Image();s.img.onload=function(){drawNeeded=true;};s.img.src='assets/units3d392-'+s.file+'.webp';unit3dKinds392[ZKIND410+i]=s;});
+
+// ---------- 411: two new defenses ----------
+// inferno  หอเพลิงอนุภาค (HQ10): one beam that keeps burning the same target harder and harder (x1 -> x10 over 4 s);
+//          hits ground and air. Built with Ore X, upgraded with Fluid Z.
+// skyguard ปืนต่อต้านอากาศยาน (HQ6): air only, missile salvo with splash. Ore X.
+var def410Meta=defense410Meta,def410Art=new Image();def410Art.onload=function(){drawNeeded=true;};def410Art.src='assets/defense410.webp';
+var DEF410={inferno:{row:0,scale:1.85,ground:.8},skyguard:{row:1,scale:1.55,ground:.76}};
+B.inferno={name:mt251('หอเพลิงอนุภาค','Particle Inferno'),cost:0,power:0,cap:1,sprite:910,hp:1900,require:10,time:0};
+B.skyguard={name:mt251('ปืนต่อต้านอากาศยาน','Sky Guard'),cost:0,power:0,cap:1,sprite:911,hp:1300,require:6,time:0};
+progression369.inferno={};progression369.skyguard={};
+for(var dl410=1;dl410<=20;dl410++){
+ progression369.inferno[dl410]={amount:Math.round(1200000*Math.pow(1.18,dl410-1)/1000)*1000,seconds:Math.round(3600*4*Math.pow(dl410,1.5)),resource:'gold'};
+ progression369.skyguard[dl410]={amount:Math.round(90000*Math.pow(1.38,dl410-1)/1000)*1000,seconds:Math.round(1800*Math.pow(dl410,1.6)),resource:'gold'};
+}
+['inferno','skyguard'].forEach(function(t){var q=progressionQuote369(t,1);B[t].cost=q.gold;B[t].power=q.power;B[t].time=q.time;});
+function infernoZ410(target){return Math.round(400*Math.pow(target,1.5));}// Fluid Z for upgrading to level `target`
+var cost410=Engine.prototype.upgradeCost;
+function upgradeCost410(prev){return function(b){var c=prev.apply(this,arguments);if(b&&b.type==='inferno'){c=Object.assign({},c,{gold:0,power:0,crystals:0,z410:infernoZ410(b.lv+1)});}return c;};}
+Engine.prototype.upgradeCost=upgradeCost410(Engine.prototype.upgradeCost);
+var upgradeRun410=0;
+function upgradeWrap410(prev){return function(id){var b=(this.d.buildings||[]).find(function(v){return v.id===id;});if(!b||b.type!=='inferno'||upgradeRun410)return prev.apply(this,arguments);
+ var need=infernoZ410(b.lv+1);this.sync();if((this.d.zfluid410||0)<need)return mt251('น้ำ Z ไม่พอ','Not enough Fluid Z');
+ upgradeRun410++;var r;try{r=prev.apply(this,arguments);}finally{upgradeRun410--;}if(r)return r;this.d.zfluid410-=need;if(!this.save()){this.d.zfluid410+=need;return tr('บันทึกไม่ได้');}return '';};}
+wrap410.upgrade=upgradeWrap410;wrap410.upgradeCost=upgradeCost410;
+['upgrade'].forEach(function(k){var f=Engine.prototype[k];if(f&&!f.w410){Engine.prototype[k]=wrap410[k](f);Engine.prototype[k].w410=true;}});
+Engine.prototype.upgradeCost.w410=true;wrapE410(E);
+var cap410=Engine.prototype.buildCap;
+Engine.prototype.buildCap=function(type){if(type==='inferno')return this.hq()>=13?2:this.hq()>=10?1:0;if(type==='skyguard')return this.hq()>=12?3:this.hq()>=9?2:this.hq()>=6?1:0;return cap410.apply(this,arguments);};
+var costHTML410=costHTML261;
+costHTML261=function(c){var h=costHTML410.apply(this,arguments);if(c&&c.z410){var short=(E.d.zfluid410||0)<c.z410;h=h.replace(/<\/div>\s*$/,'<span class="'+(short?'short261':'')+'">'+zIcon410()+' '+c.z410.toLocaleString()+'</span></div>');}return h;};
+var group411=buildGroup261;buildGroup261=function(k){return k==='inferno'||k==='skyguard'?'defense':group411.apply(this,arguments);};
+var card410=cardSprite;
+cardSprite=function(i){if(i===910||i===911)return '<span class="icon def410" style="background-position:0% '+(i===910?0:100)+'%"></span>';return card410.apply(this,arguments);};
+// upgrade window rows
+var rows411=buildingRows361;
+buildingRows361=function(b){var rows=rows411.apply(this,arguments),lv=b.lv,n=Math.min(20,lv+1);
+ if(b.type==='inferno')rows.push([mt251('ลำแสง / วินาที (เริ่ม → สูงสุด ×10)','Beam / second (start, up to x10)'),infernoDps410(lv),infernoDps410(n)],[mt251('ระยะยิง (ช่อง)','Range (tiles)'),5.5,5.5]);
+ if(b.type==='skyguard')rows.push([mt251('โจมตี / นัด (เฉพาะอากาศ)','Damage / shot (air only)'),skyDamage410(lv),skyDamage410(n)],[mt251('ระยะยิง (ช่อง)','Range (tiles)'),7,7]);
+ return rows;};
+function infernoDps410(lv){return Math.round(22*defenseGrowth351(lv));}
+function skyDamage410(lv){return Math.round(120*defenseGrowth351(lv));}
+// both defenses may hit air
+var canDamage410=canDamage285;
+canDamage285=function(target,source,weapon){if(source&&(source.type==='inferno'||source.type==='skyguard')){if(target.sortie277&&target.sortie277.phase==='reload')return false;if(target.transport277&&['away','destroyed'].includes(target.state))return false;return true;}return canDamage410.apply(this,arguments);};
+function isAir410(t){return t.transport277?false:air277(t);}
+// one combat step for both defense kinds against a list of enemies
+function fire410(scene,buildings,enemies,dt,campaign,stage){
+ (buildings||[]).forEach(function(b){if(b.hp<=0||(b.type!=='inferno'&&b.type!=='skyguard'))return;
+  var lvBoost=campaign?1+((stage||1)-1)*.08:defenseGrowth351(b.lv);
+  if(b.type==='inferno'){
+   var t=b.beam410&&enemies.find(function(e){return e===b.beam410.t&&e.hp>0&&dist(e,b)<=5.5;});
+   if(!t){t=enemies.filter(function(e){return e.hp>0&&dist(e,b)<=5.5&&canDamage285(e,b);}).sort(function(a,c){return dist(a,b)-dist(c,b);})[0];b.beam410=t?{t:t,on:0,acc:0}:null;}
+   if(!t)return;var s=b.beam410;s.on+=dt;s.acc+=dt;b.aim=Math.atan2(t.y-b.y,t.x-b.x);b.aimTarget=t;
+   if(s.acc>=.2){var ramp=1+9*Math.min(1,s.on/4);hit(scene,t,22*lvBoost*ramp*s.acc,b,'plasma');s.acc=0;}
+   if(t.hp<=0)b.beam410=null;return;}
+  b.cool410=(b.cool410||0)-dt;if(b.cool410>0)return;
+  var a=enemies.filter(function(e){return e.hp>0&&isAir410(e)&&dist(e,b)<=7;}).sort(function(x,y){return dist(x,b)-dist(y,b);})[0];if(!a)return;
+  var dmg=120*lvBoost;hit(scene,a,dmg,b,'missile');enemies.forEach(function(e){if(e!==a&&e.hp>0&&isAir410(e)&&dist(e,a)<=1.4)hit(scene,e,dmg*.6,b,'missile');});
+  scene.fx.push(weaponFX(b,a,'missile'));b.cool410=1.1;});
+}
+var depth410=0;
+wrap410.tick=function(prev){return function(dt){if(this.raid)boostTitan410(this.raid.troops);depth410++;var out;try{out=prev.apply(this,arguments);}finally{depth410--;}if(depth410)return out;var r=this.raid;
+ if(r&&r.phase==='battle'&&!r.result&&!(liveRoom&&liveRoom.v===2&&!liveRoom.host))try{fire410(r,r.buildings,r.troops.concat(r.transports277||[]),dt,!!r.campaign299&&!r.player,r.stage);}catch(e){}
+ return out;};};
+wrap410.tickDefense=function(prev){return function(dt){if(this.defense)boostTitan410(this.defense.defenders);depth410++;var out;try{out=prev.apply(this,arguments);}finally{depth410--;}if(depth410)return out;var d=this.defense;if(d&&!d.result)try{fire410(d,d.buildings,d.enemies,dt,false);}catch(e){}return out;};};
+['tick','tickDefense'].forEach(function(k){var f=Engine.prototype[k];if(f&&!f.w410){Engine.prototype[k]=wrap410[k](f);Engine.prototype[k].w410=true;}});wrapE410(E);
+// art: tier by level (1-6, 7-13, 14-20); wreck in column 3
+function defTier410(b){var lv=b.lv||1;return lv>=14?2:lv>=7?1:0;}
+function defDraw410(b,p,size,col){var d=DEF410[b.type],c=def410Meta.cell,w=size*d.scale;ctx.drawImage(def410Art,col*c,d.row*c,c,c,p.x-w/2,p.y-w*d.ground,w,w);
+ if(col<3){var tip=def410Meta.tip[b.type][col];b.tipPx410={x:p.x-w/2+tip[0]*w,y:p.y-w*d.ground+tip[1]*w};}}
+var evolved410=evolvedArt265;
+evolvedArt265=function(b,p,size){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,defTier410(b));if(b.lv>1){var marks=(b.lv-1)%4+1;for(var i=0;i<marks;i++)disk(p.x+(i-(marks-1)/2)*5*zoom,p.y+size*.1,1.5*zoom,'#ffe391');}return true;}return evolved410.apply(this,arguments);};
+var wreck410=drawWreck;
+drawWreck=function(b,p,size,enemy){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,3);return;}return wreck410.apply(this,arguments);};
+var newArt410=newBuildingArt;
+newBuildingArt=function(b,p,size){if(DEF410[b.type]&&def410Art.complete&&def410Art.naturalWidth){defDraw410(b,p,size,defTier410(b));return;}return newArt410.apply(this,arguments);};
+// inferno beam on top of the scene
+var draw410=draw;
+draw=function(){var out=draw410.apply(this,arguments);try{var sc=screen==='raid'?E.raid:screen==='defense'?E.defense:null;if(!sc)return out;
+ (sc.buildings||[]).forEach(function(b){var s=b.beam410;if(b.type!=='inferno'||!s||!s.t||s.t.hp<=0||b.hp<=0||!b.tipPx410)return;
+  var q=point(s.t.x,s.t.y),h=(s.t.height340||0)+(isAir410(s.t)?40:14),tx=q.x,ty=q.y-h*zoom,a=b.tipPx410,k=Math.min(1,s.on/4),wob=Math.sin(Date.now()/40)*1.2*zoom;
+  ctx.save();ctx.lineCap='round';
+  [[(5+7*k)*zoom,'rgba(235,40,40,.35)'],[(2.6+4*k)*zoom,'rgba(250,70,60,.85)'],[(1.2+1.5*k)*zoom,'rgba(255,225,205,.95)']].forEach(function(L){ctx.strokeStyle=L[1];ctx.lineWidth=L[0];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.quadraticCurveTo((a.x+tx)/2+wob,(a.y+ty)/2-10*zoom,tx,ty);ctx.stroke();});
+  var g=ctx.createRadialGradient(tx,ty,0,tx,ty,(8+10*k)*zoom);g.addColorStop(0,'rgba(255,240,220,.9)');g.addColorStop(.4,'rgba(255,90,60,.6)');g.addColorStop(1,'rgba(255,60,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(tx,ty,(8+10*k)*zoom,0,7);ctx.fill();
+  ctx.restore();drawNeeded=true;});}catch(e){}return out;};
+(function(){var st=document.createElement('style');st.id='def410';st.textContent='.icon.def410{background:url(assets/defense410.webp) 0 0/400% 200% no-repeat!important;width:56px;height:56px}';document.head.appendChild(st);})();
+
+// ---------- 411: NOVA mech power-up with Fluid Z ----------
+// Buying and tiers stay NOVA (server). On top of that, 20 local power-up levels paid with Fluid Z:
+// +4% HP and +3% damage per level for your own mech in battle.
+function titanZCost410(n){return Math.round(600*Math.pow(n,1.6));}
+function titanZ410(){return Math.max(0,Math.min(20,E.d.titanZ410|0));}
+Game.titanZUp410=function(){E.sync();var n=titanZ410()+1;if(n>20)return;if(!(E.d.titan342&&E.d.titan342.level)){toast(mt251('สร้างหุ่น NOVA ก่อน','Build the NOVA mech first'));return;}
+ var c=titanZCost410(n);if((E.d.zfluid410||0)<c){toast(mt251('น้ำ Z ไม่พอ','Not enough Fluid Z'));return;}
+ E.d.zfluid410-=c;E.d.titanZ410=n;if(!E.save()){E.d.zfluid410+=c;E.d.titanZ410=n-1;toast(tr('บันทึกไม่ได้'));return;}
+ toast(mt251('เสริมพลังหุ่น NOVA เป็น Lv.','NOVA mech power-up Lv.')+n);hud();titanPanel342();};
+var titanPanel410=titanPanel342;
+titanPanel342=function(){var out=titanPanel410.apply(this,arguments);try{
+ var sec=modal.querySelector('.titanShop342');if(!sec||titanShopOnly342)return out;var old=sec.querySelector('.titanZ410');
+ var s=titanState342||E.d.titan342||{},lv=s.level||0;if(!lv)return out;var n=titanZ410(),max=n>=20,c=titanZCost410(n+1),can=!max&&(E.d.zfluid410||0)>=c;
+ var box=document.createElement('div');box.className='titanZ410';
+ box.innerHTML='<b>'+mt251('เสริมพลังด้วยน้ำ Z','Fluid Z power-up')+' · Lv.'+n+'/20</b><p>♥ +'+(4*n)+'% · ⚔ +'+(3*n)+'%'+(max?'':' → ♥ +'+(4*n+4)+'% · ⚔ +'+(3*n+3)+'%')+'</p>'+
+  (max?'<p>'+tr('ระดับสูงสุด')+'</p>':'<button class="wide '+(can?'green':'')+'" '+(can?'':'disabled')+' onclick="Game.titanZUp410()">'+zIcon410()+' '+c.toLocaleString()+' · '+mt251('เสริมพลัง','Power up')+'</button>');
+ if(old){old.replaceWith(box);return out;}var after=sec.querySelector('.guardianRank343');if(after)after.insertAdjacentElement('afterend',box);else sec.appendChild(box);}catch(e){}return out;};
+function mineTitan410(t){if(!t||!t.titan342)return false;var me=E.d.onlineCrystal&&E.d.onlineCrystal.owner;return !t.owner||!!me&&t.owner===me;}
+function boostTitan410(list){(list||[]).forEach(function(t){if(!mineTitan410(t)||t.zp410)return;var n=titanZ410();t.zp410=1+.03*n;if(n){var k=1+.04*n;t.max*=k;t.hp*=k;}});}
+var hit410=hit;
+hit=function(scene,target,damage,source,weapon){if(source&&source.titan342&&source.zp410)damage*=source.zp410;return hit410.call(this,scene,target,damage,source,weapon);};
+(function(){var st=document.createElement('style');st.id='titanZ410';st.textContent='.titanZ410{margin:6px 0;padding:8px 10px;border-radius:12px;background:#fff1ef;border:1px solid #f6b9b2;text-align:center}.titanZ410 b{color:#b3262e}.titanZ410 p{margin:3px 0}';document.head.appendChild(st);})();
