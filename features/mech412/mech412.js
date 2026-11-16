@@ -45,3 +45,31 @@ var hudMech412=hud;hud=function(){var r=hudMech412.apply(this,arguments);var b=m
  M+' .right412 .recovery348,'+M+' .right412 .guardianStatus345{font-size:12px;margin:0}'+
  '@media (orientation:portrait){'+M+' .mech412{grid-template-columns:minmax(0,42%) minmax(0,1fr)}}';
  document.head.appendChild(st);})();
+
+// ---------- tapping the mech at home: control on the left, a small "manage" button on the right ----------
+function mechTapHide412(){var bar=$('mechTap412');if(bar)bar.hidden=true;}
+function mechTap412(t){if(!t||t.resting347||t.building348){Game.titan342();return;}
+ selected=null;try{hud();}catch(e){}
+ var bar=$('mechTap412');if(!bar){bar=document.createElement('div');bar.id='mechTap412';bar.innerHTML='<button class="go412" onclick="Game.mechTapControl412()">🎮 '+mt251('บังคับหุ่น','Control mech')+'</button><button class="mini412" onclick="Game.mechTapManage412()">⚙ '+mt251('จัดการหุ่น','Manage mech')+'</button>';document.body.appendChild(bar);}
+ bar.hidden=false;bar.dataset.at=Date.now();}
+Game.mechTapControl412=function(){mechTapHide412();Game.titanControl356();};
+Game.mechTapManage412=function(){mechTapHide412();Game.titan342();};
+// any other tap on the map closes the bar
+canvas.addEventListener('pointerdown',function(){var bar=$('mechTap412');if(bar&&!bar.hidden&&Date.now()-(+bar.dataset.at||0)>250)mechTapHide412();},true);
+var tickMechTap412=tickUI342;tickUI342=function(dt){tickMechTap412(dt);var bar=$('mechTap412');if(bar&&!bar.hidden&&(screen!=='home'||modal.style.display==='flex'||selectedTitan342))mechTapHide412();};
+
+// ---------- the mech stays where you leave it ----------
+function mechSave412(t){if(!t||!Number.isFinite(t.x)||!Number.isFinite(t.y))return;var p=E.d.titanHome412;if(p&&Math.abs(p.x-t.x)<.05&&Math.abs(p.y-t.y)<.05)return;E.d.titanHome412={x:+t.x.toFixed(2),y:+t.y.toFixed(2)};E.save();}
+var homeTitan412=homeTitan342,lastMech412=null,savedAt412=0;
+homeTitan342=function(){var t=homeTitan412.apply(this,arguments);
+ if(t&&t!==lastMech412){lastMech412=t;var p=E.d.titanHome412,m=typeof homeMap391==='function'?homeMap391():20;if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.y>=0&&p.x<m&&p.y<m){t.x=p.x;t.y=p.y;}}
+ if(t&&t.manual342&&Date.now()-savedAt412>1500){savedAt412=Date.now();mechSave412(t);}
+ return t;};
+var selectMech412=selectTitan342;
+selectTitan342=function(t){var prev=selectedTitan342;var r=selectMech412.apply(this,arguments);if(prev&&prev!==selectedTitan342&&screen==='home'&&prev===lastMech412)mechSave412(prev);return r;};
+(function(){var st=document.createElement('style');st.id='mechTapCss412';st.textContent=
+ '#mechTap412{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;padding:6px;border-radius:16px;background:rgba(12,36,60,.55);box-shadow:0 4px 14px rgba(0,0,0,.25)}'+
+ '#mechTap412[hidden]{display:none}'+
+ '#mechTap412 .go412{min-width:150px;min-height:48px;padding:6px 16px;border-radius:13px;border:2px solid #2f7a2a;background:linear-gradient(#a6ec6b,#4fb43a);color:#173b0d;font:800 16px/1.1 inherit;box-shadow:0 3px 0 #2f7a2a}'+
+ '#mechTap412 .mini412{min-height:36px;padding:4px 10px;border-radius:11px;border:1px solid #9ec3e6;background:linear-gradient(#f3f9ff,#dcecfb);color:#1d3d5c;font:700 12.5px/1.1 inherit;box-shadow:0 2px 0 #9ec3e6}';
+ document.head.appendChild(st);})();
