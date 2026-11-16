@@ -86,12 +86,14 @@ function fireEnergy276(scene,source,target,damage){
  scene.fx.push(fx);scene.energy276=scene.energy276||[];
  scene.energy276.push({remaining:ENERGY_FLIGHT276,x:target.x,y:target.y,damage:damage,source:source});
 }
-// One short sequential volley per reload; divide existing damage across barrels.
+// One short sequential volley per reload; divide existing damage across the shells.
+// 419: shells per volley grow with level: Lv1 1, Lv4 2, Lv8 3, Lv12 4, Lv16 5, Lv20 6.
+function energyShots419(o){var lv=Math.max(1,Math.min(20,o.lv||1));return lv>=20?6:lv>=16?5:lv>=12?4:lv>=8?3:lv>=4?2:1;}
 function startEnergyBurst282(scene,source,target,damage){
- var count=energyStage281(source)+1;source.energyShot281=0;
+ var count=energyShots419(source);source.energyShot281=0;
  fireEnergy276(scene,source,target,damage/count);
  scene.energyBurst282=scene.energyBurst282||[];
- for(var i=1;i<count;i++)scene.energyBurst282.push({delay:i*.12,source:source,target:{x:target.x,y:target.y},damage:damage/count});
+ for(var i=1;i<count;i++){var a=i*2.4,r=.18+.06*i;scene.energyBurst282.push({delay:i*.12,source:source,target:{x:target.x+Math.cos(a)*r,y:target.y+Math.sin(a)*r},damage:damage/count});}
 }
 function tickEnergy276(scene,dt,group){
  var burst=scene.energyBurst282||[];scene.energyBurst282=[];

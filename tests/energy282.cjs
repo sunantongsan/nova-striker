@@ -1,13 +1,13 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');const ctx={};
 vm.runInNewContext(fs.readFileSync('game.js','utf8').replace('root.NovaRTS={','root.EnergyTest={startEnergyBurst282,tickEnergy276,energyGeometry276};root.NovaRTS={'),ctx);
 const F=ctx.EnergyTest;
-for(const [lv,count] of [[1,1],[6,2],[12,3],[20,4]]){
+for(const [lv,count] of [[1,1],[3,1],[4,2],[8,3],[12,4],[16,5],[19,5],[20,6]]){
  const gun={id:1,type:'cannonturret',lv,x:1,y:1,hp:100},scene={fx:[],enemies:[]};
  F.startEnergyBurst282(scene,gun,{x:5,y:5},120);
  assert.equal(scene.fx.length,1);assert.equal(scene.energyBurst282.length,count-1);
  for(let i=1;i<count;i++){F.tickEnergy276(scene,.12,'enemies');assert.equal(scene.fx.length,i+1);}
- assert.equal(scene.energy276.length,count);assert.equal(scene.energy276.reduce((a,b)=>a+b.damage,0),120);
- assert.equal(new Set(scene.fx.map(f=>f.muzzle.x+':'+f.muzzle.y)).size,count);
+ assert.equal(scene.energy276.length,count);assert(Math.abs(scene.energy276.reduce((a,b)=>a+b.damage,0)-120)<1e-9);
+ assert(new Set(scene.fx.map(f=>f.muzzle.x+':'+f.muzzle.y)).size>=Math.min(count,2));
  assert(Math.abs(scene.fx[0].orb281*14.4-F.energyGeometry276(gun).muzzleDiameter*2)<1e-9);
  F.tickEnergy276(scene,2,'enemies');assert.equal(scene.energy276.length,0);
 }

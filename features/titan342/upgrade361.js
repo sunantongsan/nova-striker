@@ -14,6 +14,7 @@ function buildingRows361(b){var lv=b.lv,n=Math.min(20,lv+1),a=E.enhanceStats('bu
  if(b.type==='garrison')rows.push([mt251('พื้นที่ป้องกันฐาน','Defender capacity'),5+lv*5,5+n*5]);
  if(b.type==='hq')rows.push([mt251('คลังพื้นฐาน / ทรัพยากร','Base storage / resource'),50000+10000*(lv-1),50000+10000*(n-1)],[mt251('ระดับอาคารสูงสุด','Building level limit'),lv,n]);
  if(['gun','tesla','missileturret','cannonturret','hq'].includes(b.type)&&(a.damage||z.damage))rows.push([mt251('ระยะยิง (ช่อง)','Range (tiles)'),defenseRange223({type:b.type,lv:lv}),defenseRange223({type:b.type,lv:n})]);
+ if(b.type==='cannonturret'&&typeof energyShots419==='function')rows.push([mt251('กระสุนต่อชุด','Shells per volley'),energyShots419({lv:lv}),energyShots419({lv:n})]);
  if(b.type==='landmine')rows.push([mt251('พลังระเบิด','Explosion damage'),260+lv*140,260+n*140]);
  if(b.type==='silo')rows.push([mt251('จำนวนจรวด','Missiles'),Math.min(3,1+Math.floor((lv-1)/5)),Math.min(3,1+Math.floor((n-1)/5))]);
  return rows;
