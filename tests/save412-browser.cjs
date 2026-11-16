@@ -1,0 +1,13 @@
+const fs=require('fs'),{chromium}=require('playwright'),{payload,documentPayload}=require('../features/titan342/build.cjs');
+process.chdir(require('path').resolve(__dirname,'..'));
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||undefined,args:['--no-sandbox','--enable-unsafe-swiftshader']});
+const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+let source=fs.readFileSync('game.js','utf8'),end=source.lastIndexOf('})(typeof globalThis');
+source=source.slice(0,end)+"root.__t={E:function(){return E;},U:U};"+source.slice(end);
+const game=payload(source),html=documentPayload(fs.readFileSync('index.html','utf8'));
+await page.route('**/*',async route=>{const u=new URL(route.request().url()),p=u.pathname.slice(1);if(u.hostname!=='nova.test')return route.abort();if(!p||p==='index.html')return route.fulfill({body:html,contentType:'text/html'});if(p==='game.js')return route.fulfill({body:game,contentType:'text/javascript'});if(fs.existsSync(p))return route.fulfill({body:fs.readFileSync(p)});return route.abort();});
+await page.goto('https://nova.test/');await page.waitForFunction(()=>!!window.__t);await page.waitForTimeout(800);
+console.log(await page.evaluate(()=>{const E=__t.E();E.d.buildings.push({id:901,type:'zdrill',x:3,y:3,lv:2},{id:902,type:'inferno',x:6,y:3,lv:4},{id:903,type:'skyguard',x:9,y:3,lv:2});E.d.gold=12345;E.d.army[12]=3;E.save();return 'army '+E.d.army.length+' U '+__t.U.length;}));
+await page.reload();await page.waitForFunction(()=>!!window.__t);await page.waitForTimeout(800);
+console.log(await page.evaluate(()=>{const E=__t.E();return JSON.stringify({ids:E.d.buildings.filter(b=>b.id>900).map(b=>b.type+b.lv),gold:E.d.gold,army12:E.d.army[12],U:__t.U.length,u11:__t.U[11].name,stub:__t.U.some(u=>u.stub412),bstub:['zdrill','inferno','skyguard','ztank'].map(k=>!!__t.E&&0)});}));
+console.log('errors',errors);await browser.close();})();

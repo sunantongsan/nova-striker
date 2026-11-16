@@ -68,7 +68,8 @@ Engine.prototype.scoutPlayer=function(target){if(target&&Array.isArray(target.la
 // Old base saves dropped crystalplant/crystalstore on load; the new types are unaffected.
 
 // ---------- red troops (kinds 11-14) ----------
-U.push(
+// 412: game.js reserves slots 11-14 with placeholders before the save loads; replace them.
+U.splice(ZKIND410,U.length-ZKIND410,
  {name:mt251('นักวิ่งอนุภาค','Surge Runner'),z410:20,cost:0,time:25,space:2,hp:360,damage:58,range:1.3,rate:.5,speed:2.8,sprite:8,hq410:7,weapon:'plasma',description:mt251('วิ่งเร็วมาก ฟันรัวด้วยใบมีดพลังงานแดง','Very fast, rapid red-energy blade strikes')},
  {name:mt251('โดรนเพลิงแดง','Ember Drone'),z410:40,cost:0,time:45,space:4,hp:560,damage:96,range:1.6,rate:1.4,speed:2.1,sprite:20,hq410:8,air:true,splash:1.1,weapon:'bomb',description:mt251('บินข้ามกำแพง ทิ้งลูกไฟแดงเป็นวง','Flies over walls, drops red fire bombs')},
  {name:mt251('หุ่นยักษ์ทับทิม','Ruby Colossus'),z410:160,cost:0,time:150,space:12,hp:5600,damage:74,range:1.3,rate:1.8,speed:.75,sprite:22,hq410:9,weapon:'shock',description:mt251('ยักษ์เกราะหนา รับดาเมจแทนทั้งทัพ','Huge armored walker that soaks damage for the army')},
