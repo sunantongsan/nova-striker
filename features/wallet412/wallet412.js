@@ -1,0 +1,113 @@
+// 412: NOVA wallet on one screen, plus speeding up Fluid Z (น้ำ Z) production.
+// * Fluid Z boost: a video gives 2 hours of the extractors' production at once (server-verified through the
+//   speed264 flow, target kind 'zfluid'); NOVA gives 6 hours. Both stop at the tank's free space.
+// * The wallet window is rebuilt from the existing pieces (their buttons and handlers are moved, not copied):
+//   balance in the header, reward chips, a one-row check-in week, three production tiles (Ore X, Ore Y, Fluid Z),
+//   and a footer for shields and the legacy balance. Fits a phone screen without scrolling.
+var ZAD_HOURS412=2,ZNOVA_HOURS412=6;
+function zRoom412(){E.sync();return Math.max(0,E.zCapacity410()-(E.d.zfluid410||0));}
+function zHours412(h){return Math.floor(E.zRate410()*h);}
+function zNovaCost412(){return Math.max(5,Math.ceil(Math.min(zHours412(ZNOVA_HOURS412),zRoom412())/40));}
+function zAdd412(amount){var room=zRoom412(),got=Math.max(0,Math.min(room,Math.floor(amount)));E.d.zfluid410=(E.d.zfluid410||0)+got;return got;}
+function zReady412(){var rate=E.zRate410();if(!rate)return mt251('สร้างโรงสกัดน้ำ Z ก่อน (ศูนย์บัญชาการ 7)','Build a Fluid Z Extractor first (Command Center 7)');if(zRoom412()<=0)return mt251('แท้งน้ำ Z เต็มแล้ว','Fluid Z tank is full');return '';}
+function zDone412(got){completionAudio250&&completionAudio250();hud();
+ open('<section class="reward-success263"><h2>'+mt251('เร่งผลิตน้ำ Z แล้ว','Fluid Z boosted')+'</h2><p class="zgot412">'+zIcon410()+' +'+got.toLocaleString()+'</p><button class="wide green" onclick="Game.treasury()">'+mt251('ตกลง','OK')+'</button></section>');}
+// video: speed264 with a 'zfluid' target; the grant is applied here when the server confirms the video
+Game.zBoostAd412=function(){var why=zReady412();if(why){toast(why);return;}Game.speedAd264('zfluid','z412');};
+var snapZ412=speedSnapshot264;
+speedSnapshot264=function(kind,id){if(kind==='zfluid'){E.sync();return E.zRate410()>0?{kind:'zfluid',id:'z412'}:null;}return snapZ412.apply(this,arguments);};
+var applyZ412=applySpeed264;
+applySpeed264=function(p,r){if(!p||!p.target||p.target.kind!=='zfluid')return applyZ412.apply(this,arguments);
+ if((E.d.speedReceipts264||[]).includes(p.request_id))return 0;var before=JSON.stringify(E.d),got=zAdd412(zHours412(ZAD_HOURS412));
+ E.d.speedReceipts264=(E.d.speedReceipts264||[]).concat(p.request_id).slice(-500);delete E.d.pendingSpeed264;
+ if(!E.save()){E.d=JSON.parse(before);return null;}setTimeout(function(){zDone412(got);},0);return 0;};
+// NOVA
+Game.zBoostNova412=function(){var why=zReady412();if(why){toast(why);return;}var cost=zNovaCost412();
+ confirmNova358(cost,function(){var why=zReady412();if(why){toast(why);return;}if((E.d.gems||0)<cost){toast(mt251('NOVA ไม่พอ','Not enough NOVA'));return;}
+  var before=JSON.stringify(E.d);E.d.gems-=cost;var got=zAdd412(zHours412(ZNOVA_HOURS412));if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}zDone412(got);});};
+
+// ---------- one-screen wallet ----------
+function el412(tag,cls,html){var n=document.createElement(tag);if(cls)n.className=cls;if(html!==undefined)n.innerHTML=html;return n;}
+function fluidIcon412(i){return '<i class="fluid403" style="background-position:'+(i*50)+'% 50%" aria-hidden="true"></i>';}
+function short412(n){n=Math.floor(n||0);return n>=1e6?(Math.floor(n/1e5)/10)+'M':n>=1e4?(Math.floor(n/100)/10)+'K':n.toLocaleString('en-US');}
+function compactWallet412(){
+ var sheet=modal.querySelector('.sheet'),content=modal.querySelector('.novaContent360'),daily=content&&content.querySelector('.daily-card340');
+ if(!sheet||!content||!daily||content.dataset.w412)return;
+ var kids=Array.prototype.slice.call(content.children),take=function(f){var i=kids.findIndex(f);return i<0?null:kids.splice(i,1)[0];};
+ var raid=take(function(n){return n.matches('button[onclick*="raidRewards260"]');}),raidAmt=raid&&raid.nextElementSibling&&raid.nextElementSibling.tagName==='P'?take(function(n){return n===raid.nextElementSibling;}):null;
+ var welcome=take(function(n){return n.matches('.welcome-bonus247');});take(function(n){return n===daily;});
+ var legacy=take(function(n){return n.matches('button[onclick*="legacyBalance339"]');}),shield=take(function(n){return n.matches('button[onclick*="shieldShop"]');});
+ var ox=take(function(n){return n.matches('button[onclick*="resourceOffer233(\'gold\')"]');}),oy=take(function(n){return n.matches('button[onclick*="resourceOffer233(\'power\')"]');});
+ take(function(n){return n.tagName==='H3'&&/เร่งผลิต|Speed up/.test(n.textContent);});take(function(n){return n.tagName==='P'&&/^\s*[\d,]+\s*NOVA\s*$/.test(n.textContent);});
+ sheet.classList.add('wallet412');content.dataset.w412='1';content.innerHTML='';
+ // header balance
+ if(!sheet.querySelector('.bal412'))content.appendChild(el412('span','bal412','<i class="nova412" aria-hidden="true"></i><b id="bal412">'+(E.d.gems||0).toLocaleString()+'</b>'));
+ // reward chips
+ var chips=el412('div','chips412');
+ if(raid){var c=el412('button','chip412');c.setAttribute('onclick',raid.getAttribute('onclick'));c.innerHTML='<span class="art345" aria-hidden="true" style="background-position:100% 0%"></span><span><small>'+mt251('รางวัลโจมตี','Raid rewards')+'</small><b>'+(raidAmt?raidAmt.textContent:'')+'</b></span>';chips.appendChild(c);}
+ if(welcome){var wb=welcome.querySelector('button');if(wb){var w=el412('div','chip412 welcome412');w.innerHTML='<img src="assets/nova-core.webp" alt=""><span><small>'+mt251('โบนัสต้อนรับ','Welcome bonus')+'</small><b>'+((welcome.querySelector('strong')||{}).textContent||'')+'</b></span>';wb.className='mini412 green';w.appendChild(wb);chips.appendChild(w);}}
+ if(chips.children.length)content.appendChild(chips);
+ // check-in: title, one row of days, two buttons side by side, one note
+ daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('ปกติ 5 NOVA · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','Normal 5 NOVA · video x3 · day 7: 15 / 45');
+ var btns=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='BUTTON';});if(btns.length){var row=el412('div','pair412');btns.forEach(function(b){b.classList.remove('wide');row.appendChild(b);});daily.appendChild(row);}
+ var notes=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='SMALL';});if(notes.length){var note=el412('small','note412',notes.map(function(n){return n.textContent;}).join(' · '));notes.forEach(function(n){n.remove();});daily.appendChild(note);}
+ content.appendChild(daily);
+ // production tiles
+ var prod=el412('section','prod412','<h3>'+mt251('เร่งผลิต','Speed up production')+'</h3>'),grid=el412('div','tiles412');prod.appendChild(grid);
+ [[ox,0,mt251('แร่ X','Ore X'),E.d.gold],[oy,1,mt251('แร่ Y','Ore Y'),E.d.power]].forEach(function(a){if(!a[0])return;var t=el412('button','tile412');t.setAttribute('onclick',a[0].getAttribute('onclick'));t.innerHTML=fluidIcon412(a[1])+'<b>'+a[2]+'</b><small>'+short412(a[3])+'</small><span class="go412">'+mt251('เติม','Refill')+' ›</span>';grid.appendChild(t);});
+ E.sync();var rate=E.zRate410(),cap=E.zCapacity410(),why=zReady412(),z=el412('div','tile412 z412');
+ z.innerHTML=fluidIcon412(2)+'<b>'+mt251('น้ำ Z','Fluid Z')+'</b><small>'+(cap?short412(E.d.zfluid410)+' / '+short412(cap):mt251('ศูนย์ฯ 7','CC 7'))+'</small>'+
+  (rate?'<div class="zbtn412"><button '+(why?'disabled':'')+' onclick="Game.zBoostAd412()">🎬 +'+short412(zHours412(ZAD_HOURS412))+'</button><button class="nova412b" '+(why||(E.d.gems||0)<zNovaCost412()?'disabled':'')+' onclick="Game.zBoostNova412()"><i class="nova412" aria-hidden="true"></i>'+zNovaCost412()+' · +'+short412(zHours412(ZNOVA_HOURS412))+'</button></div>':'<span class="lock412">🔒 '+mt251('ปลดล็อก HQ 7','Unlocks at HQ 7')+'</span>');
+ grid.appendChild(z);content.appendChild(prod);
+ // footer
+ var foot=el412('div','foot412');[shield,legacy].forEach(function(b){if(!b)return;b.classList.remove('wide');b.classList.add('mini412');foot.appendChild(b);});if(shield)shield.innerHTML='🛡️ '+shield.textContent;if(legacy)legacy.textContent=mt251('ยอดเดิมที่ยังไม่เคลม','Unclaimed balance');
+ if(foot.children.length)content.appendChild(foot);
+ kids.forEach(function(n){content.appendChild(n);});// anything else stays, at the end
+}
+// Other wallet layers insert pieces after open() (the raid-reward button, the header); tidy those up as they arrive.
+function absorbWallet412(){var sheet=modal.querySelector('.sheet.wallet412'),content=sheet&&sheet.querySelector('.novaContent360');if(!content)return;
+ var head=sheet.querySelector('.novaHead360'),bal=sheet.querySelector('.bal412');
+ var h2=head&&head.querySelector('h2');if(bal&&h2&&bal.parentNode!==h2)h2.appendChild(bal);
+ var chips=content.querySelector('.chips412');if(!chips){chips=el412('div','chips412');content.insertBefore(chips,content.firstChild);}
+ Array.prototype.slice.call(content.children).forEach(function(n){
+  if(n.matches('button[onclick*="raidRewards260"]')){var c=el412('button','chip412');c.setAttribute('onclick',n.getAttribute('onclick'));c.innerHTML='<span class="art345" aria-hidden="true" style="background-position:100% 0%"></span><span><small>'+mt251('รางวัลโจมตี','Raid rewards')+'</small><b>'+mt251('รอรับ','Pending')+' ›</b></span>';chips.insertBefore(c,chips.firstChild);n.remove();}
+  else if(n.tagName==='P'&&/^\s*[\d,]+\s*NOVA\s*$/.test(n.textContent))n.remove();
+  else if(n.tagName==='H2')n.remove();});
+ if(!chips.children.length)chips.remove();}
+var treasury412=treasury;
+treasury=function(){var r=treasury412.apply(this,arguments);try{compactWallet412();absorbWallet412();}catch(e){}[0,60,250].forEach(function(t){setTimeout(function(){try{compactWallet412();absorbWallet412();}catch(e){}},t);});return r;};
+var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412');if(b){var t=(E.d.gems||0).toLocaleString();if(b.textContent!==t)b.textContent=t;}return r;};
+(function(){var st=document.createElement('style');st.id='wallet412';st.textContent=
+ '#modal#modal[data-nova360] .sheet.novaWindow360.wallet412.wallet412{width:min(420px,96vw)!important;max-height:calc(100dvh - 24px)!important}#modal#modal[data-nova360] .wallet412 .novaContent360{overflow-y:auto!important}'+
+ '#modal#modal[data-nova360] .wallet412 .illustrated345>.art345,#modal#modal[data-nova360] .wallet412 .zbtn412 .art345{display:none!important}'+
+ '#modal#modal[data-nova360] .wallet412 .daily-day340 span{display:none!important}#modal#modal[data-nova360] .wallet412 .chips412{grid-template-columns:1fr 1.7fr}#modal#modal[data-nova360] .wallet412 .welcome412 img{display:none}#modal#modal[data-nova360] .wallet412 .chip412 small,#modal#modal[data-nova360] .wallet412 .chip412 b{white-space:nowrap}'+
+ '#modal#modal[data-nova360] .wallet412 .novaHead360 h2{display:flex;align-items:center;gap:8px;flex:1;min-width:0}'+
+ '#modal#modal[data-nova360] .wallet412 .bal412{margin-left:auto;margin-right:8px;font-family:inherit;text-shadow:none;display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 5px;border-radius:999px;background:rgba(10,40,70,.35);color:#fff;font-weight:800;font-size:16px;white-space:nowrap}'+
+ '#modal#modal[data-nova360] .wallet412 .nova412{display:inline-block;width:20px;height:20px;background:url(assets/nova-core.webp) center/contain no-repeat;vertical-align:middle}'+
+ '#modal#modal[data-nova360] .wallet412 .novaContent360{display:flex;flex-direction:column;gap:6px;padding:6px 10px 8px!important;overflow:visible}'+
+ '#modal#modal[data-nova360] .wallet412 .chips412{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}'+
+ '#modal#modal[data-nova360] .wallet412 .chip412{display:flex;align-items:center;gap:6px;min-height:40px;margin:0;padding:4px 8px;border-radius:12px;background:linear-gradient(#f3f9ff,#dcecfb);border:1px solid #9ec3e6;color:#1d3d5c;text-align:left;font:inherit;box-shadow:0 2px 0 #9ec3e6}'+
+ '#modal#modal[data-nova360] .wallet412 .chip412 .art345,#modal .wallet412 .chip412 img{width:30px;height:30px;flex:0 0 30px}'+
+ '#modal#modal[data-nova360] .wallet412 .chip412 span{display:flex;flex-direction:column;line-height:1.1;min-width:0}#modal .wallet412 .chip412 small{font-size:11px;color:#4b6b88}#modal .wallet412 .chip412 b{font-size:14px}'+
+ '#modal#modal[data-nova360] .wallet412 .welcome412{padding-right:5px}#modal .wallet412 .welcome412 .mini412{margin-left:auto;max-width:96px;font-size:11px;line-height:1.1;padding:6px 7px}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412{margin:0!important;padding:8px 9px!important;border-radius:14px}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412 .daily-title340{display:flex;align-items:center;gap:8px;margin:0 0 6px}#modal .wallet412 .daily412 .daily-title340 img{width:34px;height:34px}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412 .daily-title340 h2{font-size:15px;margin:0}#modal .wallet412 .daily412 .daily-title340 p{font-size:11px;margin:1px 0 0;line-height:1.2}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412 .daily-week340{display:grid!important;grid-template-columns:repeat(7,1fr)!important;gap:4px!important;margin:0 0 6px!important}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412 .daily-day340{min-height:0!important;padding:4px 1px!important;border-radius:9px!important;gap:0!important;line-height:1.05}'+
+ '#modal#modal[data-nova360] .wallet412 .daily412 .daily-day340 small{font-size:9.5px!important;white-space:nowrap}#modal .wallet412 .daily412 .daily-day340 b{font-size:16px!important}#modal .wallet412 .daily412 .daily-day340 span{font-size:8.5px!important}'+
+ '#modal#modal[data-nova360] .wallet412 .pair412{display:grid;grid-template-columns:1fr 1fr;gap:6px}#modal .wallet412 .pair412 button{margin:0!important;min-height:40px;padding:5px 6px!important;font-size:12.5px!important;line-height:1.15;white-space:normal}'+
+ '#modal#modal[data-nova360] .wallet412 .pair412 .art345{display:none}'+
+ '#modal#modal[data-nova360] .wallet412 .note412{display:block;font-size:10.5px;opacity:.75;text-align:center;margin-top:4px;line-height:1.2}'+
+ '#modal#modal[data-nova360] .wallet412 .prod412 h3{margin:0 0 5px;font-size:15px}'+
+ '#modal#modal[data-nova360] .wallet412 .tiles412{display:grid;grid-template-columns:1fr 1fr 1.55fr;gap:6px}'+
+ '#modal#modal[data-nova360] .wallet412 .tile412{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;margin:0;padding:7px 5px;border-radius:12px;background:linear-gradient(#fffaf0,#f3e6c8);border:1px solid #d9bf86;color:#4a3713;font:inherit;box-shadow:0 2px 0 #cfb37a;min-width:0}'+
+ '#modal#modal[data-nova360] .wallet412 .tile412 .fluid403{width:30px;height:30px}#modal .wallet412 .tile412 b{font-size:13.5px}#modal .wallet412 .tile412 small{font-size:11px;opacity:.8}'+
+ '#modal#modal[data-nova360] .wallet412 .tile412 .go412{margin-top:auto;font-size:11.5px;font-weight:800;color:#2f7a2a}'+
+ '#modal#modal[data-nova360] .wallet412 .z412{background:linear-gradient(#fff3f2,#f7d4d1);border-color:#e39a94;box-shadow:0 2px 0 #d9857e;color:#5a1d1d}'+
+ '#modal#modal[data-nova360] .wallet412 .zbtn412{display:flex;flex-direction:column;gap:4px;width:100%;margin-top:2px}#modal .wallet412 .zbtn412 button{margin:0!important;width:100%;min-height:30px;padding:3px 4px!important;font-size:12px!important;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:3px}'+
+ '#modal#modal[data-nova360] .wallet412 .zbtn412 .nova412b{background:linear-gradient(#ffe88a,#f2b62a)!important;color:#4a3000!important}#modal .wallet412 .zbtn412 .nova412{width:16px;height:16px}'+
+ '#modal#modal[data-nova360] .wallet412 .lock412{font-size:11px;margin-top:auto}'+
+ '#modal#modal[data-nova360] .wallet412 .foot412{display:grid;grid-template-columns:1fr 1fr;gap:6px}#modal .wallet412 .mini412{margin:0!important;min-height:36px;padding:5px 6px!important;font-size:12.5px!important;line-height:1.15}'+
+ '#modal#modal .zgot412{font-size:28px;font-weight:800;color:#b3262e;text-align:center}#modal .zgot412 .fluid403{width:28px;height:28px}';
+ document.head.appendChild(st);})();
