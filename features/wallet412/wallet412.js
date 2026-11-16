@@ -7,24 +7,41 @@
 var ZAD_HOURS412=2,ZNOVA_HOURS412=6;
 function zRoom412(){E.sync();return Math.max(0,E.zCapacity410()-(E.d.zfluid410||0));}
 function zHours412(h){return Math.floor(E.zRate410()*h);}
-function zNovaCost412(){return Math.max(5,Math.ceil(Math.min(zHours412(ZNOVA_HOURS412),zRoom412())/40));}
+// 412b: Fluid Z refills like Ore X / Y — sized by the tank, not only by production.
+function zVideoAmount412(){E.sync();return Math.max(zHours412(ZAD_HOURS412),Math.round(E.zCapacity410()*.1));}
+function zPack412(kind){var room=zRoom412(),cap=E.zCapacity410();return kind==='full'?room:Math.min(room,Math.round(cap*.5));}
+function zPrice412(amount){return Math.max(5,Math.ceil(amount/40));}
+function zNovaCost412(){return zPrice412(Math.min(zHours412(ZNOVA_HOURS412),zRoom412()));}
 function zAdd412(amount){var room=zRoom412(),got=Math.max(0,Math.min(room,Math.floor(amount)));E.d.zfluid410=(E.d.zfluid410||0)+got;return got;}
-function zReady412(){var rate=E.zRate410();if(!rate)return mt251('สร้างโรงสกัดน้ำ Z ก่อน (ศูนย์บัญชาการ 7)','Build a Fluid Z Extractor first (Command Center 7)');if(zRoom412()<=0)return mt251('แท้งน้ำ Z เต็มแล้ว','Fluid Z tank is full');return '';}
+function zReady412(){if(E.zCapacity410()<=0)return mt251('ปลดล็อกน้ำ Z ที่ศูนย์บัญชาการ 7','Fluid Z unlocks at Command Center 7');if(zRoom412()<=0)return mt251('แท้งน้ำ Z เต็มแล้ว','Fluid Z tank is full');return '';}
 function zDone412(got){completionAudio250&&completionAudio250();hud();
  open('<section class="reward-success263"><h2>'+mt251('เร่งผลิตน้ำ Z แล้ว','Fluid Z boosted')+'</h2><p class="zgot412">'+zIcon410()+' +'+got.toLocaleString()+'</p><button class="wide green" onclick="Game.treasury()">'+mt251('ตกลง','OK')+'</button></section>');}
 // video: speed264 with a 'zfluid' target; the grant is applied here when the server confirms the video
 Game.zBoostAd412=function(){var why=zReady412();if(why){toast(why);return;}Game.speedAd264('zfluid','z412');};
 var snapZ412=speedSnapshot264;
-speedSnapshot264=function(kind,id){if(kind==='zfluid'){E.sync();return E.zRate410()>0?{kind:'zfluid',id:'z412'}:null;}return snapZ412.apply(this,arguments);};
+speedSnapshot264=function(kind,id){if(kind==='zfluid'){E.sync();return E.zCapacity410()>0?{kind:'zfluid',id:'z412'}:null;}return snapZ412.apply(this,arguments);};
 var applyZ412=applySpeed264;
 applySpeed264=function(p,r){if(!p||!p.target||p.target.kind!=='zfluid')return applyZ412.apply(this,arguments);
- if((E.d.speedReceipts264||[]).includes(p.request_id))return 0;var before=JSON.stringify(E.d),got=zAdd412(zHours412(ZAD_HOURS412));
+ if((E.d.speedReceipts264||[]).includes(p.request_id))return 0;var before=JSON.stringify(E.d),got=zAdd412(zVideoAmount412());
  E.d.speedReceipts264=(E.d.speedReceipts264||[]).concat(p.request_id).slice(-500);delete E.d.pendingSpeed264;
  if(!E.save()){E.d=JSON.parse(before);return null;}setTimeout(function(){zDone412(got);},0);return 0;};
-// NOVA
-Game.zBoostNova412=function(){var why=zReady412();if(why){toast(why);return;}var cost=zNovaCost412();
+// NOVA: half a tank or fill it up
+Game.zBuy412=function(kind){var why=zReady412();if(why){toast(why);return;}var amount=zPack412(kind),cost=zPrice412(amount);if(amount<=0)return;
  confirmNova358(cost,function(){var why=zReady412();if(why){toast(why);return;}if((E.d.gems||0)<cost){toast(mt251('NOVA ไม่พอ','Not enough NOVA'));return;}
-  var before=JSON.stringify(E.d);E.d.gems-=cost;var got=zAdd412(zHours412(ZNOVA_HOURS412));if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}zDone412(got);});};
+  var before=JSON.stringify(E.d);E.d.gems-=cost;var got=zAdd412(amount);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}zDone412(got);});};
+Game.zBoostNova412=function(){Game.zBuy412('half');};
+// the refill window (same idea as the Ore X / Y refill)
+Game.zOffer412=function(){E.sync();var cap=E.zCapacity410(),cur=E.d.zfluid410||0,why=zReady412(),locked=cap<=0;
+ var row=function(icon,title,sub,price,action,off){return '<button class="zrow412" '+(off?'disabled':'')+' onclick="'+action+'">'+icon+'<span><b>'+title+'</b><small>'+sub+'</small></span><em>'+price+'</em></button>';};
+ var half=zPack412('half'),full=zPack412('full');
+ open('<section class="zoffer412"><h2>'+mt251('เติมน้ำ Z','Refill Fluid Z')+'</h2>'+
+  '<div class="zbar412"><i style="width:'+(cap?Math.min(100,cur/cap*100):0)+'%"></i><span>'+fluidIcon412(2)+' '+short412(cur)+' / '+short412(cap)+'</span></div>'+
+  (locked?'<p class="zlock412">🔒 '+mt251('ปลดล็อกน้ำ Z ที่ศูนย์บัญชาการ 7 (สร้างโรงสกัดและแท้งน้ำ Z)','Fluid Z unlocks at Command Center 7 (build the extractor and tank)')+'</p>':
+  row('<span class="zic412">🎬</span>',mt251('ดูวิดีโอ','Watch a video'),'+'+short412(Math.min(zVideoAmount412(),zRoom412())),mt251('ฟรี','Free'),'Game.zBoostAd412()',!!why)+
+  row(fluidIcon412(2),mt251('ครึ่งแท้ง','Half a tank'),'+'+short412(half),'<i class="nova412"></i>'+zPrice412(half),"Game.zBuy412('half')",!!why||half<=0||(E.d.gems||0)<zPrice412(half))+
+  row(fluidIcon412(2),mt251('เติมเต็มแท้ง','Fill the tank'),'+'+short412(full),'<i class="nova412"></i>'+zPrice412(full),"Game.zBuy412('full')",!!why||full<=0||(E.d.gems||0)<zPrice412(full)))+
+  (why&&!locked?'<p class="zlock412">'+why+'</p>':'')+
+  '<button class="wide" onclick="Game.treasury()">'+mt251('กลับ','Back')+'</button></section>');};
 
 // ---------- one-screen wallet ----------
 function el412(tag,cls,html){var n=document.createElement(tag);if(cls)n.className=cls;if(html!==undefined)n.innerHTML=html;return n;}
@@ -55,9 +72,8 @@ function compactWallet412(){
  // production tiles
  var prod=el412('section','prod412','<h3>'+mt251('เร่งผลิต','Speed up production')+'</h3>'),grid=el412('div','tiles412');prod.appendChild(grid);
  [[ox,0,mt251('แร่ X','Ore X'),E.d.gold],[oy,1,mt251('แร่ Y','Ore Y'),E.d.power]].forEach(function(a){if(!a[0])return;var t=el412('button','tile412');t.setAttribute('onclick',a[0].getAttribute('onclick'));t.innerHTML=fluidIcon412(a[1])+'<b>'+a[2]+'</b><small>'+short412(a[3])+'</small><span class="go412">'+mt251('เติม','Refill')+' ›</span>';grid.appendChild(t);});
- E.sync();var rate=E.zRate410(),cap=E.zCapacity410(),why=zReady412(),z=el412('div','tile412 z412');
- z.innerHTML=fluidIcon412(2)+'<b>'+mt251('น้ำ Z','Fluid Z')+'</b><small>'+(cap?short412(E.d.zfluid410)+' / '+short412(cap):mt251('ศูนย์ฯ 7','CC 7'))+'</small>'+
-  (rate?'<div class="zbtn412"><button '+(why?'disabled':'')+' onclick="Game.zBoostAd412()">🎬 +'+short412(zHours412(ZAD_HOURS412))+'</button><button class="nova412b" '+(why||(E.d.gems||0)<zNovaCost412()?'disabled':'')+' onclick="Game.zBoostNova412()"><i class="nova412" aria-hidden="true"></i>'+zNovaCost412()+' · +'+short412(zHours412(ZNOVA_HOURS412))+'</button></div>':'<span class="lock412">🔒 '+mt251('ปลดล็อก HQ 7','Unlocks at HQ 7')+'</span>');
+ E.sync();var cap=E.zCapacity410(),z=el412('button','tile412 z412');z.setAttribute('onclick','Game.zOffer412()');
+ z.innerHTML=fluidIcon412(2)+'<b>'+mt251('น้ำ Z','Fluid Z')+'</b><small>'+(cap?short412(E.d.zfluid410)+' / '+short412(cap):'🔒 '+mt251('ศูนย์ฯ 7','CC 7'))+'</small><span class="go412">'+mt251('เติม','Refill')+' ›</span>';
  grid.appendChild(z);content.appendChild(prod);
  // footer
  var foot=el412('div','foot412');[shield,legacy].forEach(function(b){if(!b)return;b.classList.remove('wide');b.classList.add('mini412');foot.appendChild(b);});if(shield)shield.innerHTML='🛡️ '+shield.textContent;if(legacy)legacy.textContent=mt251('ยอดเดิมที่ยังไม่เคลม','Unclaimed balance');
@@ -100,7 +116,7 @@ var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412
  '#modal#modal[data-nova360] .wallet412 .pair412 .art345{display:none}'+
  '#modal#modal[data-nova360] .wallet412 .note412{display:block;font-size:10.5px;opacity:.75;text-align:center;margin-top:4px;line-height:1.2}'+
  '#modal#modal[data-nova360] .wallet412 .prod412 h3{margin:0 0 5px;font-size:15px}'+
- '#modal#modal[data-nova360] .wallet412 .tiles412{display:grid;grid-template-columns:1fr 1fr 1.55fr;gap:6px}'+
+ '#modal#modal[data-nova360] .wallet412 .tiles412{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}'+
  '#modal#modal[data-nova360] .wallet412 .tile412{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;margin:0;padding:7px 5px;border-radius:12px;background:linear-gradient(#fffaf0,#f3e6c8);border:1px solid #d9bf86;color:#4a3713;font:inherit;box-shadow:0 2px 0 #cfb37a;min-width:0}'+
  '#modal#modal[data-nova360] .wallet412 .tile412 .fluid403{width:30px;height:30px}#modal .wallet412 .tile412 b{font-size:13.5px}#modal .wallet412 .tile412 small{font-size:11px;opacity:.8}'+
  '#modal#modal[data-nova360] .wallet412 .tile412 .go412{margin-top:auto;font-size:11.5px;font-weight:800;color:#2f7a2a}'+
@@ -109,5 +125,7 @@ var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412
  '#modal#modal[data-nova360] .wallet412 .zbtn412 .nova412b{background:linear-gradient(#ffe88a,#f2b62a)!important;color:#4a3000!important}#modal .wallet412 .zbtn412 .nova412{width:16px;height:16px}'+
  '#modal#modal[data-nova360] .wallet412 .lock412{font-size:11px;margin-top:auto}'+
  '#modal#modal[data-nova360] .wallet412 .foot412{display:grid;grid-template-columns:1fr 1fr;gap:6px}#modal .wallet412 .mini412{margin:0!important;min-height:36px;padding:5px 6px!important;font-size:12.5px!important;line-height:1.15}'+
+ '#modal .zoffer412 h2{margin:0 0 8px}#modal .zbar412{position:relative;height:26px;border-radius:13px;background:#f3d9d6;border:1px solid #e39a94;overflow:hidden;margin-bottom:8px}#modal .zbar412 i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#ff8a80,#d63c3c)}#modal .zbar412 span{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;height:100%;font-weight:800;color:#4a1010}'+
+ '#modal .zrow412{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 6px;padding:7px 10px;border-radius:12px;text-align:left;font:inherit}#modal .zrow412 .fluid403,#modal .zrow412 .zic412{width:30px;height:30px;font-size:24px;flex:0 0 30px;text-align:center}#modal .zrow412 span{display:flex;flex-direction:column;flex:1;line-height:1.15}#modal .zrow412 small{opacity:.8}#modal .zrow412 em{font-style:normal;font-weight:800;display:flex;align-items:center;gap:3px}#modal .zrow412 .nova412{display:inline-block;width:18px;height:18px;background:url(assets/nova-core.webp) center/contain no-repeat}#modal .zlock412{font-size:13px;text-align:center;opacity:.85}#modal .zrow412 .art345{display:none!important}'+
  '#modal#modal .zgot412{font-size:28px;font-weight:800;color:#b3262e;text-align:center}#modal .zgot412 .fluid403{width:28px;height:28px}';
  document.head.appendChild(st);})();
