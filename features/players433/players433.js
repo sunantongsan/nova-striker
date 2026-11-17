@@ -10,7 +10,7 @@ var NAMES433=['ShadowFox','มังกรฟ้า','NovaKing','เสือด
  'นักรบจักรวาล','TurboTurtle','Starlord_TH','แม่ทัพแดง','MechaMango','PolarBear','ราตรีสีเงิน','CosmoCat','ShieldWall','จอมโจรสลัด','NovaPrime','LastLegend'];
 var CLANS433=['Nova Thailand','ดาวเหนือ','Iron Brotherhood','Sky Raiders','พันธมิตรฟ้า','Moon Base','Galaxy Guard','สายฟ้าแดง','Rocket Club','',''];
 var STYLES433=['core','compart','ring','diamond','offset','wheel','islands','layers','farm'];
-function styleName433(k){return {core:['ฐานกล่องกลาง','Core box'],compart:['ฐานช่องตาราง','Compartments'],ring:['ฐานวงแหวน','Ring'],diamond:['ฐานเพชร','Diamond'],offset:['ฐานแกนเยื้อง','Offset core'],wheel:['ฐานวงล้อ','Wheel'],islands:['ฐานเกาะ','Islands'],layers:['ฐานหลายชั้น','Layered'],farm:['ฐานฟาร์ม','Farming']}[k]||['ฐาน','Base'];}
+function styleName433(k){return {core:['ฐานกล่องกลาง','Core box'],compart:['ฐานช่องตาราง','Compartments'],ring:['ฐานวงแหวน','Ring'],diamond:['ฐานข้าวหลามตัด','Diamond'],offset:['ฐานแกนเยื้อง','Offset core'],wheel:['ฐานวงล้อ','Wheel'],islands:['ฐานเกาะ','Islands'],layers:['ฐานหลายชั้น','Layered'],farm:['ฐานฟาร์ม','Farming']}[k]||['ฐาน','Base'];}
 function bots433(){if(bots433.list)return bots433.list;var list=[];
  for(var hq=1;hq<=20;hq++)for(var j=0;j<3;j++){var id=(hq-1)*3+j,R=rng393(id*7919+433),name=NAMES433[id%NAMES433.length];
   list.push({id:id,hq:hq,name:name,clan:CLANS433[Math.floor(R()*CLANS433.length)],trophies:Math.round(80+hq*hq*9+hq*60+R()*120),xp:hq*6+Math.floor(R()*12),seed:id*104729+17});}
