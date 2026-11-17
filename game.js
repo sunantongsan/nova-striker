@@ -518,9 +518,9 @@ var scoutSentry339=Engine.prototype.scoutPlayer;Engine.prototype.scoutPlayer=fun
 var defenseSentry339=Engine.prototype.startDefense;Engine.prototype.startDefense=function(){var error=defenseSentry339.call(this);if(!error)addSentry339(this.defense,'defenders');return error;};
 var campaignSentry339=Engine.prototype.scout;Engine.prototype.scout=function(n){var ok=campaignSentry339.call(this,n);if(ok)this.raid.guards=this.raid.guards.filter(function(t){return !t.guard339;});return ok;};
 root.NovaRTS={speedPrice365:novaSpeedPrice365,supportPark339:supportPark339,sentryTick339:sentryTick339,nearestEntry:nearestEntry301,landingAllowed:landing277,campaignLayout:campaignLayout299,storageLoot:storageLoot299,issueOrder:issueOrder299,weaponSides:weaponSides272,maxBuildingLevel:MAX_BUILDING_LEVEL,defenseRange:defenseRange223,weaponMount:weaponMount,weaponFX:weaponFX,updateMotion:updateMotion,isTracked:isTracked,hit:hit,spaces:spaces,Engine:Engine,buildings:B,units:U,route:route,duration:duration};if(typeof document==='undefined')return;
-// 412: saves written since patch 210 hold Ore R buildings, the 411 defenses and 15 army slots, but those are registered
+// 412/436: saves written since patch 210 hold Ore R buildings (and since 229 the five army buildings), the 411 defenses and 15 army slots, but those are registered
 // by features/red410 only after E is built. Register placeholders first so the save is not rejected (and replaced by a new base).
-(function(){var b0=B.cannonturret||B.gun||B.hq;['zdrill','ztank','inferno','skyguard'].forEach(function(t){if(!B[t])B[t]=Object.assign({},b0,{name:t,cap:0,require:99,stub412:true});});while(U.length<15)U.push(Object.assign({},U[0],{stub412:true}));})();
+(function(){var b0=B.cannonturret||B.gun||B.hq;['zdrill','ztank','inferno','skyguard','tech428','forge428','workshop428','dronehub428','herohall428'].forEach(function(t){if(!B[t])B[t]=Object.assign({},b0,{name:t,cap:0,require:99,stub412:true});});while(U.length<15)U.push(Object.assign({},U[0],{stub412:true}));})();
 // 418: never throw a stored base away. If the save would fail the Engine's check (a building type or troop slot this
 // version does not know, a bad number), keep an untouched copy (novaRTS1Rescue418) and repair the save instead:
 // unknown buildings are parked in d.parked418 and come back once their type is known again.

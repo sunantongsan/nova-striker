@@ -50,3 +50,10 @@ var inspect428b=Game.inspectBuilding261;Game.inspectBuilding261=function(id,upgr
  '.icon.art428{display:inline-block;background-image:url(assets/army428.webp);background-size:2100% 500%;background-repeat:no-repeat}'+
  '.bonus428{margin:0 0 8px;padding:7px 10px;border-radius:12px;background:linear-gradient(#eaf7ff,#d6ecff);border:1px solid #9ec3e6;color:#1d3d5c;font-size:13px;text-align:center}';
  document.head.appendChild(st);})();
+// 436: before this patch a restart parked these buildings (their type was registered after the save check), so some
+// players built them again. The parked ones now come back; if a type ends up twice, keep the higher level and refund
+// what the other one cost, so nothing is lost and the base stays within the one-per-base limit.
+(function(){try{var refund={gold:0,power:0},changed=false;TYPES428.forEach(function(t){var list=E.d.buildings.filter(function(b){return b.type===t;});if(list.length<2)return;
+ list.sort(function(a,b){return (b.lv||1)-(a.lv||1)||(a.until?1:0)-(b.until?1:0);});list.slice(1).forEach(function(b){for(var l=1;l<=(b.lv||1);l++){var q=progressionQuote369(t,l);if(q){refund.gold+=q.gold||0;refund.power+=q.power||0;}}
+  E.d.buildings=E.d.buildings.filter(function(x){return x!==b;});changed=true;});});
+ if(changed){E.deposit('gold',refund.gold);E.deposit('power',refund.power);E.save();setTimeout(function(){toast(mt251('อาคารกองทัพที่หายไปกลับมาแล้ว • คืนค่าก่อสร้างหลังที่สร้างซ้ำ','Your army buildings are back • the duplicate build was refunded'));},1500);}}catch(e){}})();
