@@ -8,7 +8,7 @@ module.exports=function(source){
  ["if(b&&b.v===2&&E.raid&&b.role==='attacker'&&!done){E.enableLogistics277();hud();}","if(b&&b.v===2&&E.raid&&b.role==='attacker'&&!done){if(!E.raid.logistics277)selectedShip277=null;hud();}"],
  ["if(!old)return;Game[name]=function(){var args=arguments;(function(next)","if(!old)return;Game[name]=function(){var args=arguments,previousRaid=E.raid;(function(next)"],
  ["(r.army||this.d.army)[i]<=0)return tr('ไม่มีหน่วยนี้')","(r.army||this.d.army)[i]<=0||(r.directCampaign360&&this.d.army[i]<=0))return tr('ไม่มีหน่วยนี้')"],
- ["if(r.troops.length>=(r.logistics277?150:40))","if(r.troops.length>=(r.logistics277||r.directCampaign360?150:40))"],
+ ["if(r.troops.length>=(r.logistics277?150:40))","if(r.troops.filter(function(t){return t&&t.hp>0;}).length>=200)"],
  ["if(deployed&&(deployed.hp<=0||deployed.state==='away'))", "if(deployed)"],
  ["if(u.air&&(airStock280(i)>0||ownAir280(i).length))", "if(u.air&&airStock280(i)>0)"],
  ["muzzle:muzzle,weapon:weapon,highArc:","muzzle:muzzle,sourceKind379:a.kind,sourceType379:a.type,weapon:weapon,highArc:"],
