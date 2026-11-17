@@ -167,3 +167,17 @@ titanTick342=function(scene,t,dt){
     t.cooldowns342=t.cooldowns342||{};return;}}}
  return manualTick437.apply(this,arguments);
 };
+
+// ---------- 437f: battle mech moves like it does at home ----------
+// At home the mech somersaults over anything in its way; in battle it could only hop walls, so any building or
+// heap in front stopped it. Now in battle too: if a wall jump is not possible it leaps over whatever blocks it and
+// lands on the nearest clear ground ahead (same leap as at home). Tesla zaps no longer freeze the giant mech.
+var jump437=titanJump345;
+titanJump345=function(scene,t,dx,dy){
+ if(jump437.apply(this,arguments))return true;
+ if(!scene||scene.home355||t.jump345||t.jumpCooldown345>0)return false;
+ if(titanHomeJump355(scene,t,dx,dy)){t.jumpCooldown345=1.2;return true;}
+ return false;
+};
+var stunTick437=titanTick342;
+titanTick342=function(scene,t,dt){if(t&&t.titan342&&t.stun>0)t.stun=0;return stunTick437.apply(this,arguments);};
