@@ -5,7 +5,7 @@ var veh3dSize392={bomber:[104,36],heli:[64,26],tank:[54,0]};
 function veh3dReady392(n){var v=veh3d392[n];return v&&v.img.complete&&v.img.naturalWidth?v:null;}
 function veh3dDir392(a){var n=vehicles3dMeta392.dirs;return ((Math.round(a/(2*Math.PI/n))%n)+n)%n;}
 function veh3dK392(n){var key=n==='bomber'||n==='heli'?n:'tank',base=veh3d392[key==='tank'?(n.indexOf('plasma')>0?'tankHull:plasma':'tankHull'):n].meta.w;return veh3dSize392[key][0]/base;}
-function veh3dCell392(n,dir,col,x,y,k){var v=veh3d392[n],m=v.meta;ctx.drawImage(v.img,col*m.cw,dir*m.ch,m.cw,m.ch,x-m.ox*k,y-m.oy*k,m.cw*k,m.ch*k);}
+function veh3dCell392(n,dir,col,x,y,k){var v=veh3d392[n],m=v.meta;ctx.drawImage(v.bmp||v.img,col*m.cw,dir*m.ch,m.cw,m.ch,x-m.ox*k,y-m.oy*k,m.cw*k,m.ch*k);}
 var veh3dAircraft392=drawAircraft221;
 drawAircraft221=function(t,p){
  var bomber=t.kind===7,n=bomber?'bomber':'heli',v=veh3dReady392(n);if(!v)return veh3dAircraft392(t,p);

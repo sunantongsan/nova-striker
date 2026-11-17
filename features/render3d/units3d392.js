@@ -20,7 +20,7 @@ function unit3d392(t,u,enemy,z,flip){
   else col=g.idle[0]+Math.floor(frame*.07+(t.id||0)*.37)%g.idle[1];}
  var k=s.height*z/m.h;
  ctx.save();ctx.scale(flip,1);
- ctx.drawImage(s.img,col*g.cw,t.dir3d*g.ch,g.cw,g.ch,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
+ ctx.drawImage(s.bmp||s.img,col*g.cw,t.dir3d*g.ch,g.cw,g.ch,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
  ctx.restore();return true;
 }
 var unit3dMount392=weaponMount;
@@ -29,3 +29,21 @@ weaponMount=function(o){
  if(s){var mz=s.meta.muzzle[unit3dDir392(o.aim===undefined?Math.PI/4:o.aim)],k=s.height/s.meta.h;return {x:mz[0]*k,y:mz[1]*k,height:-mz[1]*k};}
  return unit3dMount392(o);
 };
+
+// 437: the troop sheets are big (2520x1024). The browser only decodes one the first time it is drawn, so the first drop
+// of each troop type froze the battle for a moment (and again whenever a low-memory phone threw the pixels away).
+// While a raid is open, the sheets of the troops you bring are decoded in the background into bitmaps that stay ready;
+// they are released when you go home.
+function warm437(holder,want){
+ if(!holder||!holder.img)return;
+ if(want){if(holder.bmp||holder.warming437||holder.noBmp437||!holder.img.complete||!holder.img.naturalWidth||typeof createImageBitmap!=='function')return;
+  holder.warming437=true;createImageBitmap(holder.img).then(function(b){holder.warming437=false;if(screen==='raid')holder.bmp=b;else if(b.close)b.close();},function(){holder.warming437=false;holder.noBmp437=true;});}
+ else if(holder.bmp){try{if(holder.bmp.close)holder.bmp.close();}catch(e){}holder.bmp=null;}
+}
+function warmUnits437(){
+ var r=E&&E.raid,on=screen==='raid'&&r&&!r.result,want={};
+ if(on){(r.army||E.d.army||[]).forEach(function(n,i){if(n>0)want[i]=1;});(r.troops||[]).forEach(function(t){if(t&&!t.alien&&!t.titan342)want[t.kind]=1;});}
+ Object.keys(unit3dKinds392).forEach(function(k){warm437(unit3dKinds392[k],!!want[k]);});
+ if(typeof veh3d392!=='undefined'){var veh=!!(want[1]||want[5]||want[7]||want[9]);Object.keys(veh3d392).forEach(function(n){warm437(veh3d392[n],veh);});}
+}
+setInterval(function(){try{warmUnits437();}catch(e){}},600);

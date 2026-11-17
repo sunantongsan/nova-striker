@@ -51,11 +51,14 @@ var shop430=renderShop348;renderShop348=function(s){shop430.apply(this,arguments
 // ---------- battle ----------
 var armed430=null;
 function canUse430(){var r=E.raid;return screen==='raid'&&r&&!r.result&&r.liveMode!=='preview'&&r.liveMode!=='defender'&&!(liveRoom&&(liveRoom.withdrawn||liveRoom.finished))&&(typeof myRaid428!=='function'||myRaid428());}
-function items430HTML(){var s=stock430();if(!canUse430())return '';return ITEMS430.filter(function(it){return (s[it.id]|0)>0;}).map(function(it){return '<button class="troop item430'+(armed430===it.id?' active':'')+'" onclick="Game.useItem430(\''+it.id+'\')">'+icon430(it,'card430i')+'<b>'+(s[it.id]|0)+'</b><small>'+name430(it)+'</small></button>';}).join('');}
+// 437: the item cards also show while scouting (like Clash spells), so you can see what you are bringing;
+// they work once the attack has started.
+function scouting430(){var r=E.raid;return screen==='raid'&&r&&!r.result&&r.liveMode==='preview'&&!(typeof liveTarget!=='undefined'&&liveTarget&&liveTarget.can_attack===false);}
+function items430HTML(){var s=stock430();if(!canUse430()&&!scouting430())return '';return ITEMS430.filter(function(it){return (s[it.id]|0)>0;}).map(function(it){return '<button class="troop item430'+(armed430===it.id?' active':'')+'" onclick="Game.useItem430(\''+it.id+'\')">'+icon430(it,'card430i')+'<b>'+(s[it.id]|0)+'</b><small>'+name430(it)+'</small></button>';}).join('');}
 // item cards ride along with the troop cards (same render pass, so they are never wiped by it)
-var set430=setHTML219;setHTML219=function(el,html){if(el&&el.id==='deploy'&&screen==='raid'&&E.raid)html=items430HTML()+html;return set430.call(this,el,html);};
+var set430=setHTML219;setHTML219=function(el,html){if(el&&el.id==='deploy'&&screen==='raid'&&E.raid){var it=items430HTML(),at=html.indexOf('<button class="next395"');html=at>=0?html.slice(0,at)+it+html.slice(at):it+html;}return set430.call(this,el,html);};
 function placeItems430(){if(!canUse430())armed430=null;}
-Game.useItem430=function(id){if(!canUse430())return;if(!(stock430()[id]>0))return;armed430=armed430===id?null:id;if(armed430)toast(mt251('แตะจุดในสนามเพื่อใช้ ','Tap the field to use ')+name430(IT430[id]));hud();};
+Game.useItem430=function(id){if(!canUse430()){if(scouting430())toast(mt251('ปล่อยทหารเพื่อเริ่มบุกก่อน แล้วจึงใช้ไอเทม','Drop a troop to start the attack, then use items'));return;}if(!(stock430()[id]>0))return;armed430=armed430===id?null:id;if(armed430)toast(mt251('แตะจุดในสนามเพื่อใช้ ','Tap the field to use ')+name430(IT430[id]));hud();};
 function cast430(id,x,y){var r=E.raid,it=IT430[id],s=stock430();if(!r||!it||!(s[id]>0))return;s[id]--;if(!s[id])delete s[id];E.save();
  r.zones430=(r.zones430||[]).concat({id:id,x:x,y:y,rad:it.radius,left:it.dur,dur:it.dur,color:it.color});
  if(id==='sonic')sonic430(r,x,y,it.radius);

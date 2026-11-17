@@ -52,6 +52,9 @@ var next433=Game.nextTarget;Game.nextTarget=function(){if(liveRoom&&!liveRoom.fi
  if(Math.random()<.6){nextSearch433();return;}return next433.apply(this,arguments);};
 // no real players found -> show a resident base instead of an empty list
 var warEv433=warEvent;warEvent=function(event,message){var d=message&&message.data;
+ // 437: real players only come up when their Command Center is within 2 levels of yours (like the resident bases);
+ // a tiny far-lower base with nothing to loot is skipped, and if none are left you get a resident base instead.
+ if(event==='war'&&message.action==='targets'&&d&&d.enrolled&&Array.isArray(d.targets)){var me=myHQ433();d.targets=d.targets.filter(function(t){var lv=Number(t&&t.tier)||0;return lv>0&&Math.abs(lv-me)<=2;});}
  if(event==='war'&&message.action==='targets'&&d&&d.enrolled&&(!d.targets||!d.targets.length)&&!(message.request_id&&message.request_id!==warActive)){clearTimeout(warTimer);warBusy=false;warActive=null;real433=false;scoutBot433(pickBot433());return;}
  return warEv433.apply(this,arguments);};
 // ---------- battle ----------
