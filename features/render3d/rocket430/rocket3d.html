@@ -1,0 +1,82 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="240" height="256"></canvas>
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+<script type="module">
+// 430: หุ่นรบ = the owner's android as a rocket trooper (kneels to fire, rockets hit ground and air). Based on 402: ranger = the owner's android (rigged ATLAS-09 skeleton, staging/titan/forge/models/android-nova.glb)
+// carrying a modelled assault rifle. Same camera/lights/facing as units3d.html: unit faces local +x, yaw = -gridAngle.
+// Arms are placed on the rifle with two-bone IK after the clip pose (Sentinel idle, Walk, aim+recoil, Collapse).
+import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.15;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-1.6,1.6,2.35,-1.05,0.1,100);
+S.add(new T.HemisphereLight(0xfff6e8,0x5571a3,2.2));
+const sun=new T.DirectionalLight(0xfff0d6,3.4);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.8);rim.position.set(7,3,-5);S.add(rim);
+const params=new URLSearchParams(location.search);
+const gltf=await new GLTFLoader().loadAsync(params.get('model'));
+const model=gltf.scene;const box=new T.Box3().setFromObject(model),size=box.getSize(new T.Vector3());
+const H=1.85,sc=H/size.y;model.scale.setScalar(sc);
+const wrap=new T.Group();wrap.rotation.y=Math.PI/2;S.add(wrap);wrap.add(model);
+const bones={};model.traverse(o=>{if(o.isBone)bones[o.name.replace(/[^a-zA-Z.]/g,'').replace('handL','hand.L')]=o;});
+const bn=n=>model.getObjectByName(n)||model.getObjectByName(T.PropertyBinding.sanitizeNodeName(n));
+const B={};for(const n of ['root','pelvis','chest','head','upper_arm.L','forearm.L','hand.L','upper_arm.R','forearm.R','hand.R','shoulder.L','shoulder.R','thigh.L','thigh.R'])B[n]=bn(n);
+window.boneNames=()=>Object.fromEntries(Object.entries(B).map(([k,v])=>[k,!!v]));
+let KF=+(params.get('kf')||0.5);let mat=null;model.traverse(o=>{if(o.isMesh){o.frustumCulled=false;mat=o.material;}});
+const tint=new T.Color(params.get('tint')||'#ff9f43');if(mat){mat.color.copy(tint);mat.roughness=Math.max(.35,mat.roughness||.6);}
+window.setTint=c=>{mat.color.set(c);};
+const mixer=new T.AnimationMixer(model);const clips={};for(const c of gltf.animations)clips[c.name]=c;
+// --- shoulder rocket launcher (chunky tube, visible warhead) ---
+const gun=new T.Group();const GM=new T.MeshStandardMaterial({color:0x4b5a6e,metalness:.55,roughness:.38}),GA=new T.MeshStandardMaterial({color:0xffb23e,metalness:.2,roughness:.45}),GD=new T.MeshStandardMaterial({color:0x26303c,metalness:.5,roughness:.5}),GL=new T.MeshBasicMaterial({color:0x7ff0ff}),WR=new T.MeshStandardMaterial({color:0xf2545b,metalness:.2,roughness:.4});
+const bx=(w,h,d,m,x,y,z)=>{const e=new T.Mesh(new T.BoxGeometry(w,h,d),m);e.position.set(x,y,z);gun.add(e);return e;};
+const cy=(r,l,m,x,y,z)=>{const e=new T.Mesh(new T.CylinderGeometry(r,r,l,20),m);e.rotation.x=Math.PI/2;e.position.set(x,y,z);gun.add(e);return e;};
+// launcher local: +z forward, +y up, origin at the shoulder rest
+cy(.075,.95,GM,0,0,.12);                 // main tube
+cy(.088,.10,GA,0,0,.58);                 // front ring (accent)
+cy(.088,.10,GA,0,0,-.33);                // rear ring (accent)
+cy(.095,.05,GD,0,0,-.38);                // rear bell
+const war=new T.Mesh(new T.ConeGeometry(.07,.2,18),WR);war.rotation.x=Math.PI/2;war.position.set(0,0,.72);gun.add(war); // rocket nose
+bx(.05,.12,.05,GD,0,-.11,.08);           // grip
+bx(.05,.10,.05,GD,0,-.10,.32);           // front grip
+bx(.04,.06,.14,GD,.0,.10,.18);           // sight box
+const lens=new T.Mesh(new T.CylinderGeometry(.02,.02,.01,12),GL);lens.rotation.x=Math.PI/2;lens.position.set(0,.10,.255);gun.add(lens);
+bx(.02,.02,.30,GL,.08,0,.1);             // glowing side strip
+const muzzle=new T.Object3D();muzzle.position.set(0,0,.82);gun.add(muzzle);
+const flash=new T.Mesh(new T.SphereGeometry(.1,14,10),new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.95}));flash.visible=false;gun.add(flash);
+const gripR=new T.Object3D();gripR.position.set(0,-.17,.08);gun.add(gripR);const gripL=new T.Object3D();gripL.position.set(0,-.15,.32);gun.add(gripL);
+const GS=0.9;gun.scale.setScalar(GS);
+model.add(gun);// placed in model space every frame
+// --- two-bone IK (CCD, a few passes) ---
+const tmp=new T.Vector3(),tq=new T.Quaternion(),ta=new T.Vector3(),tb=new T.Vector3();
+function reach(chain,end,target,iters=12){for(let it=0;it<iters;it++){for(let i=chain.length-1;i>=0;i--){const j=chain[i];j.updateMatrixWorld(true);
+ const jp=j.getWorldPosition(new T.Vector3()),ep=end.getWorldPosition(new T.Vector3());ta.copy(ep).sub(jp).normalize();tb.copy(target).sub(jp).normalize();
+ const ang=Math.acos(Math.min(1,Math.max(-1,ta.dot(tb))));if(ang<1e-4)continue;const axis=new T.Vector3().crossVectors(ta,tb).normalize();
+ const wq=j.getWorldQuaternion(new T.Quaternion());const inv=wq.clone().invert();axis.applyQuaternion(inv);j.quaternion.multiply(tq.setFromAxisAngle(axis,Math.min(ang,.5)));j.updateMatrixWorld(true);}}}
+// hand ends: a point a little beyond the hand bone
+const endR=new T.Object3D(),endL=new T.Object3D();B['hand.R'].add(endR);B['hand.L'].add(endL);
+function placeGun(kind,rec){// gun pose relative to chest, in model space
+ model.updateMatrixWorld(true);const c=B.chest.getWorldPosition(new T.Vector3());const inv=model.matrixWorld.clone().invert();const cm=c.clone().applyMatrix4(inv);
+ const s=1/sc;// model units per world unit
+ if(kind==='aim'){const sh=B['upper_arm.R'].getWorldPosition(new T.Vector3()).applyMatrix4(inv);gun.position.set(sh.x+0.02*s,sh.y+0.07*s,sh.z+0.0*s-rec*0.08*s);gun.rotation.set(-0.12-rec*0.22,0,0);}
+ else if(kind==='carry'){const sh=B['upper_arm.R'].getWorldPosition(new T.Vector3()).applyMatrix4(inv);gun.position.set(sh.x+0.02*s,sh.y+0.06*s,sh.z-0.05*s);gun.rotation.set(-0.55,0,0);}
+ gun.scale.setScalar(GS*s);
+ model.updateMatrixWorld(true);
+ const gR=gripR.getWorldPosition(new T.Vector3()),gL=gripL.getWorldPosition(new T.Vector3());
+ reach([B['upper_arm.R'],B['forearm.R']],B['hand.R'],gR);reach([B['upper_arm.L'],B['forearm.L']],B['hand.L'],gL);}
+function clip(name,t){mixer.stopAllAction();const c=clips[name];if(!c)return;const a=mixer.clipAction(c);a.reset().play();a.paused=false;mixer.setTime(Math.min(c.duration*0.999,t*c.duration));}
+window.pose=(dirA,anim,f)=>{
+ wrap.rotation.y=Math.PI/2-dirA;wrap.rotation.z=0;wrap.position.set(0,0,0);flash.visible=false;gun.visible=true;
+ if(anim==='idle'){clip('Sentinel',f/4);placeGun('carry',0);}
+ else if(anim==='walk'){clip('Walk',f/8);placeGun('carry',0);}
+ else if(anim==='attack'){clip('KneelFire',KF);const rec=[0,1,.45,.12][f];placeGun('aim',rec);}// shot flash is drawn by the game
+ else if(anim==='death'){clip('Collapse',Math.min(1,f/4*0.95));B.root.position.x*=0.3;B.root.position.z*=0.3;placeGun('carry',0);gun.visible=f<3;}
+ wrap.updateMatrixWorld(true);model.updateMatrixWorld(true);
+ R.render(S,cam);const v=muzzle.getWorldPosition(new T.Vector3()),pv=v.clone().project(cam),o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),mx:(pv.x+1)/2*canvas.width,my:(1-pv.y)/2*canvas.height,ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};
+};
+window.setZoom=z=>{cam.zoom=z;cam.position.set(10,16.04,10);cam.lookAt(0,0.9-(z-1)*1.7,0);cam.updateProjectionMatrix();};
+window.setZoom(+(params.get('zoom')||1.45));
+window.clipNames=()=>Object.keys(clips);
+window.setKF=v=>{KF=v;};window.ready=true;
+</script></body></html>
