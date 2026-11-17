@@ -133,3 +133,37 @@ buildingStructure265=function(b,p,size,front){
  if(!s.c)return;
  ctx.drawImage(s.c,p.x-s.ox,p.y-s.oy,s.w,s.h);
 };
+
+// ---------- 437e: the mech never gets pinned ----------
+// It used to stop dead against any building other than a wall (it could only hop walls), and once it ended up
+// overlapping a building every step counted as blocked, so it shuffled on the spot even with the stick held.
+// Now it steers around what is in the way (tries angles up to 90 degrees), walks out freely when it is already
+// overlapping something, and when you push it into a building for a moment it swings its sword at it.
+titanMove342=function(scene,t,dx,dy,dt,speed){
+ if(t.jump345)return;var len=Math.hypot(dx,dy);if(!len)return;
+ var a=Math.atan2(dy,dx),step=Math.min(len,speed*dt),here=titanBlocked342(scene,t.x,t.y),px=t.x,py=t.y;
+ t.aim=t.heading=a;t.moving=true;
+ var x=t.x+Math.cos(a)*step,y=t.y+Math.sin(a)*step,max=(scene.mapSize||22)-1;
+ // already overlapping something: any step that moves away from what it overlaps is allowed, so it can walk out
+ function out(ax,ay){return Math.max(0,.4-ax)+Math.max(0,.4-ay)+Math.max(0,ax-(max-.4))+Math.max(0,ay-(max-.4));}
+ function escapes(nx,ny){if(out(nx,ny)>out(px,py)+1e-9)return false;return scene.buildings.every(function(b){if(!(b.hp>0)||trap278(b)||Math.abs(px-b.x)>=.75||Math.abs(py-b.y)>=.75)return Math.abs(nx-b.x)>=.75||Math.abs(ny-b.y)>=.75||!(b.hp>0)||trap278(b);return Math.hypot(nx-b.x,ny-b.y)>=Math.hypot(px-b.x,py-b.y)-1e-6;});}
+ function free(nx,ny){return here?escapes(nx,ny):!titanBlocked342(scene,nx,ny);}
+ if(free(x,y)){t.x=x;t.y=y;}
+ else if(titanJump345(scene,t,dx,dy))return;
+ else{var turns=[.45,-.45,.9,-.9,1.35,-1.35,1.57,-1.57],side=t.side437||1;
+  for(var i=0;i<turns.length;i++){var b=a+turns[i]*side,nx=t.x+Math.cos(b)*step,ny=t.y+Math.sin(b)*step;
+   if(free(nx,ny)){t.x=nx;t.y=ny;if(turns[i]<0)t.side437=-side;break;}}}
+ var moved=Math.hypot(t.x-px,t.y-py);t.blocked437=moved<step*.3?(t.blocked437||0)+dt:0;
+};
+var manualTick437=titanTick342;
+titanTick342=function(scene,t,dt){
+ if(t&&t.manual342&&t.hp>0&&!t.pending342&&!t.jump345&&!(t.stun>0)&&(t.blocked437||0)>.45&&t.cool<=0&&Array.isArray(scene.buildings)){
+  var m=t.input342||{x:0,y:0};if(Math.hypot(m.x,m.y)>.1){var a=Math.atan2(m.y,m.x),best=null,bd=1e9;
+   scene.buildings.forEach(function(b){if(!(b.hp>0)||trap278(b))return;var d=Math.hypot(b.x-t.x,b.y-t.y);if(d>2)return;var off=Math.abs(Math.atan2(Math.sin(Math.atan2(b.y-t.y,b.x-t.x)-a),Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-a)));if(off>1.1)return;if(d<bd){bd=d;best=b;}});
+   if(best&&(!scene.defenders||scene.enemies&&scene.enemies.indexOf(best)>=0||scene.buildings.indexOf(best)>=0&&!scene.home355)){
+    t.aim=t.heading=Math.atan2(best.y-t.y,best.x-t.x);t.cool=1.8;t.action342='SwordSlash';t.actionTime342=1.1;t.actionSeq342=(t.actionSeq342||0)+1;
+    t.pending342={id:'slash',remaining:.42,angle:t.aim,x:best.x,y:best.y};t.blocked437=0;
+    if(scene.fx)scene.fx.push({weapon:'titan342',skill342:'slash',x:t.x,y:t.y,tx:best.x,ty:best.y,angle:t.aim,life:1.1,maxLife:1.1,radius:2.8,color:'#62eaff'});
+    t.cooldowns342=t.cooldowns342||{};return;}}}
+ return manualTick437.apply(this,arguments);
+};
