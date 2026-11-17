@@ -35,7 +35,8 @@
   var r=E.raid;if(!r||r.liveMode==='defender'||r.liveMode==='preview')return;
   if(r.logistics277){r.logistics277=false;delete r.airAllowed278;}
   selectedShip277=null;commandMode299=false;selectedUnits299=[];
-  if(r.army&&!(r.army[deployKind]>0)){var first=r.army.findIndex(function(n){return n>0;});if(first>=0)deployKind=first;}
+  var left=r.army||E.d.army;
+  if(left&&!(left[deployKind]>0)){var first=left.findIndex(function(n){return n>0;});if(first>=0)deployKind=first;}
  }
 
  // Army window: Train + Queue only. The train tab shows the current army like Clash.
@@ -158,7 +159,9 @@
   return String(html)
    .replace(/<button onclick="Game\.commandMode299\(\)"[^>]*>[^<]*<\/button>/g,'')
    .replace(/<button onclick="Game\.selectAll299\(\)"[^>]*>[^<]*<\/button>/g,'')
-   .replace(/<button class="troop( active)?"([^>]*)>([\s\S]*?)<b>0<\/b>/g,function(m,a,rest,body){return '<button class="troop empty395" disabled'+rest+'>'+body+'<b>0</b>';});
+   // 437: a troop type you never brought, or whose last unit is already on the field, leaves the bar (Clash style),
+   // so the bar only lists what you can still drop, each with how many are left.
+   .replace(/<button class="troop[^"]*"[^>]*>[\s\S]*?<\/button>/g,function(m){return /<b>0<\/b>/.test(m)?'':m;});
  }
  function scoutBar395(){
   var list=armyList395(),shield=!liveTarget||liveTarget.can_attack===false;

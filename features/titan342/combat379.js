@@ -3,8 +3,13 @@ var mechEntry379=$('titanEntry342'),hudBefore379=hud;
 hud=function(){hudBefore379();placeMech379();};
 function placeMech379(){
  var r=E.raid;if(screen!=='raid'||!r||r.result||r.liveMode==='preview'||r.liveMode==='defender')return;
- var dock=$('deploy');if(dock&&mechEntry379){dock.prepend(mechEntry379);mechEntry379.hidden=modal.style.display==='flex';mechEntry379.classList.add('battle342');}
+ var dock=$('deploy');if(dock&&mechEntry379){dock.prepend(mechEntry379);mechEntry379.hidden=modal.style.display==='flex'||!mechAvailable437(r);mechEntry379.classList.add('battle342');}
 }
+// 437: like the troop cards, the mech card only stays in the battle bar while the mech can still be sent:
+// you own one, it is not resting, and it is not already on the field.
+function mechAvailable437(r){var s=E.d.titan342;if(!s||!s.level||r.titanUsed342)return false;
+ if(r.mechSent437||(r.troops&&r.troops.some(function(t){return t&&t.titan342;}))){r.mechSent437=true;return false;}
+ try{if(E.titanRecovery347().resting)return false;}catch(e){}return true;}
 var tickBefore379=tickUI342;tickUI342=function(dt){tickBefore379(dt);placeMech379();};
 
 // 381: restore complete painted defense art. Directional artwork needs separate authored heads.
