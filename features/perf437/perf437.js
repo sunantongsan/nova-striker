@@ -181,3 +181,57 @@ titanJump345=function(scene,t,dx,dy){
 };
 var stunTick437=titanTick342;
 titanTick342=function(scene,t,dt){if(t&&t.titan342&&t.stun>0)t.stun=0;return stunTick437.apply(this,arguments);};
+
+// ---------- 437g: Clash-style health bars, quiet taps ----------
+// A building shows its health bar only once it has been hit (like Clash), so a big base is no longer covered in
+// hundreds of full green bars on every wall piece - less clutter and less to draw each frame.
+var hpQuiet437=false,box437=box;
+box=function(x,y,w,h,c){if(hpQuiet437&&h===4&&w<=30&&(c==='#263745'||c==='#a4ee69'))return;return box437.apply(this,arguments);};
+var hpBuilding437=drawBuilding;
+drawBuilding=function(b,enemy){var quiet=!!b&&b.hp!==undefined&&b.max>0&&b.hp>=b.max,old=hpQuiet437;hpQuiet437=quiet;try{return hpBuilding437.apply(this,arguments);}finally{hpQuiet437=old;}};
+// once the whole army is on the field, tapping the ground just does nothing (no "unit unavailable" message)
+var toast437=toast;
+toast=function(msg){try{var r=E.raid;if(screen==='raid'&&r&&msg===tr('ไม่มีหน่วยนี้')&&!(r.army||E.d.army||[]).some(function(n){return n>0;}))return;}catch(e){}return toast437.apply(this,arguments);};
+
+// ---------- 437h: pre-sized sprite sheets for everything ----------
+// Same idea as the troops: buildings, storage tanks, cannons and vehicles are cut from big sheets (up to 7056px wide)
+// and were shrunk to their on-screen size for every building, every frame. On the main battle/home canvas, any
+// cut-out from a big sheet that is drawn at less than ~90% of its size now comes from a copy of that sheet shrunk
+// once (in halving steps, so it is crisp) to the current zoom. One copy is (re)made per frame at most; until it is
+// ready the original sheet is used, so zooming never stalls.
+(function(){
+ if(!ctx||!ctx.drawImage||typeof document==='undefined'||!document.createElement)return;
+ var main=ctx,raw=main.drawImage,built=-1,copies=typeof WeakMap==='function'?new WeakMap():null;if(!copies)return;
+ function big(img){if(!img)return false;var ok=(typeof HTMLImageElement!=='undefined'&&img instanceof HTMLImageElement&&img.complete)||(typeof ImageBitmap!=='undefined'&&img instanceof ImageBitmap);if(!ok)return false;var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;return w*h>=1024*700;}
+ function copy(img,f){
+  var c=copies.get(img);if(c&&c.f===f)return c;
+  if(built===frame)return c||null;built=frame;
+  try{var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,tw=Math.max(1,Math.round(w*f)),th=Math.max(1,Math.round(h*f)),cur=img,cw=w,ch=h;
+   while(cw/2>tw){var nw=Math.max(tw,Math.round(cw/2)),nh=Math.max(th,Math.round(ch/2)),cv=document.createElement('canvas');cv.width=nw;cv.height=nh;var g=cv.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(cur,0,0,cw,ch,0,0,nw,nh);cur=cv;cw=nw;ch=nh;}
+   var out=document.createElement('canvas');out.width=tw;out.height=th;var o=out.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(cur,0,0,cw,ch,0,0,tw,th);
+   c={c:out,f:f,kx:tw/w,ky:th/h};copies.set(img,c);return c;}catch(e){copies.set(img,{f:-1,c:null});return null;}
+ }
+ main.drawImage=function(img,sx,sy,sw,sh,dx,dy,dw,dh){
+  if(arguments.length===9&&sw>0&&sh>0&&big(img)){
+   var t=main.getTransform?main.getTransform():null,sc=t?Math.hypot(t.a,t.b):renderScale226(),need=Math.max(Math.abs(dw)/sw,Math.abs(dh)/sh)*sc;
+   if(need>0&&need<.9){var f=Math.min(.9,Math.ceil(need*20)/20),c=copy(img,f);
+    if(c&&c.c)return raw.call(main,c.c,sx*c.kx,sy*c.ky,sw*c.kx,sh*c.ky,dx,dy,dw,dh);}
+  }
+  return raw.apply(main,arguments);
+ };
+})();
+
+// ---------- 437i: dynamic resolution in big battles ----------
+// When a battle gets heavy (frame work above ~20ms on average), the battle canvas renders at a slightly lower
+// resolution (down to 1.25x) so the frame rate stays steady; it climbs back to full sharpness as soon as the action
+// calms down. Home base and menus always keep full resolution. Changes at most once a second, so no flicker.
+var dynScale437=9,dynAt437=0,renderScale437=renderScale226;
+renderScale226=function(){
+ var base=renderScale437.apply(this,arguments),r=screen==='raid'?E.raid:null,battle=r&&r.phase==='battle'&&!r.result;
+ if(!battle){dynScale437=9;return base;}
+ var now=Date.now();if(now-dynAt437>1000){dynAt437=now;var avg=typeof frameAvg420==='number'?frameAvg420:0;
+  if(dynScale437>base)dynScale437=base;
+  if(avg>20&&dynScale437>1.25)dynScale437=Math.max(1.25,dynScale437-.25);
+  else if(avg<11&&dynScale437<base)dynScale437=Math.min(base,dynScale437+.25);}
+ return Math.min(base,dynScale437);
+};

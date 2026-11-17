@@ -19,9 +19,12 @@ function unit3d392(t,u,enemy,z,flip){
   else if(t.aimTarget&&t.aimTarget.hp>0)col=g.attack[0];
   else col=g.idle[0]+Math.floor(frame*.07+(t.id||0)*.37)%g.idle[1];}
  var k=s.height*z/m.h;
- ctx.save();ctx.scale(flip,1);
- ctx.drawImage(s.bmp||s.img,col*g.cw,t.dir3d*g.ch,g.cw,g.ch,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
- ctx.restore();return true;
+ // 437: mirror with a scale pair instead of save/restore (cheaper with hundreds of troops on the field)
+ if(flip!==1)ctx.scale(flip,1);
+ var sh=sheet437(s,k);
+ if(sh)ctx.drawImage(sh.c,col*g.cw*sh.f,t.dir3d*g.ch*sh.f,g.cw*sh.f,g.ch*sh.f,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
+ else ctx.drawImage(s.bmp||s.img,col*g.cw,t.dir3d*g.ch,g.cw,g.ch,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
+ if(flip!==1)ctx.scale(1/flip,1);return true;
 }
 var unit3dMount392=weaponMount;
 weaponMount=function(o){
@@ -47,3 +50,20 @@ function warmUnits437(){
  if(typeof veh3d392!=='undefined'){var veh=!!(want[1]||want[5]||want[7]||want[9]);Object.keys(veh3d392).forEach(function(n){warm437(veh3d392[n],veh);});}
 }
 setInterval(function(){try{warmUnits437();}catch(e){}},600);
+
+// 437: Clash-style pre-sized troop sprites. Shrinking a 2520x1024 sheet down to a ~25px troop for every unit every
+// frame was the main cost with a full army on the field. Each troop sheet is now shrunk once (in halving steps, so it
+// stays crisp) to the size it is actually shown at, and each troop is a plain 1:1 copy. Rebuilt when you zoom,
+// at most one sheet per frame so zooming never stalls; until it is ready the full-size sheet is used.
+var sheetBuilt437=0;
+function sheet437(s,k){
+ var src=s.bmp||s.img,sw=src.width||src.naturalWidth,shh=src.height||src.naturalHeight;if(!sw||!shh||typeof document==='undefined'||!document.createElement)return null;
+ var f=Math.round(k*renderScale226()*20)/20;if(!(f>0)||f>=.95)return null;
+ if(s.sh437&&s.sh437.f===f)return s.sh437;
+ if(sheetBuilt437===frame)return s.sh437||null;// one (re)build per frame; meanwhile the previous size is fine
+ sheetBuilt437=frame;
+ try{var cur=src,cw=sw,ch=shh,tw=Math.max(1,Math.round(sw*f)),th=Math.max(1,Math.round(shh*f));
+  while(cw/2>tw){var nw=Math.max(tw,Math.round(cw/2)),nh=Math.max(th,Math.round(ch/2)),c=document.createElement('canvas');c.width=nw;c.height=nh;var g=c.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(cur,0,0,cw,ch,0,0,nw,nh);cur=c;cw=nw;ch=nh;}
+  var out=document.createElement('canvas');out.width=tw;out.height=th;var o=out.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(cur,0,0,cw,ch,0,0,tw,th);
+  s.sh437={c:out,f:f};return s.sh437;}catch(e){return null;}
+}
