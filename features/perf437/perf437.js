@@ -67,3 +67,69 @@ drawCraters272=function(scene){
  scene.craters272.forEach(function(c){var p=point(c.x,c.y),r=c.r*zoom,age=now-c.born,s=craterSprite437(c,r);if(!s)return;
   ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,(25000-age)/13000));ctx.drawImage(s.c,p.x-s.w/2,p.y-s.h/2,s.w,s.h);ctx.restore();});
 };
+
+// ---------- 437b: no more wall guns ----------
+// Walls are walls again: the level-15+ machine gun on every wall piece is gone (no shooting, no gun drawn, no
+// "unlocks at level 15" line). Hundreds of tiny guns were cluttering big bases, slowing battles down and pinning
+// the NOVA mech against the walls.
+wallStats383=function(lv){return {armed:false,range:0,damage:0,rate:.9};};
+tickWalls383=function(){};
+drawWallGun383=function(){};
+(function(){var info=defenseInfo223;defenseInfo223=function(b){return b&&b.type==='wall'?'':info.apply(this,arguments);};})();
+
+// ---------- 437c: a smarter NOVA mech in raids ----------
+// Before, the mech went for whatever was closest, which in a walled base is nearly always a wall piece, and planned
+// its path around the walls, so it stood hacking at walls in the same spot. Now, like a Clash hero, it goes for the
+// nearest real target (defenders and buildings, not walls), heads straight there and leaps over walls on the way.
+// If it really cannot get through for a moment, it cuts through the wall piece in front of it, then carries on.
+function raidMech437(scene,t){return !scene.defenders&&!scene.home355&&Array.isArray(scene.troops)&&scene.troops.indexOf(t)>=0;}
+function wallAhead437(scene,t,target){var a=Math.atan2(target.y-t.y,target.x-t.x),best=null,bd=1e9;
+ scene.buildings.forEach(function(b){if(b.type!=='wall'||!(b.hp>0))return;var d=Math.hypot(b.x-t.x,b.y-t.y);if(d>1.8)return;var off=Math.abs(Math.atan2(Math.sin(Math.atan2(b.y-t.y,b.x-t.x)-a),Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-a)));if(off>1.2)return;if(d<bd){bd=d;best=b;}});return best;}
+var titanTick437=titanTick342;
+titanTick342=function(scene,t,dt){
+ if(!raidMech437(scene,t)||t.hp<=0||t.manual342)return titanTick437.apply(this,arguments);
+ var all=titanEnemies342(scene,t).filter(function(v){return v.hp>0;}),main=all.filter(function(v){return v.type!=='wall';}),ground=main.filter(function(v){return !air277(v);});
+ // flying guards are left to the troops and to the mech's palm blast; chasing one it cannot reach froze it in place
+ if(ground.length)main=ground;
+ if(!main.length||t.pending342||t.jump345||t.stun>0)return titanTick437.apply(this,arguments);
+ // pick the target: the wall we are cutting through, otherwise the nearest real target
+ var target=t.wall437&&t.wall437.hp>0?t.wall437:null;if(!target){t.wall437=null;target=main.sort(function(a,b){return dist(t,a)-dist(t,b);})[0];}
+ // stuck check: trying to move but hardly moved for a second -> cut the wall in front
+ var px=t.x,py=t.y;
+ var keepEnemies=titanEnemies342,keepRoute=route;
+ titanEnemies342=function(s,v){var list=keepEnemies(s,v);return v===t?list.filter(function(e){return e===target||(e.type!=='wall'&&(!ground.length||!air277(e)));}):list;};
+ route=function(a,b,buildings,range,max){if(a===t)buildings=buildings.filter(function(x){return x.type!=='wall'||x===target;});return keepRoute.call(this,a,b,buildings,range,max);};
+ try{titanTick437.apply(this,arguments);}finally{titanEnemies342=keepEnemies;route=keepRoute;}
+ var moved=Math.hypot(t.x-px,t.y-py);
+ if(target.type!=='wall'&&dist(t,target)>2.4&&!t.jump345&&!t.pending342){t.stuck437=moved<.01*Math.max(1,dt*60)?(t.stuck437||0)+dt:Math.max(0,(t.stuck437||0)-dt*2);
+  if(t.stuck437>1){var w=wallAhead437(scene,t,target);if(w){t.wall437=w;t.route=[];}t.stuck437=0;}}
+ else t.stuck437=0;
+};
+
+// ---------- 437d: building level details as pictures ----------
+// The armour pods, vents and lights that show a building's level depend only on its type, level and size, but were
+// drawn shape by shape (twice per building) every frame. They are now drawn once per type/level/zoom and re-used.
+// trim a sprite canvas to its visible pixels so each blit touches as few pixels as possible
+function crop437(c,scale,W,H,ox,oy){
+ try{var g=c.getContext('2d'),d=g.getImageData(0,0,c.width,c.height).data,cw=c.width,ch=c.height,x0=cw,y0=ch,x1=-1,y1=-1;
+  for(var y=0;y<ch;y++)for(var x=0;x<cw;x++)if(d[(y*cw+x)*4+3]>2){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  if(x1<0)return {c:null};
+  x0=Math.max(0,x0-1);y0=Math.max(0,y0-1);x1=Math.min(cw-1,x1+1);y1=Math.min(ch-1,y1+1);
+  var out=document.createElement('canvas');out.width=x1-x0+1;out.height=y1-y0+1;out.getContext('2d').drawImage(c,x0,y0,out.width,out.height,0,0,out.width,out.height);
+  return {c:out,w:out.width/scale,h:out.height/scale,ox:ox-x0/scale,oy:oy-y0/scale};
+ }catch(e){return {c:c,w:W,h:H,ox:ox,oy:oy};}
+}
+var struct437=buildingStructure265,structCache437={},structCount437=0,structKey437='';
+buildingStructure265=function(b,p,size,front){
+ var lv=Math.max(1,Math.min(20,b&&b.lv||1));
+ if(!b||lv===1||b.type==='wall'||b.type==='cannonturret'||typeof document==='undefined'||!document.createElement||!(size>0))return struct437.apply(this,arguments);
+ var scale=renderScale226(),zk=Math.round(size*2)/2+':'+scale;
+ if(zk!==structKey437||structCount437>300){structCache437={};structCount437=0;structKey437=zk;}
+ var key=b.type+':'+lv+':'+(front?1:0),s=structCache437[key];
+ if(!s){var k=size/80,L=60*k,R=60*k,U=95*k,D=40*k,W=Math.ceil(L+R),H=Math.ceil(U+D),c=document.createElement('canvas');
+  c.width=Math.max(1,Math.ceil(W*scale));c.height=Math.max(1,Math.ceil(H*scale));var g=c.getContext('2d');if(!g)return struct437.apply(this,arguments);
+  g.setTransform(scale,0,0,scale,0,0);var old=ctx;try{ctx=g;struct437.call(this,b,{x:L,y:U},size,front);}finally{ctx=old;}
+  s=crop437(c,scale,W,H,L,U);structCache437[key]=s;structCount437++;}
+ if(!s.c)return;
+ ctx.drawImage(s.c,p.x-s.ox,p.y-s.oy,s.w,s.h);
+};
