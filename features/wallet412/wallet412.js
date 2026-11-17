@@ -65,16 +65,12 @@ function compactWallet412(){
  if(welcome){var wb=welcome.querySelector('button');if(wb){var w=el412('div','chip412 welcome412');w.innerHTML='<img src="assets/nova-core.webp" alt=""><span><small>'+mt251('โบนัสต้อนรับ','Welcome bonus')+'</small><b>'+((welcome.querySelector('strong')||{}).textContent||'')+'</b></span>';wb.className='mini412 green';w.appendChild(wb);chips.appendChild(w);}}
  if(chips.children.length)content.appendChild(chips);
  // check-in: title, one row of days, two buttons side by side, one note
- daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('ปกติ 5 NOVA · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','Normal 5 NOVA · video x3 · day 7: 15 / 45');
+ daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('5 NOVA · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','5 NOVA · video x3 · day 7: 15 / 45');
  var btns=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='BUTTON';});if(btns.length){var row=el412('div','pair412');btns.forEach(function(b){b.classList.remove('wide');row.appendChild(b);});daily.appendChild(row);}
  var notes=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='SMALL';});if(notes.length){var note=el412('small','note412',notes.map(function(n){return n.textContent;}).join(' · '));notes.forEach(function(n){n.remove();});daily.appendChild(note);}
  content.appendChild(daily);
- // production tiles
- var prod=el412('section','prod412','<h3>'+mt251('เร่งผลิต','Speed up production')+'</h3>'),grid=el412('div','tiles412');prod.appendChild(grid);
- [[ox,0,mt251('แร่ X','Ore X'),E.d.gold],[oy,1,mt251('แร่ Y','Ore Y'),E.d.power]].forEach(function(a){if(!a[0])return;var t=el412('button','tile412');t.setAttribute('onclick',a[0].getAttribute('onclick'));t.innerHTML=fluidIcon412(a[1])+'<b>'+a[2]+'</b><small>'+short412(a[3])+'</small><span class="go412">'+mt251('เติม','Refill')+' ›</span>';grid.appendChild(t);});
- E.sync();var cap=E.zCapacity410(),z=el412('button','tile412 z412');z.setAttribute('onclick','Game.zOffer412()');
- z.innerHTML=fluidIcon412(2)+'<b>'+mt251('น้ำ Z','Fluid Z')+'</b><small>'+(cap?short412(E.d.zfluid410)+' / '+short412(cap):'🔒 '+mt251('ศูนย์ฯ 7','CC 7'))+'</small><span class="go412">'+mt251('เติม','Refill')+' ›</span>';
- grid.appendChild(z);content.appendChild(prod);
+ // 425: NOVA packs advertised where the production tiles were (refills moved to the resource counters at the top).
+ content.appendChild(promo425());
  // footer
  var foot=el412('div','foot412');[shield,legacy].forEach(function(b){if(!b)return;b.classList.remove('wide');b.classList.add('mini412');foot.appendChild(b);});if(shield)shield.innerHTML='🛡️ '+shield.textContent;if(legacy)legacy.textContent=mt251('ยอดเดิมที่ยังไม่เคลม','Unclaimed balance');
  if(foot.children.length)content.appendChild(foot);
@@ -93,6 +89,18 @@ function absorbWallet412(){var sheet=modal.querySelector('.sheet.wallet412'),con
 var treasury412=treasury;
 treasury=function(){var r=treasury412.apply(this,arguments);try{compactWallet412();absorbWallet412();}catch(e){}[0,60,250].forEach(function(t){setTimeout(function(){try{compactWallet412();absorbWallet412();}catch(e){}},t);});return r;};
 var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412');if(b){var t=(E.d.gems||0).toLocaleString();if(b.textContent!==t)b.textContent=t;}return r;};
+// 425: NOVA pack banner in the wallet. Real store prices only (no invented discounts); tapping opens the store.
+var promoPacks425=['nova_2100','nova_7600','nova_34000'];
+function promo425(){var box=el412('section','promo425'),list=novaPacks348.filter(function(p){return promoPacks425.includes(p.id);});
+ var best=novaPacks348.reduce(function(a,p){return p.nova/p.thb>a.nova/a.thb?p:a;},novaPacks348[0]);
+ box.innerHTML='<div class="promoHead425"><img src="assets/nova-core.webp" alt=""><span><b>'+mt251('แพ็ก NOVA','NOVA packs')+'</b><small>'+mt251('เติมผ่าน Google Play · ได้ NOVA ทันที','Buy on Google Play · NOVA arrives instantly')+'</small></span></div>'+
+  '<div class="promoGrid425">'+list.map(function(p){var i=novaPacks348.indexOf(p),live=billingProducts348[p.id];
+   return '<button class="promoCard425" onclick="Game.shop348(\'nova\')">'+(p===best?'<em>'+mt251('คุ้มสุด','Best value')+'</em>':'')+packArt348(i)+'<b>'+p.nova.toLocaleString()+'</b><span>'+shopEscape348(live?live.price:'฿'+p.thb)+'</span></button>';}).join('')+'</div>'+
+  '<button class="promoAll425" onclick="Game.shop348(\'nova\')">'+mt251('ดูแพ็กทั้งหมด','See all packs')+' ›</button>';
+ return box;}
+// 425: tap Ore X / Ore Y / Fluid Z at the top of the home screen to refill (like Clash of Clans).
+document.addEventListener('click',function(ev){if(screen!=='home'||!ev.target||!ev.target.closest)return;var span=ev.target.closest('#app>header .resources>span');if(!span)return;
+ if(span.querySelector('#gold'))Game.resourceOffer233('gold');else if(span.querySelector('#energy'))Game.resourceOffer233('power');else if(span.querySelector('#zfluid410'))Game.zOffer412();},true);
 (function(){var st=document.createElement('style');st.id='wallet412';st.textContent=
  '#modal#modal[data-nova360] .sheet.novaWindow360.wallet412.wallet412{width:min(420px,96vw)!important;max-height:calc(100dvh - 24px)!important}#modal#modal[data-nova360] .wallet412 .novaContent360{overflow-y:auto!important}'+
  '#modal#modal[data-nova360] .wallet412 .illustrated345>.art345,#modal#modal[data-nova360] .wallet412 .zbtn412 .art345{display:none!important}'+
@@ -115,7 +123,16 @@ var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412
  '#modal#modal[data-nova360] .wallet412 .pair412{display:grid;grid-template-columns:1fr 1fr;gap:6px}#modal .wallet412 .pair412 button{margin:0!important;min-height:40px;padding:5px 6px!important;font-size:12.5px!important;line-height:1.15;white-space:normal}'+
  '#modal#modal[data-nova360] .wallet412 .pair412 .art345{display:none}'+
  '#modal#modal[data-nova360] .wallet412 .note412{display:block;font-size:10.5px;opacity:.75;text-align:center;margin-top:4px;line-height:1.2}'+
- '#modal#modal[data-nova360] .wallet412 .prod412 h3{margin:0 0 5px;font-size:15px}'+
+ '#modal#modal[data-nova360] .wallet412 .promo425{position:relative;padding:8px 9px;border-radius:14px;background:linear-gradient(135deg,#fff2c9,#ffd6e6 60%,#d9ecff);border:2px solid #f5b54a;box-shadow:0 3px 0 #e39a2e}'+
+ '#modal#modal[data-nova360] .wallet412 .promoHead425{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#5a2d0c}#modal .wallet412 .promoHead425 img{width:30px;height:30px}#modal .wallet412 .promoHead425 span{display:flex;flex-direction:column;line-height:1.15}#modal .wallet412 .promoHead425 b{font-size:15px}#modal .wallet412 .promoHead425 small{font-size:10.5px;opacity:.8}'+
+ '#modal#modal[data-nova360] .wallet412 .promoGrid425{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}'+
+ '#modal#modal[data-nova360] .wallet412 .promoCard425{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;margin:0;padding:6px 4px;border-radius:12px;background:#fffdf6;border:1px solid #f0c27a;box-shadow:0 2px 0 #e8b066;color:#4a2a08;font:inherit;min-width:0}'+
+ '#modal#modal[data-nova360] .wallet412 .promoCard425 .packArt348{width:40px!important;height:40px!important;margin:0 auto}#modal .wallet412 .promoCard425 b{font-size:15px}'+
+ '#modal#modal[data-nova360] .wallet412 .promoCard425>span:last-child{margin-top:2px;padding:2px 8px;border-radius:999px;background:linear-gradient(#7ee07a,#3fb64a);color:#fff;font-weight:800;font-size:12px}'+
+ '#modal#modal[data-nova360] .wallet412 .promoCard425 em{position:absolute;top:-7px;right:-3px;padding:1px 6px;border-radius:8px;background:#ff5a5f;color:#fff;font-style:normal;font-weight:800;font-size:10px;transform:rotate(6deg)}'+
+ '#modal#modal[data-nova360] .wallet412 .promoAll425{display:block;width:100%;margin:6px 0 0!important;padding:5px!important;border:0!important;background:none!important;box-shadow:none!important;min-height:0!important;color:#a0521c;font:inherit;font-weight:800;font-size:12.5px}'+
+ '#app>header .resources>span:has(#gold),#app>header .resources>span:has(#energy),#app>header .resources>span:has(#zfluid410){cursor:pointer}'+
+'#modal#modal[data-nova360] .wallet412 .prod412 h3{margin:0 0 5px;font-size:15px}'+
  '#modal#modal[data-nova360] .wallet412 .tiles412{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}'+
  '#modal#modal[data-nova360] .wallet412 .tile412{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;margin:0;padding:7px 5px;border-radius:12px;background:linear-gradient(#fffaf0,#f3e6c8);border:1px solid #d9bf86;color:#4a3713;font:inherit;box-shadow:0 2px 0 #cfb37a;min-width:0}'+
  '#modal#modal[data-nova360] .wallet412 .tile412 .fluid403{width:30px;height:30px}#modal .wallet412 .tile412 b{font-size:13.5px}#modal .wallet412 .tile412 small{font-size:11px;opacity:.8}'+
