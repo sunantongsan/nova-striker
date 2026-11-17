@@ -1,6 +1,6 @@
 // 403: liquid resources, tall glass tanks, loot preview and NOVA loot rules.
 // * Names (presentation only; save keys and server fields stay gold/power/crystals):
-//   gold = แร่ X (Ore X, golden liquid), power = แร่ Y (Ore Y, green), crystals = น้ำ Z (Fluid Z, red).
+//   gold = แร่ Y (Ore Y, golden liquid), power = แร่ G (Ore G, green), crystals = แร่ R (Ore R, red).
 // * Gold / energy / fluid storages are tall glass tanks whose liquid level shows how full they are
 //   (home: own storage, raid: loot still available). Taller with every 4 levels.
 // * Scouting shows the loot on offer and the NOVA a win would pay. NOVA can never be looted.
@@ -47,15 +47,15 @@ drawWreck=function(b,p,size,enemy){if(TANK403[b.type]!==undefined&&tankArt403.co
 // ---------- names ----------
 function spaced403(src,re,name){return src.replace(re,function(m,o,s){var a=s[o-1]||'',z=s[o+m.length]||'';return (/[ก-๎]/.test(a)?' ':'')+name+(/[ก-ฮ]/.test(z)?' ':'');});}
 var KEEP403=/ปืนใหญ่พลังงาน|กับระเบิดพลังงาน|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Energy Cannon|Energy Cores?|energy cores?|Energy Mine|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
-var NAMES403=[[/โรงสังเคราะห์ผลึก/g,'โรงสกัดน้ำ Z'],[/คลังผลึก/g,'แท้งน้ำ Z'],[/คลังทอง/g,'แท้งแร่ X'],[/ถังเก็บพลังงาน/g,'แท้งแร่ Y'],[/เหมืองทอง/g,'เหมืองแร่ X'],[/เครื่องสกัดพลังงาน/g,'เครื่องขุดแร่ Y'],
- [/Crystal Synthesizer/g,'Fluid Z Extractor'],[/Crystal Storage/g,'Fluid Z Tank'],[/Gold Storage/g,'Ore X Tank'],[/Energy Storage/g,'Ore Y Tank'],[/Gold Mine/g,'Ore X Mine'],[/Energy Extractor/g,'Ore Y Drill'],
- [/\bCrystals\b/g,'Fluid Z'],[/\bcrystals\b/g,'Fluid Z'],[/\bCrystal\b/g,'Fluid Z'],[/\bcrystal\b/g,'Fluid Z'],[/\bGold\b/g,'Ore X'],[/\bgold\b/g,'Ore X'],[/\bEnergy\b/g,'Ore Y'],[/\benergy\b/g,'Ore Y']];
+var NAMES403=[[/โรงสังเคราะห์ผลึก/g,'โรงสกัดแร่ R'],[/คลังผลึก/g,'แท้งแร่ R'],[/คลังทอง/g,'แท้งแร่ Y'],[/ถังเก็บพลังงาน/g,'แท้งแร่ G'],[/เหมืองทอง/g,'เหมืองแร่ Y'],[/เครื่องสกัดพลังงาน/g,'เครื่องขุดแร่ G'],
+ [/Crystal Synthesizer/g,'Ore R Extractor'],[/Crystal Storage/g,'Ore R Tank'],[/Gold Storage/g,'Ore Y Tank'],[/Energy Storage/g,'Ore G Tank'],[/Gold Mine/g,'Ore Y Mine'],[/Energy Extractor/g,'Ore G Drill'],
+ [/\bCrystals\b/g,'Ore R'],[/\bcrystals\b/g,'Ore R'],[/\bCrystal\b/g,'Ore R'],[/\bcrystal\b/g,'Ore R'],[/\bGold\b/g,'Ore Y'],[/\bgold\b/g,'Ore Y'],[/\bEnergy\b/g,'Ore G'],[/\benergy\b/g,'Ore G']];
 var TEST403=/ผลึก|พลังงาน|ทอง|[Cc]rystal|[Gg]old|[Ee]nergy/;
 function rename403(text){
  if(typeof text!=='string'||!TEST403.test(text))return text;
  var kept=[];text=text.replace(KEEP403,function(m){kept.push(m);return '\u0001'+(kept.length-1)+'\u0002';});
  NAMES403.forEach(function(n){text=text.replace(n[0],n[1]);});
- text=spaced403(text,/ผลึก/g,'น้ำ Z');text=spaced403(text,/พลังงาน/g,'แร่ Y');text=spaced403(text,/ทอง/g,'แร่ X');
+ text=spaced403(text,/ผลึก/g,'แร่ R');text=spaced403(text,/พลังงาน/g,'แร่ G');text=spaced403(text,/ทอง/g,'แร่ Y');
  return text.replace(/\u0001(\d+)\u0002/g,function(m,i){return kept[+i];});
 }
 function paint403(node){

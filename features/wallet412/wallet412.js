@@ -1,21 +1,21 @@
-// 412: NOVA wallet on one screen, plus speeding up Fluid Z (น้ำ Z) production.
-// * Fluid Z boost: a video gives 2 hours of the extractors' production at once (server-verified through the
+// 412: NOVA wallet on one screen, plus speeding up Ore R (แร่ R) production.
+// * Ore R boost: a video gives 2 hours of the extractors' production at once (server-verified through the
 //   speed264 flow, target kind 'zfluid'); NOVA gives 6 hours. Both stop at the tank's free space.
 // * The wallet window is rebuilt from the existing pieces (their buttons and handlers are moved, not copied):
-//   balance in the header, reward chips, a one-row check-in week, three production tiles (Ore X, Ore Y, Fluid Z),
+//   balance in the header, reward chips, a one-row check-in week, three production tiles (Ore Y, Ore G, Ore R),
 //   and a footer for shields and the legacy balance. Fits a phone screen without scrolling.
 var ZAD_HOURS412=2,ZNOVA_HOURS412=6;
 function zRoom412(){E.sync();return Math.max(0,E.zCapacity410()-(E.d.zfluid410||0));}
 function zHours412(h){return Math.floor(E.zRate410()*h);}
-// 412b: Fluid Z refills like Ore X / Y — sized by the tank, not only by production.
+// 412b: Ore R refills like Ore Y / G — sized by the tank, not only by production.
 function zVideoAmount412(){E.sync();return Math.max(zHours412(ZAD_HOURS412),Math.round(E.zCapacity410()*.1));}
 function zPack412(kind){var room=zRoom412(),cap=E.zCapacity410();return kind==='full'?room:Math.min(room,Math.round(cap*.5));}
 function zPrice412(amount){return Math.max(5,Math.ceil(amount/40));}
 function zNovaCost412(){return zPrice412(Math.min(zHours412(ZNOVA_HOURS412),zRoom412()));}
 function zAdd412(amount){var room=zRoom412(),got=Math.max(0,Math.min(room,Math.floor(amount)));E.d.zfluid410=(E.d.zfluid410||0)+got;return got;}
-function zReady412(){if(E.zCapacity410()<=0)return mt251('ปลดล็อกน้ำ Z ที่ศูนย์บัญชาการ 7','Fluid Z unlocks at Command Center 7');if(zRoom412()<=0)return mt251('แท้งน้ำ Z เต็มแล้ว','Fluid Z tank is full');return '';}
+function zReady412(){if(E.zCapacity410()<=0)return mt251('ปลดล็อกแร่ R ที่ศูนย์บัญชาการ 7','Ore R unlocks at Command Center 7');if(zRoom412()<=0)return mt251('แท้งแร่ R เต็มแล้ว','Ore R tank is full');return '';}
 function zDone412(got){completionAudio250&&completionAudio250();hud();
- open('<section class="reward-success263"><h2>'+mt251('เร่งผลิตน้ำ Z แล้ว','Fluid Z boosted')+'</h2><p class="zgot412">'+zIcon410()+' +'+got.toLocaleString()+'</p><button class="wide green" onclick="Game.treasury()">'+mt251('ตกลง','OK')+'</button></section>');}
+ open('<section class="reward-success263"><h2>'+mt251('เร่งผลิตแร่ R แล้ว','Ore R boosted')+'</h2><p class="zgot412">'+zIcon410()+' +'+got.toLocaleString()+'</p><button class="wide green" onclick="Game.treasury()">'+mt251('ตกลง','OK')+'</button></section>');}
 // video: speed264 with a 'zfluid' target; the grant is applied here when the server confirms the video
 Game.zBoostAd412=function(){var why=zReady412();if(why){toast(why);return;}Game.speedAd264('zfluid','z412');};
 var snapZ412=speedSnapshot264;
@@ -30,13 +30,13 @@ Game.zBuy412=function(kind){var why=zReady412();if(why){toast(why);return;}var a
  confirmNova358(cost,function(){var why=zReady412();if(why){toast(why);return;}if((E.d.gems||0)<cost){toast(mt251('NOVA ไม่พอ','Not enough NOVA'));return;}
   var before=JSON.stringify(E.d);E.d.gems-=cost;var got=zAdd412(amount);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}zDone412(got);});};
 Game.zBoostNova412=function(){Game.zBuy412('half');};
-// the refill window (same idea as the Ore X / Y refill)
+// the refill window (same idea as the Ore Y / G refill)
 Game.zOffer412=function(){E.sync();var cap=E.zCapacity410(),cur=E.d.zfluid410||0,why=zReady412(),locked=cap<=0;
  var row=function(icon,title,sub,price,action,off){return '<button class="zrow412" '+(off?'disabled':'')+' onclick="'+action+'">'+icon+'<span><b>'+title+'</b><small>'+sub+'</small></span><em>'+price+'</em></button>';};
  var half=zPack412('half'),full=zPack412('full');
- open('<section class="zoffer412"><h2>'+mt251('เติมน้ำ Z','Refill Fluid Z')+'</h2>'+
+ open('<section class="zoffer412"><h2>'+mt251('เติมแร่ R','Refill Ore R')+'</h2>'+
   '<div class="zbar412"><i style="width:'+(cap?Math.min(100,cur/cap*100):0)+'%"></i><span>'+fluidIcon412(2)+' '+short412(cur)+' / '+short412(cap)+'</span></div>'+
-  (locked?'<p class="zlock412">🔒 '+mt251('ปลดล็อกน้ำ Z ที่ศูนย์บัญชาการ 7 (สร้างโรงสกัดและแท้งน้ำ Z)','Fluid Z unlocks at Command Center 7 (build the extractor and tank)')+'</p>':
+  (locked?'<p class="zlock412">🔒 '+mt251('ปลดล็อกแร่ R ที่ศูนย์บัญชาการ 7 (สร้างโรงสกัดและแท้งแร่ R)','Ore R unlocks at Command Center 7 (build the extractor and tank)')+'</p>':
   row('<span class="zic412">🎬</span>',mt251('ดูวิดีโอ','Watch a video'),'+'+short412(Math.min(zVideoAmount412(),zRoom412())),mt251('ฟรี','Free'),'Game.zBoostAd412()',!!why)+
   row(fluidIcon412(2),mt251('ครึ่งแท้ง','Half a tank'),'+'+short412(half),'<i class="nova412"></i>'+zPrice412(half),"Game.zBuy412('half')",!!why||half<=0||(E.d.gems||0)<zPrice412(half))+
   row(fluidIcon412(2),mt251('เติมเต็มแท้ง','Fill the tank'),'+'+short412(full),'<i class="nova412"></i>'+zPrice412(full),"Game.zBuy412('full')",!!why||full<=0||(E.d.gems||0)<zPrice412(full)))+
@@ -98,7 +98,7 @@ function promo425(){var box=el412('section','promo425'),list=novaPacks348.filter
    return '<button class="promoCard425" onclick="Game.shop348(\'nova\')">'+(p===best?'<em>'+mt251('คุ้มสุด','Best value')+'</em>':'')+packArt348(i)+'<b>'+p.nova.toLocaleString()+'</b><span>'+shopEscape348(live?live.price:'฿'+p.thb)+'</span></button>';}).join('')+'</div>'+
   '<button class="promoAll425" onclick="Game.shop348(\'nova\')">'+mt251('ดูแพ็กทั้งหมด','See all packs')+' ›</button>';
  return box;}
-// 425: tap Ore X / Ore Y / Fluid Z at the top of the home screen to refill (like Clash of Clans).
+// 425: tap Ore Y / Ore G / Ore R at the top of the home screen to refill (like Clash of Clans).
 document.addEventListener('click',function(ev){if(screen!=='home'||!ev.target||!ev.target.closest)return;var span=ev.target.closest('#app>header .resources>span');if(!span)return;
  if(span.querySelector('#gold'))Game.resourceOffer233('gold');else if(span.querySelector('#energy'))Game.resourceOffer233('power');else if(span.querySelector('#zfluid410'))Game.zOffer412();},true);
 (function(){var st=document.createElement('style');st.id='wallet412';st.textContent=
