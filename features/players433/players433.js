@@ -80,3 +80,16 @@ var hud433=hud;hud=function(){var out=hud433.apply(this,arguments);try{var r=E.r
  '.search433{text-align:center}.search433 p{opacity:.8}.clouds433{position:relative;height:70px;overflow:hidden}.clouds433 i{position:absolute;top:18px;width:90px;height:34px;border-radius:30px;background:#e8f4ff;box-shadow:30px -12px 0 6px #e8f4ff,-26px -6px 0 2px #e8f4ff;animation:cl433 1.1s linear infinite}'+
  '.clouds433 i:nth-child(2){top:40px;animation-delay:-.4s;opacity:.8}.clouds433 i:nth-child(3){top:6px;animation-delay:-.8s;opacity:.6}@keyframes cl433{from{left:110%}to{left:-40%}}';
  document.head.appendChild(st);})();
+// 437: when a base comes up (search, Next, alien raid) the camera frames the whole base, centred, instead of landing
+// zoomed-in on its top corner. Done once per base, before the first drop, so your own panning is kept after that.
+var fitRaid437=null;
+function fitBase437(r){
+ var list=(r.buildings||[]).filter(function(b){return b&&Number.isFinite(b.x)&&Number.isFinite(b.y);});if(!list.length)return;
+ var x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;list.forEach(function(b){var sx=(b.x-b.y)*tile,sy=(b.x+b.y)*tile*ISO412;if(sx<x0)x0=sx;if(sx>x1)x1=sx;if(sy<y0)y0=sy;if(sy>y1)y1=sy;});
+ x0-=tile*1.6;x1+=tile*1.6;y0-=tile*2.6;y1+=tile*1.2;// room for building height above, shadows below
+ var top=56,bottom=66,availW=Math.max(200,viewWidth-40),availH=Math.max(150,viewHeight-top-bottom);
+ zoom=Math.max(.35,Math.min(.9,availW/(x1-x0),availH/(y1-y0)));
+ panX=viewWidth/2-originX-(x0+x1)/2*zoom;panY=top+availH/2-originY-(y0+y1)/2*zoom;drawNeeded=true;}
+var hud437=hud;hud=function(){var out=hud437.apply(this,arguments);try{var r=E.raid;
+ if(screen==='raid'&&r&&!r.result&&r!==fitRaid437&&!(r.troops||[]).length&&r.liveMode!=='defender'){fitRaid437=r;fitBase437(r);}
+ else if(screen!=='raid')fitRaid437=null;}catch(e){}return out;};
