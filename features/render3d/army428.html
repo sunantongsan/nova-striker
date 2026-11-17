@@ -1,0 +1,143 @@
+<!doctype html><html><body style="margin:0;background:transparent">
+<canvas id="c" width="512" height="650"></canvas>
+<script type="module">
+// 428 header copied from 410: five army/research buildings in the bright Nova style (white / sky blue / gold, red Fluid Z glow).
+//  inferno  — หอเพลิงอนุภาค: glass bulb of Fluid Z on a ringed column; the beam leaves the bulb tip.
+//  skyguard — ปืนต่อต้านอากาศยาน: domed turret with a ring of upward missile tubes and a radar dish.
+// pose(kind,tier,wreck) renders one picture; tiers 0..2 grow taller and richer.
+import * as T from './three.js';
+const canvas=document.getElementById('c');
+const R=new T.WebGLRenderer({canvas,antialias:true,alpha:true,preserveDrawingBuffer:true});
+R.setClearColor(0,0);R.outputColorSpace=T.SRGBColorSpace;
+const S=new T.Scene();
+const cam=new T.OrthographicCamera(-2.6,2.6,4.2,-2.4,0.1,100);cam.position.set(10,16.04,10);cam.lookAt(0,1.0,0);
+S.add(new T.HemisphereLight(0xfff6e8,0x4a5d8a,0.95));
+const sun=new T.DirectionalLight(0xfff0d6,3.4);sun.position.set(-3,10,7);S.add(sun);
+const rim=new T.DirectionalLight(0x9fe3ff,1.4);rim.position.set(7,3,-5);S.add(rim);
+const g=new Uint8Array([62,112,170,222,255]);const ramp=new T.DataTexture(g,5,1,T.RedFormat);ramp.minFilter=ramp.magFilter=T.NearestFilter;ramp.needsUpdate=true;
+const M=(c)=>new T.MeshToonMaterial({color:c,gradientMap:ramp});
+const OUT=new T.ShaderMaterial({side:T.BackSide,uniforms:{w:{value:0.05}},
+ vertexShader:'uniform float w;void main(){vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.0);mv.xyz+=n*w;gl_Position=projectionMatrix*mv;}',
+ fragmentShader:'void main(){gl_FragColor=vec4(0.08,0.12,0.24,1.0);}'});
+function mesh(geo,mat,parent,ol=1){const m=new T.Mesh(geo,mat);parent.add(m);if(ol)m.add(new T.Mesh(geo,OUT));return m;}
+function lathe(pts,seg=48){return new T.LatheGeometry(pts.map(p=>new T.Vector2(p[0],p[1])),seg);}
+function rbox(w,h,d,r){r=Math.min(r,w/2-0.001,h/2-0.001);const s=new T.Shape(),x=-w/2+r,y=-h/2+r;s.moveTo(x,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,y);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(x,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,y);s.quadraticCurveTo(-w/2,-h/2,x,-h/2);
+ const dd=Math.max(0.01,d-2*r*0.6);const geo=new T.ExtrudeGeometry(s,{depth:dd,bevelEnabled:true,bevelSize:r*0.6,bevelThickness:r*0.6,bevelSegments:5,curveSegments:10});geo.translate(0,0,-dd/2);geo.computeVertexNormals();return geo;}
+const cyl=(a,b,h,s=40)=>new T.CylinderGeometry(a,b,h,s);
+const sph=(r,sx=1,sy=1,sz=1)=>{const q=new T.SphereGeometry(r,40,28);q.scale(sx,sy,sz);return q;};
+const torus=(r,t)=>new T.TorusGeometry(r,t,12,56).rotateX(Math.PI/2);
+const WHITE=M(0xd9e6f5),SKY=M(0x4f9fe0),DEEP=M(0x3a7fcc),GOLD=M(0xf2a91e),CORAL=M(0xf2545b),BLUSH=M(0xf7c8c4),STEEL=M(0x9fb3cc),
+ RGLOW=new T.MeshBasicMaterial({color:0xff5a4a}),PINK=new T.MeshBasicMaterial({color:0xffb3a8}),
+ GLASS=new T.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:0.32,roughness:0.05,metalness:0,clearcoat:1});
+// pose(kind,lv,wreck): five army/research buildings. Shape changes every 5 levels (4 tiers),
+// paint changes every level (20 palettes: bright sky -> mint -> gold -> coral -> violet -> deep royal + glow).
+const PAL=[ // [main accent, second accent, glow]
+ [0x5fb4f0,0xf2a91e,0x7ff4ff],[0x4fa6ec,0xf5b52e,0x8ff8ff],[0x45c6d8,0xf2a91e,0x8ffff0],[0x3fc6a8,0xffc23a,0x9affd8],[0x5ccf7a,0xffc23a,0xc8ff8a],
+ [0x8fd14f,0xff9f3a,0xe8ff7a],[0xf2b43a,0x3a8fe0,0xfff07a],[0xf59a3a,0x3a7fd8,0xffd27a],[0xf2785a,0x2f6fd0,0xffb39a],[0xee5a6a,0x2f5fc8,0xff9aa8],
+ [0xe8508f,0x2a4fb8,0xff9ad0],[0xc950c8,0xf2c43a,0xf3a8ff],[0x9a58e0,0xf2c43a,0xd2b0ff],[0x6f5fe8,0xffd24a,0xb8b8ff],[0x4f6ae0,0xffd24a,0x9ad0ff],
+ [0x3a5ad0,0xffb03a,0x6fe8ff],[0x7a3ad0,0xffd04a,0xff8af0],[0xb02a8a,0xffd04a,0xff6ad0],[0xc8283c,0xffd04a,0xffb04a],[0x2a2f8a,0xffd84a,0x5ff8ff]];
+let cur=null;
+function mats(lv){const p=PAL[Math.max(1,Math.min(20,lv))-1];return {A:M(p[0]),B:M(p[1]),G:new T.MeshBasicMaterial({color:p[2]}),GL:new T.MeshBasicMaterial({color:p[2],transparent:true,opacity:0.45}),glow:p[2]};}
+function tierOf(lv){return lv>=16?3:lv>=11?2:lv>=6?1:0;}
+function pad(root,m,t){
+ const PADM=M(0x8396b4);const p=mesh(lathe([[0,0],[1.95,0],[2.02,0.08],[1.92,0.32],[1.72,0.44],[0,0.44]],8),PADM,root);const top=mesh(cyl(1.7,1.7,0.04,8),M(0xb9c7da),root,0);top.position.y=0.45;top.rotation.y=Math.PI/8;p.rotation.y=Math.PI/8;
+ const sk=mesh(lathe([[1.99,0.1],[2.01,0.14],[1.95,0.28],[1.93,0.3]],8),m.A,root,0);sk.rotation.y=Math.PI/8;
+ mesh(torus(1.74,0.045),t>=2?m.B:GOLD,root,0).position.y=0.44;
+ const n=8;for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.PI/8;const tab=mesh(rbox(0.3,0.12,0.06,0.03),i%2?m.B:m.A,root,1);tab.position.set(Math.cos(a)*1.93,0.2,Math.sin(a)*1.93);tab.rotation.y=-a+Math.PI/2;tab.rotation.x=-0.45;}
+ if(t>=3)for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;const l=mesh(cyl(0.07,0.09,0.5,16),m.B,root);l.position.set(Math.cos(a)*1.62,0.68,Math.sin(a)*1.62);const b=new T.Mesh(sph(0.11),m.G);b.position.set(Math.cos(a)*1.62,0.98,Math.sin(a)*1.62);root.add(b);}
+}
+function flag(root,m,x,z,h){const f=new T.Group();f.position.set(x,0.44,z);root.add(f);mesh(cyl(0.035,0.035,h,10),STEEL,f).position.y=h/2;const cl=m.A.clone();cl.side=T.DoubleSide;const fl=mesh(new T.PlaneGeometry(0.42,0.26),cl,f,0);fl.position.set(0.22,h-0.16,0);mesh(sph(0.06),GOLD,f,0).position.y=h+0.03;}
+// 1 อาคารเทคโนโลยี: round lab, glass dome with a glowing energy core, antennas; rings/holo panels with tiers.
+function tech(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
+ const h=[1.0,1.2,1.4,1.6][t];
+ mesh(lathe([[0,0.44],[1.28,0.44],[1.32,0.5],[1.22,0.44+h],[1.05,0.5+h],[0,0.5+h]],40),WHITE,r);
+ mesh(torus(1.3,0.06),m.A,r,0).position.y=0.6;mesh(torus(1.2,0.06),m.A,r,0).position.y=0.44+h*0.75;
+ for(let i=0;i<6;i++){const a=i/6*Math.PI*2+0.3;const w=mesh(rbox(0.32,0.38,0.08,0.06),m.A,r,0);w.position.set(Math.cos(a)*1.24,0.44+h*0.45,Math.sin(a)*1.24);w.rotation.y=-a+Math.PI/2;const gl=new T.Mesh(rbox(0.22,0.26,0.05,0.04),m.G);gl.position.copy(w.position).multiplyScalar(1.02);gl.rotation.copy(w.rotation);r.add(gl);}
+ const top=0.5+h;mesh(cyl(0.98,1.05,0.16,40),m.B,r).position.y=top+0.08;
+ const core=new T.Mesh(sph(0.42+t*0.04),m.G);core.position.y=top+0.62;r.add(core);
+ const dome=new T.Mesh(sph(0.86,1,0.95,1),GLASS);dome.position.y=top+0.18;r.add(dome);
+ for(let i=0;i<=t;i++){const ring=mesh(new T.TorusGeometry(0.62+i*0.13,0.035,10,48),i%2?m.B:GOLD,r,0);ring.position.y=top+0.62;ring.rotation.set(0.9+i*0.5,i*0.8,0.3*i);}
+ const na=[1,2,3,4][t];for(let i=0;i<na;i++){const a=i/na*Math.PI*2+0.7;const g=new T.Group();g.position.set(Math.cos(a)*0.72,top+0.16,Math.sin(a)*0.72);r.add(g);mesh(cyl(0.04,0.05,0.9+t*0.15,10),STEEL,g).position.y=0.45+t*0.07;const tip=new T.Mesh(sph(0.08),m.G);tip.position.y=0.95+t*0.15;g.add(tip);}
+ if(t>=2)for(let i=0;i<3;i++){const a=i/3*Math.PI*2+0.2;const pn=new T.Mesh(rbox(0.5,0.34,0.03,0.04),m.GL);pn.position.set(Math.cos(a)*1.6,top+0.3+i*0.15,Math.sin(a)*1.6);pn.rotation.y=-a+Math.PI/2;r.add(pn);}
+ if(t>=3){const sp=mesh(new T.ConeGeometry(0.16,0.7,24),GOLD,r);sp.position.y=top+1.55;}
+ return o;}
+// 2 โรงประกอบยานบุก: arched hangar with a big door, crane arm, chimney; more bays with tiers.
+function workshop(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
+ const L=[1.9,2.1,2.3,2.5][t],W=1.7,H=[0.95,1.05,1.15,1.25][t];
+ const body=mesh(rbox(L,H,W,0.12),WHITE,r);body.position.y=0.44+H/2;body.rotation.y=-Math.PI/4;mesh(rbox(L+0.04,0.14,W+0.04,0.05),m.B,r,0).rotation.y=-Math.PI/4;
+ const roof=new T.Group();roof.position.y=0.44+H;roof.rotation.y=-Math.PI/4;r.add(roof);
+ const ar=new T.CylinderGeometry(W/2+0.06,W/2+0.06,L+0.06,40);ar.rotateZ(Math.PI/2);mesh(ar,m.A,roof);
+ for(let i=0;i<=t+2;i++){const rib=mesh(new T.TorusGeometry(W/2+0.09,0.035,8,32,Math.PI),m.B,roof,0);rib.rotation.y=Math.PI/2;rib.position.x=-L/2+0.12+i*(L-0.24)/(t+2);}
+ // door on the front face (facing camera, +x+z)
+ const front=new T.Group();front.rotation.y=-Math.PI/4;front.position.y=0.44;r.add(front);
+ const door=mesh(rbox(0.06,H*0.8,W*0.66,0.05),m.B,front,1);door.position.set(L/2+0.02,H*0.4,0);
+ for(let i=0;i<4;i++){const s=mesh(rbox(0.07,0.04,W*0.6,0.02),WHITE,front,0);s.position.set(L/2+0.05,0.15+i*H*0.18,0);}
+ const sign=new T.Mesh(new T.CircleGeometry(0.2,24),m.G);sign.position.set(L/2+0.06,H*0.9+0.05,0);sign.rotation.y=Math.PI/2;front.add(sign);
+ // chimney
+ const ch=mesh(cyl(0.16,0.2,0.8+t*0.2,20),m.A,front);ch.position.set(-L/2+0.35,H+0.5+t*0.1,-W/2+0.3);mesh(torus(0.17,0.04),GOLD,front,0).position.set(-L/2+0.35,H+0.88+t*0.2,-W/2+0.3);
+ // crane
+ if(t>=1){const c=new T.Group();c.position.set(-L/2+0.2,0,W/2+0.15);front.add(c);mesh(cyl(0.07,0.09,H+0.9,12),m.B,c).position.y=(H+0.9)/2;const arm=mesh(rbox(1.2,0.1,0.1,0.03),m.B,c);arm.position.set(0.55,H+0.85,0);mesh(cyl(0.015,0.015,0.5,6),STEEL,c,0).position.set(1.05,H+0.58,0);mesh(rbox(0.16,0.16,0.16,0.04),GOLD,c).position.set(1.05,H+0.3,0);}
+ // second bay / side garage
+ if(t>=2){const s=mesh(rbox(0.8,H*0.7,0.9,0.1),WHITE,front);s.position.set(0.2,H*0.35,-W/2-0.5);mesh(rbox(0.82,0.1,0.92,0.04),m.A,front,0).position.set(0.2,H*0.72,-W/2-0.5);}
+ if(t>=3){const g=new T.Group();g.position.set(0,H+0.98,0);front.add(g);const gear=mesh(new T.TorusGeometry(0.28,0.08,8,12),GOLD,g);gear.rotation.y=Math.PI/2;for(let i=0;i<8;i++){const tooth=mesh(rbox(0.06,0.12,0.12,0.02),GOLD,g,0);const a=i/8*Math.PI*2;tooth.position.set(0,Math.sin(a)*0.38,Math.cos(a)*0.38);}const c2=new T.Mesh(sph(0.12),m.G);g.add(c2);}
+ return o;}
+// 3 หอบัญชาการหุ่น: columned hall topped with a mech helmet emblem; wings, banners and crown with tiers.
+function herohall(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
+ const H=[0.9,1.05,1.2,1.35][t];
+ const st=mesh(rbox(2.3,0.24,2.3,0.08),m.A,r);st.position.y=0.56;st.rotation.y=Math.PI/4;
+ const hall=mesh(rbox(1.7,H,1.7,0.12),WHITE,r);hall.position.y=0.68+H/2;hall.rotation.y=Math.PI/4;
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const c=mesh(cyl(0.09,0.1,H,16),i%2?WHITE:m.B,r);c.position.set(Math.cos(a)*1.18,0.68+H/2,Math.sin(a)*1.18);}
+ const roofY=0.68+H;mesh(cyl(1.38,1.3,0.18,8),m.A,r).position.y=roofY+0.09;mesh(torus(1.34,0.05),GOLD,r,0).position.y=roofY+0.18;
+ // helmet emblem
+ const hg=new T.Group();hg.position.y=roofY+0.2;r.add(hg);hg.scale.setScalar(0.85+t*0.08);
+ mesh(cyl(0.42,0.5,0.22,24),m.B,hg).position.y=0.11;
+ const helm=mesh(sph(0.5,1,0.9,1),WHITE,hg);helm.position.y=0.55;
+ const visor=new T.Mesh(rbox(0.12,0.16,0.58,0.06),m.G);visor.position.set(0.42,0.58,0.42);visor.rotation.y=Math.PI/4;hg.add(visor);
+ mesh(rbox(0.1,0.44,0.08,0.04),m.A,hg).position.set(0,0.98,0);
+ for(const s of [-1,1]){const ear=mesh(cyl(0.12,0.12,0.12,16),m.A,hg);ear.rotation.z=Math.PI/2;ear.rotation.y=Math.PI/4;ear.position.set(s*0.36,0.55,-s*0.36);}
+ if(t>=1){flag(r,m,1.35,-0.6,1.4+t*0.15);flag(r,m,-0.6,1.35,1.4+t*0.15);}
+ if(t>=2)for(const s of [-1,1]){const w=mesh(rbox(0.6,H*0.7,0.8,0.1),WHITE,r);w.position.set(s*1.25,0.44+H*0.35,-s*1.25);w.rotation.y=Math.PI/4;mesh(rbox(0.64,0.1,0.84,0.04),m.A,r,0).position.set(s*1.25,0.44+H*0.72,-s*1.25);}
+ if(t>=3){const cr=new T.Group();cr.position.y=roofY+0.2+1.25*(0.85+t*0.08);r.add(cr);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;const sp=mesh(new T.ConeGeometry(0.06,0.28,10),GOLD,cr,0);sp.position.set(Math.cos(a)*0.2,0.1,Math.sin(a)*0.2);}const gem=new T.Mesh(sph(0.1),m.G);gem.position.y=0.1;cr.add(gem);}
+ return o;}
+// 4 ศูนย์โดรนคู่หู: nest dome with a raised landing pad; hovering mini drones (more with tiers).
+function drone(m,p,parent,s){const g=new T.Group();g.position.copy(p);g.scale.setScalar(s);parent.add(g);mesh(sph(0.22,1,0.55,1),WHITE,g);const e=new T.Mesh(sph(0.08),m.G);e.position.set(0.17,0.02,0.1);g.add(e);
+ for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;mesh(cyl(0.025,0.025,0.26,6),STEEL,g,0).position.set(Math.cos(a)*0.17,0.04,Math.sin(a)*0.17);const rot=new T.Mesh(cyl(0.13,0.13,0.015,20),m.GL);rot.position.set(Math.cos(a)*0.3,0.08,Math.sin(a)*0.3);g.add(rot);mesh(torus(0.13,0.015),m.A,g,0).position.set(Math.cos(a)*0.3,0.08,Math.sin(a)*0.3);}}
+function dronehub(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
+ const nest=mesh(sph(1.12,1,0.62,1),WHITE,r);nest.position.y=0.44;mesh(torus(1.1,0.07),m.A,r,0).position.y=0.5;
+ for(let i=0;i<5;i++){const a=i/5*Math.PI*2+0.4;const hole=mesh(rbox(0.3,0.24,0.08,0.08),m.B,r,0);hole.position.set(Math.cos(a)*0.98,0.72,Math.sin(a)*0.98);hole.rotation.y=-a+Math.PI/2;hole.rotation.x=-0.3;}
+ const H=[0.7,0.85,1.0,1.15][t];const col=mesh(cyl(0.22,0.3,H,24),m.A,r);col.position.y=1.0+H/2;
+ const py=1.0+H;const pd=mesh(cyl(0.9+t*0.06,0.8+t*0.06,0.14,8),WHITE,r);pd.position.y=py;pd.rotation.y=Math.PI/8;mesh(torus(0.86+t*0.06,0.04),m.B,r,0).position.y=py+0.08;
+ const hx=new T.Mesh(new T.RingGeometry(0.3,0.42,6),m.G);hx.rotation.x=-Math.PI/2;hx.position.y=py+0.08;r.add(hx);
+ const n=[2,3,4,5][t];for(let i=0;i<n;i++){const a=i/n*Math.PI*2+0.5;drone(m,new T.Vector3(Math.cos(a)*(1.25+0.1*(i%2)),py+0.5+0.25*(i%2)+t*0.06,Math.sin(a)*(1.25+0.1*(i%2))),r,0.9+t*0.06);}
+ drone(m,new T.Vector3(0,py+0.35,0),r,1.2);
+ if(t>=2)for(let i=0;i<4;i++){const a=i/4*Math.PI*2;const b=new T.Mesh(sph(0.07),m.G);b.position.set(Math.cos(a)*(0.95+t*0.06),py+0.12,Math.sin(a)*(0.95+t*0.06));r.add(b);}
+ if(t>=3){const dish=mesh(new T.SphereGeometry(0.3,24,10,0,Math.PI*2,0,Math.PI/2.6),WHITE,r,0);dish.material=WHITE.clone();dish.material.side=T.DoubleSide;dish.rotation.x=Math.PI;dish.rotation.z=0.6;dish.position.set(-1.1,1.25,-0.5);mesh(cyl(0.04,0.04,0.7,8),STEEL,r).position.set(-1.1,0.9,-0.5);}
+ return o;}
+// 5 โรงตีอุปกรณ์: stone-and-steel forge, glowing furnace mouth, chimneys, big anvil; hammer arm with tiers.
+function forge(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
+ const H=[0.9,1.0,1.1,1.2][t];const g=new T.Group();g.rotation.y=-Math.PI/4;r.add(g);
+ const STONE=M(0xf1dcc0);const body=mesh(rbox(1.6,H,1.5,0.14),STONE,g);body.position.set(-0.2,0.44+H/2,0);
+ const tri=new T.Shape();tri.moveTo(-0.92,0);tri.lineTo(0.92,0);tri.lineTo(0,0.62);tri.lineTo(-0.92,0);const pr=new T.ExtrudeGeometry(tri,{depth:1.62,bevelEnabled:true,bevelSize:0.05,bevelThickness:0.05,bevelSegments:3});pr.translate(0,0,-0.81);pr.rotateY(Math.PI/2);const roofM=mesh(pr,m.A,g);roofM.position.set(-0.2,0.44+H,0);
+ for(let i=0;i<2;i++)mesh(rbox(1.64,0.07,1.54,0.03),i?m.B:STEEL,g,0).position.set(-0.2,0.6+i*H*0.45,0);
+ const mouth=mesh(rbox(0.1,0.64,0.78,0.14),m.B,g,0);mouth.position.set(0.62,0.44+0.4,0);
+ const fire=new T.Mesh(rbox(0.08,0.48,0.6,0.12),new T.MeshBasicMaterial({color:0xffa23a}));fire.position.set(0.66,0.44+0.38,0);g.add(fire);
+ const nc=[1,1,2,3][t];for(let i=0;i<nc;i++){const c=mesh(cyl(0.15,0.19,0.9+t*0.18,20),i%2?m.B:m.A,g);c.position.set(-0.6+i*0.38,0.44+H+0.5+t*0.09,-0.4+i*0.25);const top=new T.Mesh(sph(0.12),m.G);top.position.set(-0.6+i*0.38,0.44+H+0.98+t*0.18,-0.4+i*0.25);g.add(top);}
+ // anvil
+ const an=new T.Group();an.position.set(1.15,0.44,0.55);g.add(an);mesh(rbox(0.3,0.26,0.26,0.05),STEEL,an).position.y=0.13;
+ const top=mesh(rbox(0.56,0.16,0.3,0.05),m.A,an);top.position.y=0.34;mesh(new T.ConeGeometry(0.08,0.22,16).rotateZ(-Math.PI/2),m.A,an,0).position.set(0.36,0.36,0);
+ const ingot=new T.Mesh(rbox(0.22,0.06,0.1,0.02),m.G);ingot.position.set(0,0.45,0);an.add(ingot);
+ if(t>=1){const ha=new T.Group();ha.position.set(1.15,0.44,0.05);g.add(ha);mesh(cyl(0.06,0.08,1.1,12),m.B,ha).position.y=0.55;const arm=mesh(rbox(0.1,0.1,0.6,0.03),m.B,ha);arm.position.set(0,1.08,0.25);const hd=mesh(rbox(0.26,0.2,0.2,0.05),GOLD,ha);hd.position.set(0,0.98,0.55);}
+ if(t>=2)for(let i=0;i<3;i++){const s=mesh(rbox(0.36,0.06,0.5,0.02),i===1?m.A:m.B,g,0);s.position.set(-1.0,0.6+i*0.14,0.55);s.rotation.z=0.1;}
+ if(t>=3)for(let i=0;i<7;i++){const sp=new T.Mesh(sph(0.035),new T.MeshBasicMaterial({color:0xffd27a}));sp.position.set(1.15+Math.cos(i)*0.3,0.95+(i%3)*0.12,0.55+Math.sin(i*1.7)*0.25);g.add(sp);}
+ return o;}
+function wreck(kind){const m=mats(1),root=new T.Group(),r=new T.Group();root.add(r);pad(r,m,0);
+ for(let i=0;i<11;i++){const a=i*0.62+0.2,rr=0.3+((i*37)%10)/14;const p=mesh(rbox(0.3+(i%3)*0.14,0.15,0.28,0.05),i%3?WHITE:STEEL,r);p.position.set(Math.cos(a)*rr,0.52+(i%2)*0.08,Math.sin(a)*rr);p.rotation.set(i*0.7,i*1.3,i*0.4);}
+ return root;}
+const KINDS={tech428:tech,workshop428:workshop,herohall428:herohall,dronehub428:dronehub,forge428:forge};
+window.pose=(kind,lv,wr)=>{
+ if(cur)S.remove(cur);cur=wr?wreck(kind):KINDS[kind](lv);S.add(cur);cur.updateMatrixWorld(true);
+ R.render(S,cam);const o=new T.Vector3(0,0,0).project(cam);
+ return {img:canvas.toDataURL('image/png'),ox:(o.x+1)/2*canvas.width,oy:(1-o.y)/2*canvas.height};
+};
+window.ready=true;
+</script></body></html>
