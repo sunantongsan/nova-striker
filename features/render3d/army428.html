@@ -40,20 +40,24 @@ let cur=null;
 function mats(lv){const p=PAL[Math.max(1,Math.min(20,lv))-1];return {A:M(p[0]),B:M(p[1]),G:new T.MeshBasicMaterial({color:p[2]}),GL:new T.MeshBasicMaterial({color:p[2],transparent:true,opacity:0.45}),glow:p[2]};}
 function tierOf(lv){return lv>=16?3:lv>=11?2:lv>=6?1:0;}
 function pad(root,m,t){
- const PADM=M(0x8396b4);const p=mesh(lathe([[0,0],[1.95,0],[2.02,0.08],[1.92,0.32],[1.72,0.44],[0,0.44]],8),PADM,root);const top=mesh(cyl(1.7,1.7,0.04,8),M(0xb9c7da),root,0);top.position.y=0.45;top.rotation.y=Math.PI/8;p.rotation.y=Math.PI/8;
- const sk=mesh(lathe([[1.99,0.1],[2.01,0.14],[1.95,0.28],[1.93,0.3]],8),m.A,root,0);sk.rotation.y=Math.PI/8;
- mesh(torus(1.74,0.045),t>=2?m.B:GOLD,root,0).position.y=0.44;
- const n=8;for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.PI/8;const tab=mesh(rbox(0.3,0.12,0.06,0.03),i%2?m.B:m.A,root,1);tab.position.set(Math.cos(a)*1.93,0.2,Math.sin(a)*1.93);tab.rotation.y=-a+Math.PI/2;tab.rotation.x=-0.45;}
- if(t>=3)for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;const l=mesh(cyl(0.07,0.09,0.5,16),m.B,root);l.position.set(Math.cos(a)*1.62,0.68,Math.sin(a)*1.62);const b=new T.Mesh(sph(0.11),m.G);b.position.set(Math.cos(a)*1.62,0.98,Math.sin(a)*1.62);root.add(b);}
+ // square platform that sits on the 2x2 grid tiles (reads as a diamond in the isometric view)
+ const PADM=M(0x8396b4);mesh(rbox(3.3,0.36,3.3,0.12),PADM,root).position.y=0.18;
+ mesh(rbox(3.36,0.12,3.36,0.05),m.A,root,0).position.y=0.12;
+ const top=mesh(rbox(2.98,0.08,2.98,0.04),M(0xb9c7da),root,0);top.position.y=0.4;
+ const tr=t>=2?m.B:GOLD;for(const [x,z,w,d] of [[0,1.48,2.9,0.06],[0,-1.48,2.9,0.06],[1.48,0,0.06,2.9],[-1.48,0,0.06,2.9]])mesh(rbox(w,0.05,d,0.02),tr,root,0).position.set(x,0.45,z);
+ for(const sx of [-1,1])for(const sz of [-1,1]){const c=mesh(rbox(0.34,0.44,0.34,0.06),i2c(m,sx,sz),root);c.position.set(sx*1.5,0.22,sz*1.5);mesh(rbox(0.36,0.06,0.36,0.03),GOLD,root,0).position.set(sx*1.5,0.46,sz*1.5);
+  if(t>=3){const l=mesh(cyl(0.06,0.08,0.4,12),m.B,root);l.position.set(sx*1.5,0.68,sz*1.5);const bb=new T.Mesh(sph(0.1),m.G);bb.position.set(sx*1.5,0.92,sz*1.5);root.add(bb);}}
+ for(let i=0;i<3;i++){const tab=mesh(rbox(0.36,0.14,0.06,0.03),i%2?m.B:m.A,root,0);tab.position.set(-0.6+i*0.6,0.2,1.66);const tab2=mesh(rbox(0.06,0.14,0.36,0.03),i%2?m.B:m.A,root,0);tab2.position.set(1.66,0.2,-0.6+i*0.6);}
 }
+function i2c(m,sx,sz){return (sx+sz)===0?m.A:WHITE;}
 function flag(root,m,x,z,h){const f=new T.Group();f.position.set(x,0.44,z);root.add(f);mesh(cyl(0.035,0.035,h,10),STEEL,f).position.y=h/2;const cl=m.A.clone();cl.side=T.DoubleSide;const fl=mesh(new T.PlaneGeometry(0.42,0.26),cl,f,0);fl.position.set(0.22,h-0.16,0);mesh(sph(0.06),GOLD,f,0).position.y=h+0.03;}
 // 1 อาคารเทคโนโลยี: round lab, glass dome with a glowing energy core, antennas; rings/holo panels with tiers.
 function tech(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
  const h=[1.0,1.2,1.4,1.6][t];
- mesh(lathe([[0,0.44],[1.28,0.44],[1.32,0.5],[1.22,0.44+h],[1.05,0.5+h],[0,0.5+h]],40),WHITE,r);
- mesh(torus(1.3,0.06),m.A,r,0).position.y=0.6;mesh(torus(1.2,0.06),m.A,r,0).position.y=0.44+h*0.75;
- for(let i=0;i<6;i++){const a=i/6*Math.PI*2+0.3;const w=mesh(rbox(0.32,0.38,0.08,0.06),m.A,r,0);w.position.set(Math.cos(a)*1.24,0.44+h*0.45,Math.sin(a)*1.24);w.rotation.y=-a+Math.PI/2;const gl=new T.Mesh(rbox(0.22,0.26,0.05,0.04),m.G);gl.position.copy(w.position).multiplyScalar(1.02);gl.rotation.copy(w.rotation);r.add(gl);}
- const top=0.5+h;mesh(cyl(0.98,1.05,0.16,40),m.B,r).position.y=top+0.08;
+ mesh(rbox(2.3,h,2.3,0.16),WHITE,r).position.y=0.44+h/2;
+ mesh(rbox(2.36,0.12,2.36,0.05),m.A,r,0).position.y=0.56;mesh(rbox(2.36,0.1,2.36,0.05),m.A,r,0).position.y=0.44+h*0.82;
+ for(const [x,z,ry] of [[1.16,-0.5,0],[1.16,0.5,0],[-0.5,1.16,Math.PI/2],[0.5,1.16,Math.PI/2]]){const w=mesh(rbox(0.08,0.4,0.34,0.05),m.A,r,0);w.position.set(x,0.44+h*0.45,z);w.rotation.y=ry;const gl=new T.Mesh(rbox(0.06,0.3,0.24,0.04),m.G);gl.position.set(x*1.03,0.44+h*0.45,z*1.03);gl.rotation.y=ry;r.add(gl);}
+ const top=0.44+h;mesh(rbox(1.9,0.16,1.9,0.06),m.B,r).position.y=top+0.08;
  const core=new T.Mesh(sph(0.42+t*0.04),m.G);core.position.y=top+0.62;r.add(core);
  const dome=new T.Mesh(sph(0.86,1,0.95,1),GLASS);dome.position.y=top+0.18;r.add(dome);
  for(let i=0;i<=t;i++){const ring=mesh(new T.TorusGeometry(0.62+i*0.13,0.035,10,48),i%2?m.B:GOLD,r,0);ring.position.y=top+0.62;ring.rotation.set(0.9+i*0.5,i*0.8,0.3*i);}
@@ -64,12 +68,12 @@ function tech(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();
 // 2 โรงประกอบยานบุก: arched hangar with a big door, crane arm, chimney; more bays with tiers.
 function workshop(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
  const L=[1.9,2.1,2.3,2.5][t],W=1.7,H=[0.95,1.05,1.15,1.25][t];
- const body=mesh(rbox(L,H,W,0.12),WHITE,r);body.position.y=0.44+H/2;body.rotation.y=-Math.PI/4;mesh(rbox(L+0.04,0.14,W+0.04,0.05),m.B,r,0).rotation.y=-Math.PI/4;
- const roof=new T.Group();roof.position.y=0.44+H;roof.rotation.y=-Math.PI/4;r.add(roof);
+ const body=mesh(rbox(L,H,W,0.12),WHITE,r);body.position.y=0.44+H/2;body.rotation.y=0;mesh(rbox(L+0.04,0.14,W+0.04,0.05),m.B,r,0).position.y=0.5;
+ const roof=new T.Group();roof.position.y=0.44+H;roof.rotation.y=0;r.add(roof);
  const ar=new T.CylinderGeometry(W/2+0.06,W/2+0.06,L+0.06,40);ar.rotateZ(Math.PI/2);mesh(ar,m.A,roof);
  for(let i=0;i<=t+2;i++){const rib=mesh(new T.TorusGeometry(W/2+0.09,0.035,8,32,Math.PI),m.B,roof,0);rib.rotation.y=Math.PI/2;rib.position.x=-L/2+0.12+i*(L-0.24)/(t+2);}
  // door on the front face (facing camera, +x+z)
- const front=new T.Group();front.rotation.y=-Math.PI/4;front.position.y=0.44;r.add(front);
+ const front=new T.Group();front.rotation.y=0;front.position.y=0.44;r.add(front);
  const door=mesh(rbox(0.06,H*0.8,W*0.66,0.05),m.B,front,1);door.position.set(L/2+0.02,H*0.4,0);
  for(let i=0;i<4;i++){const s=mesh(rbox(0.07,0.04,W*0.6,0.02),WHITE,front,0);s.position.set(L/2+0.05,0.15+i*H*0.18,0);}
  const sign=new T.Mesh(new T.CircleGeometry(0.2,24),m.G);sign.position.set(L/2+0.06,H*0.9+0.05,0);sign.rotation.y=Math.PI/2;front.add(sign);
@@ -84,10 +88,10 @@ function workshop(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Grou
 // 3 หอบัญชาการหุ่น: columned hall topped with a mech helmet emblem; wings, banners and crown with tiers.
 function herohall(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
  const H=[0.9,1.05,1.2,1.35][t];
- const st=mesh(rbox(2.3,0.24,2.3,0.08),m.A,r);st.position.y=0.56;st.rotation.y=Math.PI/4;
- const hall=mesh(rbox(1.7,H,1.7,0.12),WHITE,r);hall.position.y=0.68+H/2;hall.rotation.y=Math.PI/4;
- for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const c=mesh(cyl(0.09,0.1,H,16),i%2?WHITE:m.B,r);c.position.set(Math.cos(a)*1.18,0.68+H/2,Math.sin(a)*1.18);}
- const roofY=0.68+H;mesh(cyl(1.38,1.3,0.18,8),m.A,r).position.y=roofY+0.09;mesh(torus(1.34,0.05),GOLD,r,0).position.y=roofY+0.18;
+ const st=mesh(rbox(2.3,0.24,2.3,0.08),m.A,r);st.position.y=0.56;
+ const hall=mesh(rbox(1.7,H,1.7,0.12),WHITE,r);hall.position.y=0.68+H/2;
+ for(const [x,z] of [[1,1],[1,-1],[-1,1],[1,0],[0,1],[-1,-1],[-1,0],[0,-1]]){const c=mesh(cyl(0.09,0.1,H,16),(x&&z)?m.B:WHITE,r);c.position.set(x*0.98,0.68+H/2,z*0.98);}
+ const roofY=0.68+H;mesh(rbox(2.25,0.18,2.25,0.06),m.A,r).position.y=roofY+0.09;for(const [x,z,w,d] of [[0,1.12,2.2,0.06],[0,-1.12,2.2,0.06],[1.12,0,0.06,2.2],[-1.12,0,0.06,2.2]])mesh(rbox(w,0.06,d,0.02),GOLD,r,0).position.set(x,roofY+0.19,z);
  // helmet emblem
  const hg=new T.Group();hg.position.y=roofY+0.2;r.add(hg);hg.scale.setScalar(0.85+t*0.08);
  mesh(cyl(0.42,0.5,0.22,24),m.B,hg).position.y=0.11;
@@ -96,17 +100,17 @@ function herohall(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Grou
  mesh(rbox(0.1,0.44,0.08,0.04),m.A,hg).position.set(0,0.98,0);
  for(const s of [-1,1]){const ear=mesh(cyl(0.12,0.12,0.12,16),m.A,hg);ear.rotation.z=Math.PI/2;ear.rotation.y=Math.PI/4;ear.position.set(s*0.36,0.55,-s*0.36);}
  if(t>=1){flag(r,m,1.35,-0.6,1.4+t*0.15);flag(r,m,-0.6,1.35,1.4+t*0.15);}
- if(t>=2)for(const s of [-1,1]){const w=mesh(rbox(0.6,H*0.7,0.8,0.1),WHITE,r);w.position.set(s*1.25,0.44+H*0.35,-s*1.25);w.rotation.y=Math.PI/4;mesh(rbox(0.64,0.1,0.84,0.04),m.A,r,0).position.set(s*1.25,0.44+H*0.72,-s*1.25);}
+ if(t>=2)for(const s of [-1,1]){const w=mesh(rbox(0.6,H*0.7,0.8,0.1),WHITE,r);w.position.set(s*1.25,0.44+H*0.35,-s*1.25);mesh(rbox(0.64,0.1,0.84,0.04),m.A,r,0).position.set(s*1.25,0.44+H*0.72,-s*1.25);}
  if(t>=3){const cr=new T.Group();cr.position.y=roofY+0.2+1.25*(0.85+t*0.08);r.add(cr);for(let i=0;i<5;i++){const a=i/5*Math.PI*2;const sp=mesh(new T.ConeGeometry(0.06,0.28,10),GOLD,cr,0);sp.position.set(Math.cos(a)*0.2,0.1,Math.sin(a)*0.2);}const gem=new T.Mesh(sph(0.1),m.G);gem.position.y=0.1;cr.add(gem);}
  return o;}
 // 4 ศูนย์โดรนคู่หู: nest dome with a raised landing pad; hovering mini drones (more with tiers).
 function drone(m,p,parent,s){const g=new T.Group();g.position.copy(p);g.scale.setScalar(s);parent.add(g);mesh(sph(0.22,1,0.55,1),WHITE,g);const e=new T.Mesh(sph(0.08),m.G);e.position.set(0.17,0.02,0.1);g.add(e);
  for(let i=0;i<4;i++){const a=i/4*Math.PI*2+Math.PI/4;mesh(cyl(0.025,0.025,0.26,6),STEEL,g,0).position.set(Math.cos(a)*0.17,0.04,Math.sin(a)*0.17);const rot=new T.Mesh(cyl(0.13,0.13,0.015,20),m.GL);rot.position.set(Math.cos(a)*0.3,0.08,Math.sin(a)*0.3);g.add(rot);mesh(torus(0.13,0.015),m.A,g,0).position.set(Math.cos(a)*0.3,0.08,Math.sin(a)*0.3);}}
 function dronehub(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
- const nest=mesh(sph(1.12,1,0.62,1),WHITE,r);nest.position.y=0.44;mesh(torus(1.1,0.07),m.A,r,0).position.y=0.5;
- for(let i=0;i<5;i++){const a=i/5*Math.PI*2+0.4;const hole=mesh(rbox(0.3,0.24,0.08,0.08),m.B,r,0);hole.position.set(Math.cos(a)*0.98,0.72,Math.sin(a)*0.98);hole.rotation.y=-a+Math.PI/2;hole.rotation.x=-0.3;}
- const H=[0.7,0.85,1.0,1.15][t];const col=mesh(cyl(0.22,0.3,H,24),m.A,r);col.position.y=1.0+H/2;
- const py=1.0+H;const pd=mesh(cyl(0.9+t*0.06,0.8+t*0.06,0.14,8),WHITE,r);pd.position.y=py;pd.rotation.y=Math.PI/8;mesh(torus(0.86+t*0.06,0.04),m.B,r,0).position.y=py+0.08;
+ mesh(rbox(2.2,0.7,2.2,0.18),WHITE,r).position.y=0.79;mesh(rbox(2.26,0.12,2.26,0.05),m.A,r,0).position.y=0.6;mesh(rbox(1.7,0.14,1.7,0.06),m.A,r).position.y=1.18;
+ for(const [x,z,ry] of [[1.11,-0.5,Math.PI/2],[1.11,0.5,Math.PI/2],[-0.5,1.11,0],[0.5,1.11,0]]){const hole=mesh(rbox(0.36,0.28,0.06,0.08),m.B,r,0);hole.position.set(x,0.82,z);hole.rotation.y=ry;}
+ const H=[0.6,0.75,0.9,1.05][t];const col=mesh(rbox(0.5,H,0.5,0.08),m.A,r);col.position.y=1.25+H/2;
+ const py=1.25+H;const pw=1.6+t*0.1;mesh(rbox(pw,0.14,pw,0.05),WHITE,r).position.y=py;mesh(rbox(pw+0.04,0.05,pw+0.04,0.02),m.B,r,0).position.y=py+0.06;
  const hx=new T.Mesh(new T.RingGeometry(0.3,0.42,6),m.G);hx.rotation.x=-Math.PI/2;hx.position.y=py+0.08;r.add(hx);
  const n=[2,3,4,5][t];for(let i=0;i<n;i++){const a=i/n*Math.PI*2+0.5;drone(m,new T.Vector3(Math.cos(a)*(1.25+0.1*(i%2)),py+0.5+0.25*(i%2)+t*0.06,Math.sin(a)*(1.25+0.1*(i%2))),r,0.9+t*0.06);}
  drone(m,new T.Vector3(0,py+0.35,0),r,1.2);
@@ -115,7 +119,7 @@ function dronehub(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Grou
  return o;}
 // 5 โรงตีอุปกรณ์: stone-and-steel forge, glowing furnace mouth, chimneys, big anvil; hammer arm with tiers.
 function forge(lv){const m=mats(lv),t=tierOf(lv),o=new T.Group(),r=new T.Group();o.add(r);pad(r,m,t);
- const H=[0.9,1.0,1.1,1.2][t];const g=new T.Group();g.rotation.y=-Math.PI/4;r.add(g);
+ const H=[0.9,1.0,1.1,1.2][t];const g=new T.Group();g.rotation.y=0;r.add(g);
  const STONE=M(0xf1dcc0);const body=mesh(rbox(1.6,H,1.5,0.14),STONE,g);body.position.set(-0.2,0.44+H/2,0);
  const tri=new T.Shape();tri.moveTo(-0.92,0);tri.lineTo(0.92,0);tri.lineTo(0,0.62);tri.lineTo(-0.92,0);const pr=new T.ExtrudeGeometry(tri,{depth:1.62,bevelEnabled:true,bevelSize:0.05,bevelThickness:0.05,bevelSegments:3});pr.translate(0,0,-0.81);pr.rotateY(Math.PI/2);const roofM=mesh(pr,m.A,g);roofM.position.set(-0.2,0.44+H,0);
  for(let i=0;i<2;i++)mesh(rbox(1.64,0.07,1.54,0.03),i?m.B:STEEL,g,0).position.set(-0.2,0.6+i*H*0.45,0);

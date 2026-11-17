@@ -27,7 +27,7 @@ function bonus428(t){var l=lv428(t);return l?K428[t].bonus(l)/100:0;}
 // ---------- art ----------
 var art428=new Image();art428.onload=function(){drawNeeded=true;};art428.src='assets/army428.webp';
 function draw428(b,p,size,col){if(!art428.complete||!art428.naturalWidth)return false;var row=ARMY428.kinds.indexOf(b.type);if(row<0)return false;
- var c=art428.naturalWidth/ARMY428.cols,w=size*1.08,h=w;ctx.drawImage(art428,col*c,row*c,c,c,p.x-w*ARMY428.ax,p.y-h*ARMY428.ay+size*.08,w,h);return true;}
+ var c=art428.naturalWidth/ARMY428.cols,w=size*1.2,h=w;ctx.drawImage(art428,col*c,row*c,c,c,p.x-w*ARMY428.ax,p.y-h*ARMY428.ay+size*.08,w,h);return true;}
 var newArt428=newBuildingArt;newBuildingArt=function(b,p,size){if(K428[b.type]&&draw428(b,p,size,Math.max(1,Math.min(20,b.lv||1))-1))return;return newArt428.apply(this,arguments);};
 var wreck428=drawWreck;drawWreck=function(b,p,size,enemy){if(K428[b.type]&&draw428(b,p,size,20))return;return wreck428.apply(this,arguments);};
 var card428=cardSprite;cardSprite=function(i){var t=TYPES428.find(function(k){return K428[k].sprite===i;});if(t)return '<span class="icon art428" style="background-position:0% '+(ARMY428.kinds.indexOf(t)*25)+'%"></span>';return card428.apply(this,arguments);};
