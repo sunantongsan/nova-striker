@@ -114,6 +114,7 @@ public class MainActivity extends Activity {
         cloud=new NovaCloud(this);
         game.addJavascriptInterface(cloud, "NovaCloud");
         billing=new NovaBilling(this,cloud);game.addJavascriptInterface(billing,"NovaBilling");
+        game.setHapticFeedbackEnabled(true);game.addJavascriptInterface(new NovaHaptics(game),"NovaHaptics");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
                 if (url.equals(GAME_URL)) { finishBoot(); game.getRootView().requestApplyInsets(); immersive303(); }

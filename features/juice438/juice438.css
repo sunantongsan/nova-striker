@@ -1,0 +1,69 @@
+/* 438: Modern mobile-game UI — bright glass pills with pastel neon edges (no dark theme). */
+
+/* ---------- floating resource HUD ---------- */
+html[data-ui438] body #app>header .resources{
+ background:linear-gradient(180deg,rgba(255,255,255,.46),rgba(214,243,255,.24))!important;
+ border:1.5px solid rgba(255,255,255,.9)!important;border-radius:999px!important;
+ padding:3px 8px!important;margin-top:6px!important;column-gap:4px!important;
+ box-shadow:0 6px 16px rgba(38,118,168,.24),0 0 0 1px rgba(130,226,255,.5),0 0 14px rgba(120,225,255,.38),inset 0 1px 0 #fff!important;
+ -webkit-backdrop-filter:blur(8px) saturate(1.35);backdrop-filter:blur(8px) saturate(1.35);
+ animation:hudFloat438 4.2s ease-in-out infinite;
+}
+@keyframes hudFloat438{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+html[data-ui438] body #app>header .resources>span,
+html[data-ui438] body #app>header .resources>.gembalance,
+html[data-ui438] body #app>header .resources>#builderBadge{
+ border-radius:999px!important;padding:1px 8px 2px 4px!important;min-height:24px!important;
+ background:rgba(255,255,255,.2)!important;border:1px solid rgba(255,255,255,.65)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 3px rgba(30,90,130,.18)!important;
+ transition:transform .25s cubic-bezier(.34,1.56,.64,1)!important;
+}
+/* storage fill as a thin glowing bar under the number */
+html[data-ui438] body #app>header .resources>span:has(#gold){background:linear-gradient(90deg,#ffd84d var(--fill261,0%),rgba(255,255,255,.25) 0) bottom/100% 3px no-repeat,rgba(255,250,215,.28)!important}
+html[data-ui438] body #app>header .resources>span:has(#energy){background:linear-gradient(90deg,#6fe85a var(--fill261,0%),rgba(255,255,255,.25) 0) bottom/100% 3px no-repeat,rgba(225,255,222,.28)!important}
+html[data-ui438] body #app>header .resources>span.bump438,
+html[data-ui438] body #app>header .resources>button.bump438{transform:scale(1.16)!important}
+
+/* ---------- pill buttons ---------- */
+html[data-ui438] body #modal#modal#modal button:not(.promoCard425):not(.novaInfo360):not(.window-close243):not(.c394-dim),
+html[data-ui438] body #app .battle-actions243 button,
+html[data-ui438] body #moveControls#moveControls#moveControls button,
+html[data-ui438] body #selection#selection#selection button,
+html[data-ui438] body #welcome#welcome#welcome button,
+html[data-ui438] body #baseNameGate#baseNameGate#baseNameGate button{
+ border-radius:999px!important;
+ box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.85),inset 0 -3px 0 rgba(0,40,80,.12),0 0 0 1px rgba(150,228,255,.55),0 3px 0 rgba(40,100,150,.22),0 0 9px rgba(120,225,255,.28)!important;
+ transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease,filter .2s ease!important;
+}
+html[data-ui438] body #modal#modal#modal button.green,html[data-ui438] body #welcome#welcome#welcome button.green,html[data-ui438] body #baseNameGate#baseNameGate#baseNameGate button.green,html[data-ui438] body #moveControls#moveControls#moveControls button.green{
+ box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.8),inset 0 -3px 0 rgba(20,90,10,.18),0 0 0 1px rgba(190,255,150,.75),0 3px 0 rgba(50,130,30,.32),0 0 10px rgba(150,255,110,.35)!important}
+html[data-ui438] body #modal#modal#modal button:disabled{box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.6),0 2px 0 rgba(0,0,0,.08)!important}
+/* round close + info buttons */
+html[data-ui438] body #modal#modal#modal .window-close243{border-radius:50%!important;transition:transform .22s cubic-bezier(.34,1.56,.64,1)!important;box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.75),0 0 0 2px rgba(255,255,255,.85),0 3px 0 rgba(150,30,20,.3),0 0 10px rgba(255,150,140,.45)!important}
+/* glass rail + floating corner buttons */
+html[data-ui438] body #homebar#homebar#homebar button,html[data-ui438] body #dailyCheckin340#dailyCheckin340#dailyCheckin340,html[data-ui438] body #app>header #skillShop342#skillShop342#skillShop342,html[data-ui438] body #titanEntry342#titanEntry342#titanEntry342,html[data-ui438] body #playerSearch382#playerSearch382#playerSearch382,html[data-ui438] body #botAttack376#botAttack376#botAttack376{
+ border-radius:22px!important;
+ box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px rgba(255,255,255,.85),0 0 0 3px rgba(140,226,255,.35),0 6px 14px rgba(30,100,150,.25),0 0 14px rgba(120,225,255,.3)!important;
+ transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease,filter .2s ease!important;
+}
+html[data-ui438] body #app>header #skillShop342#skillShop342#skillShop342{border-radius:50%!important}
+html[data-ui438] body #deploy#deploy#deploy button,html[data-ui438] body #modal#modal#modal .promoCard425{transition:transform .22s cubic-bezier(.34,1.56,.64,1),filter .2s ease!important}
+
+/* ---------- press: squish + neon flash ---------- */
+html[data-ui438] body #modal#modal#modal .press438,html[data-ui438] body #homebar#homebar#homebar .press438,html[data-ui438] body #raidbar#raidbar#raidbar .press438,html[data-ui438] body #app#app#app .press438,html[data-ui438] body #dailyCheckin340#dailyCheckin340#dailyCheckin340.press438{
+ transform:scale(.92)!important;filter:brightness(1.08) saturate(1.12)!important;
+ transition:transform .06s ease-out,box-shadow .06s ease-out,filter .06s ease-out!important;
+ box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.9),0 0 0 2px #fff,0 0 14px 4px rgba(110,235,255,.9),0 0 28px 6px rgba(255,150,225,.45)!important;
+}
+html[data-ui438] body #modal#modal#modal .press438.green,html[data-ui438] body #homebar#homebar#homebar .press438.green,html[data-ui438] body #raidbar#raidbar#raidbar .press438.green,html[data-ui438] body #app#app#app .press438.green{box-shadow:inset 0 9px 10px -7px rgba(255,255,255,.9),0 0 0 2px #fff,0 0 14px 4px rgba(150,255,110,.95),0 0 28px 6px rgba(255,240,140,.45)!important}
+html[data-ui438] body #deploy#deploy#deploy .press438,html[data-ui438] body #modal#modal#modal .promoCard425.press438{box-shadow:none!important}
+@media (prefers-reduced-motion:reduce){html[data-ui438] body #app>header .resources{animation:none}html[data-ui438] body #modal#modal#modal .press438,html[data-ui438] body #homebar#homebar#homebar .press438,html[data-ui438] body #raidbar#raidbar#raidbar .press438,html[data-ui438] body #app#app#app .press438,html[data-ui438] body #dailyCheckin340#dailyCheckin340#dailyCheckin340.press438{transform:none!important}}
+
+/* ---------- floating +/- numbers next to the HUD ---------- */
+#fx438{position:fixed;inset:0;pointer-events:none;z-index:2147483000;overflow:hidden}
+#fx438 .pop438{position:absolute;left:0;top:0;font:900 15px/1 Tahoma,Arial,sans-serif;white-space:nowrap;color:#fff;
+ -webkit-text-stroke:3px #10314a;paint-order:stroke fill;text-shadow:0 2px 4px rgba(0,0,0,.25);opacity:0;will-change:transform,opacity}
+#fx438 .pop438.go{animation:pop438 1.1s cubic-bezier(.2,.8,.3,1) forwards}
+#fx438 .pop438.gain-gold{color:#ffe14d}#fx438 .pop438.gain-power{color:#8dff6a}#fx438 .pop438.gain-gems{color:#9ff6ff}
+#fx438 .pop438.spend{color:#ffb3b3;font-size:13px}
+@keyframes pop438{0%{opacity:0;transform:translate(var(--x),var(--y)) scale(.3)}14%{opacity:1;transform:translate(var(--x),calc(var(--y) - 6px)) scale(1.25)}28%{transform:translate(var(--x),calc(var(--y) - 10px)) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(var(--x),calc(var(--y) - 38px)) scale(1)}}
