@@ -14,7 +14,7 @@ const drone={kind:3,x:1,y:5,hp:130,max:130,cool:0,route:[]},ally={kind:0,x:7,y:5
 const d={buildings:[{type:'wall',x:3,y:5,hp:100}],defenders:[drone,ally],enemies:[],fx:[]};
 for(let i=0;i<30;i++)defenderTick({d:{research:{weapon:0}}},d,.1);assert(drone.x>3);assert(ally.hp>1);
 // Ground defenders ignore nearby aircraft and engage the next valid ground target.
-const tank={kind:1,x:5,y:5,hp:650,max:650,cool:0,route:[]};const air={kind:3,x:5.2,y:5,hp:130,max:130};const infantry={kind:0,x:6,y:5,hp:500,max:500};
+const tank={kind:6,x:5,y:5,hp:650,max:650,cool:0,route:[]};const air={kind:3,x:5.2,y:5,hp:130,max:130};const infantry={kind:0,x:6,y:5,hp:500,max:500};
 defenderTick({d:{research:{weapon:0}}},{buildings:[],defenders:[tank],enemies:[air,infantry],fx:[]},.01);assert.equal(air.hp,130);assert(infantry.hp<500);
 assert.equal(U[7].hp,720);assert.equal(U[7].damage,230);assert.equal(U[7].cost,360);assert.equal(U[7].time,36);
 assert.equal(B.silo.cost,6000);assert.equal(B.landmine.cost,1200);

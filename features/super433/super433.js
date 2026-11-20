@@ -1,12 +1,12 @@
 // 433: ทหารเสริมพลัง (Clash-style super troops). Boost a troop type for 3 days with Syrup or Golden Eggs (two types at a time);
 // every unit of that type you deploy is a burning super version: +25% HP and damage, flames on its body, and a new trick.
 //   0 เป็ดส้อม -> เป็ดส้อมเพลิง      shots also scorch a second target nearby (50%)
-//   2 หมาดัลเมเชียน  -> หุ่นจรวดคู่        fires two rockets per shot (+60% damage)
-//   1 เป็ดขุดดิน   -> เป็ดขุดดินหนามเพลิง     triple damage to walls
+//   2 เป็ดยักษ์กระทะ  -> หุ่นจรวดคู่        fires two rockets per shot (+60% damage)
+//   1 เป็ดหนังสติ๊ก   -> เป็ดหนังสติ๊กหนามเพลิง     triple damage to walls
 //   6 เป็ดหม้อ -> เป็ดหม้อสะท้อน      reflects 30% of turret damage back
 var SUPER433={0:{th:'เป็ดส้อมเพลิง',en:'Blaze Ranger',aTh:'กระสุนไฟลามโดนเป้าข้าง ๆ อีก 1 (50%)',aEn:'Shots scorch a second nearby target (50%)'},
  2:{th:'หุ่นจรวดคู่',en:'Twin Rocketeer',aTh:'ยิงจรวดทีละ 2 ลูก (แรงขึ้น 60%)',aEn:'Two rockets per shot (+60% damage)'},
- 1:{th:'เป็ดขุดดินหนามเพลิง',en:'Spike Tank',aTh:'ทำลายกำแพงแรงขึ้น 3 เท่า',aEn:'Triple damage to walls'},
+ 1:{th:'เป็ดหนังสติ๊กหนามเพลิง',en:'Spike Tank',aTh:'ทำลายกำแพงแรงขึ้น 3 เท่า',aEn:'Triple damage to walls'},
  6:{th:'เป็ดหม้อสะท้อน',en:'Mirror Shield',aTh:'สะท้อนดาเมจป้อมกลับ 30%',aEn:'Reflects 30% of turret damage'}};
 var SUPER_R433=2000,SUPER_NOVA433=80,SUPER_DAYS433=3,SUPER_MAX433=2,SUPER_HQ433=7;
 function boosts433(){var b=E.d.boost433;if(!b||typeof b!=='object')b=E.d.boost433={};var now=Date.now();Object.keys(b).forEach(function(k){if(!(b[k]>now))delete b[k];});return b;}

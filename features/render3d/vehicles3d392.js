@@ -26,7 +26,7 @@ drawTank=function(t,p){
 };
 var veh3dMount392=weaponMount;
 weaponMount=function(o){
- if(o&&!o.type&&!o.alien&&(o.kind===1||o.kind===9||o.kind===5)){
+ if(o&&!o.type&&!o.alien&&(o.kind===9||o.kind===5)){
   var n=o.kind===5?'heli':o.kind===9?'tankTurret:plasma':'tankTurret',v=veh3d392[n];
   if(v){var m=v.meta,a=o.aim===undefined?(o.heading===undefined?Math.PI/4:o.heading):o.aim,mz=m.muzzle[veh3dDir392(a)],k=veh3dK392(n),alt=o.kind===5?veh3dSize392.heli[1]:0,y=(mz[1]-m.oy)*k-alt;return {x:(mz[0]-m.ox)*k,y:y,height:-y};}}
  return veh3dMount392(o);

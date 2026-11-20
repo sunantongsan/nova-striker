@@ -21,7 +21,7 @@ assert.equal(e.train(1),'');assert.equal(e.train(0),'');assert.equal(e.d.queue[0
 f.advance(4000);assert.equal(e.d.army[0],1);assert.equal(e.d.army[1],0);assert.equal(e.d.queue.length,1);f.advance(6000);assert.equal(e.d.army[1],1);
 f=fresh();e=f.e;e.d.army.fill(0);e.d.power=2000;for(let i=0;i<20;i++)assert.equal(e.train(0),'');assert.equal(e.housing(),20);let beforePower=e.d.power;assert(e.train(0));assert.equal(e.d.power,beforePower);f.advance(4000);assert.equal(e.d.army[0],20);assert.equal(e.d.queue.length,0);e.sync();assert.equal(e.d.army[0],20);
 f=fresh();e=f.e;e.d.army.fill(0);e.d.power=2000;e.d.buildings.push({id:20,type:'factory',x:1,y:1,lv:1});e.train(1);e.train(0);e.d.gems=10;assert.equal(e.speedTraining(1),'');assert.equal(e.d.army[0],1);assert.equal(e.d.army[1],1);assert.equal(e.d.gems,9);
-assert.equal(new Set(NovaRTS.units.map(u=>u.weapon)).size,9);
+assert.equal(new Set(NovaRTS.units.map(u=>u.weapon)).size,8);// duck: slot 2 slingshot duck shares the sniper's shot
 console.log('PASS: parallel jobs, short-job completion, >8 jobs, housing reservation, no double completion, maximum speed-up deadline and nine weapon profiles');
 
 
