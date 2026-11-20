@@ -4,7 +4,7 @@
 //   forge428     โรงตีอุปกรณ์         (HQ6)  infantry    +1.5% hitpoints per level
 //   workshop428  โรงประกอบยานบุก      (HQ7)  vehicles    +1.5% hitpoints per level
 //   dronehub428  ศูนย์โดรนคู่หู        (HQ8)  air units   +1.5% hitpoints per level
-//   herohall428  หอบัญชาการหุ่น       (HQ9)  NOVA mech   +2% hitpoints and damage per level
+//   herohall428  หอบัญชาการหุ่น       (HQ9)  Duck Colonel   +2% hitpoints and damage per level
 // Art: assets/army428.webp (features/render3d/army428.html). Paint changes every level, shape every 5 levels.
 var ARMY428=army428Meta,K428={
  tech428:{th:'อาคารเทคโนโลยี',en:'Tech Center',req:5,res:'power',base:60000,hp:1300,sprite:920,
@@ -16,7 +16,7 @@ var ARMY428=army428Meta,K428={
  dronehub428:{th:'ศูนย์โดรนคู่หู',en:'Drone Hub',req:8,res:'power',base:110000,hp:1400,sprite:923,
   bonus:function(lv){return lv*1.5;},rowTh:'พลังชีวิตหน่วยอากาศ',rowEn:'Hitpoints, air units',unit:'%'},
  herohall428:{th:'หอบัญชาการหุ่น',en:'Mech Command Hall',req:9,res:'power',base:140000,hp:2000,sprite:924,
-  bonus:function(lv){return lv*2;},rowTh:'พลังชีวิตและโจมตีหุ่น NOVA',rowEn:'NOVA mech hitpoints and damage',unit:'%'}};
+  bonus:function(lv){return lv*2;},rowTh:'พลังชีวิตและโจมตีผู้พันเป็ด',rowEn:'Duck Colonel hitpoints and damage',unit:'%'}};
 var TYPES428=Object.keys(K428);
 TYPES428.forEach(function(t){var k=K428[t];B[t]={name:mt251(k.th,k.en),cost:0,power:0,cap:1,sprite:k.sprite,hp:k.hp,require:k.req,time:0};
  progression369[t]={};for(var lv=1;lv<=20;lv++)progression369[t][lv]={amount:Math.round(k.base*Math.pow(1.36,lv-1)/1000)*1000,seconds:Math.round(1800*Math.pow(lv,1.6)),resource:k.res};

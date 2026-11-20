@@ -25,7 +25,7 @@ await db.exec(fs.readFileSync('backend/nova_mining_251.sql','utf8'));
 await db.exec(fs.readFileSync('backend/nova_wallet_255.sql','utf8'));
 await db.exec(fs.readFileSync('backend/nova_raids_255.sql','utf8'));
 
-// Legacy in-flight jobs remain crystal-funded and must never be charged NOVA on retry.
+// Legacy in-flight jobs remain crystal-funded and must never be charged Golden Eggs on retry.
 await db.exec('update public.nova_war_players set crystals=50000,produced_at=now()');
 const old=nonce();let r=await call('research',{enhance:'unit:1',enhance_path245:'attack',request_id:old});
 await db.exec(fs.readFileSync('backend/nova_enhance_nova_257.sql','utf8'));
@@ -44,10 +44,10 @@ await assert.rejects(()=>call('research',{...q,request_id:nonce(),enhance:'unit:
 await assert.rejects(()=>call('research',{enhance:'unit:2',request_id:nonce()}),/อัปเดตเกม/);
 await db.exec("update nova_private.upgrade_jobs225 set finishes_at=now()-interval '1 second'");r=await call('status');assert.equal(r.enhancements['unit:0'],1);assert.equal(r.enhancement_paths245['unit:0'].attack,1);await call('research',q);assert.equal(await wallet(),49900);
 await db.exec('update nova_private.test_wallets set gems=99');
-await assert.rejects(()=>call('research',{...q,request_id:nonce(),enhance:'unit:2'}),/NOVA ไม่พอ/);assert.equal(await wallet(),99);
+await assert.rejects(()=>call('research',{...q,request_id:nonce(),enhance:'unit:2'}),/(ไข่ทอง|NOVA) ?ไม่พอ/);assert.equal(await wallet(),99);
 await db.exec('update nova_private.test_wallets set gems=10000');
 await db.exec("update public.nova_war_players set enhancements=jsonb_set(enhancements,'{building:mine}','9')");
 r=await call('research',{...q,enhance:'building:mine',enhance_path245:'production',request_id:nonce(),quoted_level257:9,quoted_cost257:5500});assert.equal(await wallet(),4500);assert.equal(r.receipt.level,10);
 await db.exec('set role authenticated');await assert.rejects(()=>db.query("select nova_private.command_before_timers225('status','{}')"));await db.exec('reset role');
-console.log('PASS NOVA enhancements: zero crystals, atomic charge, quotes, insufficient funds, cap price, legacy jobs, instant paths, replay and private ACL');await db.close();})().catch(e=>{console.error(e);process.exit(1)});
+console.log('PASS Golden Eggs enhancements: zero crystals, atomic charge, quotes, insufficient funds, cap price, legacy jobs, instant paths, replay and private ACL');await db.close();})().catch(e=>{console.error(e);process.exit(1)});
 

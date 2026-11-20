@@ -88,12 +88,12 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
   await page.click('#welcomeGuest');await until(page,/สวัสดี/,6000);await page.screenshot({path:out+'/coach394-hello.png'});
   await tapGo(page);await until(page,/ตั้งชื่อฐาน/,3000);await tapGo(page);
   await page.fill('#baseNameInput','ฐานทดสอบ');await page.click('#baseNameSubmit');
-  await until(page,/สร้างเหมืองทอง/,4000);await tapRing(page);
-  await until(page,/ที่เหมืองทอง/,3000);await page.screenshot({path:out+'/coach394-build.png'});await tapRing(page);
-  await until(page,/วางเหมืองทอง/,3000);for(const [x,y] of [[195,560],[120,520],[270,600],[200,650]]){await tapWorld(page,x,y);if(!/วางเหมืองทอง/.test(await text(page)))break;}
+  await until(page,/สร้างปั๊มน้ำผึ้ง/,4000);await tapRing(page);
+  await until(page,/ที่ปั๊มน้ำผึ้ง/,3000);await page.screenshot({path:out+'/coach394-build.png'});await tapRing(page);
+  await until(page,/วางปั๊มน้ำผึ้ง/,3000);for(const [x,y] of [[195,560],[120,520],[270,600],[200,650]]){await tapWorld(page,x,y);if(!/วางปั๊มน้ำผึ้ง/.test(await text(page)))break;}
   await until(page,/ทองและพลังงาน/,3000);await tapGo(page);
   await until(page,/กองทัพ/,3000);await tapRing(page);
-  await until(page,/เรนเจอร์/,3000);await page.screenshot({path:out+'/coach394-army.png'});await tapRing(page);
+  await until(page,/เป็ดส้อม/,3000);await page.screenshot({path:out+'/coach394-army.png'});await tapRing(page);
   await until(page,/ปิดหน้าต่าง/,3000);await tapRing(page);
   await until(page,/บุกด่าน/,3000);await tapRing(page);
   await until(page,/ด่าน 1/,3000);await tapRing(page);

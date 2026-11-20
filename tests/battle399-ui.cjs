@@ -16,7 +16,7 @@ function boot(data={},platform='android'){
 const a=boot({novaRTSIntro:'1',novaLanguage:'th'}),e=a.s.test232.e,G=a.s.Game,owner='10000000-0000-4000-8000-000000000001';
 let ads=0;a.s.NovaAds={rewardTest248(who,id){assert.equal(who,owner);ads++;},acknowledgeTest248(){}};
 const reply=d=>{const q=a.requests.at(-1);a.s.novaCloudEvent('war',{action:q.a,request_id:q.id,data:{owner,...d}});};
-// Bot win: 2 NOVA queued; video x3 = +4 NOVA from server and 2x more resources locally.
+// Bot win: 2 ไข่ทอง queued; video x3 = +4 ไข่ทอง from server and 2x more resources locally.
 e.d.onlineCrystal={owner};e.d.gems=10;e.d.gold=0;e.d.power=0;e.scout(1);e.raid.buildings.forEach(b=>b.hp=0);const res=e.finish();assert.equal(res.gems,2);assert(res.win399);const base={gold:e.d.gold,power:e.d.power};assert(base.gold>0);
 G.campaignAd399();let q=a.requests.at(-1);assert.equal(q.p.campaign399,'prepare');assert.equal(q.a,'test_status');const wid=q.p.id;assert.equal(wid,res.win399.id);
 reply({campaign399:{owner,id:wid,stage:1,amount:2,bonus:0,claimed:false,provider:'test',credited:2}});assert.equal(e.d.gems,12,'win credited once registered');assert.equal(ads,1);assert.equal((e.d.campaignPending399||[]).length,0);
@@ -29,4 +29,4 @@ const battle='30000000-0000-4000-8000-000000000001',pending=[{battle,gold:100,po
 G.raidRewards260(battle);q=a.requests.at(-1);a.s.novaCloudEvent('war',{action:q.a,request_id:q.id,data:{owner,raid260:true,pending}});assert(a.el('modal').innerHTML.includes('collectRaid260')&&a.el('modal').innerHTML.includes('x3'));
 G.collectRaid260(battle);q=a.requests.at(-1);assert.equal(q.a,'test_claim');assert.equal(q.p.raid260,'collect');assert.equal(ads,1,'collect needs no video');
 a.s.novaCloudEvent('war',{action:q.a,request_id:q.id,data:{owner,raid260:true,pending:[],receipt:{id:q.p.request_id,battle,claimed:true,multiplier:1,granted:{gold:100,power:50,nova:5}}}});assert(!e.d.pendingRaid260);assert(a.el('modal').innerHTML.includes('5'));
-console.log('PASS battle399 UI: bot win 2 NOVA, video x3 NOVA + resources once, raid collect x1 without video');
+console.log('PASS battle399 UI: bot win 2 NOVA, video x3 ไข่ทอง + resources once, raid collect x1 without video');

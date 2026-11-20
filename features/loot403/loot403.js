@@ -1,10 +1,10 @@
-// 403: liquid resources, tall glass tanks, loot preview and NOVA loot rules.
+// 403: liquid resources, tall glass tanks, loot preview and Golden Eggs loot rules.
 // * Names (presentation only; save keys and server fields stay gold/power/crystals):
-//   gold = แร่ Y (Ore Y, golden liquid), power = แร่ G (Ore G, green), crystals = แร่ R (Ore R, red).
+//   gold = น้ำผึ้ง (Honey, golden liquid), power = น้ำผัก (Veggie juice, green), crystals = ไซรัป (Syrup, red).
 // * Gold / energy / fluid storages are tall glass tanks whose liquid level shows how full they are
 //   (home: own storage, raid: loot still available). Taller with every 4 levels.
-// * Scouting shows the loot on offer and the NOVA a win would pay. NOVA can never be looted.
-//   NOVA by HQ gap: target same or higher = full (bot 2, player 5 at 100%), 1-2 lower = 1, 3+ lower = 0.
+// * Scouting shows the loot on offer and the Golden Eggs a win would pay. Golden Eggs can never be looted.
+//   Golden Eggs by HQ gap: target same or higher = full (bot 2, player 5 at 100%), 1-2 lower = 1, 3+ lower = 0.
 //   A bot base already cleared with 3 stars pays resources only. The server applies the same rules.
 // * Bot bases lose what is looted and refill over 24 hours, so farming one level runs dry.
 var tankArt403=new Image();tankArt403.onload=function(){drawNeeded=true;};tankArt403.src='assets/tanks403.webp';
@@ -46,16 +46,16 @@ drawWreck=function(b,p,size,enemy){if(TANK403[b.type]!==undefined&&tankArt403.co
 
 // ---------- names ----------
 function spaced403(src,re,name){return src.replace(re,function(m,o,s){var a=s[o-1]||'',z=s[o+m.length]||'';return (/[ก-๎]/.test(a)?' ':'')+name+(/[ก-ฮ]/.test(z)?' ':'');});}
-var KEEP403=/ปืนใหญ่พลังงาน|กับระเบิดพลังงาน|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Energy Cannon|Energy Cores?|energy cores?|Energy Mine|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
-var NAMES403=[[/โรงสังเคราะห์ผลึก/g,'โรงสกัดแร่ R'],[/คลังผลึก/g,'แท้งแร่ R'],[/คลังทอง/g,'แท้งแร่ Y'],[/ถังเก็บพลังงาน/g,'แท้งแร่ G'],[/เหมืองทอง/g,'เหมืองแร่ Y'],[/เครื่องสกัดพลังงาน/g,'เครื่องขุดแร่ G'],
- [/Crystal Synthesizer/g,'Ore R Extractor'],[/Crystal Storage/g,'Ore R Tank'],[/Gold Storage/g,'Ore Y Tank'],[/Energy Storage/g,'Ore G Tank'],[/Gold Mine/g,'Ore Y Mine'],[/Energy Extractor/g,'Ore G Drill'],
- [/\bCrystals\b/g,'Ore R'],[/\bcrystals\b/g,'Ore R'],[/\bCrystal\b/g,'Ore R'],[/\bcrystal\b/g,'Ore R'],[/\bGold\b/g,'Ore Y'],[/\bgold\b/g,'Ore Y'],[/\bEnergy\b/g,'Ore G'],[/\benergy\b/g,'Ore G']];
-var TEST403=/ผลึก|พลังงาน|ทอง|[Cc]rystal|[Gg]old|[Ee]nergy/;
+var KEEP403=/หม้อความดันยิงไกล|กับดักหนูยักษ์|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Pressure-Cooker Mortar|Energy Cores?|energy cores?|Giant Mousetrap|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
+var NAMES403=[[/เตาเคี่ยวไซรัป/g,'เตาเคี่ยวไซรัป'],[/โหลไซรัป/g,'โหลไซรัป'],[/โหลน้ำผึ้ง/g,'แท้งน้ำผึ้ง'],[/โหลน้ำผัก/g,'แท้งน้ำผัก'],[/ปั๊มน้ำผึ้ง/g,'ปั๊มน้ำผึ้ง'],[/เครื่องปั่นผัก/g,'เครื่องปั่นผัก'],
+ [/Syrup Stove/g,'Syrup Stove'],[/Syrup Jar/g,'Syrup Jar'],[/Honey Jar/g,'Honey Tank'],[/Veggie Jar/g,'Veggie juice Tank'],[/Honey Pump/g,'Honey Mine'],[/Veggie Blender/g,'Veggie juice Drill'],
+ [/\bCrystals\b/g,'Syrup'],[/\bcrystals\b/g,'Syrup'],[/\bCrystal\b/g,'Syrup'],[/\bcrystal\b/g,'Syrup'],[/\bGold\b/g,'Honey'],[/\bgold\b/g,'Honey'],[/\bEnergy\b/g,'Veggie juice'],[/\benergy\b/g,'Veggie juice']];
+var TEST403=/ไซรัป|พลังงาน|ทอง|[Cc]rystal|[Gg]old|[Ee]nergy/;
 function rename403(text){
  if(typeof text!=='string'||!TEST403.test(text))return text;
  var kept=[];text=text.replace(KEEP403,function(m){kept.push(m);return '\u0001'+(kept.length-1)+'\u0002';});
  NAMES403.forEach(function(n){text=text.replace(n[0],n[1]);});
- text=spaced403(text,/ผลึก/g,'แร่ R');text=spaced403(text,/พลังงาน/g,'แร่ G');text=spaced403(text,/ทอง/g,'แร่ Y');
+ text=spaced403(text,/ไซรัป/g,'ไซรัป');text=spaced403(text,/พลังงาน/g,'น้ำผัก');text=spaced403(text,/ทอง/g,'น้ำผึ้ง');
  return text.replace(/\u0001(\d+)\u0002/g,function(m,i){return kept[+i];});
 }
 function paint403(node){
@@ -74,7 +74,7 @@ if(root.CanvasRenderingContext2D){var fill403=CanvasRenderingContext2D.prototype
  CanvasRenderingContext2D.prototype.strokeText=function(t){arguments[0]=rename403(t);return stroke403.apply(this,arguments);};}
 resourceIcon238=function(k){var i={gold:0,power:1,crystals:2}[k];if(i===undefined)return '';return '<span class="fluid403" role="img" aria-label="'+rename403(resourceName233(k))+'" style="background-position:'+(i*50)+'% 50%"></span>';};
 
-// ---------- NOVA rules ----------
+// ---------- Golden Eggs rules ----------
 function novaRate403(mine,target,full){mine=mine||1;target=target||1;return mine<=target?full:mine-target<=2?Math.min(1,full):0;}
 function botFrac403(e,n){var v=(e.d.botLoot403||{})[n];if(!v)return 1;return Math.max(0,Math.min(1,(Number(v.f)||0)+(Date.now()-(Number(v.at)||0))/864e5));}
 var scout403=Engine.prototype.scout;
@@ -98,7 +98,7 @@ function wrapFinish403(e){if(!e||e.finish403)return;var finish403=e.finish;e.fin
  this.save();return res;
 };e.finish403=true;}
 wrapFinish403(E);
-// Bot win reports carry the expected NOVA so the server can only lower it (never raise).
+// Bot win reports carry the expected Golden Eggs so the server can only lower it (never raise).
 camp399Send=function(mode,p){
  if(camp399Busy||warBusy||guest288||!root.NovaCloud||!root.NovaCloud.warRequest||!p||p.owner!==camp399Owner())return false;
  var id='camp399-'+(++camp399Serial);camp399Busy={id:id,mode:mode,p:p};clearTimeout(camp399Timer);
@@ -122,7 +122,7 @@ function lootHTML403(i){
   +'<p>'+resourceIcon238('gold')+'<span>'+i.gold.toLocaleString()+'</span></p>'
   +'<p>'+resourceIcon238('power')+'<span>'+i.power.toLocaleString()+'</span></p>'
   +'<p class="nova403"><img src="assets/nova-core.webp" alt="NOVA"><span>'+(i.nova>0?'+'+i.nova:'0')+'</span><small>'+(i.player?mt251('เมื่อทำลาย 100%','at 100%'):mt251('เมื่อชนะ','on win'))+'</small></p>'
-  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้น NOVA ไม่ได้','NOVA cannot be looted')+'</i>';
+  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้น ไข่ทอง ไม่ได้','NOVA cannot be looted')+'</i>';
 }
 var lootLast403='';
 function lootTick403(){

@@ -21,4 +21,4 @@ s.drawFX(fx());assert.equal(shakes,1,'cap simultaneous explosions');now+=200;s.d
 now+=200;s.drawFX({weapon:'missile'});assert.equal(shakes,2,'launch does not shake');s.screen='home';s.drawFX(fx());assert.equal(shakes,2);
 s.screen='raid';s.document.hidden=true;const heard=audioCalls;s.drawFX(fx());assert.equal(audioCalls,heard);assert.equal(shakes,2);
 s.document.hidden=false;reduced=true;s.drawFX(fx());assert.equal(shakes,2,'respect reduced motion');assert(draws>0);
-console.log('PASS NOVA balance, three solo HQ17 fixtures, impact-only bounded battlefield shake, background/reduced-motion handling');
+console.log('PASS Golden Eggs balance, three solo HQ17 fixtures, impact-only bounded battlefield shake, background/reduced-motion handling');

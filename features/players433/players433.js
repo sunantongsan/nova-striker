@@ -1,9 +1,9 @@
-// 433: a lively multiplayer search. Sixty resident bases (three per Command Center level 1-20), built with the
+// 433: a lively multiplayer search. Sixty resident bases (three per Duck House level 1-20), built with the
 // same layout styles real Clash players use (core box, compartments, rings, diamond, wheel, islands, layered, farming)
 // plus the newer Nova buildings, each with its own commander name, trophies and defending troops.
 // "Find a match" now flips through bases near your level (100 gold per search, like before); real players from the
 // server still come up when there are any. You choose which base to hit: deploy a troop to attack, or tap Next.
-// Resident bases are played on this phone: loot is Ore Y / Ore G from their storages (less after a 3-star), no NOVA.
+// Resident bases are played on this phone: loot is Honey / Veggie juice from their storages (less after a 3-star), no Golden Eggs.
 var NAMES433=['ShadowFox','มังกรฟ้า','NovaKing','เสือดาวเหล็ก','IronWolf','PixelNinja','ฟ้าใส','สายฟ้าแลบ','Captain_Zed','BlueComet','ราชันย์ทราย','StarBreaker','Moonlight','น้องหมีแพนด้า','RocketBoy','GalaxyQueen',
  'Thunder99','จอมทัพอสูร','NightOwl','SolarFlare','ขุนศึกเหนือ','CyberMonk','LuckyCat','ป้อมปราการ','MegaBuilder','AstroJack','ดาวตก','FrostByte','KhunTong','RubyHawk','เจ้าพายุ','NeonTiger',
  'SilentStorm','ปีศาจเกราะ','OrbitRider','TankGirl','หมาป่าทะเลทราย','ZeroGravity','SkyPirate','บอสใหญ่','CometChaser','IronLotus','พญาเหยี่ยว','QuantumKid','VenomByte','สิงห์สนาม','BlazeRunner','EchoKnight',
@@ -38,7 +38,7 @@ function pickBot433(){var me=myHQ433(),pool=bots433().filter(function(b){return 
  pool.sort(function(a,b){return Math.abs(a.hq-me)-Math.abs(b.hq-me);});var w=pool.slice(0,Math.max(4,Math.ceil(pool.length*.75))),bot=w[Math.floor(Math.random()*w.length)];seen433.push(bot.id);if(seen433.length>12)seen433.shift();return bot;}
 function online433(){return !guest288&&!!E.d.onlineCrystal&&!!root.NovaCloud;}
 function searchAnim433(done){open('<section class="search433"><h2>'+mt251('กำลังค้นหาคู่ต่อสู้','Searching for opponents')+'</h2><div class="clouds433"><i></i><i></i><i></i></div><p>'+mt251('ค้นหาฐานทั่วกาแล็กซี…','Scanning bases across the galaxy…')+'</p></section>');setTimeout(done,650+Math.random()*450);}
-function charge433(){E.sync();if(E.d.gold<100){toast(mt251('แร่ Y ไม่พอ • ค้นหาครั้งละ 100','Not enough Ore Y • 100 per search'));return false;}E.d.gold-=100;E.save();hud();return true;}
+function charge433(){E.sync();if(E.d.gold<100){toast(mt251('น้ำผึ้ง ไม่พอ • ค้นหาครั้งละ 100','Not enough Honey • 100 per search'));return false;}E.d.gold-=100;E.save();hud();return true;}
 function scoutBot433(bot){var t=botTarget433(bot);t.presence364={online:Math.random()<.25};liveTarget=t;if(!E.scoutPlayer(t)){toast(mt251('โหลดฐานไม่สำเร็จ','Could not load base'));return;}
  var r=E.raid;r.liveMode='preview';r.bot433=bot.id;r.practice=false;r.army=E.d.army.slice();r.phase='spectator';r.name=bot.name;r.guards=r.guards.filter(function(g){return !g.builder||bot.hq>=3;});var lo=storageLoot299(r),k=(((E.d.botStars433||{})[bot.id]||0)>=3?.3:1)*LOOT433;t.loot_gold=Math.floor(lo.total.gold*k);t.loot_power=Math.floor(lo.total.power*k);
  screen='raid';paused=false;selected=null;placing=moving=null;zoom=.85;panX=0;panY=-110;close();hud();drawNeeded=true;}
@@ -52,7 +52,7 @@ var next433=Game.nextTarget;Game.nextTarget=function(){if(liveRoom&&!liveRoom.fi
  if(Math.random()<.6){nextSearch433();return;}return next433.apply(this,arguments);};
 // no real players found -> show a resident base instead of an empty list
 var warEv433=warEvent;warEvent=function(event,message){var d=message&&message.data;
- // 437: real players only come up when their Command Center is within 2 levels of yours (like the resident bases);
+ // 437: real players only come up when their Duck House is within 2 levels of yours (like the resident bases);
  // a tiny far-lower base with nothing to loot is skipped, and if none are left you get a resident base instead.
  if(event==='war'&&message.action==='targets'&&d&&d.enrolled&&Array.isArray(d.targets)){var me=myHQ433();d.targets=d.targets.filter(function(t){var lv=Number(t&&t.tier)||0;return lv>0&&Math.abs(lv-me)<=2;});}
  if(event==='war'&&message.action==='targets'&&d&&d.enrolled&&(!d.targets||!d.targets.length)&&!(message.request_id&&message.request_id!==warActive)){clearTimeout(warTimer);warBusy=false;warActive=null;real433=false;scoutBot433(pickBot433());return;}
@@ -67,11 +67,11 @@ var finish433=Engine.prototype.finish;Engine.prototype.finish=function(){var r=t
  var past=(this.d.botStars433=this.d.botStars433||{})[r.bot433]||0,k=(past>=3?.3:1)*LOOT433;
  r.phase='result';r.result={stars:stars,percent:pct,gold:this.deposit('gold',Math.floor(loot.taken.gold*k)),power:this.deposit('power',Math.floor(loot.taken.power*k)),gems:0};
  if(stars){this.progress('win');this.d.botStars433[r.bot433]=Math.max(past,stars);}this.save();return r.result;};
-// loot panel: resident bases pay Ore Y / Ore G only
+// loot panel: resident bases pay Honey / Veggie juice only
 var loot433=lootInfo403;lootInfo403=function(){var i=loot433.apply(this,arguments),r=E.raid;if(i&&botRaid433(r)){i.nova=0;i.why='';if(r.liveMode!=='preview'){var o=storageLoot299(r),k=(((E.d.botStars433||{})[r.bot433]||0)>=3?.3:1)*LOOT433;i.gold=Math.max(0,Math.floor((o.total.gold-o.taken.gold)*k));i.power=Math.max(0,Math.floor((o.total.power-o.taken.power)*k));}}return i;};
 // name, trophies and clan on the scout screen
 var hud433=hud;hud=function(){var out=hud433.apply(this,arguments);try{var r=E.raid;if(screen==='raid'&&botRaid433(r)){var bot=bots433()[r.bot433],tag=$('botTag433');
-  if(!tag){tag=document.createElement('div');tag.id='botTag433';$('field').appendChild(tag);}var html='<b>'+escapeHTML(bot.name)+'</b><small>🏆 '+bot.trophies.toLocaleString()+' · '+mt251('ศูนย์บัญชาการ ','CC ')+bot.hq+(bot.clan?' · 🛡 '+escapeHTML(bot.clan):'')+'</small><em>'+mt251.apply(null,styleName433(bot.style))+'</em>';if(tag.innerHTML!==html)tag.innerHTML=html;tag.hidden=!!r.result||r.liveMode!=='preview';}
+  if(!tag){tag=document.createElement('div');tag.id='botTag433';$('field').appendChild(tag);}var html='<b>'+escapeHTML(bot.name)+'</b><small>🏆 '+bot.trophies.toLocaleString()+' · '+mt251('บ้านเป็ด ','CC ')+bot.hq+(bot.clan?' · 🛡 '+escapeHTML(bot.clan):'')+'</small><em>'+mt251.apply(null,styleName433(bot.style))+'</em>';if(tag.innerHTML!==html)tag.innerHTML=html;tag.hidden=!!r.result||r.liveMode!=='preview';}
  else{var t=$('botTag433');if(t)t.hidden=true;}}catch(e){}return out;};
 (function(){var st=document.createElement('style');st.id='players433';st.textContent=
  '#botTag433{position:absolute;right:10px;top:8px;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:1px;padding:4px 10px;border-radius:12px;opacity:.95;background:linear-gradient(#fff8e6,#ffe0a8);border:2px solid #f2b44a;color:#5a3a0c;box-shadow:0 3px 0 #d8962e;pointer-events:none;max-width:60vw}'+

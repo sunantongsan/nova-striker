@@ -38,7 +38,7 @@ const oldGold=e.d.gold,oldGems=e.d.gems,start=a.requests.length;
 G.warScout(0);assert.equal(a.requests.length,start+1);
 const scout=a.requests.at(-1);assert.equal(scout.p.live,'siege_scout_gold362');
 assert(!/Game.retryScout|<button/.test(a.el('modal').innerHTML));
-assert.equal(e.d.gems,oldGems,'scouting never reserves NOVA');
+assert.equal(e.d.gems,oldGems,'scouting never reserves Golden Eggs');
 G.warScout(0);assert.equal(a.requests.length,start+1,'double tap does not duplicate the paid request');
 // Timeout exposes recovery only, retaining the same durable payment identifier.
 for(const [id,t] of [...a.timers])if(t.ms===15000){a.timers.delete(id);t.f();}

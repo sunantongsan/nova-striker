@@ -58,12 +58,12 @@ w=await win({stage:96});assert.equal(w.amount,2);                               
 w=await win({stage:71,nova403:1});assert.equal(w.amount,1,'client may ask less');
 w=await win({stage:71,nova403:9});assert.equal(w.amount,2,'never more');
 w=await win({stage:71,stars:3});assert.equal(w.amount,2,'first 3-star still pays');
-w=await win({stage:71,stars:3});assert.equal(w.amount,0,'re-raid after 3 stars: no NOVA');
+w=await win({stage:71,stars:3});assert.equal(w.amount,0,'re-raid after 3 stars: no Golden Eggs');
 w=await win({stage:91});assert.equal(w.amount,2);
 await db.query("insert into nova_private.campaign_rewards362(owner,stage,stars,amount) values($1,91,3,5)",[uid]);w=await win({stage:91});assert.equal(w.amount,0,'old 3-star record');
-// A 0-NOVA win can still use its video (client triples resources); bonus stays 0.
+// A 0-Golden Eggs win can still use its video (client triples resources); bonus stays 0.
 const zero=w.id;let r=await call('test_status',{campaign399:'prepare',owner:uid,id:zero});assert.equal(r.campaign399.provider,'test');
 r=await call('test_claim',{campaign399:'claim',owner:uid,id:zero,completed:true});assert.equal(r.campaign399.claimed,true);assert.equal(r.campaign399.bonus,0);
 w=await win({stage:96});const g1=await gems();r=await call('test_status',{campaign399:'prepare',owner:uid,id:w.id});r=await call('test_claim',{campaign399:'claim',owner:uid,id:w.id,completed:true});assert.equal(r.campaign399.bonus,4);assert.equal(await gems(),g1+4);
 r=await call('test_claim',{campaign399:'claim',owner:uid,id:w.id,completed:true});assert.equal(await gems(),g1+4,'bonus replay');
-console.log('PASS loot403 DB: NOVA by HQ gap (5/1/0 PvP, 2/1/0 bots), 3-star re-raid pays no NOVA, client can only lower, 0-NOVA video claim');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});
+console.log('PASS loot403 DB: Golden Eggs by HQ gap (5/1/0 PvP, 2/1/0 bots), 3-star re-raid pays no Golden Eggs, client can only lower, 0-Golden Eggs video claim');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});

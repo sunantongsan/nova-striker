@@ -1,9 +1,9 @@
 // 418: a player's base can never be lost to an update, a reinstall or a new phone.
 // * Every signed-in player's whole base (the local save) is copied to the server every few minutes and when the app
-//   goes to the background (nova_private.saves418). The server keeps the copy with the highest Command Center and
+//   goes to the background (nova_private.saves418). The server keeps the copy with the highest Duck House and
 //   never lets a smaller base replace a bigger one.
 // * When the game starts (or the player signs in) it asks the server for that copy. If the base on the phone has a
-//   lower Command Center than the copy, the copy comes back automatically (a brand-new base) or after one tap (any
+//   lower Duck House than the copy, the copy comes back automatically (a brand-new base) or after one tap (any
 //   other case). The base on the phone is kept in localStorage first (novaRTSBeforeRestore418).
 // * Accounts without a full copy yet fall back to their published base layout (live or the 412 backup).
 // Requests use their own ids ('save418-…') so they never wait for, or block, other online actions.
@@ -40,7 +40,7 @@
   try{localStorage.setItem('novaRTS1',JSON.stringify(save));var next=new Engine(localStorage);if(next.hq()<hqOf(save.buildings))throw Error('rejected');E=next;}
   catch(e){try{localStorage.setItem('novaRTS1',localStorage.getItem('novaRTSBeforeRestore418'));}catch(x){}return false;}
   if(Number.isFinite(gems))E.d.gems=Math.max(E.d.gems||0,gems);E.d.restore418=Date.now();E.save();
-  done(mt251('เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (ศูนย์บัญชาการระดับ ','We brought back your last base saved on the server (Command Center level ')+E.hq()+mt251(', อาคาร ',', ')+E.d.buildings.length+mt251(' ชิ้น)',' buildings)'));
+  done(mt251('เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (บ้านเป็ดระดับ ','We brought back your last base saved on the server (Duck House level ')+E.hq()+mt251(', อาคาร ',', ')+E.d.buildings.length+mt251(' ชิ้น)',' buildings)'));
   return true;}
  function fromLayout(r){
   var IN={crystalplant:'zdrill',crystalstore:'ztank'},hq=r.layout_hq|0;if(!Array.isArray(r.layout)||hq<=E.hq())return false;
@@ -52,7 +52,7 @@
   try{E.sync();}catch(e){}
   d.gold=Math.max(d.gold||0,Math.min(E.resourceCapacity(),r.gold||0));d.power=Math.max(d.power||0,Math.min(E.resourceCapacity('power'),r.power||0));
   if(!E.save()){E.d=JSON.parse(before);return false;}
-  done(mt251('เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (ศูนย์บัญชาการระดับ ','We brought back your last base saved on the server (Command Center level ')+hq+mt251(', อาคาร ',', ')+list.length+mt251(' ชิ้น)',' buildings)'));
+  done(mt251('เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (บ้านเป็ดระดับ ','We brought back your last base saved on the server (Duck House level ')+hq+mt251(', อาคาร ',', ')+list.length+mt251(' ชิ้น)',' buildings)'));
   return true;}
  function restore(r){if(r.save&&fromSave(r))return true;return fromLayout(r);}
  var pending418=null;
@@ -62,7 +62,7 @@
   offered=false;var serverHQ=Math.max(r.hq|0,r.save?hqOf(r.save.buildings):0);
   if(serverHQ>E.hq()){
    if(fresh()){if(restore(r)){checked=true;return;}}
-   else{offered=true;pending418=r;open('<h2>'+mt251('พบฐานที่ใหญ่กว่าบนเซิร์ฟเวอร์','A bigger base is saved on the server')+'</h2><p>'+mt251('บนเซิร์ฟเวอร์: ศูนย์บัญชาการระดับ ','On the server: Command Center level ')+serverHQ+'<br>'+mt251('ในเครื่องนี้: ระดับ ','On this phone: level ')+E.hq()+'</p><button class="wide green" onclick="Game.restore418()">'+mt251('ใช้ฐานบนเซิร์ฟเวอร์','Use the server base')+'</button><button class="wide" onclick="Game.keep418()">'+mt251('เล่นฐานในเครื่องต่อ','Keep this phone\'s base')+'</button>');return;}
+   else{offered=true;pending418=r;open('<h2>'+mt251('พบฐานที่ใหญ่กว่าบนเซิร์ฟเวอร์','A bigger base is saved on the server')+'</h2><p>'+mt251('บนเซิร์ฟเวอร์: บ้านเป็ดระดับ ','On the server: Duck House level ')+serverHQ+'<br>'+mt251('ในเครื่องนี้: ระดับ ','On this phone: level ')+E.hq()+'</p><button class="wide green" onclick="Game.restore418()">'+mt251('ใช้ฐานบนเซิร์ฟเวอร์','Use the server base')+'</button><button class="wide" onclick="Game.keep418()">'+mt251('เล่นฐานในเครื่องต่อ','Keep this phone\'s base')+'</button>');return;}
   }
   checked=true;put(true);}
  var prev=root.novaCloudEvent;

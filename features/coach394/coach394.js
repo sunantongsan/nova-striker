@@ -18,7 +18,7 @@ function coachBuildStep394(type,th,en){
  return function(){
   if(coachNewBuilding394(type))return {done:true};
   if(!coachCanBuild394(type))return {done:true};
-  var name=type==='mine'?mt251('เหมืองทอง','Gold Mine'):B[type].name;
+  var name=type==='mine'?mt251('ปั๊มน้ำผึ้ง','Honey Pump'):B[type].name;
   if(placing===type)return {text:mt251('แตะพื้นที่สีเขียวเพื่อวาง'+name,'Tap the green ground to place the '+name),target:'#world',world:true};
   var btn='#modal button[onclick="Game.place(\''+type+'\')"]',b=coachQ394(btn);
   if(coachModalOpen394()&&b){if(b.disabled)return {done:true};return {text:mt251('แตะ “สร้าง” ที่'+name,'Tap “Build” on the '+name),target:btn,scroll:true};}
@@ -29,7 +29,7 @@ function coachBuildStep394(type,th,en){
 }
 var coachSteps394=[
  // 0 Hello
- function(){return {text:mt251('สวัสดีผู้บัญชาการ! ผมคือโดรน NOVA เดี๋ยวพาสร้างฐานทีละขั้นนะ','Hello Commander! I am your NOVA drone. Let us build your base together.'),button:mt251('ไปกันเลย!','Let’s go!'),next:true,center:true};},
+ function(){return {text:mt251('สวัสดีผู้บัญชาการ! ผมคือโดรน ไข่ทอง เดี๋ยวพาสร้างฐานทีละขั้นนะ','Hello Commander! I am your Golden Eggs drone. Let us build your base together.'),button:mt251('ไปกันเลย!','Let’s go!'),next:true,center:true};},
  // 1 Base name
  function(){
   if(guideNamed288())return {done:true};
@@ -37,7 +37,7 @@ var coachSteps394=[
   return {text:mt251('ก่อนอื่น ตั้งชื่อฐานของคุณ','First, name your base'),button:mt251('ตั้งชื่อฐาน','Name my base'),action:function(){Game.guideName337();},center:true};
  },
  // 2 Gold mine
- coachBuildStep394('mine','แตะ “สร้าง” เพื่อสร้างเหมืองทอง','Tap “Build” to build a Gold Mine'),
+ coachBuildStep394('mine','แตะ “สร้าง” เพื่อสร้างปั๊มน้ำผึ้ง','Tap “Build” to build a Honey Pump'),
  // 3 Resources (one look at the top bar)
  function(){return {text:mt251('ทองและพลังงานไหลเข้าคลังเอง ดูยอดได้ที่มุมขวาบน','Gold and energy flow in by themselves. Check them at the top right.'),target:'header .resources',button:mt251('เข้าใจแล้ว','Got it'),next:true,soft:true};},
  // 4 Train a Ranger
@@ -45,7 +45,7 @@ var coachSteps394=[
   if(coachFlags394.trained)return {done:true};
   if(E.unitLock278&&E.unitLock278(0))return {done:true};
   var b=coachQ394('#novaTrain360_0');
-  if(coachModalOpen394()&&b&&!b.disabled)return {text:mt251('แตะ “+ ผลิต” ที่เรนเจอร์','Tap “+ Train” on the Ranger'),target:'#novaTrain360_0',scroll:true};
+  if(coachModalOpen394()&&b&&!b.disabled)return {text:mt251('แตะ “+ ผลิต” ที่เป็ดส้อม','Tap “+ Train” on the Ranger'),target:'#novaTrain360_0',scroll:true};
   if(coachModalOpen394()&&coachQ394('#armyHub278'))return {text:mt251('แตะแท็บ “ผลิต”','Tap the “Train” tab'),target:'#armyHub278 .novaTabs360 button'};
   if(coachModalOpen394())return {text:mt251('ปิดหน้าต่างนี้ก่อน','Close this window first'),target:coachCloseTarget394()};
   return {text:mt251('ฝึกทหาร! แตะ “กองทัพ”','Train troops! Tap “Army”'),target:'#homebar .rail-army338'};
@@ -72,7 +72,7 @@ var coachSteps394=[
  // 6 Defense: a cannon
  coachBuildStep394('gun','ป้องกันฐาน! แตะ “สร้าง” เพื่อสร้างป้อมป้องกัน','Defend your base! Tap “Build” to add a turret'),
  // 7 Done
- function(){return {text:mt251('เยี่ยมมาก! อัปเกรดศูนย์บัญชาการเพื่อปลดล็อกอาคารใหม่ แล้วบุกด่านต่อไปเรื่อยๆ','Great job! Upgrade your HQ to unlock new buildings, and keep attacking stages.'),button:mt251('เริ่มเล่น!','Start playing!'),next:true,center:true};}
+ function(){return {text:mt251('เยี่ยมมาก! อัปเกรดบ้านเป็ดเพื่อปลดล็อกอาคารใหม่ แล้วบุกด่านต่อไปเรื่อยๆ','Great job! Upgrade your HQ to unlock new buildings, and keep attacking stages.'),button:mt251('เริ่มเล่น!','Start playing!'),next:true,center:true};}
 ];
 function coachEnsure394(){
  if(coachEl394)return coachEl394;
@@ -157,7 +157,7 @@ function coachTick394(){
   var key=s.step+'|'+info.text+'|'+(info.button||'');
   if(key!==coachKey394){
    coachKey394=key;coachScrolled394=null;
-   el.querySelector('.c394-copy small').textContent=mt251('ผู้ช่วย NOVA','NOVA GUIDE')+' • '+Math.min(s.step+1,coachSteps394.length)+'/'+coachSteps394.length;
+   el.querySelector('.c394-copy small').textContent=mt251('ผู้ช่วย ไข่ทอง','DUCK WAR GUIDE')+' • '+Math.min(s.step+1,coachSteps394.length)+'/'+coachSteps394.length;
    el.querySelector('.c394-copy p').textContent=info.text||'';
    var a=el.querySelector('.c394-actions');a.innerHTML='';
    if(info.button){var b=document.createElement('button');b.className='c394-go';b.textContent=info.button;b.onclick=function(){if(info.action)info.action();if(info.next)coachAdvance394();coachKey394='';coachTick394();};a.appendChild(b);}
@@ -219,8 +219,8 @@ setTimeout(coachTick394,1800);
    th:'เลือกหมวดอาคาร แล้วแตะสร้างเพื่อเลือกตำแหน่งบนฐาน',
    en:'Choose a building category, then tap Build to place it in your base.'},
   {key:'store',section:'.store348',target:'.storeTabs348',
-   th:'แตะแท็บเพื่อเลือกดู NOVA สกิล หรือของเสริมฐาน',
-   en:'Use the tabs to browse NOVA, skills, or base support.'}
+   th:'แตะแท็บเพื่อเลือกดู ไข่ทอง สกิล หรือของเสริมฐาน',
+   en:'Use the tabs to browse Golden Eggs, skills, or base support.'}
  ];
  var card=null,highlight=null,active=null,save=null;
  function clear(){
@@ -242,7 +242,7 @@ setTimeout(coachTick394,1800);
   clear();active=lesson;
   highlight=content.querySelector(lesson.target);
   if(highlight)highlight.classList.add('menuCoachHighlight');
-  card=document.createElement('aside');card.className='menuCoach';card.setAttribute('aria-label',mt251('ผู้ช่วย NOVA','NOVA Guide'));
+  card=document.createElement('aside');card.className='menuCoach';card.setAttribute('aria-label',mt251('ผู้ช่วย ไข่ทอง','NOVA Guide'));
   var text=document.createElement('span');text.textContent=mt251(lesson.th,lesson.en);
   var dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent=mt251('เข้าใจแล้ว','Got it');
   dismiss.onclick=function(){

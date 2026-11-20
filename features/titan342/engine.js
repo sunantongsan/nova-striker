@@ -4,7 +4,7 @@ var Titan342={names:['NOVA I','NOVA II','NOVA III'],models:['atlas-09','vanguard
  palm:{name:'ปืนฝ่ามือ',en:'Palm cannon',level:1,range:7,arc:.4,damage:2,cool:8,cost:20,delay:.75,duration:1.35,air:true,clip:'KneelFire'},
  dash:{name:'พุ่งทะลวง',en:'Jet assault',level:1,range:3,arc:1.4,damage:1.8,cool:12,cost:25,delay:.48,duration:.9,clip:'Run'},
  shield:{name:'เกราะพิทักษ์',en:'Aegis field',level:2,range:3.2,cool:18,cost:25,delay:0,duration:1,clip:'ShieldGuard'},
- nova:{name:'โนวาระเบิด',en:'Nova rupture',level:3,range:4.5,arc:Math.PI*2,damage:3,cool:24,cost:40,delay:1.05,duration:1.7,clip:'ChestBeam'}
+ nova:{name:'เป็ดระเบิด',en:'Nova rupture',level:3,range:4.5,arc:Math.PI*2,damage:3,cool:24,cost:40,delay:1.05,duration:1.7,clip:'ChestBeam'}
 }};
 function titan342(level,x,y,skills){level=Math.max(1,Math.min(3,level||1));return {id:34000,kind:10,titan342:true,tier342:level,x:x,y:y,hp:Titan342.hp[level-1],max:Titan342.hp[level-1],energy342:100,skills342:skills||{slash:1,palm:1,dash:1,shield:1,nova:1},cooldowns342:{},cool:0,route:[],aim:0,heading:0,knockbackMass274:100,action342:'Sentinel',actionTime342:0};}
 function titanBlocked342(scene,x,y){var max=(scene.mapSize||22)-1;return x<.4||y<.4||x>max-.4||y>max-.4||scene.buildings.some(function(b){return b.hp>0&&!trap278(b)&&Math.abs(x-b.x)<.75&&Math.abs(y-b.y)<.75;});}

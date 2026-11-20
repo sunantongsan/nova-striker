@@ -1,4 +1,4 @@
-// 430: replace the kind-2 (หุ่นรบ) card portrait in assets/portraits393.webp (col 2, row 0, 200 px) with the rocket trooper.
+// 430: replace the kind-2 (หมาดัลเมเชียน) card portrait in assets/portraits393.webp (col 2, row 0, 200 px) with the rocket trooper.
 const fs=require('fs'),path=require('path');const dir=__dirname,root=path.resolve(dir,'../../..');
 const sharp=require(path.join(root,'node_modules/sharp'));
 const pw=process.env.NOVA_PLAYWRIGHT||(fs.existsSync(path.join(root,'node_modules/playwright'))?path.join(root,'node_modules/playwright'):'/opt/npm-tools/node_modules/playwright');

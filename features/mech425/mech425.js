@@ -1,4 +1,4 @@
-// 425: the NOVA mech can be sent while scouting a player base (Clash-style: no separate Attack button).
+// 425: the Duck Colonel can be sent while scouting a player base (Clash-style: no separate Attack button).
 // The mech card shows in the scout bar; tapping it arms the mech, and tapping open ground starts the attack
 // and drops the mech there as soon as the server has opened the battle.
 var mechPending425=null;

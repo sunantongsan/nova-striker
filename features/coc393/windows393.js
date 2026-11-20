@@ -1,4 +1,4 @@
-// 393: window polish. Apply the Clash-style additions after the main skin, and stop the NOVA mech
+// 393: window polish. Apply the Clash-style additions after the main skin, and stop the Duck Colonel
 // window from re-rendering (and flashing its 3D preview) when a status refresh returns the same content.
 (function(){
  function attach(){var old=document.getElementById('novaCoC393');if(old)old.remove();var st=document.createElement('style');st.id='novaCoC393';st.textContent=coc393CSS;document.head.appendChild(st);}

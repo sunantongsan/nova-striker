@@ -1,15 +1,15 @@
-// 428: the defense garrison becomes "ค่ายทหารประจำค่าย" (Garrison Camp), Clash clan-castle style:
+// 428: the defense garrison becomes "ค่ายพักเป็ดประจำค่าย" (Garrison Camp), Clash clan-castle style:
 // your own trained troops live in it and defend the base. Its info window shows capacity, how full it is
 // and every stationed troop with count and stats. The alien mercenary outpost is no longer offered for new
 // building (existing ones keep working so nothing paid for is lost).
-var CAMP428=mt251('ค่ายทหารประจำค่าย','Garrison Camp');
+var CAMP428=mt251('ค่ายพักเป็ดประจำค่าย','Garrison Camp');
 B.garrison.name=CAMP428;
 // build menu: hide the mercenary outpost unless this base already has one
 var build428=Game.build;Game.build=function(tab){var r=build428.apply(this,arguments);
  if(!E.d.buildings.some(function(b){return b.type==='mercenary';}))Array.prototype.forEach.call(modal.querySelectorAll('.build-card261'),function(c){if(/\('mercenary'\)/.test(c.innerHTML))c.remove();});return r;};
-var place428=E.build;E.build=function(type){if(type==='mercenary'&&!this.d.buildings.some(function(b){return b.type==='mercenary';}))return mt251('อาคารนี้รวมเข้ากับค่ายทหารประจำค่ายแล้ว','This building is now part of the Garrison Camp');return place428.apply(this,arguments);};
+var place428=E.build;E.build=function(type){if(type==='mercenary'&&!this.d.buildings.some(function(b){return b.type==='mercenary';}))return mt251('อาคารนี้รวมเข้ากับค่ายพักเป็ดประจำค่ายแล้ว','This building is now part of the Garrison Camp');return place428.apply(this,arguments);};
 // garrison window title / warning use the new name
-var gHTML428=garrisonHTML419;garrisonHTML419=function(){return gHTML428().replace(mt251('กองกำลังป้องกันฐาน','Base garrison'),CAMP428).replace(mt251('สร้างกองบัญชาการป้องกันฐานก่อน','Build the Defense HQ first'),mt251('สร้างค่ายทหารประจำค่ายก่อน','Build the Garrison Camp first'));};
+var gHTML428=garrisonHTML419;garrisonHTML419=function(){return gHTML428().replace(mt251('กองกำลังป้องกันฐาน','Base garrison'),CAMP428).replace(mt251('สร้างบ้านผู้พันป้องกันฐานก่อน','Build the Defense HQ first'),mt251('สร้างค่ายพักเป็ดประจำค่ายก่อน','Build the Garrison Camp first'));};
 Game.garrison=function(){open(garrisonHTML419());var h=modal.querySelector('h2');if(h&&!modal.querySelector('.campBack428'))h.insertAdjacentHTML('afterend','<button class="campBack428" onclick="Game.camp428()">‹ '+mt251('ข้อมูลค่าย','Camp info')+'</button>');};
 // info window
 function campStat428(n){n=Math.round(n||0);return n>=1e4?(Math.round(n/100)/10)+'K':n.toLocaleString('en-US');}
@@ -20,7 +20,7 @@ Game.camp428=function(){E.sync();var b=E.d.buildings.find(function(x){return x.t
   '<p class="campTip428">'+mt251('ทหารของเราประจำค่าย ออกมาป้องกันเมื่อถูกบุก แล้วกลับเข้าค่ายครบหลังจบ','Your own troops live here, defend when you are attacked and return after the battle')+'</p>'+
   '<div class="campStats428"><div><small>'+mt251('ความจุ','Capacity')+'</small><b>'+cap+'</b></div><div><small>'+mt251('ใช้ไป','Used')+'</small><b>'+used+'</b></div><div><small>'+mt251('กำลังพล','Troops')+'</small><b>'+count+mt251(' นาย','')+'</b></div></div>'+
   '<div class="g419bar campBar428"><span style="width:'+pct.toFixed(1)+'%"></span><b>'+used+' / '+cap+'</b></div>'+
-  '<div class="campList428">'+(rows||'<p class="campEmpty428">'+(lv?mt251('ยังไม่มีทหารในค่าย','No troops stationed yet'):mt251('สร้างค่ายทหารประจำค่ายก่อน','Build the Garrison Camp first'))+'</p>')+'</div>'+next+
+  '<div class="campList428">'+(rows||'<p class="campEmpty428">'+(lv?mt251('ยังไม่มีทหารในค่าย','No troops stationed yet'):mt251('สร้างค่ายพักเป็ดประจำค่ายก่อน','Build the Garrison Camp first'))+'</p>')+'</div>'+next+
   '<button class="wide green" onclick="Game.garrison()" '+(lv?'':'disabled')+'>'+mt251('จัดกำลังพล','Manage troops')+'</button></section>');};
 var inspect428=Game.inspectBuilding261;Game.inspectBuilding261=function(id,upgrade){var b=E.d.buildings.find(function(x){return x.id===id;});if(b&&b.type==='garrison'&&!upgrade){selected=id;Game.camp428();return;}return inspect428.apply(this,arguments);};
 // building bar button label

@@ -15,7 +15,7 @@ function boot(data={},platform='android'){
 
 const a=boot({novaRTSIntro:'1',novaLanguage:'th'}),G=a.s.Game,e=a.s.test232.e;
 e.d.gold=e.d.power=100000;e.d.buildings[0].lv=4;
-G.build('economy');let html=a.el('modal').innerHTML;assert(html.includes('build-card261'));assert(html.includes('Game.place(\'goldstore\')'));assert(!html.includes('Game.place(\'gun\')'));assert(!/crystalplant|crystalstore|ผลึก/.test(html));
+G.build('economy');let html=a.el('modal').innerHTML;assert(html.includes('build-card261'));assert(html.includes('Game.place(\'goldstore\')'));assert(!html.includes('Game.place(\'gun\')'));assert(!/crystalplant|crystalstore|ไซรัป/.test(html));
 G.build('defense');html=a.el('modal').innerHTML;assert(html.includes('Game.place(\'wall\')'));assert(!html.includes('Game.place(\'mine\')'));
 const b=e.d.buildings.find(x=>x.type==='mine'),before={gold:e.d.gold,power:e.d.power,level:b.lv};G.inspectBuilding261(b.id,true);assert(a.el('modal').innerHTML.includes('detail-hero261'));assert(a.el('modal').innerHTML.includes('→'));assert.equal(e.d.gold,before.gold);assert.equal(e.d.power,before.power);assert.equal(b.lv,before.level);assert(!b.until,'preview must not spend or upgrade');
 G.confirmUpgrade261(b.id,b.lv+1);assert(!b.until,'stale level rejected');G.confirmUpgrade261(b.id,b.lv);assert(b.until,'confirmed upgrade uses existing engine');const gold=e.d.gold;G.confirmUpgrade261(b.id,b.lv);assert.equal(e.d.gold,gold,'duplicate confirm cannot spend again');

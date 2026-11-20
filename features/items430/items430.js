@@ -1,5 +1,5 @@
 // 430: battle items (the owner's own take on Clash spells). Made at the Tech Center (อาคารเทคโนโลยี, tech428) with
-// Ore R, or bought with NOVA. Each is used once in a raid: tap the item card, then tap the battlefield.
+// Syrup, or bought with Golden Eggs. Each is used once in a raid: tap the item card, then tap the battlefield.
 //   haste   ยาเร่งพลัง        troops in the ring attack 75% faster
 //   heal    ยารักษา           troops in the ring heal 12% of max HP per second
 //   power   น้ำยาเพิ่มพลัง     troops in the ring hit 50% harder
@@ -28,10 +28,10 @@ function held430(){var s=stock430();return ITEMS430.reduce(function(n,it){return
 function why430(it){if(!techLv430())return mt251('สร้างอาคารเทคโนโลยีก่อน','Build the Tech Center first');if(techLv430()<it.unlock)return mt251('ปลดล็อกที่อาคารเทคโนโลยี Lv.','Unlocks at Tech Center Lv.')+it.unlock;if(held430()>=cap430())return mt251('ช่องเก็บไอเทมเต็ม','Item storage is full');return '';}
 function name430(it){return mt251(it.th,it.en);}
 Game.makeItem430=function(id){var it=IT430[id];if(!it)return;var why=why430(it);if(why){toast(why);return;}E.sync();
- if((E.d.zfluid410||0)<it.r){toast(mt251('แร่ R ไม่พอ','Not enough Ore R'));return;}
+ if((E.d.zfluid410||0)<it.r){toast(mt251('ไซรัป ไม่พอ','Not enough Syrup'));return;}
  var before=JSON.stringify(E.d);E.d.zfluid410-=it.r;stock430()[id]=(stock430()[id]|0)+1;if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.items430();};
 Game.buyItem430=function(id){var it=IT430[id];if(!it)return;var why=why430(it);if(why){toast(why);return;}
- confirmNova358(it.nova,function(){var it2=IT430[id],w=why430(it2);if(w){toast(w);return;}if((E.d.gems||0)<it2.nova){toast(mt251('NOVA ไม่พอ','Not enough NOVA'));return;}
+ confirmNova358(it.nova,function(){var it2=IT430[id],w=why430(it2);if(w){toast(w);return;}if((E.d.gems||0)<it2.nova){toast(mt251('ไข่ทอง ไม่พอ','Not enough Golden Eggs'));return;}
   var before=JSON.stringify(E.d);E.d.gems-=it2.nova;stock430()[id]=(stock430()[id]|0)+1;if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.items430();});};
 function icon430(it,cls){return '<span class="ic430 '+(cls||'')+'" style="--c430:'+it.color+'">'+it.icon+'</span>';}
 Game.items430=function(){E.sync();var s=stock430(),cap=cap430(),used=held430(),lv=techLv430();
@@ -41,7 +41,7 @@ Game.items430=function(){E.sync();var s=stock430(),cap=cap430(),used=held430(),l
    '<div class="btn430"><button class="green" '+(why||(E.d.zfluid410||0)<it.r?'disabled':'')+' onclick="Game.makeItem430(\''+it.id+'\')">'+mt251('ผลิต','Make')+' '+zIcon410()+it.r+'</button><button '+(why||(E.d.gems||0)<it.nova?'disabled':'')+' onclick="Game.buyItem430(\''+it.id+'\')">'+mt251('ซื้อ','Buy')+' <i class="nova412"></i>'+it.nova+'</button></div>')+'</article>';}).join('');
  open('<section class="items430"><h2>'+mt251('ไอเทมสนามรบ','Battle items')+'</h2>'+
   (lv?'<div class="g419bar bar430"><span style="width:'+(cap?Math.min(100,used/cap*100):0)+'%"></span><b>'+mt251('ช่องเก็บ ','Storage ')+used+' / '+cap+'</b></div>':'<p class="lockTxt430">🔒 '+mt251('สร้างอาคารเทคโนโลยี (HQ 5) เพื่อผลิตและเก็บไอเทม','Build the Tech Center (HQ 5) to make and store items')+'</p>')+
-  '<p class="tip430">'+zIcon410()+' '+mt251('แร่ R ','Ore R ')+Math.floor(E.d.zfluid410||0).toLocaleString()+' · <i class="nova412"></i> '+(E.d.gems||0).toLocaleString()+' · '+mt251('ใช้ในสนาม: แตะการ์ดไอเทม แล้วแตะจุดในสนาม','In battle: tap an item card, then tap the field')+'</p>'+
+  '<p class="tip430">'+zIcon410()+' '+mt251('ไซรัป ','Syrup ')+Math.floor(E.d.zfluid410||0).toLocaleString()+' · <i class="nova412"></i> '+(E.d.gems||0).toLocaleString()+' · '+mt251('ใช้ในสนาม: แตะการ์ดไอเทม แล้วแตะจุดในสนาม','In battle: tap an item card, then tap the field')+'</p>'+
   '<div class="grid430">'+cards+'</div></section>');};
 // entry points: Tech Center bar button, store "support" tab card
 var hud430=hud;hud=function(){var r=hud430.apply(this,arguments);try{var sel=$('selection'),b=E.d.buildings.find(function(x){return x.id===selected;});

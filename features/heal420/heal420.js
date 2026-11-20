@@ -1,5 +1,5 @@
 // 420: resources can never become NaN again, and the game saves less often in the background.
-// * Ore Y / Ore G / NOVA / Ore R are guarded on the save object: a non-number (NaN / Infinity) is refused, the
+// * Honey / Veggie juice / NOVA / Syrup are guarded on the save object: a non-number (NaN / Infinity) is refused, the
 //   last good value stays, and the first bad write is recorded (d.nanTrace420) so it can be found later.
 //   A value that is already broken is repaired once (last good value, else the full storage).
 // * The background sync (every ~half second) writes the save at most every 5 seconds; every real action still

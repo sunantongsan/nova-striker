@@ -1,7 +1,7 @@
 // 419: the base feels alive when nothing is happening.
 // - Sky Guard AA gun: slowly scans the sky left and right when it has no target.
 // - Ground rocket battery (missile silo): at home it pops up now and then, sweeps around, then hides again.
-// - NOVA mech at home: when left alone it tosses its saber up and catches it, or performs a sword dance.
+// - Duck Colonel at home: when left alone it tosses its saber up and catches it, or performs a sword dance.
 function idleNow419(){return Date.now();}
 function aimMoved419(b,now){if(b.aim!==b.aimSeen419){var first=b.aimSeen419===undefined;b.aimSeen419=b.aim;if(!first)b.aimAt419=now;}return now-(b.aimAt419||0)>3000;}
 function sweep419(b,now,span,period){var base=b.idleBase419;if(base===undefined)base=b.idleBase419=(b.aim===undefined?Math.PI*.75:b.aim);
@@ -34,7 +34,7 @@ if(typeof silo3dOpen392==='function'){
  };
 }
 
-// --- NOVA mech at home: saber toss / sword dance ---
+// --- Duck Colonel at home: saber toss / sword dance ---
 var MECHIDLE419=[
  // toss: throw the saber up, catch it, finish with a slash
  [{act:'Sentinel',toss:true,ms:1500},{act:'SwordSlash',ms:1250},{act:'Sentinel',ms:300}],

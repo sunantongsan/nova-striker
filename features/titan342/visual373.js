@@ -38,7 +38,7 @@
  homeDock376.querySelector('.rail-attack338').after(bot376);
  var checkin=$('dailyCheckin340');if(checkin)homeDock376.appendChild(checkin);
  // Small descriptive labels make the existing icon rail learnable on touch screens.
- Array.from(document.querySelectorAll('#homebar > button')).forEach(function(b){var label=document.createElement('span');label.className='railLabel373';var names={titanEntry342:mt251('หุ่น NOVA','Mech'),botAttack376:mt251('มัลติเพลย์','Multiplayer'),dailyCheckin340:mt251('เช็คอิน','Check-in'),skillShop342:mt251('ร้านค้า','Shop')};label.textContent=names[b.id]||(b.classList.contains('rail-attack338')?mt251('ตีผู้เล่น','Players'):b.getAttribute('aria-label')||b.title);label.title=b.title;b.appendChild(label);});
+ Array.from(document.querySelectorAll('#homebar > button')).forEach(function(b){var label=document.createElement('span');label.className='railLabel373';var names={titanEntry342:mt251('ผู้พันเป็ด','Mech'),botAttack376:mt251('มัลติเพลย์','Multiplayer'),dailyCheckin340:mt251('เช็คอิน','Check-in'),skillShop342:mt251('ร้านค้า','Shop')};label.textContent=names[b.id]||(b.classList.contains('rail-attack338')?mt251('ตีผู้เล่น','Players'):b.getAttribute('aria-label')||b.title);label.title=b.title;b.appendChild(label);});
  var playerSearch382=homeDock376.querySelector('.rail-attack338');
  if(playerSearch382){playerSearch382.id='playerSearch382';playerSearch382.title=mt251('ค้นหาผู้เล่น','Find players');playerSearch382.setAttribute('aria-label',playerSearch382.title);var label=playerSearch382.querySelector('.railLabel373');if(label)label.textContent=playerSearch382.title;}
  var settingsBefore=Game.settings;
@@ -46,7 +46,7 @@
  // A single anchored coach card; focus never intercepts a player's tap.
  guideHint337=function(th,en,selector,button){
   var dock=$('guideDock288'),step=guide288?guide288.step:0;dock.hidden=false;
-  setHTML219(dock,'<div class="coachPortrait373" aria-hidden="true"></div><div class="coachCopy373"><small>'+mt251('ผู้ช่วย NOVA','NOVA GUIDE')+' · '+(step+1)+'/8</small><p>'+mt251(th,en)+'</p><div class="coachActions373">'+(button||'')+'<button class="guide-skip337" onclick="Game.guideFinish288()">'+mt251('พักก่อน','Later')+'</button></div><div class="coachProgress373" aria-hidden="true"><i style="width:'+((step+1)*12.5)+'%"></i></div></div>');
+  setHTML219(dock,'<div class="coachPortrait373" aria-hidden="true"></div><div class="coachCopy373"><small>'+mt251('ผู้ช่วย ไข่ทอง','DUCK WAR GUIDE')+' · '+(step+1)+'/8</small><p>'+mt251(th,en)+'</p><div class="coachActions373">'+(button||'')+'<button class="guide-skip337" onclick="Game.guideFinish288()">'+mt251('พักก่อน','Later')+'</button></div><div class="coachProgress373" aria-hidden="true"><i style="width:'+((step+1)*12.5)+'%"></i></div></div>');
   var target=selector&&document.querySelector(selector);
   if(target!==guideFocusTarget337){guideClearFocus288();guideFocusTarget337=target;if(target){target.classList.add('guide-focus288');if(target.id!=='world'&&target.scrollIntoView)target.scrollIntoView({block:'nearest',inline:'nearest'});}}
   // Pick the corner with least overlap; use viewport coordinates for a fixed coach.

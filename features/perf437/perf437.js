@@ -71,13 +71,13 @@ drawCraters272=function(scene){
 // ---------- 437b: no more wall guns ----------
 // Walls are walls again: the level-15+ machine gun on every wall piece is gone (no shooting, no gun drawn, no
 // "unlocks at level 15" line). Hundreds of tiny guns were cluttering big bases, slowing battles down and pinning
-// the NOVA mech against the walls.
+// the Duck Colonel against the walls.
 wallStats383=function(lv){return {armed:false,range:0,damage:0,rate:.9};};
 tickWalls383=function(){};
 drawWallGun383=function(){};
 (function(){var info=defenseInfo223;defenseInfo223=function(b){return b&&b.type==='wall'?'':info.apply(this,arguments);};})();
 
-// ---------- 437c: a smarter NOVA mech in raids ----------
+// ---------- 437c: a smarter Duck Colonel in raids ----------
 // Before, the mech went for whatever was closest, which in a walled base is nearly always a wall piece, and planned
 // its path around the walls, so it stood hacking at walls in the same spot. Now, like a Clash hero, it goes for the
 // nearest real target (defenders and buildings, not walls), heads straight there and leaps over walls on the way.

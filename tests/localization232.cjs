@@ -11,15 +11,15 @@ function boot(data={},platform='android'){
  return {s,el,data,errors,requests,reloads:()=>reloads,frame:n=>frame(n)};
 }
 for(const platform of ['android','telegram']){
- const a=boot({novaRTSIntro:'1'},platform);assert.equal(a.s.NovaI18n.language,'en');assert.equal(a.s.NovaRTS.buildings.hq.name,'Command Center');
+ const a=boot({novaRTSIntro:'1'},platform);assert.equal(a.s.NovaI18n.language,'en');assert.equal(a.s.NovaRTS.buildings.hq.name,'Duck House');
  a.s.Game.settings();assert.match(a.el('modal').innerHTML,/Language/);assert(!a.el('modal').innerHTML.includes('Game.setLanguage'));a.s.Game.languages();assert.match(a.el('modal').innerHTML,/English/);assert.match(a.el('modal').innerHTML,/aria-pressed="true" onclick="Game.setLanguage\('en'\)"/);
  a.s.novaCloudEvent('status',{message:'เชื่อมต่อบัญชีไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่'});assert.match(a.el('toast').textContent,/Could not connect/);
  a.s.Game.setLanguage('xx');assert.equal(a.reloads(),0);
  a.s.test232.setScreen('raid');a.s.Game.setLanguage('th');assert.equal(a.reloads(),0);a.s.test232.setScreen('home');
- const baseName='ศูนย์บัญชาการ';a.s.novaCloudEvent('war',{request_id:a.requests.at(-1).id,data:{profile:true,owner:'test',name:baseName}});assert.match(a.el('mode').textContent,/ศูนย์บัญชาการ/,'player names remain unchanged');
- a.s.Game.setLanguage('th');assert.equal(a.reloads(),0);assert.equal(a.s.NovaI18n.language,'th');assert.equal(a.s.NovaRTS.buildings.hq.name,'ศูนย์บัญชาการ');assert.equal(a.data.novaLanguage,'th');assert.equal(JSON.parse(a.data.novaBaseProfile224).name,baseName);
- const before=JSON.parse(a.data.novaRTS1),b=boot({...a.data},platform);assert.equal(b.s.NovaI18n.language,'th');assert.equal(b.s.NovaRTS.buildings.hq.name,'ศูนย์บัญชาการ');b.s.Game.settings();assert.match(b.el('modal').innerHTML,/ภาษา/);assert.equal(b.s.test232.e.d.gold,before.gold);
- b.s.Game.setLanguage('en');assert.equal(b.reloads(),0);assert.equal(b.s.NovaRTS.buildings.hq.name,'Command Center');assert.equal(b.data.novaLanguage,'en');const c=boot({...b.data},platform);assert.equal(c.s.NovaI18n.language,'en');
+ const baseName='บ้านเป็ด';a.s.novaCloudEvent('war',{request_id:a.requests.at(-1).id,data:{profile:true,owner:'test',name:baseName}});assert.match(a.el('mode').textContent,/บ้านเป็ด/,'player names remain unchanged');
+ a.s.Game.setLanguage('th');assert.equal(a.reloads(),0);assert.equal(a.s.NovaI18n.language,'th');assert.equal(a.s.NovaRTS.buildings.hq.name,'บ้านเป็ด');assert.equal(a.data.novaLanguage,'th');assert.equal(JSON.parse(a.data.novaBaseProfile224).name,baseName);
+ const before=JSON.parse(a.data.novaRTS1),b=boot({...a.data},platform);assert.equal(b.s.NovaI18n.language,'th');assert.equal(b.s.NovaRTS.buildings.hq.name,'บ้านเป็ด');b.s.Game.settings();assert.match(b.el('modal').innerHTML,/ภาษา/);assert.equal(b.s.test232.e.d.gold,before.gold);
+ b.s.Game.setLanguage('en');assert.equal(b.reloads(),0);assert.equal(b.s.NovaRTS.buildings.hq.name,'Duck House');assert.equal(b.data.novaLanguage,'en');const c=boot({...b.data},platform);assert.equal(c.s.NovaI18n.language,'en');
  c.el('modal').style.display='none';for(let n=40;n<=2000;n+=40)c.frame(n);assert.deepEqual(c.errors,[],'home animation remains healthy');
  const saved=c.data.novaLanguage;c.s.localStorage.setItem=()=>{throw Error('full')};c.s.Game.setLanguage('th');assert.equal(c.reloads(),0);assert.equal(c.data.novaLanguage,saved);
 }

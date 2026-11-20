@@ -27,7 +27,7 @@ let balance=0;
 await db.exec(fs.readFileSync('backend/nova_checkin395.sql','utf8'));
 await db.exec(fs.readFileSync('backend/nova_test_ads396.sql','utf8'));await db.exec(fs.readFileSync('backend/nova_checkin_choice397.sql','utf8'));await db.exec(fs.readFileSync('backend/nova_checkin_day7_398.sql','utf8'));
 const today="(now() at time zone 'Asia/Bangkok')::date";
-// Free claim: 5 NOVA once per day, streak continues, replay grants nothing.
+// Free claim: 5 ไข่ทอง once per day, streak continues, replay grants nothing.
 await db.query('update nova_private.test_wallets set gems=0,claimed_day=null,checkin_streak233=0,checkin_reward233=0,checkin_ad395=null where user_id=$1',[other]);
 let s=await call('test_status',{checkin233:true},other);assert.equal(s.checkin233.next_reward,5);assert.equal(s.checkin233.ad_bonus395,15);assert.equal(s.checkin233.claimed,false);
 let r=await call('test_status',{checkin233:true,checkin395:'free'},other);assert.equal(r.test_gems,5);assert.equal(r.checkin233.claimed,true);assert.equal(r.checkin233.reward,5);assert.equal(r.checkin233.ad_bonus395,0);assert.equal(r.checkin233.streak,1);
@@ -50,7 +50,7 @@ for(const telegram of [false,true]){
  await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[uid]);
  x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,20);assert.equal(x.checkin233.streak,2);
  await assert.rejects(()=>call('research',{owner:uid,request_id:nonce(),kind:'checkin',[key]:'prepare'},uid,telegram),/วันนี้แล้ว/);
- // A video prepared before choosing normal check-in grants nothing once 5 NOVA was taken.
+ // A video prepared before choosing normal check-in grants nothing once 5 ไข่ทอง was taken.
  await db.query(`update nova_private.test_wallets set claimed_day=${today}-1,checkin_ad395=${today}-1 where user_id=$1`,[uid]);
  const id=nonce(),p={owner:uid,request_id:id,kind:'checkin',[key]:'prepare'};x=await call('research',p,uid,telegram);assert.equal(x.ad_reward.amount,15);
  x=await call('test_status',{checkin395:'free'},uid);assert.equal(x.test_gems,25);

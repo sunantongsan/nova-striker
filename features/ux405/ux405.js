@@ -1,6 +1,6 @@
-// 405: (1) NOVA speed-ups finish instantly. Online, the economy clock only advances to the last
+// 405: (1) Golden Eggs speed-ups finish instantly. Online, the economy clock only advances to the last
 // server-confirmed time (economyConfirmedAt), so a job set to finish "now" used to wait for the next
-// server heartbeat before it completed. Jobs just finished by a NOVA payment are pinned to the
+// server heartbeat before it completed. Jobs just finished by a Golden Eggs payment are pinned to the
 // confirmed time instead, so the very same sync completes them.
 // (2) Clash-style selection: the building action bar sits low and only its buttons catch taps, so
 // tapping another building switches the selection straight away.

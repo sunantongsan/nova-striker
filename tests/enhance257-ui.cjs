@@ -21,5 +21,5 @@ G.enhanceInfo('unit:0',1);assert(a.el('modal').innerHTML.includes('NOVA'));asser
 const response={...online,enhancements:{'unit:0':1},enhancement_paths245:{'unit:0':{attack:1}},receipt:{id:req.p.request_id,key:'unit:0',level:1,pending:false,completed:true,cost:100,currency:'NOVA'}};reply(response);assert.equal(e.d.gems,400);assert.equal(e.d.crystals,0);assert.equal(e.d.enhancements['unit:0'],1);assert(!a.el('modal').innerHTML.includes('◷'));reply(response);assert.equal(e.d.gems,400,'receipt replay is not charged twice');
 G.enhanceInfo('building:hq',1);assert(a.el('modal').innerHTML.includes('aria-pressed="true"'),'single path automatically selected');
 G.close();const tg=boot({novaRTSIntro:'1'},'telegram');tg.s.novaCloudEvent('signed_in',{});const delayed=[...tg.timers.values()].filter(t=>t.ms===700);assert.equal(delayed.length,1);delayed[0].f();assert(!tg.el('modal').innerHTML.includes('mining251'),'login does not open wallet');tg.s.Game.treasury();assert(tg.el('modal').innerHTML.includes('checkin-grid237'),'wallet still opens on demand');
-console.log('PASS enhance257 UI: NOVA only with zero crystals, quoted request, single debit/replay, automatic sole path, no login wallet, manual wallet');
+console.log('PASS enhance257 UI: Golden Eggs only with zero crystals, quoted request, single debit/replay, automatic sole path, no login wallet, manual wallet');
 

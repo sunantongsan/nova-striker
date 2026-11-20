@@ -43,15 +43,15 @@ let room=await siege(true),r=await call('test_status',{raid260:'status'});let ro
 let g0=await gems(),b0=await balance();await assert.rejects(()=>call('test_status',{raid260:'collect',battle:room,owner:uid,request_id:nonce()}),/ไม่ถูกต้อง/);
 r=await call('test_claim',{raid260:'collect',battle:room,owner:uid,request_id:nonce()});assert.equal(r.receipt.claimed,true);assert.equal(r.receipt.multiplier,1);assert.equal(r.receipt.granted.nova,5);assert.equal(r.receipt.granted.gold,row.gold);assert.equal(await gems(),g0+5);assert.equal(Number((await balance()).resource_gold),Number(b0.resource_gold)+row.gold);
 r=await call('test_claim',{raid260:'collect',battle:room,owner:uid,request_id:nonce()});assert.equal(await gems(),g0+5,'collect replay');
-// Player attack, 100%, with a video = x3 NOVA and resources (storage-capped).
+// Player attack, 100%, with a video = x3 ไข่ทอง and resources (storage-capped).
 room=await siege(true);r=await call('test_status',{raid260:'status'});row=r.pending.find(x=>x.battle===room);g0=await gems();
 const id=nonce(),p={raid260:'prepare',battle:room,owner:uid,request_id:id};r=await call('test_status',p);assert.equal(r.receipt.provider,'test');
 await assert.rejects(()=>call('test_claim',{...p,raid260:'claim'}),/ดูโฆษณา/);
 r=await call('test_claim',{...p,raid260:'claim',completed:true});assert.equal(r.receipt.multiplier,3);assert.equal(r.receipt.granted.nova,15);assert.equal(r.receipt.granted.gold,row.gold*3);assert.equal(r.receipt.granted.power,row.power*3);assert.equal(await gems(),g0+15);
 r=await call('test_claim',{raid260:'collect',battle:room,owner:uid,request_id:nonce()});assert.equal(await gems(),g0+15,'no collect after video');
-// Not 100%: no NOVA, resources still collectable.
+// Not 100%: no Golden Eggs, resources still collectable.
 room=await siege(false);r=await call('test_status',{raid260:'status'});row=r.pending.find(x=>x.battle===room);assert.equal(row?row.nova:0,0);
-// Bot-base wins: 2 NOVA every win, video triples to 6.
+// Bot-base wins: 2 ไข่ทอง every win, video triples to 6.
 const win=(wid,extra={},who=uid)=>call('test_claim',{campaign399:'win',owner:who,id:wid,stage:3,stars:2,...extra},who);
 g0=await gems();const w1=nonce();r=await win(w1);assert.equal(r.campaign399.amount,2);assert.equal(r.campaign399.credited,2);assert.equal(await gems(),g0+2);
 r=await win(w1);assert.equal(await gems(),g0+2,'same win replay');
@@ -65,4 +65,4 @@ r=await call('test_claim',{campaign399:'claim',owner:uid,id:w2,completed:true});
 await db.exec("update nova_private.campaign_wins399 set created_at=now()-interval '1 minute'");await assert.rejects(()=>win(nonce(),{stage:101}),/Invalid/);await assert.rejects(()=>win(nonce(),{stars:0}),/Invalid/);
 await assert.rejects(()=>call('test_claim',{campaign399:'claim',owner:uid,id:nonce(),completed:true}),/Invalid|ไม่พบ/);
 assert.equal((await db.query("select has_table_privilege('authenticated','nova_private.campaign_wins399','INSERT') a")).rows[0].a,false);
-console.log('PASS battle399 DB: PvP 100% = 5 NOVA, collect x1, video x3 (NOVA + resources), no double claim; bot win 2 NOVA every win, video +4, replay/spacing/owner checks');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});
+console.log('PASS battle399 DB: PvP 100% = 5 NOVA, collect x1, video x3 (NOVA + resources), no double claim; bot win 2 ไข่ทอง every win, video +4, replay/spacing/owner checks');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});

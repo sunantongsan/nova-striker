@@ -1,7 +1,7 @@
 // 419: base defense waves are attacked by real troops from the game, not the old aliens.
 // The attackers are the same unit types a player at your HQ level can build (same stats and
 // research level as yours), and the wave is sized from your own army capacity, so the fight is
-// even. Defense wins pay resources only (no NOVA). The defense garrison window is rebuilt:
+// even. Defense wins pay resources only (no Golden Eggs). The defense garrison window is rebuilt:
 // pick your own trained troops to station, up to the garrison capacity.
 
 // ---------- who may attack: units a player at this HQ level could train ----------
@@ -116,7 +116,7 @@ drawFighter=function(t,enemy){
  return drawFoe419(t,false);
 };
 
-// ---------- defense pays resources only, never NOVA ----------
+// ---------- defense pays resources only, never Golden Eggs ----------
 var finishFoe419=Engine.prototype.finishDefense;
 Engine.prototype.finishDefense=function(){var d=this.defense,before=this.d.gems,out=finishFoe419.apply(this,arguments);
  if(d&&d.result&&this.d.gems>before){this.d.gems=before;d.result.gems=0;this.save();}else if(d&&d.result)d.result.gems=0;return out;};
@@ -130,7 +130,7 @@ function garrisonHTML419(){
  return '<h2>'+mt251('กองกำลังป้องกันฐาน','Base garrison')+'</h2><div class="g419">'+
   '<p class="g419tip">'+mt251('เลือกทหารที่ฝึกแล้วเข้าประจำการ • แตะการ์ดเพื่อใส่ • แตะ − เพื่อถอน • ช่วยป้องกันเมื่อถูกบุก แล้วกลับมาครบหลังจบ','Pick trained troops to station • tap a card to add • − to remove • they defend when you are attacked and come back after')+'</p>'+
   '<div class="g419bar"><span style="width:'+pct.toFixed(1)+'%"></span><b>'+used+' / '+cap+'</b></div>'+
-  (has?'':'<p class="g419warn">'+mt251('สร้างกองบัญชาการป้องกันฐานก่อน','Build the Defense HQ first')+'</p>')+
+  (has?'':'<p class="g419warn">'+mt251('สร้างบ้านผู้พันป้องกันฐานก่อน','Build the Defense HQ first')+'</p>')+
   '<div class="g419grid">'+(cards||'<p class="g419warn">'+mt251('ยังไม่มีทหาร ฝึกทหารที่โรงฝึกก่อน','No troops yet - train some first')+'</p>')+'</div>'+
   '<div class="g419row"><button class="green" onclick="Game.fill419()">'+mt251('เติมเต็มอัตโนมัติ','Auto fill')+'</button><button onclick="Game.clear419()">'+mt251('ถอนทั้งหมด','Remove all')+'</button></div></div>';
 }

@@ -37,7 +37,7 @@
   if(!E.save()){E.d=JSON.parse(before);return;}
   selected=null;drawNeeded=true;try{hud();}catch(e){}
   open('<h2>'+mt251('กู้คืนฐานเดิมแล้ว','Your base is back')+'</h2><p>'+
-   mt251('อัปเดตก่อนหน้านี้ทำให้ฐานของคุณเริ่มใหม่ เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (ศูนย์บัญชาการระดับ ','An earlier update restarted your base. We brought back your last base saved on the server (Command Center level ')+
+   mt251('อัปเดตก่อนหน้านี้ทำให้ฐานของคุณเริ่มใหม่ เราคืนฐานล่าสุดที่บันทึกบนเซิร์ฟเวอร์ให้แล้ว (บ้านเป็ดระดับ ','An earlier update restarted your base. We brought back your last base saved on the server (Duck House level ')+
    (r.hq||'')+mt251(', อาคาร ',', ')+list.length+mt251(' ชิ้น)',' buildings)')+'</p><p>'+mt251('ขออภัยในความไม่สะดวก เล่นต่อได้เลย','Sorry for the trouble. Carry on playing!')+'</p><button class="wide green" onclick="Game.close()">'+mt251('เล่นต่อ','Play')+'</button>');}
  setTimeout(function(){ask412(false);},2500);
 })();

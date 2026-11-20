@@ -1,31 +1,31 @@
-// 433: ทหารเสริมพลัง (Clash-style super troops). Boost a troop type for 3 days with Ore R or NOVA (two types at a time);
+// 433: ทหารเสริมพลัง (Clash-style super troops). Boost a troop type for 3 days with Syrup or Golden Eggs (two types at a time);
 // every unit of that type you deploy is a burning super version: +25% HP and damage, flames on its body, and a new trick.
-//   0 เรนเจอร์ -> เรนเจอร์เพลิง      shots also scorch a second target nearby (50%)
-//   2 หุ่นรบ  -> หุ่นจรวดคู่        fires two rockets per shot (+60% damage)
-//   1 รถถัง   -> รถถังหนามเพลิง     triple damage to walls
-//   6 หุ่นโล่ -> หุ่นโล่สะท้อน      reflects 30% of turret damage back
-var SUPER433={0:{th:'เรนเจอร์เพลิง',en:'Blaze Ranger',aTh:'กระสุนไฟลามโดนเป้าข้าง ๆ อีก 1 (50%)',aEn:'Shots scorch a second nearby target (50%)'},
+//   0 เป็ดส้อม -> เป็ดส้อมเพลิง      shots also scorch a second target nearby (50%)
+//   2 หมาดัลเมเชียน  -> หุ่นจรวดคู่        fires two rockets per shot (+60% damage)
+//   1 เป็ดขุดดิน   -> เป็ดขุดดินหนามเพลิง     triple damage to walls
+//   6 เป็ดหม้อ -> เป็ดหม้อสะท้อน      reflects 30% of turret damage back
+var SUPER433={0:{th:'เป็ดส้อมเพลิง',en:'Blaze Ranger',aTh:'กระสุนไฟลามโดนเป้าข้าง ๆ อีก 1 (50%)',aEn:'Shots scorch a second nearby target (50%)'},
  2:{th:'หุ่นจรวดคู่',en:'Twin Rocketeer',aTh:'ยิงจรวดทีละ 2 ลูก (แรงขึ้น 60%)',aEn:'Two rockets per shot (+60% damage)'},
- 1:{th:'รถถังหนามเพลิง',en:'Spike Tank',aTh:'ทำลายกำแพงแรงขึ้น 3 เท่า',aEn:'Triple damage to walls'},
- 6:{th:'หุ่นโล่สะท้อน',en:'Mirror Shield',aTh:'สะท้อนดาเมจป้อมกลับ 30%',aEn:'Reflects 30% of turret damage'}};
+ 1:{th:'เป็ดขุดดินหนามเพลิง',en:'Spike Tank',aTh:'ทำลายกำแพงแรงขึ้น 3 เท่า',aEn:'Triple damage to walls'},
+ 6:{th:'เป็ดหม้อสะท้อน',en:'Mirror Shield',aTh:'สะท้อนดาเมจป้อมกลับ 30%',aEn:'Reflects 30% of turret damage'}};
 var SUPER_R433=2000,SUPER_NOVA433=80,SUPER_DAYS433=3,SUPER_MAX433=2,SUPER_HQ433=7;
 function boosts433(){var b=E.d.boost433;if(!b||typeof b!=='object')b=E.d.boost433={};var now=Date.now();Object.keys(b).forEach(function(k){if(!(b[k]>now))delete b[k];});return b;}
 function active433(k){var b=boosts433();return b[k]>Date.now();}
 function left433(k){return Math.max(0,(boosts433()[k]||0)-Date.now())/1000;}
 function dleft433(sec){var d=Math.floor(sec/86400),h=Math.floor(sec%86400/3600),m=Math.floor(sec%3600/60);return d?d+mt251(' วัน ',' d ')+h+mt251(' ชม.',' h'):h?h+mt251(' ชม. ',' h ')+m+mt251(' นาที',' m'):m+mt251(' นาที',' m');}
 function sname433(k){return mt251(SUPER433[k].th,SUPER433[k].en);}
-function why433(k){if(E.hq()<SUPER_HQ433)return mt251('ปลดล็อกที่ศูนย์บัญชาการ ','Unlocks at Command Center ')+SUPER_HQ433;if(active433(k))return '';if(Object.keys(boosts433()).length>=SUPER_MAX433)return mt251('เสริมพลังได้พร้อมกัน 2 ชนิด','Only 2 boosts at a time');return '';}
+function why433(k){if(E.hq()<SUPER_HQ433)return mt251('ปลดล็อกที่บ้านเป็ด ','Unlocks at Duck House ')+SUPER_HQ433;if(active433(k))return '';if(Object.keys(boosts433()).length>=SUPER_MAX433)return mt251('เสริมพลังได้พร้อมกัน 2 ชนิด','Only 2 boosts at a time');return '';}
 function give433(k){var b=boosts433();b[k]=Math.max(b[k]||0,Date.now())+SUPER_DAYS433*86400000;}
-Game.boostR433=function(k){var why=why433(k);if(why){toast(why);return;}E.sync();if((E.d.zfluid410||0)<SUPER_R433){toast(mt251('แร่ R ไม่พอ','Not enough Ore R'));return;}
+Game.boostR433=function(k){var why=why433(k);if(why){toast(why);return;}E.sync();if((E.d.zfluid410||0)<SUPER_R433){toast(mt251('ไซรัป ไม่พอ','Not enough Syrup'));return;}
  var before=JSON.stringify(E.d);E.d.zfluid410-=SUPER_R433;give433(k);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.super433();};
-Game.boostNova433=function(k){var why=why433(k);if(why){toast(why);return;}confirmNova358(SUPER_NOVA433,function(){var w=why433(k);if(w){toast(w);return;}if((E.d.gems||0)<SUPER_NOVA433){toast(mt251('NOVA ไม่พอ','Not enough NOVA'));return;}
+Game.boostNova433=function(k){var why=why433(k);if(why){toast(why);return;}confirmNova358(SUPER_NOVA433,function(){var w=why433(k);if(w){toast(w);return;}if((E.d.gems||0)<SUPER_NOVA433){toast(mt251('ไข่ทอง ไม่พอ','Not enough Golden Eggs'));return;}
  var before=JSON.stringify(E.d);E.d.gems-=SUPER_NOVA433;give433(k);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.super433();});};
 Game.super433=function(){E.sync();var lockAll=E.hq()<SUPER_HQ433,used=Object.keys(boosts433()).length;
  var cards=Object.keys(SUPER433).map(function(k){k=+k;var s=SUPER433[k],on=active433(k),why=why433(k);
   return '<article class="sup433'+(on?' on433':'')+'"><div class="supPic433">'+portrait278(k)+'<i class="flame433"></i></div><b>'+sname433(k)+'</b><small class="from433">'+mt251('จาก ','from ')+U[k].name+'</small><small>❤ ⚔ +25% · '+mt251(s.aTh,s.aEn)+'</small>'+
    (on?'<p class="left433">🔥 '+mt251('เสริมพลังอยู่ · เหลือ ','Boosted · ')+dleft433(left433(k))+'</p><div class="btn433"><button class="green" '+((E.d.zfluid410||0)<SUPER_R433?'disabled':'')+' onclick="Game.boostR433('+k+')">+3 '+mt251('วัน ','days ')+zIcon410()+SUPER_R433+'</button><button '+((E.d.gems||0)<SUPER_NOVA433?'disabled':'')+' onclick="Game.boostNova433('+k+')">+3 '+mt251('วัน ','days ')+'<i class="nova412"></i>'+SUPER_NOVA433+'</button></div>':
    '<div class="btn433"><button class="green" '+(why||(E.d.zfluid410||0)<SUPER_R433?'disabled':'')+' onclick="Game.boostR433('+k+')">'+zIcon410()+SUPER_R433+'</button><button '+(why||(E.d.gems||0)<SUPER_NOVA433?'disabled':'')+' onclick="Game.boostNova433('+k+')"><i class="nova412"></i>'+SUPER_NOVA433+'</button></div>'+(why&&!lockAll?'<p class="left433">'+why+'</p>':''))+'</article>';}).join('');
- open('<section class="super433"><h2>🔥 '+mt251('ทหารเสริมพลัง','Super troops')+'</h2><p class="tip433">'+(lockAll?'🔒 '+mt251('ปลดล็อกที่ศูนย์บัญชาการ ','Unlocks at Command Center ')+SUPER_HQ433+' · ':'')+mt251('เสริมพลังได้ครั้งละ 2 ชนิด ('+used+'/2) · ครั้งละ 3 วัน · ทหารชนิดนั้นที่ส่งลงสนามจะมีไฟลุกทั้งตัว','Boost up to 2 types ('+used+'/2) · 3 days each · every unit of that type burns in battle')+'</p><div class="grid433">'+cards+'</div></section>');};
+ open('<section class="super433"><h2>🔥 '+mt251('ทหารเสริมพลัง','Super troops')+'</h2><p class="tip433">'+(lockAll?'🔒 '+mt251('ปลดล็อกที่บ้านเป็ด ','Unlocks at Duck House ')+SUPER_HQ433+' · ':'')+mt251('เสริมพลังได้ครั้งละ 2 ชนิด ('+used+'/2) · ครั้งละ 3 วัน · ทหารชนิดนั้นที่ส่งลงสนามจะมีไฟลุกทั้งตัว','Boost up to 2 types ('+used+'/2) · 3 days each · every unit of that type burns in battle')+'</p><div class="grid433">'+cards+'</div></section>');};
 // entry: button at the top of the army window, fire badge on boosted troops
 var army433=Game.army278;Game.army278=function(){var r=army433.apply(this,arguments);try{var hub=$('armyHub278');if(hub&&!hub.querySelector('.supBtn433')){var h=hub.querySelector('.novaFilter360');if(h)h.insertAdjacentHTML('beforebegin','<button class="supBtn433" onclick="Game.super433()">🔥 '+mt251('ทหารเสริมพลัง','Super troops')+'</button>');}
  Object.keys(SUPER433).forEach(function(k){if(!active433(k))return;var b=hub&&hub.querySelector('button[onclick="Game.unitInfo278('+k+')"]'),a=b&&b.closest('article');if(a)a.classList.add('fire433');});}catch(e){}return r;};

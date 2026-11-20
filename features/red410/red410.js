@@ -1,13 +1,13 @@
-// 410: Ore R (แร่ R, the red particle accelerant) — extractor and tank from HQ 7, and four red troops paid with it.
+// 410: Syrup (ไซรัป, the red particle accelerant) — extractor and tank from HQ 7, and four red troops paid with it.
 // * New building types zdrill (extractor) and ztank (tank). The server's layout list knows them by their old
 //   names crystalplant / crystalstore (cap 1 each), so layouts are renamed on the way out and back.
 // * The balance lives in the local save as d.zfluid410, like gold and energy. It is not looted (yet).
 // * Red troops are army kinds 11-14. The server accepts armies of 11 (older app) to 15 entries (migration 410).
 var ZHQ410=7,ZKIND410=11;
-B.zdrill={name:mt251('โรงสกัดแร่ R','Ore R Extractor'),cost:0,power:0,cap:1,sprite:23,hp:1100,require:ZHQ410,time:0};
-B.ztank={name:mt251('แท้งแร่ R','Ore R Tank'),cost:0,power:0,cap:1,sprite:24,hp:1500,require:ZHQ410,time:0};
+B.zdrill={name:mt251('เตาเคี่ยวไซรัป','Syrup Stove'),cost:0,power:0,cap:1,sprite:23,hp:1100,require:ZHQ410,time:0};
+B.ztank={name:mt251('โหลไซรัป','Syrup Jar'),cost:0,power:0,cap:1,sprite:24,hp:1500,require:ZHQ410,time:0};
 buildingImages.zdrill=buildingImages.crystalplant;
-// Prices: Ore G, steep like Clash dark-elixir buildings; the shared quote caps them at attainable storage.
+// Prices: Veggie juice, steep like Clash dark-elixir buildings; the shared quote caps them at attainable storage.
 progression369.zdrill={};progression369.ztank={};
 for(var lv410=1;lv410<=20;lv410++){
  progression369.zdrill[lv410]={amount:Math.round(150000*Math.pow(1.42,lv410-1)/1000)*1000,seconds:Math.round(1800*Math.pow(lv410,1.7)),resource:'power'};
@@ -29,13 +29,13 @@ function zTick410(e){
 // Engine methods are wrapped on the prototype and on the live engine (E carries its own copies of sync/train/...).
 var wrap410={
  sync:function(prev){return function(){var r=prev.apply(this,arguments);zTick410(this);return r;};},
- unitLock278:function(prev){return function(i){if(red410(i)&&this.hq()<U[i].hq410)return mt251('ต้องมีศูนย์บัญชาการระดับ ','Requires Command Center level ')+U[i].hq410;return prev.apply(this,arguments);};},
- unitLock:function(prev){return function(i){if(red410(i)&&this.hq()<U[i].hq410)return mt251('ต้องมีศูนย์บัญชาการระดับ ','Requires Command Center level ')+U[i].hq410;return prev.apply(this,arguments);};},
+ unitLock278:function(prev){return function(i){if(red410(i)&&this.hq()<U[i].hq410)return mt251('ต้องมีบ้านเป็ดระดับ ','Requires Duck House level ')+U[i].hq410;return prev.apply(this,arguments);};},
+ unitLock:function(prev){return function(i){if(red410(i)&&this.hq()<U[i].hq410)return mt251('ต้องมีบ้านเป็ดระดับ ','Requires Duck House level ')+U[i].hq410;return prev.apply(this,arguments);};},
  train278:function(prev){return trainWrap410(prev);},train:function(prev){return trainWrap410(prev);}
 };
 var training410=0;
 function trainWrap410(prev){return function(i){if(!red410(i)||training410)return prev.apply(this,arguments);
- this.sync();if((this.d.zfluid410||0)<U[i].z410)return mt251('แร่ R ไม่พอ','Not enough Ore R');
+ this.sync();if((this.d.zfluid410||0)<U[i].z410)return mt251('ไซรัป ไม่พอ','Not enough Syrup');
  training410++;var r;try{r=prev.apply(this,arguments);}finally{training410--;}if(r)return r;
  this.d.zfluid410-=U[i].z410;if(!this.save()){this.d.zfluid410+=U[i].z410;return tr('บันทึกไม่ได้');}return '';};}
 Object.keys(wrap410).forEach(function(k){var f=Engine.prototype[k];if(f&&!f.w410){Engine.prototype[k]=wrap410[k](f);Engine.prototype[k].w410=true;}});
@@ -45,10 +45,10 @@ wrapE410(E);if(root.setInterval)setInterval(function(){try{wrapE410(E);}catch(e)
 var rows410=buildingRows361;
 buildingRows361=function(b){var rows=rows410.apply(this,arguments),lv=b.lv,n=Math.min(20,lv+1);
  if(b.type==='zdrill')rows.push([mt251('ผลิต / ชั่วโมง','Production / hour'),zRate410(lv),zRate410(n)]);
- if(b.type==='ztank')rows.push([mt251('ความจุแร่ R','Ore R capacity'),10000*lv,10000*n]);
+ if(b.type==='ztank')rows.push([mt251('ความจุไซรัป','Syrup capacity'),10000*lv,10000*n]);
  return rows;};
 var group410=buildGroup261;buildGroup261=function(k){return k==='zdrill'||k==='ztank'?'economy':group410.apply(this,arguments);};
-// Tank art: the red (z) row of the tank atlas, filled by the stored Ore R.
+// Tank art: the red (z) row of the tank atlas, filled by the stored Syrup.
 TANK403.ztank=2;
 var fill410=tankFill403;
 tankFill403=function(b){
@@ -70,15 +70,15 @@ Engine.prototype.scoutPlayer=function(target){if(target&&Array.isArray(target.la
 // ---------- red troops (kinds 11-14) ----------
 // 412: game.js reserves slots 11-14 with placeholders before the save loads; replace them.
 U.splice(ZKIND410,U.length-ZKIND410,
- {name:mt251('นักวิ่งอนุภาค','Surge Runner'),z410:20,cost:0,time:25,space:2,hp:360,damage:58,range:1.3,rate:.5,speed:2.8,sprite:8,hq410:7,weapon:'plasma',description:mt251('วิ่งเร็วมาก ฟันรัวด้วยใบมีดพลังงานแดง','Very fast, rapid red-energy blade strikes')},
- {name:mt251('โดรนเพลิงแดง','Ember Drone'),z410:40,cost:0,time:45,space:4,hp:560,damage:96,range:1.6,rate:1.4,speed:2.1,sprite:20,hq410:8,air:true,splash:1.1,weapon:'bomb',description:mt251('บินข้ามกำแพง ทิ้งลูกไฟแดงเป็นวง','Flies over walls, drops red fire bombs')},
- {name:mt251('หุ่นยักษ์ทับทิม','Ruby Colossus'),z410:160,cost:0,time:150,space:12,hp:5600,damage:74,range:1.3,rate:1.8,speed:.75,sprite:22,hq410:9,weapon:'shock',description:mt251('ยักษ์เกราะหนา รับดาเมจแทนทั้งทัพ','Huge armored walker that soaks damage for the army')},
- {name:mt251('หุ่นปืนอนุภาค','Particle Lancer'),z410:80,cost:0,time:90,space:7,hp:1150,damage:180,range:4.6,rate:2.6,speed:1.05,sprite:10,hq410:10,splash:1.2,weapon:'plasma',description:mt251('ยิงลำแสงอนุภาคไกล ระเบิดเป็นวง','Long-range particle shots with splash')}
+ {name:mt251('เป็ดระเบิด','Bomber Duck'),z410:20,cost:0,time:25,space:2,hp:360,damage:58,range:1.3,rate:.5,speed:2.8,sprite:8,hq410:7,weapon:'plasma',description:mt251('วิ่งเร็วมาก ฟันรัวด้วยใบมีดพลังงานแดง','Very fast, rapid red-energy blade strikes')},
+ {name:mt251('เป็ดแม่มด','Witch Duck'),z410:40,cost:0,time:45,space:4,hp:560,damage:96,range:1.6,rate:1.4,speed:2.1,sprite:20,hq410:8,air:true,splash:1.1,weapon:'bomb',description:mt251('บินข้ามกำแพง ทิ้งลูกไฟแดงเป็นวง','Flies over walls, drops red fire bombs')},
+ {name:mt251('เป็ดหม้อหุงข้าว','Rice-Cooker Duck'),z410:160,cost:0,time:150,space:12,hp:5600,damage:74,range:1.3,rate:1.8,speed:.75,sprite:22,hq410:9,weapon:'shock',description:mt251('ยักษ์เกราะหนา รับดาเมจแทนทั้งทัพ','Huge armored walker that soaks damage for the army')},
+ {name:mt251('นกยางนักรบ','Egret Warrior'),z410:80,cost:0,time:90,space:7,hp:1150,damage:180,range:4.6,rate:2.6,speed:1.05,sprite:10,hq410:10,splash:1.2,weapon:'plasma',description:mt251('ยิงลำแสงอนุภาคไกล ระเบิดเป็นวง','Long-range particle shots with splash')}
 );
 function red410(i){return i>=ZKIND410&&!!U[i]&&U[i].z410>0;}
 (function(){if(E&&E.d&&Array.isArray(E.d.army))while(E.d.army.length<U.length)E.d.army.push(0);})();
 function zIcon410(){return '<span class="fluid403 z410" style="background-position:100% 50%"></span>';}
-// Army window: red troops show their Ore R price and enable by Ore R.
+// Army window: red troops show their Syrup price and enable by Syrup.
 var army410=Game.army278;
 Game.army278=function(){var r=army410.apply(this,arguments);redCards410();return r;};
 var refresh410=refreshArmy278;
@@ -90,14 +90,14 @@ function redCards410(){if(!modal||!modal.querySelector)return;
 // Portraits for the red troops (3D renders, 4 across).
 var portrait410=unitPortrait393;
 unitPortrait393=function(k,cls){if(!red410(k))return portrait410.apply(this,arguments);return '<span class="'+(cls||'icon')+' portrait410" style="background-position:'+((k-ZKIND410)*100/3)+'% 0%"></span>';};
-// Unit info shows the Ore R price.
+// Unit info shows the Syrup price.
 var info410=Game.unitInfo278;
 Game.unitInfo278=function(i){var r=info410.apply(this,arguments);if(red410(i)){var p=modal.querySelector('.army278 p');if(p)p.insertAdjacentHTML('beforebegin','<p class="red410">'+U[i].description+'<br>'+zIcon410()+' '+U[i].z410.toLocaleString()+' · ◷ '+U[i].time+'s · '+mt251('ปลดล็อก HQ ','Unlock HQ ')+U[i].hq410+'</p>');}return r;};
 
 // ---------- HUD readout ----------
 (function(){
  var res=document.querySelector('#app>header .resources'),energy=$('energy');if(!res||!energy)return;
- var span=document.createElement('span');span.id='zbox410';span.hidden=true;span.title=mt251('แร่ R','Ore R');
+ var span=document.createElement('span');span.id='zbox410';span.hidden=true;span.title=mt251('ไซรัป','Syrup');
  span.innerHTML='<em class="red410"><i class="fluid403" style="background-position:100% 50%" aria-hidden="true"></i></em> <b id="zfluid410">0</b>';
  var after=energy.closest('span');if(after&&after.parentNode===res)after.insertAdjacentElement('afterend',span);else res.appendChild(span);
  function short(n){var a=Math.abs(n);if(a<10000)return Math.floor(n).toLocaleString('en-US');if(a<1e6)return (Math.floor(n/100)/10).toString().replace(/\.0$/,'')+'K';return (Math.floor(n/1e5)/10).toString().replace(/\.0$/,'')+'M';}
@@ -115,9 +115,9 @@ Game.unitInfo278=function(i){var r=info410.apply(this,arguments);if(red410(i)){v
 
 // ---------- 411: two new defenses ----------
 // inferno  หอเพลิงอนุภาค (HQ10): one beam that keeps burning the same target harder and harder (x1 -> x10 over 4 s);
-//          hits ground and air. Built with Ore Y, upgraded with Ore R.
-// skyguard ปืนต่อสู้อากาศยาน (HQ6): air only, flak with splash. Ore Y.
-// 412: inferno is now ป้อมเลเซอร์ (Laser Fortress). Both turn their guns toward the target (16 directions);
+//          hits ground and air. Built with Honey, upgraded with Syrup.
+// skyguard ปืนฉีดน้ำต่อสู้อากาศ (HQ6): air only, flak with splash. Honey.
+// 412: inferno is now ป้อมเชฟพริกไฟ (Chili Chef Tower). Both turn their guns toward the target (16 directions);
 //      Lv1-3 / 4-8 / 9+: AA gun 1 / 2 / 4 barrels, laser fortress 2 / 3 / 4 main barrels and four corner guns
 //      that grow and start firing from Lv4.
 var DEF410={inferno:1,skyguard:1};
@@ -130,21 +130,21 @@ function skyDps412(lv){var t=tier412(lv);return skyDamage410(lv)*SKYSHOT412[t]*B
 function laserDps412(lv){return Math.round(26*defenseGrowth351(lv));}
 // colour before shape: each shape tier has three colour stages
 function stage412(lv){lv=lv||1;if(lv<=3)return [0,lv-1];if(lv<=8)return [1,lv<=5?0:lv<=7?1:2];return [2,lv<=12?0:lv<=16?1:2];}
-B.inferno={name:mt251('ป้อมเลเซอร์','Laser Fortress'),cost:0,power:0,cap:1,sprite:910,hp:1900,require:10,time:0};
-B.skyguard={name:mt251('ปืนต่อสู้อากาศยาน','Sky Guard AA Gun'),cost:0,power:0,cap:1,sprite:911,hp:1300,require:6,time:0};
+B.inferno={name:mt251('ป้อมเชฟพริกไฟ','Chili Chef Tower'),cost:0,power:0,cap:1,sprite:910,hp:1900,require:10,time:0};
+B.skyguard={name:mt251('ปืนฉีดน้ำต่อสู้อากาศ','Water-Gun AA'),cost:0,power:0,cap:1,sprite:911,hp:1300,require:6,time:0};
 progression369.inferno={};progression369.skyguard={};
 for(var dl410=1;dl410<=20;dl410++){
  progression369.inferno[dl410]={amount:Math.round(1200000*Math.pow(1.18,dl410-1)/1000)*1000,seconds:Math.round(3600*4*Math.pow(dl410,1.5)),resource:'gold'};
  progression369.skyguard[dl410]={amount:Math.round(90000*Math.pow(1.38,dl410-1)/1000)*1000,seconds:Math.round(1800*Math.pow(dl410,1.6)),resource:'gold'};
 }
 ['inferno','skyguard'].forEach(function(t){var q=progressionQuote369(t,1);B[t].cost=q.gold;B[t].power=q.power;B[t].time=q.time;});
-function infernoZ410(target){return Math.round(400*Math.pow(target,1.5));}// Ore R for upgrading to level `target`
+function infernoZ410(target){return Math.round(400*Math.pow(target,1.5));}// Syrup for upgrading to level `target`
 var cost410=Engine.prototype.upgradeCost;
 function upgradeCost410(prev){return function(b){var c=prev.apply(this,arguments);if(b&&b.type==='inferno'){c=Object.assign({},c,{gold:0,power:0,crystals:0,z410:infernoZ410(b.lv+1)});}return c;};}
 Engine.prototype.upgradeCost=upgradeCost410(Engine.prototype.upgradeCost);
 var upgradeRun410=0;
 function upgradeWrap410(prev){return function(id){var b=(this.d.buildings||[]).find(function(v){return v.id===id;});if(!b||b.type!=='inferno'||upgradeRun410)return prev.apply(this,arguments);
- var need=infernoZ410(b.lv+1);this.sync();if((this.d.zfluid410||0)<need)return mt251('แร่ R ไม่พอ','Not enough Ore R');
+ var need=infernoZ410(b.lv+1);this.sync();if((this.d.zfluid410||0)<need)return mt251('ไซรัป ไม่พอ','Not enough Syrup');
  upgradeRun410++;var r;try{r=prev.apply(this,arguments);}finally{upgradeRun410--;}if(r)return r;this.d.zfluid410-=need;if(!this.save()){this.d.zfluid410+=need;return tr('บันทึกไม่ได้');}return '';};}
 wrap410.upgrade=upgradeWrap410;wrap410.upgradeCost=upgradeCost410;
 ['upgrade'].forEach(function(k){var f=Engine.prototype[k];if(f&&!f.w410){Engine.prototype[k]=wrap410[k](f);Engine.prototype[k].w410=true;}});
@@ -212,8 +212,10 @@ function defDraw412(b,p,size,wreck){var st=stage412(b.lv),img=art412(b.type,st[0
  if(wreck){cell412(k,17,img,x,y,w,h);b.tips412=null;return true;}
  turn412(b);var d=dir412(b);cell412(k,16,img,x,y,w,h);cell412(k,d,img,x,y,w,h);
  b.tips412=k.tips[st[0]][d].map(function(q){return {x:x+q[0]*w,y:y+q[1]*h};});b.tipPx410=b.tips412[0]||null;return true;}
+// duck: the giant slingshot (gun) uses the same 16-direction duck atlas as the 412 defenses
+var turretDuck=drawTurret;drawTurret=function(b,p){if(b&&b.type==='gun'&&D412.kinds.gun&&defDraw412(b,p,tile*zoom*2.25,false))return;return turretDuck.apply(this,arguments);};
 var mount412=weaponMount;
-weaponMount=function(o){if(o&&(o.type==='inferno'||o.type==='skyguard')&&o.wz412&&D412.kinds[o.type]){var k=D412.kinds[o.type],tips=k.tips[stage412(o.lv)[0]][dir412(o)],q=tips[Math.min(o.gun412||0,tips.length-1)];
+weaponMount=function(o){if(o&&(o.type==='inferno'||o.type==='skyguard'||o.type==='gun')&&o.wz412&&D412.kinds[o.type]){var k=D412.kinds[o.type],tips=k.tips[stage412(o.lv)[0]][dir412(o)],q=tips[Math.min(o.gun412||0,tips.length-1)];
   if(q){var yy=(q[1]-k.ay)*o.hz412;return {x:(q[0]-k.ax)*o.wz412,y:yy,height:-yy};}}return mount412.apply(this,arguments);};
 var evolved410=evolvedArt265;
 evolvedArt265=function(b,p,size){if(DEF410[b.type]&&defDraw412(b,p,size,false)){if(b.lv>1){var marks=(b.lv-1)%4+1;for(var i=0;i<marks;i++)disk(p.x+(i-(marks-1)/2)*5*zoom,p.y+size*.1,1.5*zoom,'#ffe391');}return true;}return evolved410.apply(this,arguments);};
@@ -234,21 +236,21 @@ draw=function(){var out=draw410.apply(this,arguments);try{var sc=screen==='raid'
   ctx.restore();if(any)drawNeeded=true;});}catch(e){}return out;};
 (function(){var st=document.createElement('style');st.id='def410';st.textContent='.icon.def410{background:url(assets/defense412-icons.webp) 0 0/200% 100% no-repeat!important;width:56px;height:56px}';document.head.appendChild(st);})();
 
-// ---------- 411: NOVA mech power-up with Ore R ----------
-// Buying and tiers stay NOVA (server). On top of that, 20 local power-up levels paid with Ore R:
+// ---------- 411: Duck Colonel power-up with Syrup ----------
+// Buying and tiers stay Golden Eggs (server). On top of that, 20 local power-up levels paid with Syrup:
 // +4% HP and +3% damage per level for your own mech in battle.
 function titanZCost410(n){return Math.round(600*Math.pow(n,1.6));}
 function titanZ410(){return Math.max(0,Math.min(20,E.d.titanZ410|0));}
-Game.titanZUp410=function(){E.sync();var n=titanZ410()+1;if(n>20)return;if(!(E.d.titan342&&E.d.titan342.level)){toast(mt251('สร้างหุ่น NOVA ก่อน','Build the NOVA mech first'));return;}
- var c=titanZCost410(n);if((E.d.zfluid410||0)<c){toast(mt251('แร่ R ไม่พอ','Not enough Ore R'));return;}
+Game.titanZUp410=function(){E.sync();var n=titanZ410()+1;if(n>20)return;if(!(E.d.titan342&&E.d.titan342.level)){toast(mt251('สร้างผู้พันเป็ด ก่อน','Build the Duck Colonel first'));return;}
+ var c=titanZCost410(n);if((E.d.zfluid410||0)<c){toast(mt251('ไซรัป ไม่พอ','Not enough Syrup'));return;}
  E.d.zfluid410-=c;E.d.titanZ410=n;if(!E.save()){E.d.zfluid410+=c;E.d.titanZ410=n-1;toast(tr('บันทึกไม่ได้'));return;}
- toast(mt251('เสริมพลังหุ่น NOVA เป็น Lv.','NOVA mech power-up Lv.')+n);hud();titanPanel342();};
+ toast(mt251('เสริมพลังผู้พันเป็ด เป็น Lv.','Duck Colonel power-up Lv.')+n);hud();titanPanel342();};
 var titanPanel410=titanPanel342;
 titanPanel342=function(){var out=titanPanel410.apply(this,arguments);try{
  var sec=modal.querySelector('.titanShop342');if(!sec||titanShopOnly342)return out;var old=sec.querySelector('.titanZ410');
  var s=titanState342||E.d.titan342||{},lv=s.level||0;if(!lv)return out;var n=titanZ410(),max=n>=20,c=titanZCost410(n+1),can=!max&&(E.d.zfluid410||0)>=c;
  var box=document.createElement('div');box.className='titanZ410';
- box.innerHTML='<b>'+mt251('เสริมพลังด้วยแร่ R','Ore R power-up')+' · Lv.'+n+'/20</b><p>♥ +'+(4*n)+'% · ⚔ +'+(3*n)+'%'+(max?'':' → ♥ +'+(4*n+4)+'% · ⚔ +'+(3*n+3)+'%')+'</p>'+
+ box.innerHTML='<b>'+mt251('เสริมพลังด้วยไซรัป','Syrup power-up')+' · Lv.'+n+'/20</b><p>♥ +'+(4*n)+'% · ⚔ +'+(3*n)+'%'+(max?'':' → ♥ +'+(4*n+4)+'% · ⚔ +'+(3*n+3)+'%')+'</p>'+
   (max?'<p>'+tr('ระดับสูงสุด')+'</p>':'<button class="wide '+(can?'green':'')+'" '+(can?'':'disabled')+' onclick="Game.titanZUp410()">'+zIcon410()+' '+c.toLocaleString()+' · '+mt251('เสริมพลัง','Power up')+'</button>');
  if(old){old.replaceWith(box);return out;}var after=sec.querySelector('.guardianRank343');if(after)after.insertAdjacentElement('afterend',box);else sec.appendChild(box);}catch(e){}return out;};
 function mineTitan410(t){if(!t||!t.titan342)return false;var me=E.d.onlineCrystal&&E.d.onlineCrystal.owner;return !t.owner||!!me&&t.owner===me;}

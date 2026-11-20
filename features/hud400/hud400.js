@@ -3,7 +3,7 @@
 // 401: builder count moves out from under the base card into the resource readouts, so the
 // shop badge below the card can be big.
 (function(){var badge=$('builderBadge'),res=document.querySelector('#app>header .resources');if(badge&&res)res.appendChild(badge);})();
-// 401: until a real banner ad fills the top-right slot, show our own Nova Striker banner there
+// 401: until a real banner ad fills the top-right slot, show our own Duck War banner there
 // (game art + logo). It only appears inside the Android app, where the slot exists, and steps
 // aside the moment the native banner is shown (data-nova-banner39).
 (function(){
