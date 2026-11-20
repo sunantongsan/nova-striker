@@ -65,7 +65,7 @@ function compactWallet412(){
  if(welcome){var wb=welcome.querySelector('button');if(wb){var w=el412('div','chip412 welcome412');w.innerHTML='<img src="assets/nova-core.webp" alt=""><span><small>'+mt251('โบนัสต้อนรับ','Welcome bonus')+'</small><b>'+((welcome.querySelector('strong')||{}).textContent||'')+'</b></span>';wb.className='mini412 green';w.appendChild(wb);chips.appendChild(w);}}
  if(chips.children.length)content.appendChild(chips);
  // check-in: title, one row of days, two buttons side by side, one note
- daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('5 ไข่ทอง · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','5 ไข่ทอง · video x3 · day 7: 15 / 45');
+ daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('5 ไข่ทอง · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','5 Golden Eggs · video x3 · day 7: 15 / 45');
  var btns=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='BUTTON';});if(btns.length){var row=el412('div','pair412');btns.forEach(function(b){b.classList.remove('wide');row.appendChild(b);});daily.appendChild(row);}
  var notes=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='SMALL';});if(notes.length){var note=el412('small','note412',notes.map(function(n){return n.textContent;}).join(' · '));notes.forEach(function(n){n.remove();});daily.appendChild(note);}
  content.appendChild(daily);
@@ -93,7 +93,7 @@ var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412
 var promoPacks425=['nova_2100','nova_7600','nova_34000'];
 function promo425(){var box=el412('section','promo425'),list=novaPacks348.filter(function(p){return promoPacks425.includes(p.id);});
  var best=novaPacks348.reduce(function(a,p){return p.nova/p.thb>a.nova/a.thb?p:a;},novaPacks348[0]);
- box.innerHTML='<div class="promoHead425"><img src="assets/nova-core.webp" alt=""><span><b>'+mt251('แพ็ก ไข่ทอง','NOVA packs')+'</b><small>'+mt251('เติมผ่าน Google Play · ได้ ไข่ทอง ทันที','Buy on Google Play · Golden Eggs arrives instantly')+'</small></span></div>'+
+ box.innerHTML='<div class="promoHead425"><img src="assets/nova-core.webp" alt=""><span><b>'+mt251('แพ็ก ไข่ทอง','Golden Eggs packs')+'</b><small>'+mt251('เติมผ่าน Google Play · ได้ ไข่ทอง ทันที','Buy on Google Play · Golden Eggs arrives instantly')+'</small></span></div>'+
   '<div class="promoGrid425">'+list.map(function(p){var i=novaPacks348.indexOf(p),live=billingProducts348[p.id];
    return '<button class="promoCard425" onclick="Game.shop348(\'nova\')">'+(p===best?'<em>'+mt251('คุ้มสุด','Best value')+'</em>':'')+packArt348(i)+'<b>'+p.nova.toLocaleString()+'</b><span>'+shopEscape348(live?live.price:'฿'+p.thb)+'</span></button>';}).join('')+'</div>'+
   '<button class="promoAll425" onclick="Game.shop348(\'nova\')">'+mt251('ดูแพ็กทั้งหมด','See all packs')+' ›</button>';

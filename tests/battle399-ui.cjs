@@ -29,4 +29,4 @@ const battle='30000000-0000-4000-8000-000000000001',pending=[{battle,gold:100,po
 G.raidRewards260(battle);q=a.requests.at(-1);a.s.novaCloudEvent('war',{action:q.a,request_id:q.id,data:{owner,raid260:true,pending}});assert(a.el('modal').innerHTML.includes('collectRaid260')&&a.el('modal').innerHTML.includes('x3'));
 G.collectRaid260(battle);q=a.requests.at(-1);assert.equal(q.a,'test_claim');assert.equal(q.p.raid260,'collect');assert.equal(ads,1,'collect needs no video');
 a.s.novaCloudEvent('war',{action:q.a,request_id:q.id,data:{owner,raid260:true,pending:[],receipt:{id:q.p.request_id,battle,claimed:true,multiplier:1,granted:{gold:100,power:50,nova:5}}}});assert(!e.d.pendingRaid260);assert(a.el('modal').innerHTML.includes('5'));
-console.log('PASS battle399 UI: bot win 2 NOVA, video x3 ไข่ทอง + resources once, raid collect x1 without video');
+console.log('PASS battle399 UI: bot win 2 NOVA, video x3 Golden Eggs + resources once, raid collect x1 without video');

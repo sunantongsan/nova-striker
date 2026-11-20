@@ -65,4 +65,4 @@ r=await call('test_claim',{campaign399:'claim',owner:uid,id:w2,completed:true});
 await db.exec("update nova_private.campaign_wins399 set created_at=now()-interval '1 minute'");await assert.rejects(()=>win(nonce(),{stage:101}),/Invalid/);await assert.rejects(()=>win(nonce(),{stars:0}),/Invalid/);
 await assert.rejects(()=>call('test_claim',{campaign399:'claim',owner:uid,id:nonce(),completed:true}),/Invalid|ไม่พบ/);
 assert.equal((await db.query("select has_table_privilege('authenticated','nova_private.campaign_wins399','INSERT') a")).rows[0].a,false);
-console.log('PASS battle399 DB: PvP 100% = 5 NOVA, collect x1, video x3 (NOVA + resources), no double claim; bot win 2 ไข่ทอง every win, video +4, replay/spacing/owner checks');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});
+console.log('PASS battle399 DB: PvP 100% = 5 NOVA, collect x1, video x3 (NOVA + resources), no double claim; bot win 2 Golden Eggs every win, video +4, replay/spacing/owner checks');await db.close();})().catch(e=>{console.error(e);process.exitCode=1;});

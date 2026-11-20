@@ -15,13 +15,13 @@ for(const platform of ['android','telegram']){
  const a=boot({novaRTSIntro:'1'},platform),G=a.s.Game,e=a.s.test232.e;
  const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
  const base={owner:'new',mining251:{server_time:new Date().toISOString(),code:'test',base_rate:200,active_team:0,team_total:0,credited:0,earned:0,provider:'test'},test_gems:0,checkin233:{day:'2026-10-17',claimed:false,streak:0,reward:0,next_reward:20},welcome247:{eligible:true,amount:500,claimed:false}};
- a.s.test232.clearBusy();G.treasury();reply(base);assert.match(a.el('modal').innerHTML,/Claim 500 ไข่ทอง/);const before=e.d.gems;
+ a.s.test232.clearBusy();G.treasury();reply(base);assert.match(a.el('modal').innerHTML,/Claim 500 Golden Eggs/);const before=e.d.gems;
  G.claimWelcome247();const count=a.requests.length;G.claimWelcome247();assert.equal(a.requests.length,count);assert.equal(a.requests.at(-1).p.welcome247,'claim');assert.equal(e.d.gems,before,'no credit before server confirmation');
  const granted={...base,test_gems:500,welcome247:{eligible:true,amount:500,claimed:true,id:'welcome-one'}};
  reply(granted);assert.equal(e.d.gems,before+500);assert.match(a.el('modal').innerHTML,/Congratulations/);assert.equal((a.el('modal').innerHTML.match(/<i style=/g)||[]).length,56,'bounded fireworks');
  G.treasury();reply(granted);assert.equal(e.d.gems,before+500);assert(!a.el('modal').innerHTML.includes('Congratulations'));
  const b=boot({...a.data},platform);b.s.test232.clearBusy();b.s.Game.treasury();const r=b.requests.at(-1);b.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:granted});assert.equal(b.s.test232.e.d.gems,before+500,'reload cannot credit receipt twice');
- G.treasury();reply({...base,welcome247:{eligible:false,amount:500,claimed:false}});assert(!a.el('modal').innerHTML.includes('Claim 500 ไข่ทอง'));
+ G.treasury();reply({...base,welcome247:{eligible:false,amount:500,claimed:false}});assert(!a.el('modal').innerHTML.includes('Claim 500 Golden Eggs'));
 }
 console.log('PASS welcome247 UI: Android/Telegram, server-confirmed credit, double tap, saved replay guard, eligibility and bounded celebration');
 

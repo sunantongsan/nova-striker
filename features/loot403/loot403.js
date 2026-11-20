@@ -122,7 +122,7 @@ function lootHTML403(i){
   +'<p>'+resourceIcon238('gold')+'<span>'+i.gold.toLocaleString()+'</span></p>'
   +'<p>'+resourceIcon238('power')+'<span>'+i.power.toLocaleString()+'</span></p>'
   +'<p class="nova403"><img src="assets/nova-core.webp" alt="NOVA"><span>'+(i.nova>0?'+'+i.nova:'0')+'</span><small>'+(i.player?mt251('เมื่อทำลาย 100%','at 100%'):mt251('เมื่อชนะ','on win'))+'</small></p>'
-  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้น ไข่ทอง ไม่ได้','NOVA cannot be looted')+'</i>';
+  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้น ไข่ทอง ไม่ได้','Golden Eggs cannot be looted')+'</i>';
 }
 var lootLast403='';
 function lootTick403(){
