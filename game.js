@@ -65,7 +65,7 @@ U.push({name:tr('เป็ดขุดดิน'),cost:85,time:12,space:2,hp:180
 {name:tr('เป็ดเชฟพริก'),cost:170,time:20,space:3,hp:650,damage:80,range:3,rate:.8,speed:1.6,sprite:21,tech:5,description:tr('เป็ดขุดดินรุ่นเกราะพลาสมา')});
 U[3].air=true;
 ['machine','cannon','grenade','heal','sniper','missile','shock','bomb','plasma'].forEach(function(w,i){U[i].weapon=w;});
-U[2].splash=.85;U[1].splash=.6;U[0].range=1.2;Object.assign(U[1],{range:3.4,weapon:'sniper',splash:0});Object.assign(U[2],{range:1,speed:.8});// duck: the pan giant walks slowly and smashes up close (like the CoC Giant)
+U[2].splash=.85;U[1].splash=.6;U[0].range=1.2;Object.assign(U[1],{range:3.4,weapon:'sniper',splash:0});Object.assign(U[2],{range:1,speed:.8,splash:0});// duck: the pan giant walks slowly and smashes up close (like the CoC Giant)
 // duck: slot 2 is the slingshot archer duck
 
 // Energy mortar: a fixed landing point, with damage only when the orb arrives.
