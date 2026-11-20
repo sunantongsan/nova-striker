@@ -1,6 +1,7 @@
 # Nova RTS visual quality
 
 The owner requires bright, cute, relaxing cartoon art with pastel colors, rounded forms and readable dimensional highlights. Avoid black/dark themes.
+Exception approved by the owner (2026-11-20, Duck War re-theme): high-tier (stage 4-5) defenses/bases may use dark iron/black metal to look more intimidating, and the soot-covered bomber duck stays dark. Keep everything else bright and pastel.
 
 Implement the approved visual reference faithfully in the actual game. Do not replace detailed approved artwork with flat geometric placeholders, plain platforms, or simplified connectors. Preserve the reference's forms, materials, edges, lighting and decorations while keeping building placement unobstructed.
 
