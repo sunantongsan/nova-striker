@@ -1,6 +1,6 @@
 /* Presentation only: preserve gems balances, save keys and server contracts. */
 (function(root){'use strict';
-function label(value){return value.replace(/เพชร/g,' ไข่ทอง ').replace(/\bdiamonds?\b/gi,'NOVA').replace(/\bgems?\b/gi,'NOVA').replace(/ {2,}/g,' ');}
+function label(value){return value.replace(/เพชร/g,' เหรียญเป็ด ').replace(/\bdiamonds?\b/gi,'NOVA').replace(/\bgems?\b/gi,'NOVA').replace(/ {2,}/g,' ');}
 function paint(node){
  if(!node)return;
  if(node.nodeType===3){

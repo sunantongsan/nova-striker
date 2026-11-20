@@ -14,23 +14,23 @@ function boot(data={},platform='android'){
 const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e,owner='10000000-0000-4000-8000-000000000002';
 const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
 const ck=x=>({owner,test_gems:0,checkin233:{day:'2026-11-14',claimed:false,streak:0,reward:0,next_reward:5,ad_bonus395:15,server_time:new Date().toISOString(),next_reset:new Date(Date.now()+3600000).toISOString(),schedule395:true,...x}});
-G.openDaily340();reply(ck());let html=a.el('modal').innerHTML;assert(html.includes('checkinFree395')&&/15\ (ไข่ทอง|Golden Eggs)/.test(html));assert(a.el('dailyCheckin340').className.includes('ready340'));
+G.openDaily340();reply(ck());let html=a.el('modal').innerHTML;assert(html.includes('checkinFree395')&&/15\ (เหรียญเป็ด|Duck Coins)/.test(html));assert(a.el('dailyCheckin340').className.includes('ready340'));
 const before=e.d.gems;G.checkinFree395();let r=a.requests.at(-1);assert.equal(r.a,'test_status');assert.equal(r.p.checkin395,'free');
-reply(ck({claimed:true,streak:1,reward:5,ad_bonus395:0}));assert.equal(e.d.gems,before+5,'free claim credits 5');assert(/\+5\ (ไข่ทอง|Golden Eggs)/.test(a.el('modal').innerHTML));assert(!a.el('dailyCheckin340').className.includes('ready340'));
+reply(ck({claimed:true,streak:1,reward:5,ad_bonus395:0}));assert.equal(e.d.gems,before+5,'free claim credits 5');assert(/\+5\ (เหรียญเป็ด|Duck Coins)/.test(a.el('modal').innerHTML));assert(!a.el('dailyCheckin340').className.includes('ready340'));
 G.refreshCheckin233();reply(ck({claimed:true,streak:1,reward:5,ad_bonus395:0}));assert.equal(e.d.gems,before+5,'status replay');
 G.openDaily340();reply(ck({claimed:true,streak:1,reward:5,ad_bonus395:0}));html=a.el('modal').innerHTML;assert(!html.includes('checkinFree395')&&!html.includes('Game.checkin()'),'no second check-in after choosing');
 // Video top-up arrives later through a server status: only the difference is credited, once.
 G.refreshCheckin233();reply(ck({claimed:true,streak:1,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+15,'top-up credits +10');
 G.refreshCheckin233();reply(ck({claimed:true,streak:1,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+15,'top-up replay');
-G.openDaily340();reply(ck({claimed:true,streak:1,reward:15,ad_bonus395:0}));html=a.el('modal').innerHTML;assert(!html.includes('Game.checkin()')&&/15\ (ไข่ทอง|Golden Eggs)/.test(html));
+G.openDaily340();reply(ck({claimed:true,streak:1,reward:15,ad_bonus395:0}));html=a.el('modal').innerHTML;assert(!html.includes('Game.checkin()')&&/15\ (เหรียญเป็ด|Duck Coins)/.test(html));
 // Next day straight to video: 15 credited once.
 G.refreshCheckin233();reply(ck({day:'2026-11-15',claimed:true,streak:2,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+30);
 G.refreshCheckin233();reply(ck({day:'2026-11-15',claimed:true,streak:2,reward:15,ad_bonus395:0}));assert.equal(e.d.gems,before+30);
 // 397: demo video enables the video check-in button before choosing.
 a.s.NovaAds={rewardTest248(){},acknowledgeTest248(){}};
-G.openDaily340();reply({...ck({day:'2026-11-16',streak:2}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/class="wide gold395" +onclick/.test(html)&&/15\ (ไข่ทอง|Golden Eggs)/.test(html)&&html.includes('checkinFree395'));
+G.openDaily340();reply({...ck({day:'2026-11-16',streak:2}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/class="wide gold395" +onclick/.test(html)&&/15\ (เหรียญเป็ด|Duck Coins)/.test(html)&&html.includes('checkinFree395'));
 G.checkin();assert.equal(a.requests.at(-1).p.checkin_test248,'prepare','video check-in uses demo video');
 // 398: day 7 buttons.
-G.openDaily340();reply({...ck({day:'2026-11-17',streak:6,next_reward:15,video395:45,ad_bonus395:45}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/15\ (ไข่ทอง|Golden Eggs)/.test(html));assert(/45\ (ไข่ทอง|Golden Eggs)/.test(html));
+G.openDaily340();reply({...ck({day:'2026-11-17',streak:6,next_reward:15,video395:45,ad_bonus395:45}),test_checkin248:true});html=a.el('modal').innerHTML;assert(/15\ (เหรียญเป็ด|Duck Coins)/.test(html));assert(/45\ (เหรียญเป็ด|Duck Coins)/.test(html));
 assert.equal(a.errors.length,0,JSON.stringify(a.errors));
 console.log('PASS checkin395 UI: free 5 button, x3 video offer, one choice per day, replay safety');

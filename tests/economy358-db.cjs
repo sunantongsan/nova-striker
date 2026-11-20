@@ -22,7 +22,7 @@ await assert.rejects(()=>call('publish',{layout:layout.concat([{type:'goldstore'
 const seq=(await db.query('select snapshot_seq from public.nova_war_players where user_id=$1',[uid])).rows[0].snapshot_seq;
 await call('status',{resourceSnapshot:{owner:uid,seq:Number(seq)+1,gold:2000000,power:2000000,gold_cap:17040000,power_cap:17040000,gold_rate:0,power_rate:0}});
 assert.equal((await db.query('select gold_cap from public.nova_war_players where user_id=$1',[uid])).rows[0].gold_cap,17040000);
-console.log('PASS economy358 DB: resource debit, zero Golden Eggs cost, idempotent receipt, shortage rollback, stale client rejected, new principal ads blocked, legacy ad credit, four stores and expanded snapshot');
+console.log('PASS economy358 DB: resource debit, zero Duck Coins cost, idempotent receipt, shortage rollback, stale client rejected, new principal ads blocked, legacy ad credit, four stores and expanded snapshot');
 await db.query('update nova_private.test_wallets set gems=1000 where user_id=$1',[uid]);
 const oldReceipt359=nonce();
 await call('research',{enhance:'unit:0',enhance_currency257:'NOVA',quoted_cost257:100,quoted_level257:0,request_id:oldReceipt359});

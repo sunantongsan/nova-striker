@@ -10,7 +10,7 @@ Engine.prototype.upgradeCost=function(b){var c=upgradeCost393.call(this,b),cap=p
 Object.keys(B).forEach(function(type){var q=progressionQuote369(type,1);if(q&&type!=='hq'){B[type].cost=q.gold;B[type].power=q.power;}});
 // New walls cost gold (they were free after the reference progression set level 1 to 0).
 B.wall.cost=200;B.wall.power=0;
-// Golden Eggs speed-ups are 20% cheaper (server nova_private.speed_price365 uses the same .72 factor).
+// Duck Coins speed-ups are 20% cheaper (server nova_private.speed_price365 uses the same .72 factor).
 novaSpeedPrice365=function(seconds){
  if(!Number.isFinite(seconds))throw new RangeError('Invalid remaining time');
  if(seconds<=0)return 0;

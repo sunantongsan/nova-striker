@@ -1,6 +1,6 @@
-// 412: Golden Eggs wallet on one screen, plus speeding up Syrup (ไซรัป) production.
+// 412: Duck Coins wallet on one screen, plus speeding up Syrup (ไซรัป) production.
 // * Syrup boost: a video gives 2 hours of the extractors' production at once (server-verified through the
-//   speed264 flow, target kind 'zfluid'); Golden Eggs gives 6 hours. Both stop at the tank's free space.
+//   speed264 flow, target kind 'zfluid'); Duck Coins gives 6 hours. Both stop at the tank's free space.
 // * The wallet window is rebuilt from the existing pieces (their buttons and handlers are moved, not copied):
 //   balance in the header, reward chips, a one-row check-in week, three production tiles (Honey, Veggie juice, Syrup),
 //   and a footer for shields and the legacy balance. Fits a phone screen without scrolling.
@@ -27,7 +27,7 @@ applySpeed264=function(p,r){if(!p||!p.target||p.target.kind!=='zfluid')return ap
  if(!E.save()){E.d=JSON.parse(before);return null;}setTimeout(function(){zDone412(got);},0);return 0;};
 // NOVA: half a tank or fill it up
 Game.zBuy412=function(kind){var why=zReady412();if(why){toast(why);return;}var amount=zPack412(kind),cost=zPrice412(amount);if(amount<=0)return;
- confirmNova358(cost,function(){var why=zReady412();if(why){toast(why);return;}if((E.d.gems||0)<cost){toast(mt251('ไข่ทอง ไม่พอ','Not enough Golden Eggs'));return;}
+ confirmNova358(cost,function(){var why=zReady412();if(why){toast(why);return;}if((E.d.gems||0)<cost){toast(mt251('เหรียญเป็ดไม่พอ','Not enough Duck Coins'));return;}
   var before=JSON.stringify(E.d);E.d.gems-=cost;var got=zAdd412(amount);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}zDone412(got);});};
 Game.zBoostNova412=function(){Game.zBuy412('half');};
 // the refill window (same idea as the Honey / G refill)
@@ -55,7 +55,7 @@ function compactWallet412(){
  var welcome=take(function(n){return n.matches('.welcome-bonus247');});take(function(n){return n===daily;});
  var legacy=take(function(n){return n.matches('button[onclick*="legacyBalance339"]');}),shield=take(function(n){return n.matches('button[onclick*="shieldShop"]');});
  var ox=take(function(n){return n.matches('button[onclick*="resourceOffer233(\'gold\')"]');}),oy=take(function(n){return n.matches('button[onclick*="resourceOffer233(\'power\')"]');});
- take(function(n){return n.tagName==='H3'&&/เร่งผลิต|Speed up/.test(n.textContent);});take(function(n){return n.tagName==='P'&&/^\s*[\d,]+\s*NOVA\s*$/.test(n.textContent);});
+ take(function(n){return n.tagName==='H3'&&/เร่งผลิต|Speed up/.test(n.textContent);});take(function(n){return n.tagName==='P'&&/^\s*[\d,]+\s*(NOVA|เหรียญเป็ด|Duck Coins)\s*$/.test(n.textContent);});
  sheet.classList.add('wallet412');content.dataset.w412='1';content.innerHTML='';
  // header balance
  if(!sheet.querySelector('.bal412'))content.appendChild(el412('span','bal412','<i class="nova412" aria-hidden="true"></i><b id="bal412">'+(E.d.gems||0).toLocaleString()+'</b>'));
@@ -65,11 +65,11 @@ function compactWallet412(){
  if(welcome){var wb=welcome.querySelector('button');if(wb){var w=el412('div','chip412 welcome412');w.innerHTML='<img src="assets/nova-core.webp" alt=""><span><small>'+mt251('โบนัสต้อนรับ','Welcome bonus')+'</small><b>'+((welcome.querySelector('strong')||{}).textContent||'')+'</b></span>';wb.className='mini412 green';w.appendChild(wb);chips.appendChild(w);}}
  if(chips.children.length)content.appendChild(chips);
  // check-in: title, one row of days, two buttons side by side, one note
- daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('5 ไข่ทอง · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','5 Golden Eggs · video x3 · day 7: 15 / 45');
+ daily.classList.add('daily412');var title=daily.querySelector('.daily-title340 p');if(title)title.textContent=mt251('5 เหรียญเป็ด · ดูวิดีโอ x3 · วันที่ 7 รับ 15 / 45','5 Duck Coins · video x3 · day 7: 15 / 45');
  var btns=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='BUTTON';});if(btns.length){var row=el412('div','pair412');btns.forEach(function(b){b.classList.remove('wide');row.appendChild(b);});daily.appendChild(row);}
  var notes=Array.prototype.filter.call(daily.children,function(n){return n.tagName==='SMALL';});if(notes.length){var note=el412('small','note412',notes.map(function(n){return n.textContent;}).join(' · '));notes.forEach(function(n){n.remove();});daily.appendChild(note);}
  content.appendChild(daily);
- // 425: Golden Eggs packs advertised where the production tiles were (refills moved to the resource counters at the top).
+ // 425: Duck Coins packs advertised where the production tiles were (refills moved to the resource counters at the top).
  content.appendChild(promo425());
  // footer
  var foot=el412('div','foot412');[shield,legacy].forEach(function(b){if(!b)return;b.classList.remove('wide');b.classList.add('mini412');foot.appendChild(b);});if(shield)shield.innerHTML='🛡️ '+shield.textContent;if(legacy)legacy.textContent=mt251('ยอดเดิมที่ยังไม่เคลม','Unclaimed balance');
@@ -83,17 +83,17 @@ function absorbWallet412(){var sheet=modal.querySelector('.sheet.wallet412'),con
  var chips=content.querySelector('.chips412');if(!chips){chips=el412('div','chips412');content.insertBefore(chips,content.firstChild);}
  Array.prototype.slice.call(content.children).forEach(function(n){
   if(n.matches('button[onclick*="raidRewards260"]')){var c=el412('button','chip412');c.setAttribute('onclick',n.getAttribute('onclick'));c.innerHTML='<span class="art345" aria-hidden="true" style="background-position:100% 0%"></span><span><small>'+mt251('รางวัลโจมตี','Raid rewards')+'</small><b>'+mt251('รอรับ','Pending')+' ›</b></span>';chips.insertBefore(c,chips.firstChild);n.remove();}
-  else if(n.tagName==='P'&&/^\s*[\d,]+\s*NOVA\s*$/.test(n.textContent))n.remove();
+  else if(n.tagName==='P'&&/^\s*[\d,]+\s*(NOVA|เหรียญเป็ด|Duck Coins)\s*$/.test(n.textContent))n.remove();
   else if(n.tagName==='H2')n.remove();});
  if(!chips.children.length)chips.remove();}
 var treasury412=treasury;
 treasury=function(){var r=treasury412.apply(this,arguments);try{compactWallet412();absorbWallet412();}catch(e){}[0,60,250].forEach(function(t){setTimeout(function(){try{compactWallet412();absorbWallet412();}catch(e){}},t);});return r;};
 var hud412=hud;hud=function(){var r=hud412.apply(this,arguments);var b=$('bal412');if(b){var t=(E.d.gems||0).toLocaleString();if(b.textContent!==t)b.textContent=t;}return r;};
-// 425: Golden Eggs pack banner in the wallet. Real store prices only (no invented discounts); tapping opens the store.
+// 425: Duck Coins pack banner in the wallet. Real store prices only (no invented discounts); tapping opens the store.
 var promoPacks425=['nova_2100','nova_7600','nova_34000'];
 function promo425(){var box=el412('section','promo425'),list=novaPacks348.filter(function(p){return promoPacks425.includes(p.id);});
  var best=novaPacks348.reduce(function(a,p){return p.nova/p.thb>a.nova/a.thb?p:a;},novaPacks348[0]);
- box.innerHTML='<div class="promoHead425"><img src="assets/nova-core.webp" alt=""><span><b>'+mt251('แพ็ก ไข่ทอง','Golden Eggs packs')+'</b><small>'+mt251('เติมผ่าน Google Play · ได้ ไข่ทอง ทันที','Buy on Google Play · Golden Eggs arrives instantly')+'</small></span></div>'+
+ box.innerHTML='<div class="promoHead425"><img src="assets/nova-core.webp" alt=""><span><b>'+mt251('แพ็กเหรียญเป็ด','Duck Coins packs')+'</b><small>'+mt251('เติมผ่าน Google Play · ได้เหรียญเป็ด ทันที','Buy on Google Play · Duck Coins arrives instantly')+'</small></span></div>'+
   '<div class="promoGrid425">'+list.map(function(p){var i=novaPacks348.indexOf(p),live=billingProducts348[p.id];
    return '<button class="promoCard425" onclick="Game.shop348(\'nova\')">'+(p===best?'<em>'+mt251('คุ้มสุด','Best value')+'</em>':'')+packArt348(i)+'<b>'+p.nova.toLocaleString()+'</b><span>'+shopEscape348(live?live.price:'฿'+p.thb)+'</span></button>';}).join('')+'</div>'+
   '<button class="promoAll425" onclick="Game.shop348(\'nova\')">'+mt251('ดูแพ็กทั้งหมด','See all packs')+' ›</button>';

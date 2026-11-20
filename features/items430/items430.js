@@ -1,5 +1,5 @@
 // 430: battle items (the owner's own take on Clash spells). Made at the Tech Center (อาคารเทคโนโลยี, tech428) with
-// Syrup, or bought with Golden Eggs. Each is used once in a raid: tap the item card, then tap the battlefield.
+// Syrup, or bought with Duck Coins. Each is used once in a raid: tap the item card, then tap the battlefield.
 //   haste   ยาเร่งพลัง        troops in the ring attack 75% faster
 //   heal    ยารักษา           troops in the ring heal 12% of max HP per second
 //   power   น้ำยาเพิ่มพลัง     troops in the ring hit 50% harder
@@ -31,7 +31,7 @@ Game.makeItem430=function(id){var it=IT430[id];if(!it)return;var why=why430(it);
  if((E.d.zfluid410||0)<it.r){toast(mt251('ไซรัป ไม่พอ','Not enough Syrup'));return;}
  var before=JSON.stringify(E.d);E.d.zfluid410-=it.r;stock430()[id]=(stock430()[id]|0)+1;if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.items430();};
 Game.buyItem430=function(id){var it=IT430[id];if(!it)return;var why=why430(it);if(why){toast(why);return;}
- confirmNova358(it.nova,function(){var it2=IT430[id],w=why430(it2);if(w){toast(w);return;}if((E.d.gems||0)<it2.nova){toast(mt251('ไข่ทอง ไม่พอ','Not enough Golden Eggs'));return;}
+ confirmNova358(it.nova,function(){var it2=IT430[id],w=why430(it2);if(w){toast(w);return;}if((E.d.gems||0)<it2.nova){toast(mt251('เหรียญเป็ดไม่พอ','Not enough Duck Coins'));return;}
   var before=JSON.stringify(E.d);E.d.gems-=it2.nova;stock430()[id]=(stock430()[id]|0)+1;if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.items430();});};
 function icon430(it,cls){return '<span class="ic430 '+(cls||'')+'" style="--c430:'+it.color+'">'+it.icon+'</span>';}
 Game.items430=function(){E.sync();var s=stock430(),cap=cap430(),used=held430(),lv=techLv430();

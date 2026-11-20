@@ -9,7 +9,7 @@ const c={el,button,field,tr:(th,en)=>en,root:{confirm:()=>{throw Error('Native d
 vm.createContext(c);vm.runInContext(source.slice(source.indexOf('function confirmInline296'),source.indexOf('function errorText')),c);vm.runInContext(source.slice(source.indexOf('function adminTools'),source.indexOf('function offers')),c);
 const box=new Node('div'),recipient='00000000-0000-0000-0000-000000000002';c.adminTools(box,{players:[{user_id:recipient,name:'Test base',nova:20}],promos:[]});
 const gift=box.children[0],form=gift.children.find(n=>n.tag==='form'&&all(n).some(x=>x.tag==='select'));
-all(form).find(n=>n.tag==='select').value=recipient;all(form).find(n=>n.textContent==='Golden Eggs amount (1–1,000,000)').value='500';all(form).find(n=>n.textContent==='Reason').value='test reward';
+all(form).find(n=>n.tag==='select').value=recipient;all(form).find(n=>n.textContent==='Duck Coins amount (1–1,000,000)').value='500';all(form).find(n=>n.textContent==='Reason').value='test reward';
 form.requestSubmit();assert.equal(sent.length,0);all(form).find(n=>n.textContent==='Cancel').click();assert.equal(sent.length,0);
 form.requestSubmit();all(form).find(n=>n.textContent==='Confirm these details').click();assert.equal(sent.length,1);assert.equal(sent[0].mode,'gift');assert.equal(sent[0].p.amount,500);assert.equal(sent[0].p.recipient,recipient);
 form.requestSubmit();assert.equal(sent.length,1,'double submit while in flight must not duplicate');

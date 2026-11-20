@@ -1,4 +1,4 @@
-// 412: Duck Colonel window on one screen. The status moves into the title bar next to the Golden Eggs balance, the
+// 412: Duck Colonel window on one screen. The status moves into the title bar next to the Duck Coins balance, the
 // "control mech" button is gone (tapping the mech on the map already gives its controls), the preview sits on the
 // left and the other mech menus are small buttons on the right. Built from the existing window's own pieces.
 function mechStatus412(btn){var t=(btn.getAttribute('aria-label')||btn.textContent||'').replace(/^.*?:\s*/,'');var ok=/#8ff0bf/i.test(btn.getAttribute('style')||'');return '<span class="mst412 '+(ok?'ok412':'wait412')+'">'+(ok?'● ':'◌ ')+t+'</span>';}

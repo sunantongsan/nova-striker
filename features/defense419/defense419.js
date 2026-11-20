@@ -1,7 +1,7 @@
 // 419: base defense waves are attacked by real troops from the game, not the old aliens.
 // The attackers are the same unit types a player at your HQ level can build (same stats and
 // research level as yours), and the wave is sized from your own army capacity, so the fight is
-// even. Defense wins pay resources only (no Golden Eggs). The defense garrison window is rebuilt:
+// even. Defense wins pay resources only (no Duck Coins). The defense garrison window is rebuilt:
 // pick your own trained troops to station, up to the garrison capacity.
 
 // ---------- who may attack: units a player at this HQ level could train ----------
@@ -116,7 +116,7 @@ drawFighter=function(t,enemy){
  return drawFoe419(t,false);
 };
 
-// ---------- defense pays resources only, never Golden Eggs ----------
+// ---------- defense pays resources only, never Duck Coins ----------
 var finishFoe419=Engine.prototype.finishDefense;
 Engine.prototype.finishDefense=function(){var d=this.defense,before=this.d.gems,out=finishFoe419.apply(this,arguments);
  if(d&&d.result&&this.d.gems>before){this.d.gems=before;d.result.gems=0;this.save();}else if(d&&d.result)d.result.gems=0;return out;};

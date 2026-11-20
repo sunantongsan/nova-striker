@@ -28,7 +28,7 @@ r=await call('test_claim',{welcome247:'claim',owner:fresh,amount:999999},fresh);
 for(let i=0;i<3;i++){r=await call('test_claim',{welcome247:'claim',owner:fresh},fresh);assert.equal(r.test_gems,500);assert.equal(r.welcome247.id,receipt);}
 await db.query('insert into nova_private.telegram_accounts231(telegram_id,user_id) values(456,$1)',[fresh]);
 r=await call('test_status',{},fresh,true);assert.equal(r.test_gems,500,'same account shares bonus across clients');
-await db.query('update nova_private.test_wallets set gems=gems-100 where user_id=$1',[fresh]);r=await call('test_claim',{welcome247:'claim',owner:fresh},fresh);assert.equal(r.test_gems,400,'repeat claim never replenishes spent Golden Eggs');
+await db.query('update nova_private.test_wallets set gems=gems-100 where user_id=$1',[fresh]);r=await call('test_claim',{welcome247:'claim',owner:fresh},fresh);assert.equal(r.test_gems,400,'repeat claim never replenishes spent Duck Coins');
 await db.exec("update nova_private.welcome_settings247 set starts_at=starts_at-interval '1 day'");r=await call('test_claim',{welcome247:'claim',owner:fresh},fresh);assert.equal(r.test_gems,400);
 await db.query('update auth.users set is_anonymous=true where id=$1',[other]);r=await call('test_status',{},other);assert(!r.welcome247.eligible);
 assert.equal((await db.query("select has_function_privilege('anon','nova_private.test_command(text,jsonb)','execute') allowed")).rows[0].allowed,false);

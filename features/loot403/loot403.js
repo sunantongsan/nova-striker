@@ -1,10 +1,10 @@
-// 403: liquid resources, tall glass tanks, loot preview and Golden Eggs loot rules.
+// 403: liquid resources, tall glass tanks, loot preview and Duck Coins loot rules.
 // * Names (presentation only; save keys and server fields stay gold/power/crystals):
 //   gold = น้ำผึ้ง (Honey, golden liquid), power = น้ำผัก (Veggie juice, green), crystals = ไซรัป (Syrup, red).
 // * Gold / energy / fluid storages are tall glass tanks whose liquid level shows how full they are
 //   (home: own storage, raid: loot still available). Taller with every 4 levels.
-// * Scouting shows the loot on offer and the Golden Eggs a win would pay. Golden Eggs can never be looted.
-//   Golden Eggs by HQ gap: target same or higher = full (bot 2, player 5 at 100%), 1-2 lower = 1, 3+ lower = 0.
+// * Scouting shows the loot on offer and the Duck Coins a win would pay. Duck Coins can never be looted.
+//   Duck Coins by HQ gap: target same or higher = full (bot 2, player 5 at 100%), 1-2 lower = 1, 3+ lower = 0.
 //   A bot base already cleared with 3 stars pays resources only. The server applies the same rules.
 // * Bot bases lose what is looted and refill over 24 hours, so farming one level runs dry.
 var tankArt403=new Image();tankArt403.onload=function(){drawNeeded=true;};tankArt403.src='assets/tanks403.webp';
@@ -46,7 +46,7 @@ drawWreck=function(b,p,size,enemy){if(TANK403[b.type]!==undefined&&tankArt403.co
 
 // ---------- names ----------
 function spaced403(src,re,name){return src.replace(re,function(m,o,s){var a=s[o-1]||'',z=s[o+m.length]||'';return (/[ก-๎]/.test(a)?' ':'')+name+(/[ก-ฮ]/.test(z)?' ':'');});}
-var KEEP403=/ไข่ทอง|Golden Eggs?|หม้อความดันยิงไกล|กับดักหนูยักษ์|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Pressure-Cooker Mortar|Energy Cores?|energy cores?|Giant Mousetrap|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
+var KEEP403=/เหรียญเป็ด|Duck Coins?|หม้อความดันยิงไกล|กับดักหนูยักษ์|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Pressure-Cooker Mortar|Energy Cores?|energy cores?|Giant Mousetrap|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
 var NAMES403=[[/เตาเคี่ยวไซรัป/g,'เตาเคี่ยวไซรัป'],[/โหลไซรัป/g,'โหลไซรัป'],[/โหลน้ำผึ้ง/g,'โหลน้ำผึ้ง'],[/โหลน้ำผัก/g,'โหลน้ำผัก'],[/ปั๊มน้ำผึ้ง/g,'ปั๊มน้ำผึ้ง'],[/เครื่องปั่นผัก/g,'เครื่องปั่นผัก'],
  [/Syrup Stove/g,'Syrup Stove'],[/Syrup Jar/g,'Syrup Jar'],[/Honey Jar/g,'Honey Jar'],[/Veggie Jar/g,'Veggie Jar'],[/Honey Pump/g,'Honey Pump'],[/Veggie Blender/g,'Veggie Blender'],
  [/\bCrystals\b/g,'Syrup'],[/\bcrystals\b/g,'Syrup'],[/\bCrystal\b/g,'Syrup'],[/\bcrystal\b/g,'Syrup'],[/\bGold\b/g,'Honey'],[/\bgold\b/g,'Honey'],[/\bEnergy\b/g,'Veggie juice'],[/\benergy\b/g,'Veggie juice']];
@@ -74,7 +74,7 @@ if(root.CanvasRenderingContext2D){var fill403=CanvasRenderingContext2D.prototype
  CanvasRenderingContext2D.prototype.strokeText=function(t){arguments[0]=rename403(t);return stroke403.apply(this,arguments);};}
 resourceIcon238=function(k){var i={gold:0,power:1,crystals:2}[k];if(i===undefined)return '';return '<span class="fluid403" role="img" aria-label="'+rename403(resourceName233(k))+'" style="background-position:'+(i*50)+'% 50%"></span>';};
 
-// ---------- Golden Eggs rules ----------
+// ---------- Duck Coins rules ----------
 function novaRate403(mine,target,full){mine=mine||1;target=target||1;return mine<=target?full:mine-target<=2?Math.min(1,full):0;}
 function botFrac403(e,n){var v=(e.d.botLoot403||{})[n];if(!v)return 1;return Math.max(0,Math.min(1,(Number(v.f)||0)+(Date.now()-(Number(v.at)||0))/864e5));}
 var scout403=Engine.prototype.scout;
@@ -98,7 +98,7 @@ function wrapFinish403(e){if(!e||e.finish403)return;var finish403=e.finish;e.fin
  this.save();return res;
 };e.finish403=true;}
 wrapFinish403(E);
-// Bot win reports carry the expected Golden Eggs so the server can only lower it (never raise).
+// Bot win reports carry the expected Duck Coins so the server can only lower it (never raise).
 camp399Send=function(mode,p){
  if(camp399Busy||warBusy||guest288||!root.NovaCloud||!root.NovaCloud.warRequest||!p||p.owner!==camp399Owner())return false;
  var id='camp399-'+(++camp399Serial);camp399Busy={id:id,mode:mode,p:p};clearTimeout(camp399Timer);
@@ -121,8 +121,8 @@ function lootHTML403(i){
  return '<b>'+mt251('ปล้นได้','Available loot')+'</b>'
   +'<p>'+resourceIcon238('gold')+'<span>'+i.gold.toLocaleString()+'</span></p>'
   +'<p>'+resourceIcon238('power')+'<span>'+i.power.toLocaleString()+'</span></p>'
-  +'<p class="nova403"><img src="assets/nova-core.webp" alt="NOVA"><span>'+(i.nova>0?'+'+i.nova:'0')+'</span><small>'+(i.player?mt251('เมื่อทำลาย 100%','at 100%'):mt251('เมื่อชนะ','on win'))+'</small></p>'
-  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้น ไข่ทอง ไม่ได้','Golden Eggs cannot be looted')+'</i>';
+  +'<p class="nova403"><img src="assets/nova-core.webp" alt="เหรียญเป็ด"><span>'+(i.nova>0?'+'+i.nova:'0')+'</span><small>'+(i.player?mt251('เมื่อทำลาย 100%','at 100%'):mt251('เมื่อชนะ','on win'))+'</small></p>'
+  +(why?'<em>'+why+'</em>':'')+'<i>'+mt251('ปล้นเหรียญเป็ด ไม่ได้','Duck Coins cannot be looted')+'</i>';
 }
 var lootLast403='';
 function lootTick403(){

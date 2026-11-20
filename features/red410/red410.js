@@ -237,7 +237,7 @@ draw=function(){var out=draw410.apply(this,arguments);try{var sc=screen==='raid'
 (function(){var st=document.createElement('style');st.id='def410';st.textContent='.icon.def410{background:url(assets/defense412-icons.webp) 0 0/200% 100% no-repeat!important;width:56px;height:56px}';document.head.appendChild(st);})();
 
 // ---------- 411: Duck Colonel power-up with Syrup ----------
-// Buying and tiers stay Golden Eggs (server). On top of that, 20 local power-up levels paid with Syrup:
+// Buying and tiers stay Duck Coins (server). On top of that, 20 local power-up levels paid with Syrup:
 // +4% HP and +3% damage per level for your own mech in battle.
 function titanZCost410(n){return Math.round(600*Math.pow(n,1.6));}
 function titanZ410(){return Math.max(0,Math.min(20,E.d.titanZ410|0));}

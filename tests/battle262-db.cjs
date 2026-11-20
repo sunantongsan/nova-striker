@@ -57,7 +57,7 @@ sr=(await db.query('select result from nova_private.sieges where id=$1',[multi])
 const last=await roomFor([uid]);await db.query(`update nova_private.sieges set frame=jsonb_set(frame,'{buildings}','[[100],[100]]') where id=$1`,[last]);
 let latest=(await db.query('select * from nova_private.sieges where id=$1',[last])).rows[0];
 r=await call('attack',{live:'siege_retreat',id:last,epoch:latest.epoch,seq:latest.seq+1,ack:Number(latest.ack),frame:{...latest.frame,buildings:[[0],[100]]}});assert.equal(r.battle.result.destruction,50);assert.equal(r.battle.result.nova255,20);
-// No destruction gives no Golden Eggs, even when surrendering; legacy withdrawn rooms recover.
+// No destruction gives no Duck Coins, even when surrendering; legacy withdrawn rooms recover.
 const zero=await roomFor([uid]);await db.query(`update nova_private.sieges set frame=jsonb_set(frame,'{buildings}','[[100],[100]]') where id=$1`,[zero]);await db.query('update nova_private.siege_members set withdrawn=true where room=$1',[zero]);r=await call('attack',{live:'siege_retreat',id:zero});assert.equal(r.battle.result.nova255,0);assert.equal(r.battle.result.loot_gold,0);
 const job=nonce();await db.query("insert into nova_private.upgrade_jobs225(owner,request_id,job_key,category,item,target_level,finishes_at) values($1,$2,'research:weapon','research','weapon',1,now()+interval '60 seconds')",[uid,job]);
 const speedPayload={support228:'speed',request_id:nonce(),job_id:job,quoted:1};await assert.rejects(()=>call('research',speedPayload),/ราคาเปลี่ยน/);r=await call('research',{...speedPayload,quoted:6});assert.equal(r.receipt.cost,6);r=await call('research',{...speedPayload,quoted:6});assert.equal(r.receipt.cost,6);

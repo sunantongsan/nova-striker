@@ -3,7 +3,7 @@
 // plus the newer Nova buildings, each with its own commander name, trophies and defending troops.
 // "Find a match" now flips through bases near your level (100 gold per search, like before); real players from the
 // server still come up when there are any. You choose which base to hit: deploy a troop to attack, or tap Next.
-// Resident bases are played on this phone: loot is Honey / Veggie juice from their storages (less after a 3-star), no Golden Eggs.
+// Resident bases are played on this phone: loot is Honey / Veggie juice from their storages (less after a 3-star), no Duck Coins.
 var NAMES433=['ShadowFox','มังกรฟ้า','NovaKing','เสือดาวเหล็ก','IronWolf','PixelNinja','ฟ้าใส','สายฟ้าแลบ','Captain_Zed','BlueComet','ราชันย์ทราย','StarBreaker','Moonlight','น้องหมีแพนด้า','RocketBoy','GalaxyQueen',
  'Thunder99','จอมทัพอสูร','NightOwl','SolarFlare','ขุนศึกเหนือ','CyberMonk','LuckyCat','ป้อมปราการ','MegaBuilder','AstroJack','ดาวตก','FrostByte','KhunTong','RubyHawk','เจ้าพายุ','NeonTiger',
  'SilentStorm','ปีศาจเกราะ','OrbitRider','TankGirl','หมาป่าทะเลทราย','ZeroGravity','SkyPirate','บอสใหญ่','CometChaser','IronLotus','พญาเหยี่ยว','QuantumKid','VenomByte','สิงห์สนาม','BlazeRunner','EchoKnight',

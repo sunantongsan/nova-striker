@@ -1,4 +1,4 @@
-// 433: ทหารเสริมพลัง (Clash-style super troops). Boost a troop type for 3 days with Syrup or Golden Eggs (two types at a time);
+// 433: ทหารเสริมพลัง (Clash-style super troops). Boost a troop type for 3 days with Syrup or Duck Coins (two types at a time);
 // every unit of that type you deploy is a burning super version: +25% HP and damage, flames on its body, and a new trick.
 //   0 เป็ดส้อม -> เป็ดส้อมเพลิง      shots also scorch a second target nearby (50%)
 //   2 เป็ดยักษ์กระทะ  -> หุ่นจรวดคู่        fires two rockets per shot (+60% damage)
@@ -18,7 +18,7 @@ function why433(k){if(E.hq()<SUPER_HQ433)return mt251('ปลดล็อกท�
 function give433(k){var b=boosts433();b[k]=Math.max(b[k]||0,Date.now())+SUPER_DAYS433*86400000;}
 Game.boostR433=function(k){var why=why433(k);if(why){toast(why);return;}E.sync();if((E.d.zfluid410||0)<SUPER_R433){toast(mt251('ไซรัป ไม่พอ','Not enough Syrup'));return;}
  var before=JSON.stringify(E.d);E.d.zfluid410-=SUPER_R433;give433(k);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.super433();};
-Game.boostNova433=function(k){var why=why433(k);if(why){toast(why);return;}confirmNova358(SUPER_NOVA433,function(){var w=why433(k);if(w){toast(w);return;}if((E.d.gems||0)<SUPER_NOVA433){toast(mt251('ไข่ทอง ไม่พอ','Not enough Golden Eggs'));return;}
+Game.boostNova433=function(k){var why=why433(k);if(why){toast(why);return;}confirmNova358(SUPER_NOVA433,function(){var w=why433(k);if(w){toast(w);return;}if((E.d.gems||0)<SUPER_NOVA433){toast(mt251('เหรียญเป็ดไม่พอ','Not enough Duck Coins'));return;}
  var before=JSON.stringify(E.d);E.d.gems-=SUPER_NOVA433;give433(k);if(!E.save()){E.d=JSON.parse(before);toast(tr('บันทึกไม่ได้'));return;}hud();Game.super433();});};
 Game.super433=function(){E.sync();var lockAll=E.hq()<SUPER_HQ433,used=Object.keys(boosts433()).length;
  var cards=Object.keys(SUPER433).map(function(k){k=+k;var s=SUPER433[k],on=active433(k),why=why433(k);
