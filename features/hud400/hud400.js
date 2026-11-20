@@ -9,7 +9,7 @@
 (function(){
  var root=document.documentElement,house=document.createElement('div');
  house.id='houseBanner401';house.setAttribute('aria-hidden','true');house.hidden=true;
- house.innerHTML='<b class="hb401-logo">NOVA<span>STRIKER</span></b>';
+ house.innerHTML='<b class="hb401-logo">DUCK<span>WAR</span></b>';
  document.body.appendChild(house);
  function shown(id){var el=document.getElementById(id);if(!el||el.hidden)return false;var s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&el.getClientRects().length>0;}
  function update(){

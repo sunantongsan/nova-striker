@@ -5,7 +5,7 @@ process.chdir(path.resolve(__dirname,'..'));
 let source=require('../features/titan342/build.cjs').integrate(fs.readFileSync('game.js','utf8'));
 const end=source.lastIndexOf('})(typeof globalThis');
 source=source.slice(0,end)+`root.qaDuck={e:E,
- home:()=>{Game.guideFinish288();close();screen='home';const e=E;e.d.gold=e.d.power=1e7;const hq=e.d.buildings.find(b=>b.type==='hq');if(hq)hq.lv=+(window.qaHQ||1);hud();draw();},
+ home:()=>{Game.guideFinish288();close();screen='home';const e=E;e.d.gold=e.d.power=1e7;const L=+(window.qaHQ||1);e.d.buildings.forEach(b=>{if(b.type!=='wall')b.lv=L;});const hq=e.d.buildings.find(b=>b.type==='hq');if(hq)hq.lv=L;hud();draw();},
  raid:(kinds)=>{Game.guideFinish288();E.scout(1);screen='raid';E.raid.liveMode=null;E.raid.army=U.map(()=>30);close();hud();
   kinds.forEach((k,i)=>{for(let j=0;j<3;j++)E.deploy(k,4+i*0.7+j*0.2,10.3+j*0.45);});paused=false;},
  zoom:(z,x,y)=>{zoom=z;panX=x;panY=y;draw();}};`+source.slice(end);
