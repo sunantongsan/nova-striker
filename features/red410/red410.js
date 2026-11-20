@@ -111,7 +111,7 @@ Game.unitInfo278=function(i){var r=info410.apply(this,arguments);if(red410(i)){v
  document.head.appendChild(st);
 })();
 // 3D battle sprites for the red troops (features/render3d/units3d.html: surge, ember, colossus, lancer).
-[['surge',42,10],['ember',46,6],['colossus',66,6],['lancer',52,7]].forEach(function(a,i){var s={file:a[0],height:a[1],perTile:a[2]};s.meta=unit3dMeta392[s.file];if(!s.meta)return;s.img=new Image();s.img.onload=function(){drawNeeded=true;};s.img.src='assets/units3d392-'+s.file+'.webp';unit3dKinds392[ZKIND410+i]=s;});
+[['surge',50,10],['ember',55,6],['colossus',79,6],['lancer',62,7]].forEach(function(a,i){var s={file:a[0],height:a[1],perTile:a[2]};s.meta=unit3dMeta392[s.file];if(!s.meta)return;s.img=new Image();s.img.onload=function(){drawNeeded=true;};s.img.src='assets/units3d392-'+s.file+'.webp';unit3dKinds392[ZKIND410+i]=s;});
 
 // ---------- 411: two new defenses ----------
 // inferno  หอเพลิงอนุภาค (HQ10): one beam that keeps burning the same target harder and harder (x1 -> x10 over 4 s);

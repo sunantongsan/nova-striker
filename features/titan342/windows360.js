@@ -12,7 +12,7 @@
    sheet.classList.add('novaWindow360');var oldnav=sheet.querySelector('.window-nav243'),back=oldnav&&Array.from(oldnav.querySelectorAll('button')).find(function(b){return !b.classList.contains('window-close243');}),title=sheet.querySelector('h2,h3');
    var head=document.createElement('header');head.className='novaHead360';
    if(back){back.textContent='‹';back.setAttribute('aria-label',mt251('กลับ','Back'));head.appendChild(back);}
-   var label=document.createElement('h2');label.textContent=title?title.textContent:mt251('NOVA','NOVA');head.appendChild(label);if(title)title.remove();if(oldnav)oldnav.remove();
+   var label=document.createElement('h2');label.textContent=title?title.textContent:mt251('Duck War','Duck War');head.appendChild(label);if(title)title.remove();if(oldnav)oldnav.remove();
    var close=document.createElement('button');close.className='window-close243';close.textContent='×';close.setAttribute('aria-label',mt251('ปิด','Close'));close.setAttribute('onclick','Game.dismissWindow243()');head.appendChild(close);
    var body=document.createElement('div');body.className='novaContent360';while(sheet.firstChild)body.appendChild(sheet.firstChild);sheet.appendChild(head);sheet.appendChild(body);
 

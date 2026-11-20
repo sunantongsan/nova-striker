@@ -91,7 +91,7 @@ Game.titanUpgrade357=function(){titanPay357=true;titanShopOnly342=false;titanPan
 function renderTitanPay357(s){
  var cost=s.level===1?2500:10000,total=s.level===1?50:200,remaining=Math.max(0,total-Number((s.ads||{}).upgrade||0)),enough=Number(E.d.gems||0)>=cost,busy=!!titanBusy342;
  var html='<section class="titanShop342"><h2>'+mt251('อัปเกรด','Upgrade')+'</h2><div class="pay357">';
- html+='<button class="payNova357 '+(enough?'enough357':'short357')+'" '+(!enough||busy?'disabled':'')+' onclick="Game.titanAction342(\'upgrade\')" aria-label="NOVA '+cost+'">'+art345(1)+'<b>'+cost.toLocaleString()+'</b><small>NOVA</small></button>';
+ html+='<button class="payNova357 '+(enough?'enough357':'short357')+'" '+(!enough||busy?'disabled':'')+' onclick="Game.titanAction342(\'upgrade\')" aria-label="NOVA '+cost+'">'+art345(1)+'<b>'+cost.toLocaleString()+'</b><small>'+mt251('ไข่ทอง','eggs')+'</small></button>';
  html+='<button '+(busy?'disabled':'')+' onclick="Game.titanAd342(\'upgrade\')" aria-label="ADS '+remaining+'">'+art345(2)+'<b>ADS</b><small>'+remaining+' '+mt251('ครั้ง','videos')+'</small></button></div><button class="wide" onclick="Game.titan342()">'+mt251('กลับ','Back')+'</button></section>';
  var sheet=modal.querySelector('.sheet'),scroll=sheet?sheet.scrollTop:0;open(html);modal.setAttribute('data-guardian343','true');sheet=modal.querySelector('.sheet');if(sheet)sheet.scrollTop=scroll;
 }
@@ -101,7 +101,7 @@ var novaPacks348=[{"id":"nova_1000","nova":1000,"thb":30,"usd":"0.89"},{"id":"no
 function shopEscape348(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function packArt348(i){return '<span class="packArt348" aria-hidden="true" style="background-position:'+(i%2*100)+'% '+(Math.floor(i/2)*50)+'%"></span>';}
 function renderShop348(s){var lv=s.level||0,html='<section class="store348"><h2>'+mt251('ร้านค้า','Store')+'</h2><div class="storeTabs348">';
- ['nova','skills','support'].forEach(function(id,i){html+='<button class="'+(id===shopTab348?'active':'')+'" onclick="Game.shop348(\''+id+'\')">'+art345([1,4,11][i])+'<span>'+mt251(['NOVA','สกิล','เสริมฐาน'][i],['NOVA','Skills','Support'][i])+'</span></button>';});html+='</div><div class="storeGrid348">';
+ ['nova','skills','support'].forEach(function(id,i){html+='<button class="'+(id===shopTab348?'active':'')+'" onclick="Game.shop348(\''+id+'\')">'+art345([1,4,11][i])+'<span>'+mt251(['ไข่ทอง','สกิล','เสริมฐาน'][i],['Golden Eggs','Skills','Support'][i])+'</span></button>';});html+='</div><div class="storeGrid348">';
  if(shopTab348==='nova')novaPacks348.forEach(function(pack,i){var live=billingProducts348[pack.id],ready=!!live&&!billingBusy348;html+='<article class="packCard348">'+packArt348(i)+'<b>'+pack.nova.toLocaleString()+'</b><small class="novaReferencePrices348">฿'+pack.thb+' · US$'+pack.usd+'</small><button '+(!ready?'disabled':'')+' onclick="Game.buyNova348(\''+pack.id+'\')">'+shopEscape348(live?live.price:'—')+'</button></article>';});
  else if(shopTab348==='skills'){
   if(!lv)html+='<article class="packCard348">'+art345(0)+'<button onclick="Game.titan342()">'+mt251('สร้างหุ่น','Build Duck Colonel')+'</button></article>';

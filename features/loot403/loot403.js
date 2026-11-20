@@ -46,9 +46,9 @@ drawWreck=function(b,p,size,enemy){if(TANK403[b.type]!==undefined&&tankArt403.co
 
 // ---------- names ----------
 function spaced403(src,re,name){return src.replace(re,function(m,o,s){var a=s[o-1]||'',z=s[o+m.length]||'';return (/[ก-๎]/.test(a)?' ':'')+name+(/[ก-ฮ]/.test(z)?' ':'');});}
-var KEEP403=/หม้อความดันยิงไกล|กับดักหนูยักษ์|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Pressure-Cooker Mortar|Energy Cores?|energy cores?|Giant Mousetrap|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
-var NAMES403=[[/เตาเคี่ยวไซรัป/g,'เตาเคี่ยวไซรัป'],[/โหลไซรัป/g,'โหลไซรัป'],[/โหลน้ำผึ้ง/g,'แท้งน้ำผึ้ง'],[/โหลน้ำผัก/g,'แท้งน้ำผัก'],[/ปั๊มน้ำผึ้ง/g,'ปั๊มน้ำผึ้ง'],[/เครื่องปั่นผัก/g,'เครื่องปั่นผัก'],
- [/Syrup Stove/g,'Syrup Stove'],[/Syrup Jar/g,'Syrup Jar'],[/Honey Jar/g,'Honey Tank'],[/Veggie Jar/g,'Veggie juice Tank'],[/Honey Pump/g,'Honey Mine'],[/Veggie Blender/g,'Veggie juice Drill'],
+var KEEP403=/ไข่ทอง|Golden Eggs?|หม้อความดันยิงไกล|กับดักหนูยักษ์|ระเบิดพลังงาน|แกนพลังงาน|รัศมีพลังงาน|ลูกพลังงาน|คลื่นพลังงาน|โล่พลังงาน|ลำแสงพลังงาน|สีทอง|ขอบทอง|ทองคำ|Pressure-Cooker Mortar|Energy Cores?|energy cores?|Giant Mousetrap|energy wave|Energy Wave|energy beam|Energy Beam|Golden|golden/g;
+var NAMES403=[[/เตาเคี่ยวไซรัป/g,'เตาเคี่ยวไซรัป'],[/โหลไซรัป/g,'โหลไซรัป'],[/โหลน้ำผึ้ง/g,'โหลน้ำผึ้ง'],[/โหลน้ำผัก/g,'โหลน้ำผัก'],[/ปั๊มน้ำผึ้ง/g,'ปั๊มน้ำผึ้ง'],[/เครื่องปั่นผัก/g,'เครื่องปั่นผัก'],
+ [/Syrup Stove/g,'Syrup Stove'],[/Syrup Jar/g,'Syrup Jar'],[/Honey Jar/g,'Honey Jar'],[/Veggie Jar/g,'Veggie Jar'],[/Honey Pump/g,'Honey Pump'],[/Veggie Blender/g,'Veggie Blender'],
  [/\bCrystals\b/g,'Syrup'],[/\bcrystals\b/g,'Syrup'],[/\bCrystal\b/g,'Syrup'],[/\bcrystal\b/g,'Syrup'],[/\bGold\b/g,'Honey'],[/\bgold\b/g,'Honey'],[/\bEnergy\b/g,'Veggie juice'],[/\benergy\b/g,'Veggie juice']];
 var TEST403=/ไซรัป|พลังงาน|ทอง|[Cc]rystal|[Gg]old|[Ee]nergy/;
 function rename403(text){

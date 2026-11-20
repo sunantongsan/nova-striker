@@ -1,7 +1,7 @@
 root.addEventListener('nova-hq-art352',function(){drawNeeded=true;previewCache265.clear();});
 // Preserve original HUD, health, construction controls and hit testing around the new HQ.
 var drawBuildingHQ352=drawBuilding;drawBuilding=function(b,enemy){
- if(b.type!=='hq'||!root.NovaHQ3D)return drawBuildingHQ352(b,enemy);
+ if(b.type!=='hq'||!root.NovaHQ3D||!root.NovaHQ3DRobot||(b.hp!==undefined&&b.hp<=0))return drawBuildingHQ352(b,enemy);// duck: the duck house is painted art; the 3D robot HQ renderer stays off (saves a WebGL render every frame)// duck: a destroyed duck house shows its painted rubble, not the robot wreck
  var p=point(b.x,b.y),z=zoom;if(p.x<-150*z||p.x>viewWidth+150*z||p.y<-30*z||p.y>viewHeight+180*z)return;
  if(screen==='home')b.renderKey352='home-hq-'+b.id;var im=root.NovaHQ3D.render(b);if(!im)return drawBuildingHQ352(b,enemy);
  ctx.save();ctx.globalAlpha=b.constructing?.48:1;ctx.drawImage(im,p.x-74*z,p.y-160*z,148*z,185*z);ctx.restore();if(im.hqMuzzle352)b.muzzle352={x:-74+im.hqMuzzle352.x*148/256,y:-160+im.hqMuzzle352.y*185/320};

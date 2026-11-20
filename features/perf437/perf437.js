@@ -231,7 +231,7 @@ renderScale226=function(){
  if(!battle){dynScale437=9;return base;}
  var now=Date.now();if(now-dynAt437>1000){dynAt437=now;var avg=typeof frameAvg420==='number'?frameAvg420:0;
   if(dynScale437>base)dynScale437=base;
-  if(avg>20&&dynScale437>1.25)dynScale437=Math.max(1.25,dynScale437-.25);
+  if(avg>20&&dynScale437>1.5)dynScale437=Math.max(1.5,dynScale437-.25);
   else if(avg<11&&dynScale437<base)dynScale437=Math.min(base,dynScale437+.25);}
  return Math.min(base,dynScale437);
 };
