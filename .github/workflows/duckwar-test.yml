@@ -2,7 +2,7 @@ name: Duck War TEST APK
 # Builds a side-by-side test app (package com.sunantongsan.duckwar.test, label "Duck War TEST")
 # from the duck-war branch. Runs only when a commit message on duck-war contains [apk], so
 # ordinary pushes cost no Actions minutes. The test app never touches real players:
-# patch downloads and cloud/online are switched off, and it installs next to the real game.
+# patches come from the duck-war Vercel preview (never production); cloud/online are switched off, and it installs next to the real game.
 on:
   push:
     branches: [duck-war]
@@ -34,18 +34,18 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: Install build tools
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Make it a separate TEST app (no patches, no cloud, own package)
+      - name: Make it a separate TEST app (patches from the duck-war preview, no cloud, own package)
         run: |
           sed -i "s/applicationId 'com.sunantongsan.novastriker'/applicationId 'com.sunantongsan.duckwar.test'/" app/build.gradle
-          sed -i 's#"https://nova-striker-updates.vercel.app"#"https://duckwar-test.invalid"#' app/build.gradle
+          sed -i 's#"https://nova-striker-updates.vercel.app"#"https://nova-striker-updates-git-duck-war-sunans-projects-4868df82.vercel.app"#' app/build.gradle
           sed -i "s/'NOVA_CLOUD_ENABLED', 'true'/'NOVA_CLOUD_ENABLED', 'false'/; s/'NOVA_WAR_ENABLED', 'true'/'NOVA_WAR_ENABLED', 'false'/" app/build.gradle
           sed -i 's/android:label="[^"]*"/android:label="Duck War TEST"/' app/src/main/AndroidManifest.xml
           grep -n "applicationId\|PATCH_ORIGIN\|CLOUD_ENABLED\|WAR_ENABLED" app/build.gradle
       - name: Build test APK
-        run: gradle :app:assembleDebug --no-daemon -PnovaPatchBackupOrigin=https://duckwar-test.invalid
+        run: gradle :app:assembleDebug --no-daemon -PnovaPatchBackupOrigin=https://nova-striker-updates-git-duck-war-sunans-projects-4868df82.vercel.app
       - name: Publish test APK
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp app/build/outputs/apk/debug/*.apk "DuckWar-TEST-${{ github.run_number }}.apk"
-          gh release create "duckwar-test-${{ github.run_number }}" "DuckWar-TEST-${{ github.run_number }}.apk" --target "$GITHUB_SHA" --prerelease --title "Duck War TEST ${{ github.run_number }}" --notes 'Side-by-side test app (com.sunantongsan.duckwar.test). Installs next to the real game; no patches, no cloud. Not for players.'
+          gh release create "duckwar-test-${{ github.run_number }}" "DuckWar-TEST-${{ github.run_number }}.apk" --target "$GITHUB_SHA" --prerelease --title "Duck War TEST ${{ github.run_number }}" --notes 'Side-by-side test app (com.sunantongsan.duckwar.test). Installs next to the real game; patches only from the duck-war preview, no cloud. Not for players.'
