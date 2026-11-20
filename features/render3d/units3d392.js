@@ -22,9 +22,15 @@ function unit3d392(t,u,enemy,z,flip){
  var k=s.height*z/m.h;
  // 437: mirror with a scale pair instead of save/restore (cheaper with hundreds of troops on the field)
  if(flip!==1)ctx.scale(flip,1);
+ // duck: cartoon attack - stretch up on the wind-up, lunge and squash flat on the hit, spring back
+ var atkQ=(t.hp>0&&t.atk3d)?(Date.now()-t.atk3d)/520:9,anim=atkQ<1;
+ if(anim){var aa=t.aim||0,ax=Math.cos(aa)-Math.sin(aa),ay=(Math.cos(aa)+Math.sin(aa))*.75,al=Math.hypot(ax,ay)||1,hitW=atkQ<.35?0:Math.sin(Math.min(1,(atkQ-.35)/.45)*Math.PI);
+  var lunge=hitW*10*z,qx=atkQ<.35?1-.12*Math.sin(atkQ/.35*Math.PI):1+.28*hitW,qy=atkQ<.35?1+.16*Math.sin(atkQ/.35*Math.PI):1-.22*hitW;
+  ctx.save();ctx.translate(ax/al*lunge*flip,ay/al*lunge);ctx.scale(qx,qy);}
  var sh=sheet437(s,k);
  if(sh)ctx.drawImage(sh.c,col*g.cw*sh.f,t.dir3d*g.ch*sh.f,g.cw*sh.f,g.ch*sh.f,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
  else ctx.drawImage(s.bmp||s.img,col*g.cw,t.dir3d*g.ch,g.cw,g.ch,-m.ax*k,-m.ay*k,g.cw*k,g.ch*k);
+ if(anim)ctx.restore();
  if(flip!==1)ctx.scale(1/flip,1);return true;
 }
 var unit3dMount392=weaponMount;
