@@ -1969,6 +1969,7 @@ function clearSpeedWait264(){
 function releaseUnwatched264(){
  var p=E.d.pendingSpeed264;
  if(!p||p.completed)return;
+ if(p.provider==='admob'&&speedShowing264&&root.NovaAds&&root.NovaAds.cancelRewardLoad254)root.NovaAds.cancelRewardLoad254(p.request_id);
  speedRetry264=p;delete E.d.pendingSpeed264;
  if(!E.save())E.d.pendingSpeed264=p;
 }
@@ -1976,7 +1977,7 @@ function cancelSpeedWait264(){
  if(speedBusy264&&speedBusy264.mode==='prepare'){
   clearTimeout(speedTimer264);speedTimer264=null;speedBusy264=null;
  }
- clearSpeedWait264();releaseUnwatched264();
+ releaseUnwatched264();clearSpeedWait264();
 }
 function openSpeed264(html){
  open(html);if(modal.setAttribute)modal.setAttribute('data-speed-ad','true');
@@ -2011,6 +2012,16 @@ Game.retrySpeed264=function(){
  if(!E.d.pendingSpeed264)E.d.pendingSpeed264=p;
  speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');
 };
+function rewardFailure254(status,fallback){
+ if(status!=='unavailable'||!root.NovaAds||!root.NovaAds.rewardProblem254)return fallback;
+ var problem=String(root.NovaAds.rewardProblem254()),parts=/^(load|show)\/(google|other)\/(-?\d+)$/.exec(problem);
+ if(!parts)return fallback;
+ var message;
+ if(problem==='load/google/3')message=mt251('AdMob ยังไม่มีวิดีโอให้แสดง','AdMob has no video available.');
+ else if(problem==='load/google/2')message=mt251('เชื่อมต่อเครือข่ายโฆษณาไม่ได้','Could not connect to the ad network.');
+ else message=parts[1]==='load'?mt251('โหลดวิดีโอไม่สำเร็จ','Video failed to load.'):mt251('โหลดแล้ว แต่เปิดวิดีโอไม่สำเร็จ','Video loaded but failed to open.');
+ return message+' ('+problem+')';
+}
 function speedError264(message){clearSpeedWait264();speedWaitPhase264='error';openSpeed264('<h2>'+mt251('เร่งเวลาด้วย ADS','Speed up with ADS')+'</h2><p>'+escapeHTML(message||mt251('รางวัลยังถูกเก็บไว้ ลองอีกครั้ง','Your reward is saved. Retry.'))+'</p><button class="wide green" onclick="Game.retrySpeed264()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');}
 function speedSend264(mode){
  var p=E.d.pendingSpeed264;if(!p||speedBusy264||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;
@@ -2040,7 +2051,7 @@ var statusSpeed264=root.novaRewardStatus;root.novaRewardStatus=function(status){
   :status==='disabled'?mt251('แอปยังขอโฆษณาไม่ได้ในขณะนี้','The app cannot request ads yet.')
   :status==='unconfigured'?mt251('ยังไม่ได้ตั้งค่าหน่วยโฆษณารางวัล','Rewarded ad unit is not configured.')
   :mt251('โหลดหรือเปิดวิดีโอไม่ได้ ลองใหม่ภายหลัง','Video could not load or open. Try again later.');
- releaseUnwatched264();speedError264(message);
+ releaseUnwatched264();speedError264(rewardFailure254(status,message));
 };
 var mediaSpeed264=mediaAllowed250;mediaAllowed250=function(){return !speedShowing264&&mediaSpeed264();};
 function applySpeed264(p,r){
@@ -2863,7 +2874,7 @@ function camp399Show(a){if(screen!=='raid'||!E.raid||!E.raid.result||!E.raid.res
 function camp399Earned(owner,id){var a=E.d.campaignAd399;if(!a||a.owner!==owner||a.id!==id)return false;a.completed=true;if(!E.save()){a.completed=false;camp399Stop();return false;}clearTimeout(camp399VideoTimer);camp399Showing=false;camp399Active=null;camp399Tries=0;camp399Wait('กำลังรับรางวัล…','Collecting your reward…');if(!camp399Send('claim',a))camp399Restore();return true;}
 var testEarned399=root.novaTestRewardEarned248;root.novaTestRewardEarned248=function(owner,id){var a=E.d.campaignAd399;if(a&&a.owner===owner&&a.id===id){if(camp399Earned(owner,id)&&root.NovaAds&&root.NovaAds.acknowledgeTest248)root.NovaAds.acknowledgeTest248(id);return;}if(testEarned399)testEarned399(owner,id);};
 var earned399=root.novaRewardEarned;root.novaRewardEarned=function(id){var a=E.d.campaignAd399;if(a&&a.provider!=='test'&&camp399Active===a.id){if(camp399Earned(a.owner,a.provider==='admob'?a.id:id)&&root.NovaAds&&root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);return;}if(earned399)earned399(id);};
-var status399=root.novaRewardStatus;root.novaRewardStatus=function(status){if(camp399Showing||camp399Active){if(status==='ready'){var a=E.d.campaignAd399;if(a&&a.provider==='admob')camp399Show(a);return;}if(status==='loading')return;if(status==='test_showing248'||status==='showing'){clearTimeout(camp399VideoTimer);return;}camp399Stop();toast(mt251('ยังดูไม่ครบ ลองใหม่ได้','Video not finished. You can try again.'));return;}if(status399)status399(status);};
+var status399=root.novaRewardStatus;root.novaRewardStatus=function(status){if(camp399Showing||camp399Active){if(status==='ready'){var a=E.d.campaignAd399;if(a&&a.provider==='admob')camp399Show(a);return;}if(status==='loading')return;if(status==='test_showing248'||status==='showing'){clearTimeout(camp399VideoTimer);return;}camp399Stop();toast(rewardFailure254(status,status==='closed'?mt251('ปิดวิดีโอก่อนจบ','Video closed before completion.'):mt251('วิดีโอยังไม่พร้อม กลับฐานหรือลองใหม่ได้','Video unavailable. Return home or try again.')));return;}if(status399)status399(status);};
 var media399=mediaAllowed250;mediaAllowed250=function(){return !camp399Showing&&media399();};
 var cloud399=root.novaCloudEvent;root.novaCloudEvent=function(event,data){
  if(data&&data.request_id&&data.request_id.indexOf('camp399-')===0){

@@ -19,6 +19,11 @@ final class GameAds {
     private RewardedAd rewardReady;
     private boolean rewardLoading;
     private long rewardLoadedAt;
+    private static final long REWARD_TTL_MS = 3500000L;
+    private static final long REWARD_RETRY_MS = 30000L;
+    private long rewardRetryAt;
+    private String waitingReward;
+    private volatile String rewardProblem = "";
     private static final String REWARD_UNIT = "ca-app-pub-4585492700643566/9387691342"; // Nova optional reward; UI remains gated until verified rewards are ready.
     private void rewardStatus(String status) { if(!destroyed) activity.rewardStatus(status); }
     void deliverPending() {
@@ -32,27 +37,28 @@ final class GameAds {
     @JavascriptInterface public void rewardVerified(String owner, String intent) {
         if(owner==null || intent==null || !owner.matches("[0-9a-fA-F-]{36}") || !intent.matches("[0-9a-fA-F-]{36}")) return;
         activity.runOnUiThread(() -> {
-            if(destroyed || showing) return;
-            if(!prefs.getString("rewardPending", "").isEmpty()) { deliverPending(); return; }
-            String unit=BuildConfig.DEBUG?"ca-app-pub-3940256099942544/5224354917":REWARD_UNIT;
-            if(unit.isEmpty()) { rewardStatus("unconfigured"); return; }
-            if(!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
-            if(rewardReady==null || SystemClock.elapsedRealtime()-rewardLoadedAt>3500000L) {
-                if(rewardLoading) { rewardStatus("loading"); return; }
-                rewardReady=null; rewardLoading=true; rewardStatus("loading"); final int gen=generation;
-                Bundle extras=new Bundle(); extras.putString("npa","1");
-                RewardedAd.load(activity,unit,new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class,extras).build(),new RewardedAdLoadCallback(){
-                    @Override public void onAdLoaded(RewardedAd ad){rewardLoading=false;if(enabled()&&generation==gen){rewardReady=ad;rewardLoadedAt=SystemClock.elapsedRealtime();rewardStatus("ready");}}
-                    @Override public void onAdFailedToLoad(LoadAdError error){rewardLoading=false;rewardReady=null;rewardStatus("unavailable");}
-                }); return;
+            if (destroyed) return;
+            if (!foreground || showing) { rewardStatus("closed"); return; }
+            if (!prefs.getString("rewardPending", "").isEmpty()) { deliverPending(); return; }
+            if (!consent.canRequestAds()) { rewardStatus("disabled"); return; }
+            long now = SystemClock.elapsedRealtime();
+            if (rewardReady == null || now - rewardLoadedAt >= REWARD_TTL_MS) {
+                rewardReady = null;
+                if (now < rewardRetryAt) { rewardStatus("unavailable"); return; }
+                waitingReward = intent;
+                rewardStatus("loading");
+                if (sdkReady) preloadReward();
+                else initialize();
+                return;
             }
-            if(!foreground) return;
-            RewardedAd ad=rewardReady;rewardReady=null;
+            waitingReward = null;
+            RewardedAd ad = rewardReady;
+            rewardReady = null;
             ad.setServerSideVerificationOptions(new ServerSideVerificationOptions.Builder().setUserId(owner).setCustomData(intent).build());
             showing=true;final boolean[] earned={false};
             ad.setFullScreenContentCallback(new FullScreenContentCallback(){
-                @Override public void onAdDismissedFullScreenContent(){showing=false;if(!earned[0])rewardStatus("closed");deliverPending();}
-                @Override public void onAdFailedToShowFullScreenContent(AdError error){showing=false;rewardStatus("unavailable");}
+                @Override public void onAdDismissedFullScreenContent(){showing=false;if(!earned[0])rewardStatus("closed");deliverPending();preloadReward();}
+                @Override public void onAdFailedToShowFullScreenContent(AdError error){showing=false;recordRewardFailure("show",error);rewardStatus("unavailable");}
             });
             try { ad.show(activity,item -> {
                 if(earned[0]||destroyed) return;earned[0]=true;
@@ -61,8 +67,59 @@ final class GameAds {
                 String id=java.util.UUID.randomUUID().toString();
                 prefs.edit().putLong("rewardDay",earnedDay).putInt("rewardCount",count+1).putLong("rewardLast",earnedAt).putString("rewardPending",id).commit();
                 deliverPending();
-            }); } catch(RuntimeException error){showing=false;rewardStatus("unavailable");}
+            }); } catch(RuntimeException error){showing=false;recordRewardFailure("show",null);rewardStatus("unavailable");}
         });
+    }
+    @JavascriptInterface public String rewardProblem254() { return rewardProblem; }
+    @JavascriptInterface public void cancelRewardLoad254(String intent) {
+        activity.runOnUiThread(() -> { if (intent != null && intent.equals(waitingReward)) waitingReward = null; });
+    }
+    private void recordRewardFailure(String stage, AdError error) {
+        boolean google = error != null && "com.google.android.gms.ads".equals(error.getDomain());
+        rewardProblem = stage + "/" + (google ? "google" : "other") + "/" + (error == null ? -1 : error.getCode());
+        rewardRetryAt = SystemClock.elapsedRealtime() + REWARD_RETRY_MS;
+    }
+    private void finishRewardLoad() {
+        boolean notify = waitingReward != null && foreground;
+        waitingReward = null;
+        if (notify) rewardStatus(rewardReady != null ? "ready" : "unavailable");
+    }
+    private void preloadReward() {
+        long now = SystemClock.elapsedRealtime();
+        if (!sdkReady || destroyed || !foreground || !consent.canRequestAds() || showing || rewardLoading
+                || now < rewardRetryAt || (rewardReady != null && now - rewardLoadedAt < REWARD_TTL_MS)) return;
+        rewardReady = null;
+        rewardLoading = true;
+        int gen = generation;
+        Bundle extras = new Bundle();
+        extras.putString("npa", "1");
+        String unit = BuildConfig.DEBUG ? "ca-app-pub-3940256099942544/5224354917" : REWARD_UNIT;
+        try {
+            RewardedAd.load(activity, unit, new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build(), new RewardedAdLoadCallback() {
+                @Override public void onAdLoaded(RewardedAd ad) {
+                    rewardLoading = false;
+                    if (destroyed) return;
+                    if (gen != generation) { preloadReward(); return; }
+                    if (consent.canRequestAds()) {
+                        rewardReady = ad;
+                        rewardLoadedAt = SystemClock.elapsedRealtime();
+                        rewardProblem = "";
+                    }
+                    finishRewardLoad();
+                }
+                @Override public void onAdFailedToLoad(LoadAdError error) {
+                    rewardLoading = false;
+                    if (destroyed) return;
+                    if (gen != generation) { preloadReward(); return; }
+                    recordRewardFailure("load", error);
+                    finishRewardLoad();
+                }
+            });
+        } catch (RuntimeException e) {
+            rewardLoading = false;
+            recordRewardFailure("load", null);
+            finishRewardLoad();
+        }
     }
     // Explicit demo-ad path. It never emits a production rewarded/SSV callback.
     private boolean testLoading248;
@@ -106,8 +163,7 @@ final class GameAds {
         activity.runOnUiThread(() -> {
             if (destroyed || prefs.getBoolean("liveAds399", false) == live) return;
             prefs.edit().putBoolean("liveAds399", live).apply();
-            generation++; ready=null; clearBanner();
-            if (initialized) load();
+            // The unit set is determined by the build. A server flag update cannot change it.
         });
     }
     @JavascriptInterface public void bannerLayoutAllowed(boolean allowed) {
@@ -147,7 +203,7 @@ final class GameAds {
         Bundle extras=new Bundle(); extras.putString("npa","1");
         view.loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class,extras).build());
     }
-    private boolean initialized, loading, showing, destroyed, foreground;
+    private boolean sdkReady, initialized, loading, showing, destroyed, foreground;
     private long lastShown = SystemClock.elapsedRealtime();
     private int generation;
     GameAds(MainActivity activity) {
@@ -169,7 +225,8 @@ final class GameAds {
     @JavascriptInterface public void settings() {
         activity.runOnUiThread(() -> {
             if (destroyed || showing || !privacyRequired()) return;
-            ready=null; rewardReady=null; generation++; clearBanner();
+            if (waitingReward != null) rewardStatus("closed");
+            waitingReward=null; ready=null; rewardReady=null; generation++; clearBanner();
             UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
         });
     }
@@ -182,13 +239,14 @@ final class GameAds {
     }
     private void initialize() {
         if (!enabled() || !consent.canRequestAds()) return;
-        if (initialized) { load(); return; }
+        if (initialized) { if (sdkReady) load(); return; }
         initialized=true;
         MobileAds.setRequestConfiguration(new RequestConfiguration.Builder()
             .setMaxAdContentRating(RequestConfiguration.MAX_AD_CONTENT_RATING_PG).build());
-        new Thread(() -> MobileAds.initialize(activity, status -> activity.runOnUiThread(this::load))).start();
+        new Thread(() -> MobileAds.initialize(activity, status -> activity.runOnUiThread(() -> { sdkReady = true; load(); }))).start();
     }
     private void load() {
+        preloadReward();
         loadBanner();
         if (!enabled() || !consent.canRequestAds() || loading || ready!=null) return;
         loading=true;
@@ -220,8 +278,8 @@ final class GameAds {
         });
     }
     private void done() { if (!destroyed) activity.adFinished(); }
-    void resume() { foreground=true; if(banner!=null) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
-    void pause() { foreground=false; bannerHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
+    void resume() { foreground=true; preloadReward(); if(banner!=null) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
+    void pause() { if (waitingReward != null) rewardStatus("closed"); waitingReward=null; foreground=false; bannerHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
     void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; clearBanner(); }
 }
 

@@ -60,3 +60,16 @@ const watchdog=[...failed.timers.values()].findLast(t=>t.ms===30000);assert(watc
 assert.match(failed.el('modal').innerHTML,/โหลดวิดีโอไม่ทัน/);assert.equal(fe.d.pendingSpeed264,undefined);
 assert.equal(job.until,originalEnd);assert.equal(fe.d.gems,originalGems);
 console.log('PASS speed ad failure, close during prepare and load, late ready, timeout and no free reward');
+
+let cancelled;
+failed.s.NovaAds.cancelRewardLoad254=id=>{cancelled=id;};
+fg.speedAd264('building',String(job.id));prepareFailedCase();failed.s.novaRewardStatus('loading');
+const activeId=fe.d.pendingSpeed264.request_id;
+fg.dismissWindow243();assert.equal(cancelled,activeId);
+for(const [detail,text] of [['load/google/3','ไม่มีวิดีโอ'],['load/google/2','เครือข่าย'],['show/google/2','เปิดวิดีโอ'],['load/other/3','โหลดวิดีโอไม่สำเร็จ']]){
+ failed.s.NovaAds.rewardProblem254=()=>detail;
+ fg.speedAd264('building',String(job.id));prepareFailedCase();failed.s.novaRewardStatus('unavailable');
+ assert.ok(failed.el('modal').innerHTML.includes(detail));assert.ok(failed.el('modal').innerHTML.includes(text));
+ assert.equal(fe.d.pendingSpeed264,undefined);assert.equal(job.until,originalEnd);
+}
+console.log('PASS cancelled request ID and SDK load/show error mapping without crediting a failed view');

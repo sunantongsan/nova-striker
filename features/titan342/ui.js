@@ -181,7 +181,7 @@ var openGuardian343=open;open=function(html){modal.removeAttribute('data-guardia
 
 var selectionTouch343=false,selectionTimer343=null,hudBefore343=hud;
 hud=function(){if(!selectionTouch343)return hudBefore343();};
-(function(){var box=$('selection');box.addEventListener('pointerdown',function(){clearTimeout(selectionTimer343);selectionTouch343=true;},true);function release(){clearTimeout(selectionTimer343);selectionTimer343=setTimeout(function(){selectionTouch343=false;hud();},80);}root.addEventListener('pointerup',release);root.addEventListener('pointercancel',release);root.addEventListener('blur',release);})();
+(function(){var box=$('selection');box.addEventListener('pointerdown',function(){clearTimeout(selectionTimer343);selectionTouch343=true;},true);function release(){if(!selectionTouch343)return;clearTimeout(selectionTimer343);selectionTimer343=setTimeout(function(){selectionTouch343=false;hud();},80);}root.addEventListener('pointerup',release);root.addEventListener('pointercancel',release);root.addEventListener('blur',release);})();
 
 (function(){function decorate(){document.querySelectorAll('#selection button,#modal button').forEach(function(b){if(b.querySelector('.art345,img,.icon,.art278,.resourceArt303')||b.classList.contains('window-close243'))return;var a=b.getAttribute('onclick')||'',i=/move|Move/.test(a)?10:/enhance|Upgrade|upgrade|forge/i.test(a)?9:/speed|wait/i.test(a)?3:/Ad|checkin|reward/i.test(a)?2:/train|garrison|mercenar/i.test(a)?0:/build/i.test(a)?11:-1;if(i>=0){b.insertAdjacentHTML('afterbegin',art345(i));b.classList.add('illustrated345');}});}
  new MutationObserver(decorate).observe(modal,{childList:true,subtree:true});new MutationObserver(decorate).observe($('selection'),{childList:true,subtree:true});

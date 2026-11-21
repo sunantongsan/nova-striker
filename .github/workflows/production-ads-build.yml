@@ -2,7 +2,7 @@ name: Build NOVA production ads bundle
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/production-ads-build.yml']
+    paths: ['.github/workflows/production-ads-build.yml', 'app/build.gradle', 'app/src/main/java/**/GameAds.java']
 permissions: {contents: write}
 jobs:
   build:

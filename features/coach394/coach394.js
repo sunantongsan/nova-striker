@@ -201,7 +201,7 @@ setTimeout(coachTick394,1800);
 // offered only where the law requires it (NovaAds.privacyRequired, native 40+).
 (function(){
  function required(){try{return !!(root.NovaAds&&root.NovaAds.privacyRequired&&root.NovaAds.privacyRequired());}catch(e){return false;}}
- function tidy(){if(!modal.querySelectorAll||required())return;Array.prototype.forEach.call(modal.querySelectorAll('button[onclick*="NovaAds.settings"],button[onclick*="adPrivacy248"]'),function(b){b.remove();});}
+ function tidy(){if(!modal.querySelectorAll)return;var buttons=modal.querySelectorAll('button[onclick*="NovaAds.settings"],button[onclick*="adPrivacy248"]');if(buttons.length&&!required())Array.prototype.forEach.call(buttons,function(b){b.remove();});}
  if(root.MutationObserver)new MutationObserver(tidy).observe(modal,{childList:true,subtree:true});
  Game.adPrivacy248=function(){if(required())root.NovaAds.settings();};
 })();
