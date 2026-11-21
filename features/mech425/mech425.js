@@ -6,8 +6,8 @@ function mechReady425(){var s=E.d.titan342;return !!(s&&s.level)&&!E.titanRecove
 var place425=placeMech379;
 placeMech379=function(){place425.apply(this,arguments);var r=E.raid;if(screen!=='raid'||!r||r.result||r.liveMode!=='preview'||!mechEntry379)return;
  var dock=$('deploy');if(!dock)return;var show=mechReady425()&&!!liveTarget&&liveTarget.can_attack!==false;
- if(show){var end=dock.querySelector('.end395');if(mechEntry379.parentNode!==dock||mechEntry379.previousElementSibling!==end){if(end)end.after(mechEntry379);else dock.prepend(mechEntry379);}mechEntry379.hidden=modal.style.display==='flex';mechEntry379.classList.add('battle342');mechEntry379.classList.toggle('armed425',!!deployTitan342||!!mechPending425);}
- else if(mechEntry379.parentNode===dock)mechEntry379.hidden=true;};
+ if(show){var end=dock.querySelector('.end395');if(mechEntry379.parentNode!==dock||mechEntry379.previousElementSibling!==end){if(end)end.after(mechEntry379);else dock.prepend(mechEntry379);}var hidden=modal.style.display==='flex';if(mechEntry379.hidden!==hidden)mechEntry379.hidden=hidden;mechEntry379.classList.add('battle342');mechEntry379.classList.toggle('armed425',!!deployTitan342||!!mechPending425);}
+ else if(!mechEntry379.hidden)mechEntry379.hidden=true;};
 var titanDeploy425=Game.titanDeploy342;
 Game.titanDeploy342=function(){var r=E.raid;if(screen!=='raid'||!r||r.result||r.liveMode!=='preview')return titanDeploy425.apply(this,arguments);
  if(!liveTarget||liveTarget.can_attack===false){toast(mt251('ฐานนี้มีโล่ป้องกัน แตะ ถัดไป','This base is shielded. Tap Next'));return;}

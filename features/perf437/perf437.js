@@ -78,34 +78,6 @@ tickWalls383=function(){};
 drawWallGun383=function(){};
 (function(){var info=defenseInfo223;defenseInfo223=function(b){return b&&b.type==='wall'?'':info.apply(this,arguments);};})();
 
-// ---------- 437c: a smarter NOVA mech in raids ----------
-// Before, the mech went for whatever was closest, which in a walled base is nearly always a wall piece, and planned
-// its path around the walls, so it stood hacking at walls in the same spot. Now, like a Clash hero, it goes for the
-// nearest real target (defenders and buildings, not walls), heads straight there and leaps over walls on the way.
-// If it really cannot get through for a moment, it cuts through the wall piece in front of it, then carries on.
-function raidMech437(scene,t){return !scene.defenders&&!scene.home355&&Array.isArray(scene.troops)&&scene.troops.indexOf(t)>=0;}
-function wallAhead437(scene,t,target){var a=Math.atan2(target.y-t.y,target.x-t.x),best=null,bd=1e9;
- scene.buildings.forEach(function(b){if(b.type!=='wall'||!(b.hp>0))return;var d=Math.hypot(b.x-t.x,b.y-t.y);if(d>1.8)return;var off=Math.abs(Math.atan2(Math.sin(Math.atan2(b.y-t.y,b.x-t.x)-a),Math.cos(Math.atan2(b.y-t.y,b.x-t.x)-a)));if(off>1.2)return;if(d<bd){bd=d;best=b;}});return best;}
-var titanTick437=titanTick342;
-titanTick342=function(scene,t,dt){
- if(!raidMech437(scene,t)||t.hp<=0||t.manual342)return titanTick437.apply(this,arguments);
- var all=titanEnemies342(scene,t).filter(function(v){return v.hp>0;}),main=all.filter(function(v){return v.type!=='wall';}),ground=main.filter(function(v){return !air277(v);});
- // flying guards are left to the troops and to the mech's palm blast; chasing one it cannot reach froze it in place
- if(ground.length)main=ground;
- if(!main.length||t.pending342||t.jump345||t.stun>0)return titanTick437.apply(this,arguments);
- // pick the target: the wall we are cutting through, otherwise the nearest real target
- var target=t.wall437&&t.wall437.hp>0?t.wall437:null;if(!target){t.wall437=null;target=main.reduce(function(best,v){return !best||dist(t,v)<dist(t,best)?v:best;},undefined);}
- // stuck check: trying to move but hardly moved for a second -> cut the wall in front
- var px=t.x,py=t.y;
- var keepEnemies=titanEnemies342;
- titanEnemies342=function(s,v){var list=keepEnemies(s,v);return v===t?list.filter(function(e){return e===target||(e.type!=='wall'&&(!ground.length||!air277(e)));}):list;};
- try{titanTick437.apply(this,arguments);}finally{titanEnemies342=keepEnemies;}
- var moved=Math.hypot(t.x-px,t.y-py);
- if(target.type!=='wall'&&dist(t,target)>2.4&&!t.jump345&&!t.pending342){t.stuck437=moved<.01*Math.max(1,dt*60)?(t.stuck437||0)+dt:Math.max(0,(t.stuck437||0)-dt*2);
-  if(t.stuck437>1){var w=wallAhead437(scene,t,target);if(w){t.wall437=w;t.route=[];}t.stuck437=0;}}
- else t.stuck437=0;
-};
-
 // ---------- 437d: building level details as pictures ----------
 // The armour pods, vents and lights that show a building's level depend only on its type, level and size, but were
 // drawn shape by shape (twice per building) every frame. They are now drawn once per type/level/zoom and re-used.

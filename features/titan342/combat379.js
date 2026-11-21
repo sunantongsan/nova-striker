@@ -3,7 +3,7 @@ var mechEntry379=$('titanEntry342'),hudBefore379=hud;
 hud=function(){hudBefore379();placeMech379();};
 function placeMech379(){
  var r=E.raid;if(screen!=='raid'||!r||r.result||r.liveMode==='preview'||r.liveMode==='defender')return;
- var dock=$('deploy');if(dock&&mechEntry379){dock.prepend(mechEntry379);mechEntry379.hidden=modal.style.display==='flex'||!mechAvailable437(r);mechEntry379.classList.add('battle342');}
+ var dock=$('deploy');if(dock&&mechEntry379){if(mechEntry379.parentNode!==dock)dock.prepend(mechEntry379);var hidden=modal.style.display==='flex'||!mechAvailable437(r);if(mechEntry379.hidden!==hidden)mechEntry379.hidden=hidden;mechEntry379.classList.add('battle342');}
 }
 // 437: like the troop cards, the mech card only stays in the battle bar while the mech can still be sent:
 // you own one, it is not resting, and it is not already on the field.

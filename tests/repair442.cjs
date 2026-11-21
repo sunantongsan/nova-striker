@@ -17,3 +17,18 @@ console.log('PASS repair442: confirmed healing clears local rest, timeout/throw 
 // Coin feedback is gated by sound settings and uses a short three-note chime.
 const game=fs.readFileSync('game.js','utf8');let notes=0,fallback=0;const sound={soundOn:true,document:{hidden:false},mediaAllowed250:()=>true,unlockAudio218(){},completionAudio250(){fallback++},audio:{currentTime:1,destination:{},createOscillator(){notes++;return{frequency:{setValueAtTime(){}},connect(){},start(){},stop(){},disconnect(){}}},createGain(){return{gain:{setValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){},disconnect(){}}}}};vm.createContext(sound);vm.runInContext(game.slice(game.indexOf('function coinSuccess442()'),game.indexOf('function completionAudio250()')),sound);sound.coinSuccess442();assert.equal(notes,3);assert.equal(fallback,0);sound.soundOn=false;sound.coinSuccess442();assert.equal(notes,3);
 console.log('PASS coin feedback: three-note receipt chime, muted setting respected');
+// A live control acknowledgement must not serialize or overwrite the player's economy.
+a=boot();a.E.save=()=>{throw Error('control saved the whole base')};a.E.sync=()=>{throw Error('control synced the whole base')};
+assert(a.s.titanSend342('control',{room:'test',seq:1,manual:true,dx:1,dy:0}));
+assert(!('resourceSnapshot' in a.requests[0].p));
+a.reply({}, {combat:true});assert.equal(a.s.titanBusy342,null);assert.equal(a.E.d.gems,100);
+{
+ let now=0,orders=[];
+ const state={Date:{now:()=>now},Math,screen:'raid',liveRoom:{id:'one',v:2},selectedTitan342:null,titanBusy342:null,titanOwner342:'a',titanQueuedSkill342:null,titanControlSeq342:0,titanControlAt342:0,E:{raid:{}},tickUI342(){},titanSend342:(mode,p)=>{orders.push(p);return true;}};
+ vm.createContext(state);vm.runInContext(src.slice(src.indexOf('var manualRoom443='),src.indexOf('};',src.indexOf('manualRoom443=manual?'))+2),state);
+ const run=frames=>{for(let i=0;i<frames;i++){now+=17;state.tickUI342(.017)}};
+ run(600);assert.equal(orders.length,0,'no controls sent during AUTO');
+ state.selectedTitan342={owner:'a',hp:1,input342:{x:1,y:0}};run(60);
+ assert(orders.length>=2&&orders.every(p=>p.manual&&p.dx===1),'manual heartbeat');
+ state.selectedTitan342=null;run(600);assert.equal(orders.filter(p=>!p.manual).length,1,'one release, then silence');
+}

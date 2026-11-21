@@ -34,11 +34,48 @@ function titanRoute442(scene,t,target,buildings){
  if(clear)return [{x:target.x,y:target.y}];
  return route(t,target,buildings,1.6,(scene.mapSize||22)-1)||[];
 }
+// A sealed objective needs a breach target. Follow the route that would open
+// if walls were removed and cut the first intact wall on that route.
+function titanPlan443(scene,t,target){
+ var buildings=scene.buildings;
+ var path=titanRoute442(scene,t,target,buildings);
+ if(path.length)return path;
+ if(!scene.defenders&&scene.troops.includes(t)){
+  var open=route(t,target,buildings.filter(function(b){return b.type!=='wall';}),1.6,(scene.mapSize||22)-1)||[];
+  var wallsOnly=open.length>0;
+  if(!wallsOnly)open=route(t,target,[],1.6,(scene.mapSize||22)-1)||[];
+  for(var cell of open){
+   var obstruction=buildings.find(function(b){return b.hp>0&&!trap278(b)&&(!wallsOnly||b.type==='wall')&&b.x===cell.x&&b.y===cell.y;});
+   if(obstruction){
+    t.breach443=obstruction;
+    return titanRoute442(scene,t,obstruction,buildings);
+   }
+  }
+ }
+ return [{x:target.x,y:target.y}];
+}
+function titanTarget443(scene,t,dt){
+ if(t.breach443&&t.breach443.hp>0)return t.breach443;
+ t.breach443=null;
+ t.searchIn443=(t.searchIn443||0)-dt;
+ var prior=t.aimTarget;
+ if(t.searchIn443>0&&prior&&prior.hp>0&&!(prior.sortie277||prior.transport277))return prior;
+ var enemies=titanEnemies342(scene,t),best=null,rank=Infinity,nearest=Infinity;
+ var raider=!t.manual342&&!scene.defenders&&scene.troops.includes(t);
+ for(var enemy of enemies){
+  if(!(enemy.hp>0)||enemy.sortie277&&enemy.sortie277.phase==='reload'||enemy.transport277&&['away','destroyed'].includes(enemy.state))continue;
+  var priority=raider?(enemy.type==='wall'?2:air277(enemy)?1:0):0;
+  var dx=enemy.x-t.x,dy=enemy.y-t.y,d=dx*dx+dy*dy;
+  if(priority<rank||priority===rank&&d<nearest){best=enemy;rank=priority;nearest=d;}
+ }
+ t.searchIn443=.25;
+ return best;
+}
 function titanMove342(scene,t,dx,dy,dt,speed){if(t.jump345)return;var len=Math.hypot(dx,dy);if(!len)return;var step=Math.min(len,speed*dt),x=t.x+dx/len*step,y=t.y+dy/len*step;if(!titanBlocked342(scene,x,y)){t.x=x;t.y=y;}else if(titanJump345(scene,t,dx,dy))return;else if(!titanBlocked342(scene,x,t.y))t.x=x;else if(!titanBlocked342(scene,t.x,y))t.y=y;t.aim=t.heading=Math.atan2(dy,dx);t.moving=true;}
 function titanEnemies342(scene,t){return scene.defenders?(scene.enemies||[]):scene.troops.includes(t)?scene.guards.concat(scene.buildings.filter(function(b){return !trap278(b)||b.revealed278;})):scene.troops.concat(scene.transports277||[]);}
 function titanFriends342(scene,t){return scene.defenders?scene.defenders:scene.troops.includes(t)?scene.troops:scene.guards;}
-function titanCast342(scene,t,id){var s=Titan342.skills[id];if(!s||t.hp<=0||t.resting347||t.stun>0||t.tier342<s.level||!(t.skills342[id]>0)||t.energy342<s.cost||t.cooldowns342[id]>0||t.pending342||t.jump345)return false;
- t.cool=Math.max(t.cool,s.duration+.8);t.energy342-=s.cost;t.cooldowns342[id]=s.cool;t.action342=s.clip;t.actionTime342=s.duration;t.actionSeq342=(t.actionSeq342||0)+1;var target=titanEnemies342(scene,t).filter(function(v){return v.hp>0&&(s.air||!air277(v));}).reduce(function(best,v){return !best||dist(t,v)<dist(t,best)?v:best;},undefined);
+function titanCast342(scene,t,id,aimTarget){var s=Titan342.skills[id];if(!s||t.hp<=0||t.resting347||t.stun>0||t.tier342<s.level||!(t.skills342[id]>0)||t.energy342<s.cost||t.cooldowns342[id]>0||t.pending342||t.jump345)return false;
+ t.cool=Math.max(t.cool,s.duration+.8);t.energy342-=s.cost;t.cooldowns342[id]=s.cool;t.action342=s.clip;t.actionTime342=s.duration;t.actionSeq342=(t.actionSeq342||0)+1;var target=aimTarget||titanEnemies342(scene,t).filter(function(v){return v.hp>0&&(s.air||!air277(v));}).reduce(function(best,v){return !best||dist(t,v)<dist(t,best)?v:best;},undefined);
  if(target&&dist(t,target)<=s.range+1){t.aim=t.heading=Math.atan2(target.y-t.y,target.x-t.x);}
  if(id==='shield'){titanFriends342(scene,t).forEach(function(v){if(v.hp>0&&dist(t,v)<=s.range)v.shield342=5;});}
  else t.pending342={id:id,remaining:s.delay,angle:t.aim,x:target?target.x:t.x+Math.cos(t.aim)*s.range,y:target?target.y:t.y+Math.sin(t.aim)*s.range};
@@ -49,14 +86,35 @@ function titanTick342(scene,t,dt){if(t.hp<=0){t.action342='Collapse';delete t.pe
  if(t.pending342){var p=t.pending342;if(p.id==='dash')titanMove342(scene,t,Math.cos(p.angle)*10,Math.sin(p.angle)*10,dt,6);p.remaining-=dt;if(p.remaining<=0){titanImpact342(scene,t,p);delete t.pending342;}return;}
  if(t.stun>0)return;
  if(t.manual342){var m=t.input342||{x:0,y:0};titanMove342(scene,t,m.x,m.y,dt,2);if(Math.hypot(m.x,m.y)>.1){if(!t.jump345)t.action342=t.moving?'Walk':'Sentinel';return;}}
- var enemies=titanEnemies342(scene,t).filter(function(v){return v.hp>0;}),target=enemies.reduce(function(best,v){return !best||dist(t,v)<dist(t,best)?v:best;},undefined);
+ var target=titanTarget443(scene,t,dt);
  if(!target){if(!t.actionTime342)t.action342='Sentinel';return;}var d=dist(t,target);t.aimTarget=target;
- if(!t.manual342){t.aim=t.heading=Math.atan2(target.y-t.y,target.x-t.x);var skill=t.hp<t.max*.6&&t.tier342>=2&&!(t.shield342>0)?'shield':t.tier342===3&&d<4?'nova':air277(target)||d>2.8&&d<=7?'palm':d<=2.8?'slash':null;if(skill&&titanCast342(scene,t,skill))return;}
+ if(!t.manual342){
+  t.aim=t.heading=Math.atan2(target.y-t.y,target.x-t.x);
+  if(t.hp<t.max*.6&&!(t.shield342>0)&&titanCast342(scene,t,'shield',target))return;
+  if(!air277(target)&&d<4&&titanCast342(scene,t,'nova',target))return;
+  if(d<=7&&(air277(target)||d>2.8)&&titanCast342(scene,t,'palm',target))return;
+  if(d<=2.8&&!air277(target)&&titanCast342(scene,t,'slash',target))return;
+ }
  if(d<=2.2&&!air277(target)){if(t.cool<=0){t.aim=t.heading=Math.atan2(target.y-t.y,target.x-t.x);t.cool=1.8;t.action342='SwordSlash';t.actionTime342=1.1;t.actionSeq342=(t.actionSeq342||0)+1;t.pending342={id:'slash',remaining:.42,angle:t.aim,x:target.x,y:target.y};scene.fx.push({weapon:'titan342',skill342:'slash',x:t.x,y:t.y,tx:target.x,ty:target.y,angle:t.aim,life:1.1,maxLife:1.1,radius:2.8,color:'#62eaff'});}}
- else if(!t.manual342){t.pathAge=(t.pathAge||0)-dt;var obstacles442=scene.buildings.filter(function(b){return b.hp>0;});if(t.pathAge<=0||!t.route.length||t.routeCount442!==obstacles442.length||t.routeTarget442!==target){t.route=titanRoute442(scene,t,target,obstacles442);t.routeCount442=obstacles442.length;t.routeTarget442=target;t.pathAge=.7;}var p=t.route[0];if(p){titanMove342(scene,t,p.x-t.x,p.y-t.y,dt,1.5);if(dist(t,p)<.15)t.route.shift();}if(!t.jump345&&t.moving)t.action342='Walk';}
+ else if(!t.manual342){
+  t.pathAge=(t.pathAge||0)-dt;
+  var revision=scene.obstacles443||0;
+  if(t.pathAge<=0||t.routeRevision443!==revision||t.routeTarget442!==target){
+   t.route=titanPlan443(scene,t,target);
+   t.routeTarget442=t.breach443||target;
+   t.routeRevision443=revision;
+   t.pathAge=.7;
+  }
+  var waypoint=t.route[0];
+  if(waypoint){
+   titanMove342(scene,t,waypoint.x-t.x,waypoint.y-t.y,dt,1.5);
+   if(dist(t,waypoint)<.15)t.route.shift();
+  }
+  if(!t.jump345&&t.moving)t.action342='Walk';
+ }
  if(!t.jump345&&!t.actionTime342&&!t.moving)t.action342='Sentinel';
 }
-var hitTitan342=hit;hit=function(scene,target,damage,source,weapon){return hitTitan342(scene,target,damage*(target.shield342>0?.35:1),source,weapon);};
+var hitTitan342=hit;hit=function(scene,target,damage,source,weapon){var alive=target.hp>0,result=hitTitan342(scene,target,damage*(target.shield342>0?.35:1),source,weapon);if(alive&&target.type&&target.hp<=0)scene.obstacles443=(scene.obstacles443||0)+1;return result;};
 function tickTitans342(scene,dt){['troops','guards','defenders','enemies'].forEach(function(k){(scene[k]||[]).forEach(function(t){t.shield342=Math.max(0,(t.shield342||0)-dt);if(t.titan342)titanTick342(scene,t,dt);});});}
 var tickTitan342=Engine.prototype.tick;Engine.prototype.tick=function(dt){if(this.raid&&this.raid.phase==='battle'&&!this.raid.result)tickTitans342(this.raid,Math.min(.1,Math.max(0,dt)));return tickTitan342.call(this,dt);};
 var defenseTitan342=Engine.prototype.tickDefense;Engine.prototype.tickDefense=function(dt){if(this.defense&&!this.defense.result)tickTitans342(this.defense,Math.min(.1,Math.max(0,dt)));return defenseTitan342.call(this,dt);};

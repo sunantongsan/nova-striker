@@ -17,3 +17,16 @@ const perf=fs.readFileSync('features/perf437/perf437.js','utf8');const moves={Ma
 scene.buildings[0].hp=0;unit.x=4.7;unit.y=5;moves.titanMove342(scene,unit,1,0,.1,2);assert(unit.x>4.8&&unit.moving,'walk through rubble');
 const trapped={mapSize:2,buildings:[]};unit.x=.5;unit.y=.5;moves.titanMove342(trapped,unit,1,0,.1,2);assert.equal(unit.moving,false,'blocked feet do not run in place');
 console.log('PASS mech442: refresh-independent Walk, attack priority, rubble shortcut, intact walls, home collision, movement flag');
+// Raid regression: the first kill leaves the next objective inside a closed ring.
+const siegeMech=titan.make(1,3,10,{}),first={type:'mine',x:4,y:10,hp:10},hq={type:'hq',x:12,y:10,hp:800};
+const perimeter=[];
+for(let i=-3;i<=3;i++){
+ for(const [dx,dy] of [[i,-3],[i,3],...(Math.abs(i)<3?[[-3,i],[3,i]]:[])]){
+  perimeter.push({type:'wall',x:12+dx,y:10+dy,hp:180});
+ }
+}
+const siege={mapSize:24,buildings:[first,hq,...perimeter],troops:[siegeMech],guards:[],fx:[]};
+for(let i=0;i<1800&&hq.hp>0;i++)titan.tick(siege,siegeMech,1/60);
+assert.equal(first.hp,0);
+assert(perimeter.some(b=>b.hp===0),'cut a breach after the first kill');
+assert.equal(hq.hp,0,'continue through the breach to attack the next objective');
