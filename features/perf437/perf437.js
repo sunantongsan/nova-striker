@@ -124,8 +124,8 @@ buildingStructure265=function(b,p,size,front){
  var lv=Math.max(1,Math.min(20,b&&b.lv||1));
  if(!b||lv===1||b.type==='wall'||b.type==='cannonturret'||typeof document==='undefined'||!document.createElement||!(size>0))return struct437.apply(this,arguments);
  var scale=renderScale226(),zk=Math.round(size*2)/2+':'+scale;
- if(zk!==structKey437||structCount437>300){structCache437={};structCount437=0;structKey437=zk;}
- var key=b.type+':'+lv+':'+(front?1:0),s=structCache437[key];
+ if(scale!==structKey437||structCount437>300){structCache437={};structCount437=0;structKey437=scale;}
+ var key=zk+':'+b.type+':'+lv+':'+(front?1:0),s=structCache437[key];
  if(!s){var k=size/80,L=60*k,R=60*k,U=95*k,D=40*k,W=Math.ceil(L+R),H=Math.ceil(U+D),c=document.createElement('canvas');
   c.width=Math.max(1,Math.ceil(W*scale));c.height=Math.max(1,Math.ceil(H*scale));var g=c.getContext('2d');if(!g)return struct437.apply(this,arguments);
   g.setTransform(scale,0,0,scale,0,0);var old=ctx;try{ctx=g;struct437.call(this,b,{x:L,y:U},size,front);}finally{ctx=old;}

@@ -912,7 +912,7 @@ Game.confirmMove=function(){if(!movePreview224||moving!==movePreview224.id)retur
 document.addEventListener('visibilitychange',function(){if(document.hidden)pause();else{E.sync();hud();}});root.addEventListener('pagehide',function(){E.save();});
 // 420: battles run at 60 fps when the phone keeps up (frame work under ~9 ms), else 30 fps.
 var frameGap420=32,frameAvg420=12;function frameCost420(ms){frameAvg420=frameAvg420*.92+ms*.08;if(screen==='home')return;frameGap420=frameAvg420<9?15:frameAvg420>13?32:frameGap420;}
-function loop(n){requestAnimationFrame(loop);if(document.hidden){last=n;return;}if(n-last<(screen==='home'&&modal.style.display!=='flex'?15:frameGap420))return;var dt=Math.min(.08,(n-last)/1000);last=n;var work420=performance.now();try{musicTick218();if(screen==='defense'&&!paused&&!E.defense.result){E.tickDefense(dt);drawNeeded=true;if(E.defense.result)defenseResult();}if(screen==='raid'&&!paused&&E.raid.phase==='battle'){E.tick(dt);drawNeeded=true;if(E.raid.result)result();}if(++frame%30===0){var jobs=E.d.buildings.filter(function(b){return b.until;}).length;E.sync();hud();updateTraining();}if(screen==='raid'&&E.raid&&E.raid.phase==='spectator'&&E.raid.liveMode!=='preview')drawNeeded=true;if(screen==='home'&&((guardLoaded340&&robots251.length)||E.builderBusy()>0||mineActive251()))drawNeeded=true;monitorBuild249();if(bursts249.length)drawNeeded=true;if(drawNeeded&&modal.style.display!=='flex'){draw();drawNeeded=false;}frameCost420(performance.now()-work420);}catch(e){console.error('Nova frame error',e);paused=true;$('boot').style.display='block';$('bootmessage').textContent=tr('โหลดสนามไม่สำเร็จ กดลองเปิดใหม่ ข้อมูลฐานที่บันทึกไว้ยังอยู่');}}
+function loop(n){requestAnimationFrame(loop);if(document.hidden){last=n;return;}if(n-last<(screen==='home'&&modal.style.display!=='flex'?Math.max(15,frameGap420):frameGap420))return;var dt=Math.min(.08,(n-last)/1000);last=n;var work420=performance.now();try{musicTick218();if(screen==='defense'&&!paused&&!E.defense.result){E.tickDefense(dt);drawNeeded=true;if(E.defense.result)defenseResult();}if(screen==='raid'&&!paused&&E.raid.phase==='battle'){E.tick(dt);drawNeeded=true;if(E.raid.result)result();}if(++frame%30===0){var jobs=E.d.buildings.filter(function(b){return b.until;}).length;E.sync();hud();updateTraining();}if(screen==='raid'&&E.raid&&E.raid.phase==='spectator'&&E.raid.liveMode!=='preview')drawNeeded=true;if(screen==='home'&&((guardLoaded340&&robots251.length)||E.builderBusy()>0||mineActive251()))drawNeeded=true;monitorBuild249();if(bursts249.length)drawNeeded=true;if(drawNeeded&&modal.style.display!=='flex'){draw();drawNeeded=false;}frameCost420(performance.now()-work420);}catch(e){console.error('Nova frame error',e);paused=true;$('boot').style.display='block';$('bootmessage').textContent=tr('โหลดสนามไม่สำเร็จ กดลองเปิดใหม่ ข้อมูลฐานที่บันทึกไว้ยังอยู่');}}
 home();$('boot').style.display='none';if(!localStorage.getItem('novaRTSIntro')){root.Game.help();try{localStorage.setItem('novaRTSIntro','1');}catch(e){}}requestAnimationFrame(loop);
 
 var resumeCrystal=false,crystalRecoveryTimer=null;
@@ -2774,53 +2774,59 @@ Game.collectRaid260=function(battle){if(raidBusy260||raidShowing260||!raidOwner2
 var raidAuto399=null;
 Game.raidResult399=function(battle,video){if(raidBusy260||raidShowing260)return;if(raidOwner260&&raidRows260.some(function(x){return x.battle===battle;})){if(video)Game.claimRaid260(battle);else Game.collectRaid260(battle);return;}raidAuto399={battle:battle,video:!!video};open('<h2>'+mt251('กำลังตรวจรางวัล','Checking rewards')+'</h2>');raidSend260('status');};
 var rows399=root.novaCloudEvent;root.novaCloudEvent=function(event,data){var auto=raidAuto399,isRaid=!!(data&&data.request_id&&data.request_id.indexOf('raid260-')===0);if(isRaid)raidAuto399=null;rows399(event,data);if(isRaid&&auto&&event==='war'&&data.data&&data.data.raid260&&!raidBusy260&&raidRows260.some(function(x){return x.battle===auto.battle;})){if(auto.video)Game.claimRaid260(auto.battle);else Game.collectRaid260(auto.battle);}};
-var camp399Busy=null,camp399Serial=0,camp399Showing=false,camp399Tries=0,camp399Timer=null,camp399Next=0;
+var camp399Busy=null,camp399Serial=0,camp399Showing=false,camp399Tries=0,camp399Timer=null,camp399Next=0,camp399VideoTimer=null,camp399Active=null,camp399Want=null;
+// Keep navigation usable while server verification or the ad SDK is pending.
+function camp399Wait(th,en){open('<h2>'+mt251(th,en)+'</h2><button class="wide" onclick="Game.home()">'+mt251('กลับฐาน','Home')+'</button>');}
+function camp399Restore(){if(screen==='raid'&&E.raid&&E.raid.result){if(typeof result277==='function')result277();else result();}}
+function camp399Stop(){clearTimeout(camp399VideoTimer);camp399Showing=false;camp399Active=null;camp399Restore();}
 function camp399Owner(){return E.d.onlineCrystal&&E.d.onlineCrystal.owner;}
 function camp399Send(mode,p){
  if(camp399Busy||warBusy||guest288||!root.NovaCloud||!root.NovaCloud.warRequest||!p||p.owner!==camp399Owner())return false;
  var id='camp399-'+(++camp399Serial);camp399Busy={id:id,mode:mode,p:p};clearTimeout(camp399Timer);
- camp399Timer=setTimeout(function(){if(camp399Busy&&camp399Busy.id===id){camp399Busy=null;camp399Showing=false;if(mode!=='win')toast(mt251('เชื่อมต่อไม่ได้ รางวัลยังบันทึกไว้ ลองใหม่','Connection timed out. Your reward is saved. Retry.'));}},25000);
+ camp399Timer=setTimeout(function(){if(camp399Busy&&camp399Busy.id===id){camp399Busy=null;camp399Showing=false;camp399Want=null;camp399Restore();if(mode!=='win')toast(mt251('เชื่อมต่อไม่ได้ รางวัลยังบันทึกไว้ ลองใหม่','Connection timed out. Your reward is saved. Retry.'));}},25000);
  camp399Next=Date.now()+15000;
- var payload={campaign399:mode,owner:p.owner,id:p.id,stage:p.stage,stars:p.stars};if(mode==='claim')payload.completed=!!p.completed;
+ var payload={campaign399:mode,owner:p.owner,id:p.id,stage:p.stage,stars:p.stars};if(mode==='claim')payload.completed=!!p.completed;if(p.nova403!==undefined)payload.nova403=p.nova403;
  try{root.NovaCloud.warRequest(mode==='prepare'?'test_status':'test_claim',JSON.stringify(payload),id);}catch(e){clearTimeout(camp399Timer);camp399Busy=null;return false;}
  return true;
 }
-function camp399Retry(){if(camp399Busy||warBusy||request362||searchQueued363||Date.now()<camp399Next||screen!=='home')return;var owner=camp399Owner(),a=E.d.campaignAd399;if(a&&a.owner===owner&&a.completed){camp399Send('claim',a);return;}var w=(E.d.campaignPending399||[]).find(function(v){return v.owner===owner;});if(w)camp399Send('win',w);}
+function camp399Retry(){if(camp399Busy||warBusy||request362||searchQueued363||Date.now()<camp399Next||(screen!=='home'&&!(screen==='raid'&&E.raid&&E.raid.result)))return;var owner=camp399Owner(),a=E.d.campaignAd399;if(a&&a.owner===owner&&a.completed){camp399Send('claim',a);return;}var w=(E.d.campaignPending399||[]).find(function(v){return v.owner===owner;});if(w)camp399Send('win',w);}
 function camp399Credit(r,owner){var total=Number(r&&r.credited);if(!Number.isSafeInteger(total)||total<0)return;var credits=E.d.campaignCredits362||{},old=credits[owner]||0;if(total>old){E.d.gems+=total-old;E.d.campaignCredits362=Object.assign({},credits);E.d.campaignCredits362[owner]=total;}}
 Game.campaignAd399=function(){
- var r=E.raid&&E.raid.result,w=r&&r.win399;if(!w||camp399Busy||camp399Showing||r.tripled399)return;
+ var r=E.raid&&E.raid.result,w=r&&r.win399;if(!w||r.tripled399)return;if(camp399Busy&&camp399Busy.mode==='win'&&camp399Busy.p.id===w.id){camp399Want=w.id;camp399Wait('กำลังรับรางวัล…','Collecting your reward…');return;}if(camp399Busy||camp399Showing){toast(mt251('กำลังตรวจรางวัล กรุณาลองอีกครั้ง','Checking rewards. Please retry.'));return;}
  if(w.owner!==camp399Owner()){toast(mt251('กรุณาใช้บัญชีเดิม','Use the same account'));return;}
- var a=E.d.campaignAd399;if(!a||a.id!==w.id){a=Object.assign({},w);E.d.campaignAd399=a;if(!E.save())return;}
- if(a.completed){camp399Send('claim',a);return;}
- open('<h2>'+mt251('กำลังเปิดวิดีโอ…','Opening video…')+'</h2>');
- if(!camp399Send('prepare',a)){close();toast(mt251('ยังเชื่อมต่อไม่ได้ ลองอีกครั้ง','Not connected yet. Try again.'));}
+ if((E.d.campaignPending399||[]).some(function(v){return v.id===w.id;})){camp399Want=w.id;camp399Wait('กำลังรับรางวัล…','Collecting your reward…');if(!camp399Send('win',w)){camp399Want=null;camp399Restore();}return;}
+ var a=E.d.campaignAd399;if(a&&a.id!==w.id&&a.completed){camp399Send('claim',a);toast(mt251('กำลังรับรางวัลก่อนหน้า ลองอีกครั้ง','Collecting previous reward. Retry.'));return;}if(!a||a.id!==w.id){a=Object.assign({},w);E.d.campaignAd399=a;if(!E.save())return;}
+ if(a.completed){camp399Wait('กำลังรับรางวัล…','Collecting your reward…');if(!camp399Send('claim',a))camp399Restore();return;}
+ camp399Wait('กำลังเปิดวิดีโอ…','Opening video…');
+ if(!camp399Send('prepare',a)){camp399Restore();toast(mt251('ยังเชื่อมต่อไม่ได้ ลองอีกครั้ง','Not connected yet. Try again.'));}
 };
-function camp399Show(a){var ads=root.NovaAds;camp399Showing=true;try{if(a.provider==='test'&&ads&&ads.rewardTest248)ads.rewardTest248(a.owner,a.id);else if(a.provider==='monetag'&&ads&&ads.provider==='monetag'&&ads.rewardVerified)ads.rewardVerified(a.owner,a.id);else if(a.provider==='admob'&&ads&&ads.provider!=='monetag'&&ads.rewardVerified)ads.rewardVerified(a.owner,a.id);else throw Error('unavailable');}catch(e){camp399Showing=false;close();toast(mt251('วิดีโอยังไม่พร้อม ลองอีกครั้ง','Video not ready. Try again.'));}}
-function camp399Earned(owner,id){var a=E.d.campaignAd399;if(!a||a.owner!==owner||a.id!==id)return false;a.completed=true;if(!E.save())return true;camp399Showing=false;camp399Tries=0;open('<h2>'+mt251('กำลังรับรางวัล…','Collecting your reward…')+'</h2>');camp399Send('claim',a);return true;}
-var testEarned399=root.novaTestRewardEarned248;root.novaTestRewardEarned248=function(owner,id){if(camp399Earned(owner,id)){if(root.NovaAds&&root.NovaAds.acknowledgeTest248)root.NovaAds.acknowledgeTest248(id);return;}if(testEarned399)testEarned399(owner,id);};
-var earned399=root.novaRewardEarned;root.novaRewardEarned=function(id){var a=E.d.campaignAd399;if(a&&a.provider!=='test'&&camp399Showing&&camp399Earned(a.owner,a.provider==='admob'?a.id:id)){if(root.NovaAds&&root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);return;}if(earned399)earned399(id);};
-var status399=root.novaRewardStatus;root.novaRewardStatus=function(status){if(camp399Showing){if(status==='ready'){var a=E.d.campaignAd399;if(a&&a.provider==='admob')camp399Show(a);return;}if(status==='loading'||status==='test_showing248'||status==='showing')return;camp399Showing=false;close();toast(mt251('ยังดูไม่ครบ ลองใหม่ได้','Video not finished. You can try again.'));return;}if(status399)status399(status);};
+function camp399Show(a){if(screen!=='raid'||!E.raid||!E.raid.result||!E.raid.result.win399||E.raid.result.win399.id!==a.id)return;var ads=root.NovaAds;camp399Showing=true;camp399Active=a.id;clearTimeout(camp399VideoTimer);camp399VideoTimer=setTimeout(function(){camp399Showing=false;camp399Restore();toast(mt251('วิดีโอยังไม่พร้อม กลับฐานหรือลองใหม่ได้','Video not ready. Return home or retry.'));},45000);try{if(a.provider==='test'&&ads&&ads.rewardTest248)ads.rewardTest248(a.owner,a.id);else if(a.provider==='monetag'&&ads&&ads.provider==='monetag'&&ads.rewardVerified)ads.rewardVerified(a.owner,a.id);else if(a.provider==='admob'&&ads&&ads.provider!=='monetag'&&ads.rewardVerified)ads.rewardVerified(a.owner,a.id);else throw Error('unavailable');}catch(e){clearTimeout(camp399VideoTimer);camp399Active=null;camp399Showing=false;camp399Restore();toast(mt251('วิดีโอยังไม่พร้อม ลองอีกครั้ง','Video not ready. Try again.'));}}
+function camp399Earned(owner,id){var a=E.d.campaignAd399;if(!a||a.owner!==owner||a.id!==id)return false;a.completed=true;if(!E.save()){a.completed=false;camp399Stop();return false;}clearTimeout(camp399VideoTimer);camp399Showing=false;camp399Active=null;camp399Tries=0;camp399Wait('กำลังรับรางวัล…','Collecting your reward…');if(!camp399Send('claim',a))camp399Restore();return true;}
+var testEarned399=root.novaTestRewardEarned248;root.novaTestRewardEarned248=function(owner,id){var a=E.d.campaignAd399;if(a&&a.owner===owner&&a.id===id){if(camp399Earned(owner,id)&&root.NovaAds&&root.NovaAds.acknowledgeTest248)root.NovaAds.acknowledgeTest248(id);return;}if(testEarned399)testEarned399(owner,id);};
+var earned399=root.novaRewardEarned;root.novaRewardEarned=function(id){var a=E.d.campaignAd399;if(a&&a.provider!=='test'&&camp399Active===a.id){if(camp399Earned(a.owner,a.provider==='admob'?a.id:id)&&root.NovaAds&&root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);return;}if(earned399)earned399(id);};
+var status399=root.novaRewardStatus;root.novaRewardStatus=function(status){if(camp399Showing||camp399Active){if(status==='ready'){var a=E.d.campaignAd399;if(a&&a.provider==='admob')camp399Show(a);return;}if(status==='loading')return;if(status==='test_showing248'||status==='showing'){clearTimeout(camp399VideoTimer);return;}camp399Stop();toast(mt251('ยังดูไม่ครบ ลองใหม่ได้','Video not finished. You can try again.'));return;}if(status399)status399(status);};
 var media399=mediaAllowed250;mediaAllowed250=function(){return !camp399Showing&&media399();};
 var cloud399=root.novaCloudEvent;root.novaCloudEvent=function(event,data){
  if(data&&data.request_id&&data.request_id.indexOf('camp399-')===0){
   if(!camp399Busy||camp399Busy.id!==data.request_id)return;var q=camp399Busy;camp399Busy=null;clearTimeout(camp399Timer);var owner=camp399Owner();if(q.p.owner!==owner)return;
-  if(event!=='war'||!data.data||!data.data.campaign399){camp399Showing=false;if(q.mode!=='win'){close();toast(data.message||mt251('รับรางวัลไม่สำเร็จ ลองใหม่','Could not collect. Retry.'));}return;}
+  if(event!=='war'||!data.data||!data.data.campaign399){camp399Showing=false;camp399Want=null;camp399Restore();if(q.mode!=='win'){toast(data.message||mt251('รับรางวัลไม่สำเร็จ ลองใหม่','Could not collect. Retry.'));}return;}
   var c=data.data.campaign399,before=JSON.stringify(E.d);if(c.id!==q.p.id)return;
   E.d.campaignPending399=(E.d.campaignPending399||[]).filter(function(v){return v.id!==c.id;});camp399Credit(c,owner);
-  var a=E.d.campaignAd399,result=null;
+  var current=E.raid&&E.raid.result;var a=E.d.campaignAd399,result=null;
   if(a&&a.id===c.id){
    if(c.provider)a.provider=c.provider;
    if(c.claimed){var extra={gold:0,power:0};if(!a.resources399){extra.gold=E.deposit('gold',2*(a.gold||0));extra.power=E.deposit('power',2*(a.power||0));a.resources399=true;}
-    result={gold:(a.gold||0)+extra.gold,power:(a.power||0)+extra.power,nova:(c.amount||2)+(c.bonus||0)};delete E.d.campaignAd399;
-    if(E.raid&&E.raid.result&&E.raid.result.win399&&E.raid.result.win399.id===c.id)E.raid.result.tripled399=true;}
+    result={gold:(a.gold||0)+extra.gold,power:(a.power||0)+extra.power,nova:(c.amount||0)+(c.bonus||0)};delete E.d.campaignAd399;
+    }
   }
-  if(!E.save()){E.d=JSON.parse(before);return;}hud();
+  if(!E.save()){E.d=JSON.parse(before);camp399Restore();return;}if(current&&current.win399&&current.win399.id===c.id){current.pending362=false;current.gems=(Number(c.amount)||0)+(Number(c.bonus)||0);if(c.claimed)current.tripled399=true;}hud();
   if(result){completionAudio250();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย! x3','Congratulations! x3')+'</h2><p>'+resourceIcon238('gold')+' '+mt251('ทอง','Gold')+' <b>'+result.gold.toLocaleString()+'</b></p><p>'+resourceIcon238('power')+' '+mt251('พลังงาน','Energy')+' <b>'+result.power.toLocaleString()+'</b></p><p><img src="assets/nova-core.webp" alt="" style="width:28px;height:28px;vertical-align:middle"> NOVA <b>'+result.nova+'</b></p><button class="wide green" onclick="Game.home()">'+mt251('กลับฐาน','Home')+'</button></section>');return;}
   if(q.mode==='prepare'&&a&&a.id===c.id){if(a.completed){camp399Send('claim',a);return;}camp399Show(a);return;}
+  if(q.mode==='win'){var wanted=camp399Want===c.id;camp399Want=null;if(wanted&&screen==='raid'&&current&&current.win399&&current.win399.id===c.id){Game.campaignAd399();return;}camp399Restore();}
   if(q.mode==='claim'&&a&&a.completed&&!c.claimed){if(camp399Tries++<12){camp399Timer=setTimeout(function(){camp399Send('claim',a);},5000);return;}toast(mt251('กำลังรอยืนยันรางวัล ระบบจะตรวจอีกครั้งอัตโนมัติ','Reward confirmation pending. It will be checked again automatically.'));}
   return;
  }
- if(event==='signed_in'||event==='signed_out'){camp399Busy=null;camp399Showing=false;clearTimeout(camp399Timer);}
+ if(event==='signed_in'||event==='signed_out'){camp399Busy=null;camp399Showing=false;camp399Active=null;camp399Want=null;clearTimeout(camp399VideoTimer);clearTimeout(camp399Timer);}
  cloud399(event,data);
 };
 var heartbeat399=liveHeartbeat;liveHeartbeat=function(){if(!document.hidden)camp399Retry();heartbeat399();};

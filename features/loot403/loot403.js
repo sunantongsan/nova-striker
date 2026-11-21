@@ -98,16 +98,7 @@ function wrapFinish403(e){if(!e||e.finish403)return;var finish403=e.finish;e.fin
  this.save();return res;
 };e.finish403=true;}
 wrapFinish403(E);
-// Bot win reports carry the expected NOVA so the server can only lower it (never raise).
-camp399Send=function(mode,p){
- if(camp399Busy||warBusy||guest288||!root.NovaCloud||!root.NovaCloud.warRequest||!p||p.owner!==camp399Owner())return false;
- var id='camp399-'+(++camp399Serial);camp399Busy={id:id,mode:mode,p:p};clearTimeout(camp399Timer);
- camp399Timer=setTimeout(function(){if(camp399Busy&&camp399Busy.id===id){camp399Busy=null;camp399Showing=false;if(mode!=='win')toast(mt251('เชื่อมต่อไม่ได้ รางวัลยังบันทึกไว้ ลองใหม่','Connection timed out. Your reward is saved. Retry.'));}},25000);
- camp399Next=Date.now()+15000;
- var payload={campaign399:mode,owner:p.owner,id:p.id,stage:p.stage,stars:p.stars};if(mode==='claim')payload.completed=!!p.completed;if(mode==='win'&&p.nova403!==undefined)payload.nova403=p.nova403;
- try{root.NovaCloud.warRequest(mode==='prepare'?'test_status':'test_claim',JSON.stringify(payload),id);}catch(e){clearTimeout(camp399Timer);camp399Busy=null;return false;}
- return true;
-};
+// Campaign reports use the shared sender, including nova403 and recovery handling.
 
 // ---------- loot panel while scouting / attacking ----------
 function lootInfo403(){

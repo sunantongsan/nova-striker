@@ -1,0 +1,10 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('features/perf437/perf437.js','utf8');
+let builds=0,blits=0;
+const ctx={drawImage(){blits++;}},g={setTransform(){}};
+const s={Math,ctx,buildingStructure265(){builds++;},renderScale226:()=>1,document:{createElement:()=>({getContext:()=>g})},crop437:(c,scale,w,h,ox,oy)=>({c,w,h,ox,oy})};
+vm.createContext(s);vm.runInContext(source.slice(source.indexOf('var struct437='),source.indexOf('// ---------- 437e')),s);
+for(let frame=0;frame<20;frame++)for(const [type,size] of [['hq',110],['goldmine',70],['power',90]])for(const front of [false,true])s.buildingStructure265({type,lv:5},{x:0,y:0},size,front);
+assert.equal(builds,6,'mixed building sizes reuse their cached sprites across frames');assert.equal(blits,120);
+s.renderScale226=()=>2;s.buildingStructure265({type:'hq',lv:5},{x:0,y:0},110,true);assert.equal(builds,7,'render scale changes invalidate old-resolution sprites');
+console.log('PASS performance440: mixed building sizes reuse cache; display scale invalidates it');

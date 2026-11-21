@@ -179,7 +179,7 @@ if(root.Game&&typeof root.Game.zoom==='function')root.Game.zoom=function(v){zoom
 // ---------- 60 FPS battle pacing ----------
 // Before: battles started at 30 FPS and only reached 60 when a frame cost under 9 ms. Now they run at 60
 // while frames cost under 11 ms and fall back to 30 only when the phone really can't keep up (>15 ms).
-if(typeof frameCost420==='function'){frameGap420=15;frameCost420=function(ms){frameAvg420=frameAvg420*.92+ms*.08;if(screen==='home')return;frameGap420=frameAvg420<11?15:frameAvg420>15?32:frameGap420;};}
+if(typeof frameCost420==='function'){frameGap420=15;frameCost420=function(ms){frameAvg420=frameAvg420*.92+ms*.08;frameGap420=frameAvg420<11?15:frameAvg420>15?32:frameGap420;};}
 
 // ---------- per-frame driver (runs inside the game loop, before draw) ----------
 var lastStep438=0;
