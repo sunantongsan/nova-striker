@@ -1,4 +1,15 @@
-# AdMob setup — 17 October 2026
+# NOVA WAR AdMob status
+
+## Checked 22 November 2026 (Thailand)
+
+- AdMob still shows account verification in progress. The payment profile is complete. The identity verification page describes the earnings threshold without requesting documents. Policy Center reports no current issues.
+- Google Play is already linked to `com.sunantongsan.novastriker`. NOVA is Getting ready with limited ad serving and three active units.
+- Rewarded unit `9387691342` passed the AdMob dashboard verification using `nova-setup-probe` for both test parameters. The callback was saved and confirmed on reopening the unit: `https://uzinxxeadejmzxqmqqtx.supabase.co/functions/v1/nova-admob-ssv`. This probe grants no reward.
+- The production row in `nova_private.admob_settings230` already had `enabled = true` when checked. No database update was made. The migration below records the initial value only.
+- Google Play lists `https://cockro-network.vercel.app` as the developer website. Its root app-ads.txt serves the AdMob publisher record. AdMob's app-ads.txt report did not yet show requests with app-ads.txt. The Vercel build now also copies the publisher record to the root of the patch host.
+- Native 1.9.43 uses production rewarded, banner and interstitial IDs in release. UMP permission is checked before requesting ads. The database flag routes eligible server rewards independently of the native banner and interstitial unit selection. A real impression and end-to-end player reward are still unverified.
+
+## Historical setup — 17 October 2026
 
 Account resubmission accepted; dashboard reports verification in progress. Payment profile shown complete. This is not an approval.
 

@@ -1,7 +1,7 @@
 {
   "framework": null,
   "installCommand": "npm ci --ignore-scripts --no-audit --no-fund",
-  "buildCommand": "npm test && node scripts/patch.cjs && node scripts/telegram.cjs",
+  "buildCommand": "npm test && node scripts/patch.cjs && node scripts/telegram.cjs && cp app-ads.txt patch-dist/app-ads.txt",
   "outputDirectory": "patch-dist",
   "headers": [
     {
