@@ -5,7 +5,7 @@ function boot(data={},platform='android'){
  const ctx=new Proxy({measureText:t=>({width:String(t).length*8}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(o,k)=>o[k]||(()=>{})});
  const el=id=>elements[id]||(elements[id]={hidden:true,value:'',style:{},innerHTML:'',textContent:'',addEventListener(){},getContext:()=>ctx,getBoundingClientRect:()=>({width:420,height:800}),querySelectorAll:()=>[]});
  const storage={getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]};
- const s={console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
+ const s={navigator:{languages:['en-US'],language:'en-US'},console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:()=>1,clearTimeout(){},Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
  if(platform==='telegram'){s.Telegram={WebApp:{}};s.window=s;}
  vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v};})(typeof globalThis!=='),s);
  return {s,el,data,errors,requests,reloads:()=>reloads,frame:n=>frame(n)};
@@ -25,8 +25,12 @@ for(const platform of ['android','telegram']){
 }
 // Every legacy Thai phrase and backend/native status is covered, without translating user content.
 const seen=new Set();for(const [thai,en]of Object.entries(catalog)){assert(en.trim());assert(!/[\u0e00-\u0e7f]/.test(en));seen.add(thai);}
-const runtime=source.slice(0,source.indexOf('/* locale232:end */'));const sandbox={};vm.runInNewContext(runtime,sandbox);for(const [thai,en] of Object.entries(catalog))assert.equal(sandbox.NovaI18n.translate(thai),en);
+const runtime=source.slice(0,source.indexOf('/* locale232:end */'));const sandbox={navigator:{languages:['en-US'],language:'en-US'}};vm.runInNewContext(runtime,sandbox);for(const [thai,en] of Object.entries(catalog))assert.equal(sandbox.NovaI18n.translate(thai),en);
 assert.equal(sandbox.NovaI18n.translate('ต้องรอ 15 นาทีก่อนบุกคนเดิม'),'Please wait 15 minutes before raiding the same player');
+for(const [locales,zone,saved,expected] of [[['th-TH'],'UTC',null,'th'],[['en-US'],'Asia/Bangkok',null,'en'],[[],'Asia/Bangkok',null,'th'],[[],'UTC',null,'en'],[['th-TH'],'Asia/Bangkok','en','en']]){
+ const env={navigator:{languages:locales,language:locales[0]||''},Intl:{DateTimeFormat:()=>({resolvedOptions:()=>({timeZone:zone})})},localStorage:{getItem:()=>saved}};
+ vm.runInNewContext(runtime,env);assert.equal(env.NovaI18n.language,expected,'locale / timezone / saved preference');
+}
 // Real DOM text and accessibility attributes use the same preference.
 const nodes=[{nodeValue:'ตั้งค่า',parentNode:{tagName:'BUTTON'}},{nodeValue:'ตั้งค่า',parentNode:{tagName:'SCRIPT'}},{nodeValue:'ไทย',parentNode:{tagName:'BUTTON',lang:'th'}}],attrs={'aria-label':'ชื่อฐาน'},attrElement={hasAttribute:k=>k in attrs,getAttribute:k=>attrs[k],setAttribute:(k,v)=>attrs[k]=v},doc={documentElement:{lang:'th'},body:{},createTreeWalker:()=>{let i=0;return{nextNode:()=>nodes[i++]};},querySelectorAll:()=>[attrElement]};sandbox.NovaI18n.localize(doc);assert.equal(nodes[0].nodeValue,'Settings');assert.equal(nodes[1].nodeValue,'ตั้งค่า');assert.equal(nodes[2].nodeValue,'ไทย','language autonym stays Thai');assert.equal(attrs['aria-label'],'Base name');assert.equal(doc.documentElement.lang,'en');sandbox.NovaI18n.setLanguage('th');sandbox.NovaI18n.localize(doc);assert.equal(nodes[0].nodeValue,'ตั้งค่า');assert.equal(attrs['aria-label'],'ชื่อฐาน');
 const generated=fs.readFileSync('game.js','utf8');require('../scripts/localization.cjs').build();assert.equal(fs.readFileSync('game.js','utf8'),generated,'embedded translations match catalog');
