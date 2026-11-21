@@ -1,0 +1,8 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('ui/admin293.js','utf8');
+let signed=true, sent=[], buttons=[],status,back=0;
+const c={G:{cloud(){back++;}},account:()=>signed,panel:()=>({isConnected:true}),tr:(th,en)=>en,el:(tag,text)=>{const n={textContent:text,setAttribute(){}};if(text==='')status=n;return n;},button:(box,text,onclick)=>{const b={text,onclick};buttons.push(b);return b;},request:(mode,p,cb)=>sent.push({mode,p,cb}),close(){}};
+vm.createContext(c);vm.runInContext(source.slice(source.indexOf('G.accountDelete439='),source.indexOf('function dashboard()')),c);
+c.G.accountDelete439();assert.equal(sent.length,0,'opening confirmation never sends deletion request');buttons[1].onclick();assert.equal(sent.length,0,'cancel never sends');buttons[0].onclick();assert.equal(sent.length,1);assert.equal(sent[0].mode,'feedback');assert.match(sent[0].p.body,/ACCOUNT_DELETION_REQUEST/);assert.equal(buttons[0].disabled,true);sent[0].cb(Error('offline'));assert.equal(buttons[0].disabled,false);assert.equal(status.textContent,'offline');buttons[0].onclick();sent[1].cb(null);assert.equal(buttons[0].disabled,true);assert.match(status.textContent,/remains active/);signed=false;c.G.accountDelete439();assert.equal(back,1);assert.equal(sent.length,2);
+for(const file of ['index.html','web/index.html']){const html=fs.readFileSync(file,'utf8');assert(html.includes(source));assert(!html.includes('sunan.tongsan@gmail.com'));}
+console.log('PASS account439: confirmation, cancellation, authenticated request, failure/retry, honest pending status, inline source parity and admin email removal');
