@@ -4,6 +4,7 @@
 :root{--ink391:#2f4060;--cream391:#fff8e8;--cream2391:#f7ecd2;--line391:#e2cfa4;--sky1391:#8fd6ff;--sky2391:#4aa3ea;--g1391:#a4ea62;--g2391:#56b82e;--gd391:#2f7a1c;--r1391:#ff8a76;--r2391:#e4432f;--rd391:#8c2617;--gold391:#ffcf4a;--title391:0 2px 0 var(--ink391),1.5px 0 0 var(--ink391),-1.5px 0 0 var(--ink391),0 -1.5px 0 var(--ink391),1px 1px 0 var(--ink391),-1px 1px 0 var(--ink391)}
 
 /* Backdrop and frame */
+#modal#modal[data-speed-ad]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 #modal#modal[data-nova360]{background:radial-gradient(ellipse at center,#24476b55,#0f243c88)!important;backdrop-filter:blur(1.5px)}
 #modal#modal[data-nova360] .sheet.novaWindow360.novaWindow360{width:min(94vw,920px)!important;max-width:94vw!important;max-height:calc(100dvh - 14px)!important;min-height:min(78dvh,520px)!important;border:3px solid var(--ink391)!important;border-radius:20px!important;background:var(--cream391)!important;color:var(--ink391)!important;box-shadow:0 5px 0 #1f2c45,0 16px 34px #0b1a2e70,inset 0 0 0 3px #fff!important;font:600 13px/1.45 "Trebuchet MS",Tahoma,"Noto Sans Thai",sans-serif!important;animation:pop391 .18s ease-out}
 @keyframes pop391{from{transform:scale(.94)!important;opacity:.4}to{transform:none;opacity:1}}

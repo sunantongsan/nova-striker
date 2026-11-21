@@ -32,3 +32,31 @@ const native=boot({novaRTSIntro:'1'}),ne=native.s.test232.e;ne.d.onlineCrystal={
 native.s.NovaAds={rewardVerified(){shown++;},acknowledgeReward(id){ack=id;}};native.s.Game.speedAd264('building','1');req=native.requests.at(-1);lp=ne.d.pendingSpeed264;native.s.novaCloudEvent('war',{request_id:req.id,data:{owner,speed264:true,receipt:{id:lp.request_id,target:lp.target,provider:'admob',claimed:false,seconds:500,expires_at:new Date(Date.now()+1800000).toISOString()}}});assert.equal(shown,1);native.s.novaRewardStatus('ready');assert.equal(shown,2);native.s.novaRewardEarned('delivery-id');assert.equal(ack,'delivery-id');assert.equal(native.requests.at(-1).p.request_id,lp.request_id);assert(ne.d.buildings[0].until>Date.now()+500000);
 console.log('PASS speed264 recovery and native load/show/delivery verification');
 
+// An unavailable video releases the job. Retrying reuses the same receipt.
+const failed=boot({novaRTSIntro:'1',novaLanguage:'th'}), fe=failed.s.test232.e, fg=failed.s.Game;
+fe.d.onlineCrystal={owner};
+const job=fe.d.buildings[0];
+job.started=Date.now();job.until=Date.now()+800000;
+const originalEnd=job.until, originalGems=fe.d.gems;
+let openings=0;
+failed.s.NovaAds={rewardVerified(){openings++;}};
+function prepareFailedCase(){
+ const req=failed.requests.at(-1),p=req.p;
+ failed.s.novaCloudEvent('war',{request_id:req.id,data:{owner,speed264:true,receipt:{
+  id:p.request_id,target:p.target,provider:'admob',claimed:false,seconds:500,expires_at:new Date(Date.now()+1800000).toISOString()
+ }}});
+}
+fg.speedAd264('building',String(job.id));
+const receipt=failed.requests.at(-1).p.request_id;
+prepareFailedCase();failed.s.novaRewardStatus('unavailable');
+assert.match(failed.el('modal').innerHTML,/โหลดหรือเปิดวิดีโอไม่ได้/);
+assert.equal(fe.d.pendingSpeed264,undefined);
+fg.retrySpeed264();assert.equal(failed.requests.at(-1).p.request_id,receipt);prepareFailedCase();
+failed.s.novaRewardStatus('loading');fg.dismissWindow243();const beforeReady=openings;
+failed.s.novaRewardStatus('ready');assert.equal(openings,beforeReady);assert.equal(failed.el('modal').style.display,'none');
+fg.speedAd264('building',String(job.id));fg.dismissWindow243();prepareFailedCase();assert.equal(openings,beforeReady);
+fg.speedAd264('building',String(job.id));prepareFailedCase();failed.s.novaRewardStatus('loading');
+const watchdog=[...failed.timers.values()].findLast(t=>t.ms===30000);assert(watchdog);watchdog.f();
+assert.match(failed.el('modal').innerHTML,/โหลดวิดีโอไม่ทัน/);assert.equal(fe.d.pendingSpeed264,undefined);
+assert.equal(job.until,originalEnd);assert.equal(fe.d.gems,originalGems);
+console.log('PASS speed ad failure, close during prepare and load, late ready, timeout and no free reward');

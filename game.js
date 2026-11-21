@@ -736,7 +736,7 @@ function draw(){fitCanvas();var map=screen==='raid'?(E.raid.mapSize||12):screen=
 var bs=def?def.buildings:raid?raid.buildings:E.d.buildings.map(previewBuilding224),objects=bs.map(function(b){return{depth:b.x+b.y,b:b};});if(raid)raid.troops.forEach(function(t){if(t.hp>0||t.dead)objects.push({depth:t.x+t.y,t:t});});if(def)(def.defenders||[]).forEach(function(t){if(t.hp>0||t.dead)objects.push({depth:t.x+t.y,t:t});});wallIndex219=new Map();bs.forEach(function(b){if(b.type==='wall'&&(b.hp===undefined||b.hp>0))wallIndex219.set(b.x+','+b.y,b);});if(screen==='home'){updateRobots251();robots251.forEach(function(r){objects.push({depth:r.x+r.y+((r.height256||0)>12?50:0),miner251:r});});}objects.sort(function(a,b){return a.depth-b.depth;});objects.forEach(function(o){if(o.miner251)drawMiner251(o.miner251);else if(o.b)drawBuilding(o.b,!!raid&&!raid.player);else drawFighter(o.t,false);});if(def){def.enemies.forEach(function(e){drawFighter(e,true);});def.fx.forEach(drawFX);}if(raid){raid.guards.forEach(function(e){drawFighter(e,!raid.player||e.kind===undefined);});raid.fx.forEach(drawFX);}if(screen==='home'){bs.forEach(drawResourceLabel);drawHomeBuilders228();}}
 function drawFX(f){var a=point(f.x,f.y),b=point(f.tx,f.ty),v=1-f.life/(f.maxLife||.48),w=f.weapon||'plasma';if(f.muzzle){a.x+=f.muzzle.x*zoom;a.y+=f.muzzle.y*zoom;}else a.y-=15*zoom;b.y-=15*zoom;ctx.save();ctx.strokeStyle=f.color;ctx.fillStyle=f.color;ctx.lineWidth=2*zoom;if(w==='impact'){var radius=(f.radius||15)*zoom;ctx.globalAlpha=1-v;ctx.beginPath();ctx.arc(b.x,b.y+10,radius*v,0,Math.PI*2);ctx.stroke();for(var k=0;k<6;k++){var angle=k*1.047;box(b.x+Math.cos(angle)*radius*v,b.y+10+Math.sin(angle)*radius*v*.6-10*Math.sin(v*Math.PI),3*zoom,3*zoom,f.color);}}else if(w==='tesla'||w==='shock'){ctx.beginPath();ctx.moveTo(a.x,a.y);for(var k=1;k<=7;k++)ctx.lineTo(a.x+(b.x-a.x)*k/7+(k<7?Math.sin(k*12+frame)*7:0),a.y+(b.y-a.y)*k/7);ctx.stroke();}else if(w==='heal'||w==='sniper'){ctx.globalAlpha=1-v;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();if(w==='heal'){box(b.x-5,b.y-1,10,2,f.color);box(b.x-1,b.y-5,2,10,f.color);}}else{var t=Math.min(1,v*1.5),x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;if(w==='grenade'||w==='bomb')y-=Math.sin(t*Math.PI)*28*zoom;if(w==='machine'){for(var k=0;k<3;k++){var z=Math.max(0,t-k*.13);ctx.beginPath();ctx.moveTo(a.x+(b.x-a.x)*z,a.y+(b.y-a.y)*z);ctx.lineTo(a.x+(b.x-a.x)*Math.max(0,z-.08),a.y+(b.y-a.y)*Math.max(0,z-.08));ctx.stroke();}}else{if(w==='missile'){ctx.globalAlpha=.4;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(x,y);ctx.stroke();ctx.globalAlpha=1;}disk(x,y,(w==='plasma'?5:3)*zoom,f.color);}if(t===1){ctx.globalAlpha=1-v;var radius=(w==='bomb'||w==='grenade'||w==='cannon'?18:7)*(v-.6)*3*zoom;ctx.beginPath();ctx.arc(b.x,b.y,Math.max(1,radius),0,Math.PI*2);ctx.stroke();}}ctx.restore();}
 
-function open(html){if(modal.removeAttribute)modal.removeAttribute('data-compact302');if(modal.setAttribute)modal.setAttribute('data-army301',html.indexOf('class="army278"')>=0?'true':'false');modal.innerHTML='<div class="sheet">'+html+'</div>';modal.style.display='flex';windowNav243();}function close(){modal.style.display='none';drawNeeded=true;}function act(code){return code;}function cardSprite(i){if(i===19||i===20)return '<img class="icon" style="object-fit:contain;background:none" src="assets/'+(i===19?'attack-helicopter-221.webp':'heavy-bomber-221.webp')+'" alt="">';if(i>=23)return '<img class="icon" style="object-fit:contain;background:none" src="assets/'+['crystalplant','crystalstore','goldstore','powerstore','garrison','missileturret','cannonturret','shield'][i-23]+'.webp" alt="">';if(i>=16)return'<span class="icon extra" style="background-position:'+((i-16)%3*50)+'% '+(Math.floor((i-16)/3)*50)+'%"></span>';return'<span class="icon" style="background-position:'+(i%4*100/3)+'% '+(Math.floor(i/4)*100/3)+'%"></span>';}
+function open(html){if(modal.removeAttribute)modal.removeAttribute('data-speed-ad');if(modal.removeAttribute)modal.removeAttribute('data-compact302');if(modal.setAttribute)modal.setAttribute('data-army301',html.indexOf('class="army278"')>=0?'true':'false');modal.innerHTML='<div class="sheet">'+html+'</div>';modal.style.display='flex';windowNav243();}function close(){if(speedWaitPhase264==='prepare'||speedWaitPhase264==='loading'||speedWaitPhase264==='error')cancelSpeedWait264();modal.style.display='none';drawNeeded=true;}function act(code){return code;}function cardSprite(i){if(i===19||i===20)return '<img class="icon" style="object-fit:contain;background:none" src="assets/'+(i===19?'attack-helicopter-221.webp':'heavy-bomber-221.webp')+'" alt="">';if(i>=23)return '<img class="icon" style="object-fit:contain;background:none" src="assets/'+['crystalplant','crystalstore','goldstore','powerstore','garrison','missileturret','cannonturret','shield'][i-23]+'.webp" alt="">';if(i>=16)return'<span class="icon extra" style="background-position:'+((i-16)%3*50)+'% '+(Math.floor((i-16)/3)*50)+'%"></span>';return'<span class="icon" style="background-position:'+(i%4*100/3)+'% '+(Math.floor(i/4)*100/3)+'%"></span>';}
 function hud(){var d=E.d;$('gold').textContent=Math.floor(d.gold)+' / '+E.resourceCapacity();$('energy').textContent=Math.floor(d.power)+' / '+E.resourceCapacity('power');$('gems').textContent=d.gems.toLocaleString();$('army').textContent=E.housing()+'/'+E.capacity();$('mode').textContent=screen==='home'?tr('ฐาน NOVA • Lv.')+E.hq():screen==='defense'?tr('ป้องกันฐาน • ระลอก ')+E.defense.wave:(E.raid.player?tr('ทดสอบบุก • ')+E.raid.name:tr('บุกฐานจำลอง • ด่าน ')+E.raid.stage);$('homebar').style.display=screen==='home'?'flex':'none';$('raidbar').style.display=screen!=='home'?'block':'none';$('raidhint').textContent=screen==='defense'?tr('ป้อมป้องกันฐานอัตโนมัติ'):tr('เลือกทหาร → แตะพื้นที่ว่าง');if(screen==='defense'){$('clock').textContent=duration(E.defense.time);setHTML219($('deploy'),'');$('instruction').textContent=tr('ป้อมโจมตีอัตโนมัติ • รักษาศูนย์บัญชาการให้รอด');}else if(screen==='raid'){var r=E.raid;$('clock').textContent=r.liveMode?Math.ceil(r.time)+tr(' วินาที'):mt251('ไม่จำกัดเวลา','No time limit');if(r.liveMode!=='preview'&&r.liveMode!=='defender'&&!(liveRoom&&liveRoom.withdrawn))setHTML219($('deploy'),U.map(function(u,i){return'<button class="troop '+(i===deployKind?'active':'')+'" onclick="Game.unit('+i+')">'+cardSprite(u.sprite)+'<b>'+(r.army||d.army)[i]+'</b><small>'+u.name+'</small></button>';}).join(''));$('instruction').textContent=r.phase==='scout'?tr('แตะพื้นที่ว่างเพื่อปล่อยทหาร เริ่มรบเมื่อปล่อยตัวแรก'):tr('ทหารหาเป้าหมายอัตโนมัติ • ปล่อยกำลังเสริมที่ขอบสีฟ้า');}else{$('instruction').textContent=placing?tr('แตะช่องสีเขียวเพื่อวาง ')+B[placing].name:moving?tr('ลากอาคาร • ✓ วาง / ✕ ยกเลิก'):mt251('แตะอาคารเพื่อจัดการ • ลากพื้นที่เพื่อเลื่อน','Tap a building to manage • Drag to pan');}var b=E.d.buildings.find(function(b){return b.id===selected;});$('selection').style.display=screen==='home'&&b&&!placing&&!moving?'block':'none';if(b){var c=E.upgradeCost(b);$('selection').innerHTML='<div class="selection-heading">'+(b.type==='wall'?'<span style="font-size:24px">▰</span>':cardSprite(B[b.type].sprite))+'<b>'+B[b.type].name+' <small>Lv.'+b.lv+'</small></b></div><div><button onclick="Game.upgrade()" '+(b.until||b.lv>=MAX_BUILDING_LEVEL?'disabled':'')+'>'+(b.until?(b.constructing?tr('กำลังสร้าง '):tr('อัปเกรด '))+duration((b.until-E.now())/1000):b.lv>=MAX_BUILDING_LEVEL?tr('ระดับสูงสุด'):tr('อัปเกรด')+' ('+(false?resourceIcon238('crystals')+' '+(200*b.lv*b.lv):resourceIcon238('gold')+' '+c.gold+' / '+resourceIcon238('power')+' '+c.power+(c.crystals?' / '+resourceIcon238('crystals')+' '+c.crystals:''))+')')+'</button>'+(b.until?tr('<button class="gem" onclick="Game.speedConfirm()">💎 เร่ง ')+E.speedCost(b.id)+'</button>':'')+'</div>'+(b.type==='tech'?tr('<small>ปลดล็อกหน่วยใหม่ทุกระดับ 1–5</small>'):b.type==='storage'?tr('<small>เพิ่มความจุทองและพลังงานอย่างละ ')+20000*b.lv+'</small>':'');$('selection').innerHTML+=defenseInfo223(b);if(b.type==='mercenary')$('selection').innerHTML+=tr('<button class="wide" onclick="Game.mercenaries()">ทหารรับจ้างต่างดาว</button>');if(b.type==='garrison')$('selection').innerHTML+=tr('<button class="wide" onclick="Game.garrison()">จัดกองกำลังป้องกัน ')+spaces(E.d.garrison)+' / '+E.garrisonCapacity()+'</button>';if(b.type==='wall')$('selection').innerHTML+=tr('<button class="wide" onclick="Game.wallMenu()">อัปเกรดชิ้น / แถว / แนวที่เชื่อมกัน</button>');}drawNeeded=true;}
 function homeMap391(){return Math.max(sceneSize391(E.d.buildings),(E.d.grid391===GRID_PAID391?GRID_PAID391:GRID_FREE391)+2);}
 function home(){screen='home';E.raid=null;E.defense=null;paused=false;placing=null;moving=null;selected=null;zoom=.85;panX=0;panY=-110;E.sync();close();hud();}
@@ -1548,7 +1548,7 @@ root.novaAdDone=function(){var p=nativeScout246;nativeScout246=null;if(p)finishS
 Game.requestRetreat243=function(){if(!E.raid||E.raid.liveMode!=='attacker'||(liveRoom&&(liveRoom.finished||liveRoom.withdrawn)))return;open('<h2>'+tr('ถอนกำลังหรือไม่?')+'</h2><p>'+mt251('ถอนกำลังคือยอมแพ้ กลับฐานทันทีหลังยืนยันผล และรับรางวัลตามเปอร์เซ็นต์ที่ทำลายได้','Surrender and return home after confirmation. Rewards follow destruction at withdrawal.')+'</p><button class="wide" onclick="Game.confirmRetreat243()">'+tr('ยืนยันถอนกำลัง')+'</button><button class="wide green" onclick="Game.close()">'+tr('สู้ต่อ')+'</button>');};
 Game.confirmRetreat243=function(){if(warBusy){toast(tr('กำลังส่งคำสั่ง กรุณาลองอีกครั้ง'));return;}Game.retreat();close();};
 var hud243=hud;hud=function(){hud243();var button=$('retreat243'),back=$('battleBack243');if(button)button.hidden=!(screen==='raid'&&E.raid&&E.raid.liveMode==='attacker'&&!(liveRoom&&(liveRoom.finished||liveRoom.withdrawn)));if(back)back.hidden=!(screen==='raid'&&E.raid&&E.raid.liveMode==='preview');};
-Game.dismissWindow243=function(){if(scoutAd243){Game.cancelScout243();return;}if(E.raid&&E.raid.phase==='result'){Game.home();return;}if(paused){Game.resume();return;}close();};
+Game.dismissWindow243=function(){if(speedWaitPhase264==='native')cancelSpeedWait264();if(scoutAd243){Game.cancelScout243();return;}if(E.raid&&E.raid.phase==='result'){Game.home();return;}if(paused){Game.resume();return;}close();};
 function windowNav243(){if(modal.innerHTML.indexOf('reward-success263')>=0)return;if(!modal.querySelector)return;var sheet=modal.querySelector('.sheet');if(!sheet||!document.createElement||sheet.querySelector&&sheet.querySelector('.window-nav243'))return;var bar=document.createElement('div');bar.className='window-nav243';Array.prototype.slice.call(sheet.querySelectorAll('button')).forEach(function(button){if(/^(กลับ|ย้อนกลับ|Back\b|Return\b)/.test(button.textContent.trim())){button.classList.remove('wide');bar.appendChild(button);}});var x=document.createElement('button');x.className='window-close243';x.textContent='×';x.setAttribute('aria-label',tr('ปิดหน้าต่าง'));x.setAttribute('onclick','Game.dismissWindow243()');bar.appendChild(x);sheet.insertBefore(bar,sheet.firstChild);}
 
 var stats245=Engine.prototype.enhanceStats;Engine.prototype.enhanceStats=function(key,lv){var s=stats245.call(this,key,lv);if(!s)return s;var p=pathCounts245((this.d.enhancement_paths245||{})[key]);s.paths=p;s.hp=s.baseHP*plusFactor(Math.max(0,s.level-p.attack-p.production));s.damage=s.baseDamage*plusFactor(Math.max(0,s.level-p.armor-p.production));s.productionBonus=p.production*10;return s;};
@@ -1953,6 +1953,25 @@ liveHeartbeat=function(){
 };
 // One video = 50 NOVA = 500 seconds. Local timers are bound to the selected job snapshot.
 var speedBusy264=null,speedSerial264=0,speedTimer264=null,speedShowing264=false,speedAttempts264=0;
+var speedWaitPhase264='',speedLoadTimer264=null,speedRetry264=null;
+function clearSpeedWait264(){
+ clearTimeout(speedLoadTimer264);speedLoadTimer264=null;speedWaitPhase264='';speedShowing264=false;
+}
+function releaseUnwatched264(){
+ var p=E.d.pendingSpeed264;
+ if(!p||p.completed)return;
+ speedRetry264=p;delete E.d.pendingSpeed264;
+ if(!E.save())E.d.pendingSpeed264=p;
+}
+function cancelSpeedWait264(){
+ if(speedBusy264&&speedBusy264.mode==='prepare'){
+  clearTimeout(speedTimer264);speedTimer264=null;speedBusy264=null;
+ }
+ clearSpeedWait264();releaseUnwatched264();
+}
+function openSpeed264(html){
+ open(html);if(modal.setAttribute)modal.setAttribute('data-speed-ad','true');
+}
 function speedButton264(kind,id){return '<button class="wide" onclick="Game.speedAd264(\''+kind+'\',\''+escapeHTML(String(id||''))+'\')">▶ '+mt251('ดูโฆษณาเร่งเวลา','Watch ad to speed up')+'</button>';}
 Game.speedConfirm=function(){
  E.sync();var b=E.d.buildings.find(function(b){return b.id===selected;});if(!b||!b.until)return;
@@ -1973,23 +1992,47 @@ Game.speedAd264=function(kind,id){
  var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner;if(!owner){resourceAccount233();return;}
  var p=E.d.pendingSpeed264;
  if(p&&p.owner!==owner){toast(tr('ใช้บัญชีเดิมเพื่อตรวจรายการ'));return;}
- if(!p){var target=speedSnapshot264(kind,id);if(!target){toast(tr('งานนี้เสร็จแล้ว'));return;}p={owner:owner,request_id:nonce160(),target:target};E.d.pendingSpeed264=p;if(!E.save()){delete E.d.pendingSpeed264;return;}}
+ if(!p){var target=speedSnapshot264(kind,id);if(!target){toast(tr('งานนี้เสร็จแล้ว'));return;}p={owner:owner,request_id:nonce160(),target:target};E.d.pendingSpeed264=p;}
  speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');
 };
-Game.retrySpeed264=function(){var p=E.d.pendingSpeed264;if(p){speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');}};
-function speedError264(message){speedShowing264=false;open('<h2>'+mt251('เร่งเวลาด้วย ADS','Speed up with ADS')+'</h2><p>'+escapeHTML(message||mt251('รางวัลยังถูกเก็บไว้ ลองอีกครั้ง','Your reward is saved. Retry.'))+'</p><button class="wide green" onclick="Game.retrySpeed264()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');}
+Game.retrySpeed264=function(){
+ if(speedShowing264||speedBusy264)return;
+ var p=E.d.pendingSpeed264||speedRetry264;
+ if(!p||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;
+ if(!E.d.pendingSpeed264)E.d.pendingSpeed264=p;
+ speedAttempts264=0;speedSend264(p.completed?'claim':'prepare');
+};
+function speedError264(message){clearSpeedWait264();speedWaitPhase264='error';openSpeed264('<h2>'+mt251('เร่งเวลาด้วย ADS','Speed up with ADS')+'</h2><p>'+escapeHTML(message||mt251('รางวัลยังถูกเก็บไว้ ลองอีกครั้ง','Your reward is saved. Retry.'))+'</p><button class="wide green" onclick="Game.retrySpeed264()">'+mt251('ลองอีกครั้ง','Retry')+'</button>');}
 function speedSend264(mode){
  var p=E.d.pendingSpeed264;if(!p||speedBusy264||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return;
- if(!root.NovaCloud||!root.NovaCloud.warRequest){speedError264(mt251('เชื่อมต่อไม่ได้','Could not connect'));return;}
- var id='speed264-'+(++speedSerial264);speedBusy264={id:id,mode:mode};clearTimeout(speedTimer264);speedTimer264=setTimeout(function(){speedBusy264=null;speedError264(mt251('เชื่อมต่อไม่ได้ รางวัลยังถูกเก็บไว้','Connection timed out. Your reward is saved.'));},25000);
- open('<h2>'+mt251(mode==='claim'?'กำลังเร่งเวลา…':'กำลังเตรียมโฆษณา…',mode==='claim'?'Applying speed-up…':'Preparing video…')+'</h2>');
- try{root.NovaCloud.warRequest(mode==='claim'?'test_claim':'test_status',JSON.stringify(Object.assign({},p,{speed264:mode})),id);}catch(e){clearTimeout(speedTimer264);speedBusy264=null;speedError264();}
+ if(!root.NovaCloud||!root.NovaCloud.warRequest){if(mode==='prepare')releaseUnwatched264();speedError264(mt251('เชื่อมต่อไม่ได้','Could not connect'));return;}
+ speedRetry264=null;var id='speed264-'+(++speedSerial264);speedBusy264={id:id,mode:mode};clearTimeout(speedTimer264);speedTimer264=setTimeout(function(){speedBusy264=null;if(mode==='prepare')releaseUnwatched264();speedError264(mt251('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ ลองอีกครั้ง','Server connection timed out. Try again.'));},25000);
+ speedWaitPhase264=mode;openSpeed264('<h2>'+mt251(mode==='claim'?'กำลังเร่งเวลา…':'กำลังเตรียมโฆษณา…',mode==='claim'?'Applying speed-up…':'Preparing video…')+'</h2>');
+ try{root.NovaCloud.warRequest(mode==='claim'?'test_claim':'test_status',JSON.stringify(Object.assign({},p,{speed264:mode})),id);}catch(e){clearTimeout(speedTimer264);speedBusy264=null;if(mode==='prepare')releaseUnwatched264();speedError264(mt251('เชื่อมต่อไม่ได้','Could not connect'));}
 }
-function speedAdShow264(p){var a=root.NovaAds;speedShowing264=true;try{if(p.provider==='test'&&a&&a.rewardTest248)a.rewardTest248(p.owner,p.request_id);else if(p.provider!=='test'&&a&&a.rewardVerified&&((p.provider==='monetag')===(a.provider==='monetag')))a.rewardVerified(p.owner,p.request_id);else throw Error('unavailable');}catch(e){speedError264(mt251('โฆษณายังไม่พร้อม กรุณาลองใหม่','Ads unavailable. Please retry.'));}}
-function speedEarn264(owner,id,provider){var p=E.d.pendingSpeed264;if(!p||p.owner!==owner||p.request_id!==id||p.provider!==provider||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return false;p.completed=true;if(!E.save())return true;speedShowing264=false;speedSend264('claim');return true;}
+function speedAdShow264(p){var a=root.NovaAds;speedWaitPhase264='native';speedShowing264=true;try{if(p.provider==='test'&&a&&a.rewardTest248)a.rewardTest248(p.owner,p.request_id);else if(p.provider!=='test'&&a&&a.rewardVerified&&((p.provider==='monetag')===(a.provider==='monetag')))a.rewardVerified(p.owner,p.request_id);else throw Error('unavailable');}catch(e){releaseUnwatched264();speedError264(mt251('โฆษณายังไม่พร้อม กรุณาลองใหม่','Ads unavailable. Please retry.'));}}
+function speedEarn264(owner,id,provider){var p=E.d.pendingSpeed264;if(!p||p.owner!==owner||p.request_id!==id||p.provider!==provider||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner)return false;clearSpeedWait264();p.completed=true;if(!E.save()){speedError264(tr('บันทึกไม่ได้'));return true;}speedSend264('claim');return true;}
 var testSpeed264=root.novaTestRewardEarned248;root.novaTestRewardEarned248=function(owner,id){if(speedEarn264(owner,id,'test')){if(root.NovaAds.acknowledgeTest248)root.NovaAds.acknowledgeTest248(id);return;}testSpeed264(owner,id);};
 var earnedSpeed264=root.novaRewardEarned;root.novaRewardEarned=function(id){var p=E.d.pendingSpeed264;if(p&&p.provider!=='test'&&speedEarn264(p.owner,p.provider==='admob'&&speedShowing264?p.request_id:id,p.provider)){if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);return;}earnedSpeed264(id);};
-var statusSpeed264=root.novaRewardStatus;root.novaRewardStatus=function(status){if(speedShowing264){if(status==='ready'){var p=E.d.pendingSpeed264;if(p&&p.provider==='admob')speedAdShow264(p);return;}if(['loading','showing','test_showing248'].includes(status))return;speedError264(mt251('ยังดูไม่ครบหรือโฆษณาไม่พร้อม กรุณาลองใหม่','Video incomplete or unavailable. Please retry.'));return;}statusSpeed264(status);};
+var statusSpeed264=root.novaRewardStatus;root.novaRewardStatus=function(status){
+ if(!speedShowing264){statusSpeed264(status);return;}
+ if(status==='loading'){
+  if(speedWaitPhase264==='loading')return;
+  speedWaitPhase264='loading';
+  speedLoadTimer264=setTimeout(function(){
+   if(speedWaitPhase264!=='loading')return;
+   releaseUnwatched264();speedError264(mt251('โหลดวิดีโอไม่ทัน ลองใหม่ภายหลัง','Video load timed out. Try again later.'));
+  },30000);return;
+ }
+ clearTimeout(speedLoadTimer264);speedLoadTimer264=null;speedWaitPhase264='native';
+ if(status==='ready'){var p=E.d.pendingSpeed264;if(p&&p.provider==='admob')speedAdShow264(p);return;}
+ if(status==='showing'||status==='test_showing248')return;
+ var message=status==='closed'?mt251('ปิดวิดีโอก่อนจบ จึงยังไม่ได้เร่งเวลา','Video closed before completion. No speed-up applied.')
+  :status==='disabled'?mt251('แอปยังขอโฆษณาไม่ได้ในขณะนี้','The app cannot request ads yet.')
+  :status==='unconfigured'?mt251('ยังไม่ได้ตั้งค่าหน่วยโฆษณารางวัล','Rewarded ad unit is not configured.')
+  :mt251('โหลดหรือเปิดวิดีโอไม่ได้ ลองใหม่ภายหลัง','Video could not load or open. Try again later.');
+ releaseUnwatched264();speedError264(message);
+};
 var mediaSpeed264=mediaAllowed250;mediaAllowed250=function(){return !speedShowing264&&mediaSpeed264();};
 function applySpeed264(p,r){
  var before=JSON.stringify(E.d),now=E.d.onlineCrystal?Math.min(E.now(),E.d.economyConfirmedAt||E.now()):E.now(),ms=Math.max(0,Math.min(900,r.seconds))*1000,used=0,t=p.target;
@@ -2004,14 +2047,14 @@ function applySpeed264(p,r){
 var cloudSpeed264=root.novaCloudEvent;root.novaCloudEvent=function(event,data){data=data||{};
  if(data.request_id&&data.request_id.indexOf('speed264-')===0){
   if(!speedBusy264||data.request_id!==speedBusy264.id)return;var mode=speedBusy264.mode;speedBusy264=null;clearTimeout(speedTimer264);
-  if(event!=='war'||!data.data||!data.data.speed264){speedError264(data.message);return;}
+  if(event!=='war'||!data.data||!data.data.speed264){if(mode==='prepare')releaseUnwatched264();speedError264(data.message);return;}
   var d=data.data,p=E.d.pendingSpeed264,r=d.receipt;if(!p||d.owner!==p.owner||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner||!r||r.id!==p.request_id||JSON.stringify(r.target)!==JSON.stringify(p.target)){
    // JSON object key order is not semantic (Postgres jsonb sorts keys).
    if(!p||d.owner!==p.owner||!E.d.onlineCrystal||p.owner!==E.d.onlineCrystal.owner||!r||r.id!==p.request_id)return;
    if(r.target.kind!==p.target.kind||r.target.id!==p.target.id||r.target.level!==p.target.level||r.target.started!==p.target.started||r.target.constructing!==p.target.constructing||JSON.stringify(r.target.keys)!==JSON.stringify(p.target.keys))return;
   }
   if(!Number.isInteger(r.seconds)||r.seconds<0||r.seconds>900||!r.target)return;
-  p.provider=r.provider;p.expires_at=r.expires_at;if(!E.save())return;
+  p.provider=r.provider;p.expires_at=r.expires_at;if(!E.save()){speedError264(tr('บันทึกไม่ได้'));return;}
   if(r.claimed){
    if(d.locked||E.d.siegeLocked){speedTimer264=setTimeout(function(){speedSend264('claim');},5000);return;}
    if(d.online)syncCrystal(d.online);var seconds=applySpeed264(p,r);if(seconds===null){speedError264(tr('บันทึกไม่ได้'));return;}speedShowing264=false;completionAudio250();hud();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย!','Congratulations!')+'</h2><p>'+mt251('เร่งเวลาแล้ว ','Sped up by ')+duration(seconds)+'</p><button class="wide green" onclick="Game.close()">'+mt251('ตกลง','OK')+'</button></section>');return;
@@ -2020,7 +2063,7 @@ var cloudSpeed264=root.novaCloudEvent;root.novaCloudEvent=function(event,data){d
   if(Date.parse(p.expires_at)<=Date.now()){p.request_id=nonce160();delete p.provider;delete p.expires_at;E.save();speedSend264('prepare');return;}
   speedAdShow264(p);return;
  }
- if(event==='signed_in'||event==='signed_out'){speedBusy264=null;speedShowing264=false;clearTimeout(speedTimer264);}
+ if(event==='signed_in'||event==='signed_out'){speedBusy264=null;speedRetry264=null;clearSpeedWait264();clearTimeout(speedTimer264);speedTimer264=null;}
  cloudSpeed264(event,data);
 };
 var heartbeatSpeed264=liveHeartbeat;liveHeartbeat=function(){var p=E.d.pendingSpeed264;if(p&&p.completed&&!speedBusy264&&!speedTimer264&&!document.hidden&&E.d.onlineCrystal&&p.owner===E.d.onlineCrystal.owner){speedSend264('claim');}heartbeatSpeed264();};
