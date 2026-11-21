@@ -8,7 +8,7 @@ c.E.titanRecovery347=()=>({fraction:1,resting:false});t=c.homeTitan342();assert(
 console.log('PASS shop348 UI: construction hologram, tap-to-speed building/recovery, restored control after healing');
 
 // A delayed guardian status must not replace the drone/shield panel the user just opened.
-let renders=0;const race={root:{novaCloudEvent(){}},titanBusy342:{id:'titan342-1',mode:'status'},clearTimeout(){},E:{d:{},save(){}},screen:'home',testWallet:null,modal:{style:{display:'flex'},hasAttribute:()=>false},titanPanelOpen342:true,titanPanel342(){renders++},hud(){}};vm.createContext(race);
+let renders=0;const race={root:{novaCloudEvent(){}},titanBusy342:{id:'titan342-1',mode:'status'},clearTimeout(){},E:{d:{},save(){return true}},screen:'home',testWallet:null,modal:{style:{display:'flex'},hasAttribute:()=>false},titanPanelOpen342:true,titanPanel342(){renders++},hud(){}};vm.createContext(race);
 vm.runInContext(src.slice(src.indexOf('var titanCloud342='),src.indexOf('var titanCloud342=')+src.slice(src.indexOf('var titanCloud342=')).indexOf('\n')),race);
 const data={request_id:'titan342-1',data:{titan342:true,state:{level:1,skills:{}},server_time:new Date().toISOString(),owner:'test'}};race.root.novaCloudEvent('war',data);assert.equal(renders,0);assert.equal(race.E.d.titan342.level,1);
 race.titanBusy342={id:'titan342-1',mode:'status'};race.modal.hasAttribute=()=>true;race.root.novaCloudEvent('war',data);assert.equal(renders,1);console.log('PASS shop navigation: delayed status preserves unrelated panels');

@@ -94,13 +94,12 @@ titanTick342=function(scene,t,dt){
  if(ground.length)main=ground;
  if(!main.length||t.pending342||t.jump345||t.stun>0)return titanTick437.apply(this,arguments);
  // pick the target: the wall we are cutting through, otherwise the nearest real target
- var target=t.wall437&&t.wall437.hp>0?t.wall437:null;if(!target){t.wall437=null;target=main.sort(function(a,b){return dist(t,a)-dist(t,b);})[0];}
+ var target=t.wall437&&t.wall437.hp>0?t.wall437:null;if(!target){t.wall437=null;target=main.reduce(function(best,v){return !best||dist(t,v)<dist(t,best)?v:best;},undefined);}
  // stuck check: trying to move but hardly moved for a second -> cut the wall in front
  var px=t.x,py=t.y;
- var keepEnemies=titanEnemies342,keepRoute=route;
+ var keepEnemies=titanEnemies342;
  titanEnemies342=function(s,v){var list=keepEnemies(s,v);return v===t?list.filter(function(e){return e===target||(e.type!=='wall'&&(!ground.length||!air277(e)));}):list;};
- route=function(a,b,buildings,range,max){if(a===t)buildings=buildings.filter(function(x){return x.type!=='wall'||x===target;});return keepRoute.call(this,a,b,buildings,range,max);};
- try{titanTick437.apply(this,arguments);}finally{titanEnemies342=keepEnemies;route=keepRoute;}
+ try{titanTick437.apply(this,arguments);}finally{titanEnemies342=keepEnemies;}
  var moved=Math.hypot(t.x-px,t.y-py);
  if(target.type!=='wall'&&dist(t,target)>2.4&&!t.jump345&&!t.pending342){t.stuck437=moved<.01*Math.max(1,dt*60)?(t.stuck437||0)+dt:Math.max(0,(t.stuck437||0)-dt*2);
   if(t.stuck437>1){var w=wallAhead437(scene,t,target);if(w){t.wall437=w;t.route=[];}t.stuck437=0;}}
@@ -143,18 +142,17 @@ buildingStructure265=function(b,p,size,front){
 titanMove342=function(scene,t,dx,dy,dt,speed){
  if(t.jump345)return;var len=Math.hypot(dx,dy);if(!len)return;
  var a=Math.atan2(dy,dx),step=Math.min(len,speed*dt),here=titanBlocked342(scene,t.x,t.y),px=t.x,py=t.y;
- t.aim=t.heading=a;t.moving=true;
+ t.aim=t.heading=a;t.moving=false;
  var x=t.x+Math.cos(a)*step,y=t.y+Math.sin(a)*step,max=(scene.mapSize||22)-1;
  // already overlapping something: any step that moves away from what it overlaps is allowed, so it can walk out
  function out(ax,ay){return Math.max(0,.4-ax)+Math.max(0,.4-ay)+Math.max(0,ax-(max-.4))+Math.max(0,ay-(max-.4));}
- function escapes(nx,ny){if(out(nx,ny)>out(px,py)+1e-9)return false;return scene.buildings.every(function(b){if(!(b.hp>0)||trap278(b)||Math.abs(px-b.x)>=.75||Math.abs(py-b.y)>=.75)return Math.abs(nx-b.x)>=.75||Math.abs(ny-b.y)>=.75||!(b.hp>0)||trap278(b);return Math.hypot(nx-b.x,ny-b.y)>=Math.hypot(px-b.x,py-b.y)-1e-6;});}
+ function escapes(nx,ny){if(out(nx,ny)>out(px,py)+1e-9)return false;return scene.buildings.every(function(b){if(!titanSolid442(scene,b)||Math.abs(px-b.x)>=.75||Math.abs(py-b.y)>=.75)return Math.abs(nx-b.x)>=.75||Math.abs(ny-b.y)>=.75||!titanSolid442(scene,b);return Math.hypot(nx-b.x,ny-b.y)>=Math.hypot(px-b.x,py-b.y)-1e-6;});}
  function free(nx,ny){return here?escapes(nx,ny):!titanBlocked342(scene,nx,ny);}
  if(free(x,y)){t.x=x;t.y=y;}
- else if(titanJump345(scene,t,dx,dy))return;
  else{var turns=[.45,-.45,.9,-.9,1.35,-1.35,1.57,-1.57],side=t.side437||1;
   for(var i=0;i<turns.length;i++){var b=a+turns[i]*side,nx=t.x+Math.cos(b)*step,ny=t.y+Math.sin(b)*step;
    if(free(nx,ny)){t.x=nx;t.y=ny;if(turns[i]<0)t.side437=-side;break;}}}
- var moved=Math.hypot(t.x-px,t.y-py);t.blocked437=moved<step*.3?(t.blocked437||0)+dt:0;
+ var moved=Math.hypot(t.x-px,t.y-py);t.moving=moved>1e-5;if(t.moving)t.aim=t.heading=Math.atan2(t.y-py,t.x-px);if(!t.moving&&(t.blocked437||0)>.45&&titanJump345(scene,t,dx,dy))return;t.blocked437=moved<step*.3?(t.blocked437||0)+dt:0;
 };
 var manualTick437=titanTick342;
 titanTick342=function(scene,t,dt){
