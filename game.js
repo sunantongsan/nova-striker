@@ -703,11 +703,14 @@ function paintTerrain219(map,raid){ctx.clearRect(0,0,viewWidth,viewHeight);var p
 if(raid){for(var x=0;x<map;x++)for(var y=0;y<map;y++)if(!raid.buildings.some(function(b){return b.hp>0&&!trap278(b)&&Math.abs(b.x-x)<.75&&Math.abs(b.y-y)<.75;}))diamond(x,y,'rgba(66,190,240,.07)','#426779');}else if(placing||moving){for(var x=1;x<=homeMap391()-2;x++)for(var y=1;y<=homeMap391()-2;y++)if(E.empty(x,y,moving))diamond(x,y,'rgba(239,255,130,.22)','#b9e89b');}
 }
 function drawTerrain219(map,raid){
- if(placing||moving||!document.createElement){paintTerrain219(map,raid);return;}
+ var cameraMoving=screen==='home'&&(pinch302||drag&&drag.moved);
+ if(placing||moving||cameraMoving||!document.createElement){paintTerrain219(map,raid);return;}
  var key=[planetChoice298,map,!!raid,zoom,panX,panY,originX,originY,canvas.width,canvas.height].join(':');
  if(!terrain219){terrain219=document.createElement('canvas');}
  if(key!==terrainKey219){
-  terrain219.width=canvas.width;terrain219.height=canvas.height;var original=ctx,off=terrain219.getContext('2d');
+  if(terrain219.width!==canvas.width)terrain219.width=canvas.width;
+  if(terrain219.height!==canvas.height)terrain219.height=canvas.height;
+  var original=ctx,off=terrain219.getContext('2d');
   if(!off){paintTerrain219(map,raid);return;}
   try{ctx=off;var scale=canvas.width/viewWidth;ctx.setTransform(scale,0,0,scale,0,0);paintTerrain219(map,raid);terrainKey219=key;}finally{ctx=original;}
  }
@@ -1627,11 +1630,17 @@ function burst249(b,kind){bursts249.push({x:b.x,y:b.y,kind:kind,start:Date.now()
 function monitorBuild249(){
  var owner=E.d.onlineCrystal&&E.d.onlineCrystal.owner||'local';
  if(watchOwner249!==owner||watchData249!==E.d){buildWatch249.clear();watchOwner249=owner;watchData249=E.d;}
- var next=new Map(),completed=[];
- E.d.buildings.forEach(function(b){var old=buildWatch249.get(b.id),job=(E.d.serverUpgrades225||[]).find(function(j){return j.category==='infrastructure'&&j.item===b.type;});
-  if(old&&old.busy&&!b.until&&!job&&(b.lv>old.lv||old.constructing&&!b.constructing))completed.push(b);
-  next.set(b.id,{busy:!!(b.until||job),lv:b.lv,constructing:!!b.constructing});
- });buildWatch249=next;
+ var completed=[],jobs=E.d.serverUpgrades225||[];
+ E.d.buildings.forEach(function(b){
+  var old=buildWatch249.get(b.id),busy=!!b.until||jobs.some(function(j){return j.category==='infrastructure'&&j.item===b.type;});
+  if(!old){old={};buildWatch249.set(b.id,old);}
+  if(old.busy&&!busy&&(b.lv>old.lv||old.constructing&&!b.constructing))completed.push(b);
+  old.busy=busy;old.lv=b.lv;old.constructing=!!b.constructing;
+ });
+ if(buildWatch249.size>E.d.buildings.length){
+  var present=new Set(E.d.buildings.map(function(b){return b.id;}));
+  buildWatch249.forEach(function(_,id){if(!present.has(id))buildWatch249.delete(id);});
+ }
  if(completed.length){completed.slice(0,8).forEach(function(b){burst249(b,'complete');});if(screen==='home'&&!document.hidden){toast(root.NovaI18n.language==='th'?'สร้างเสร็จแล้ว'+(completed.length>1?' '+completed.length+' อาคาร':''):'Construction complete');if(Date.now()-lastFinish249>1200){lastFinish249=Date.now();if(completed.some(function(b){return b.lv>1;})&&soundOn)playClip250('level362');else completionAudio250();}}}
  bursts249=bursts249.filter(function(f){return Date.now()-f.start<(f.kind==='complete'?1700:1300);});
 }

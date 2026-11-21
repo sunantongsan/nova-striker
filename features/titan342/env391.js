@@ -46,8 +46,14 @@ paintTerrain219=function(map,raid){
  var hw=(f[1][0]-f[3][0])/2*k,hh=(f[2][1]-f[0][1])/2*k,ax=(f[1][0]+f[3][0])/2*k,ay=(f[0][1]+f[2][1])/2*k;
  var c=point((map-1)/2,(map-1)/2),gw=map*tile*zoom,gh=map*tile*ISO412*zoom;
  var sy=gh/hh*1.02,sx=Math.max(gw/hw*1.02,sy/1.22);
- // Soft, enlarged copy of the same scene fills the screen edges behind the fitted art.
- var cover=Math.max(c.x/ax,(viewWidth-c.x)/(sw-ax),c.y/ay,(viewHeight-c.y)/(sh-ay),sx)*1.06;ctx.save();try{ctx.filter='blur(5px)';}catch(e){}ctx.globalAlpha=.95;ctx.drawImage(scenery384,i%2*sw,Math.floor(i/2)*sh,sw,sh,c.x-ax*cover,c.y-ay*cover,sw*cover,sh*cover);ctx.restore();
+ // Only paint the blurred border where the opaque foreground leaves an edge visible.
+ var left=c.x-ax*sx,top=c.y-ay*sy;
+ if(left>0||top>0||left+sw*sx<viewWidth||top+sh*sy<viewHeight){
+  var cover=Math.max(c.x/ax,(viewWidth-c.x)/(sw-ax),c.y/ay,(viewHeight-c.y)/(sh-ay),sx)*1.06;
+  ctx.save();try{ctx.filter='blur(5px)';}catch(e){}ctx.globalAlpha=.95;
+  ctx.drawImage(scenery384,i%2*sw,Math.floor(i/2)*sh,sw,sh,c.x-ax*cover,c.y-ay*cover,sw*cover,sh*cover);
+  ctx.restore();
+ }
  ctx.save();ctx.translate(c.x,c.y);ctx.scale(sx,sy);
  ctx.drawImage(scenery384,i%2*sw,Math.floor(i/2)*sh,sw,sh,-ax,-ay,sw,sh);
  ctx.restore();
