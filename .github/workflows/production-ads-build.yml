@@ -1,0 +1,46 @@
+name: Build NOVA production ads bundle
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/production-ads-build.yml']
+permissions: {contents: write}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17'}
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with: {gradle-version: '8.13'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm ci --ignore-scripts
+      - name: Build production bundle
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+          gradle --no-daemon :app:bundleRelease
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: production-ads-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 3
+      - name: Record build result
+        if: always()
+        env:
+          BUILD_STATUS: ${{ job.status }}
+          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+        run: |
+          mkdir -p docs
+          python3 - <<'PY'
+          import os,json
+          json.dump({k:os.getenv(k) for k in ['GITHUB_RUN_ID','GITHUB_SHA','BUILD_STATUS','ARTIFACT_ID']},open('docs/production-ads-build-result.json','w'),indent=2)
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/production-ads-build-result.json
+          git commit -m 'Record production ads build result [skip ci]'
+          git push origin HEAD:${{ github.ref_name }}
