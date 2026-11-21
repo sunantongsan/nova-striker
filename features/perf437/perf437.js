@@ -24,22 +24,23 @@ drawWall=function(b,enemy,preview){
  if(preview||!b||typeof document==='undefined'||!document.createElement)return drawWall437.apply(this,arguments);
  var bs=screen==='defense'?E.defense.buildings:screen==='raid'?E.raid.buildings:E.d.buildings;
  function near(dx,dy){var w=wallIndex219?wallIndex219.get((b.x+dx)+','+(b.y+dy)):bs.find(function(w){return w.type==='wall'&&w.x===b.x+dx&&w.y===b.y+dy;});return !!(w&&(w.hp===undefined||w.hp>0));}
- var scale=renderScale226(),z=Math.round(zoom*100)/100;
+ var scale=renderScale226(),z=1;
  if(z!==wallCacheZoom437||scale!==wallCacheScale437||wallCacheCount437>400){wallCache437={};wallCacheZoom437=z;wallCacheScale437=scale;wallCacheCount437=0;}
  var art=wallArt274.complete&&wallArt274.naturalWidth?1:0,lv=Math.max(1,b.lv||1);
  var key=(near(-1,0)?1:0)+(near(0,-1)?2:0)+(near(1,0)?4:0)+(near(0,1)?8:0)+':'+lv+':'+(enemy?1:0)+':'+art;
  var spr=wallCache437[key];
  if(!spr){
+  var savedZoom441=zoom;zoom=1;
   var W=Math.ceil(tile*zoom*2.4)+4,top=Math.ceil(60*zoom)+4,H=top+Math.ceil(tile*ISO412*zoom*1.4)+4,c=document.createElement('canvas');
   c.width=Math.max(1,Math.ceil(W*scale));c.height=Math.max(1,Math.ceil(H*scale));
-  var g=c.getContext('2d');if(!g)return drawWall437.apply(this,arguments);
+  var g=c.getContext('2d');if(!g){zoom=savedZoom441;return drawWall437.apply(this,arguments);}
   g.setTransform(scale,0,0,scale,0,0);
   var oldCtx=ctx,oldPoint=point,ox=W/2,oy=top;
   try{ctx=g;point=function(x,y){return {x:ox+((x-b.x)-(y-b.y))*tile*zoom,y:oy+((x-b.x)+(y-b.y))*tile*ISO412*zoom};};drawWall437.call(this,b,enemy);}
-  finally{ctx=oldCtx;point=oldPoint;}
+  finally{ctx=oldCtx;point=oldPoint;zoom=savedZoom441;}
   spr=wallCache437[key]={c:c,w:W,h:H,ox:ox,oy:oy};wallCacheCount437++;
  }
- var p=point(b.x,b.y);ctx.drawImage(spr.c,p.x-spr.ox,p.y-spr.oy,spr.w,spr.h);
+ var p=point(b.x,b.y);ctx.drawImage(spr.c,p.x-spr.ox*zoom,p.y-spr.oy*zoom,spr.w*zoom,spr.h*zoom);
 };
 
 // ---------- crater sprites ----------
@@ -123,15 +124,15 @@ var struct437=buildingStructure265,structCache437={},structCount437=0,structKey4
 buildingStructure265=function(b,p,size,front){
  var lv=Math.max(1,Math.min(20,b&&b.lv||1));
  if(!b||lv===1||b.type==='wall'||b.type==='cannonturret'||typeof document==='undefined'||!document.createElement||!(size>0))return struct437.apply(this,arguments);
- var scale=renderScale226(),zk=Math.round(size*2)/2+':'+scale;
+ var scale=renderScale226(),zk=128+':'+scale,ratio441=size/128;
  if(scale!==structKey437||structCount437>300){structCache437={};structCount437=0;structKey437=scale;}
  var key=zk+':'+b.type+':'+lv+':'+(front?1:0),s=structCache437[key];
- if(!s){var k=size/80,L=60*k,R=60*k,U=95*k,D=40*k,W=Math.ceil(L+R),H=Math.ceil(U+D),c=document.createElement('canvas');
+ if(!s){var k=128/80,L=60*k,R=60*k,U=95*k,D=40*k,W=Math.ceil(L+R),H=Math.ceil(U+D),c=document.createElement('canvas');
   c.width=Math.max(1,Math.ceil(W*scale));c.height=Math.max(1,Math.ceil(H*scale));var g=c.getContext('2d');if(!g)return struct437.apply(this,arguments);
-  g.setTransform(scale,0,0,scale,0,0);var old=ctx;try{ctx=g;struct437.call(this,b,{x:L,y:U},size,front);}finally{ctx=old;}
+  g.setTransform(scale,0,0,scale,0,0);var old=ctx;try{ctx=g;struct437.call(this,b,{x:L,y:U},128,front);}finally{ctx=old;}
   s=crop437(c,scale,W,H,L,U);structCache437[key]=s;structCount437++;}
  if(!s.c)return;
- ctx.drawImage(s.c,p.x-s.ox,p.y-s.oy,s.w,s.h);
+ ctx.drawImage(s.c,p.x-s.ox*ratio441,p.y-s.oy*ratio441,s.w*ratio441,s.h*ratio441);
 };
 
 // ---------- 437e: the mech never gets pinned ----------
@@ -197,41 +198,42 @@ toast=function(msg){try{var r=E.raid;if(screen==='raid'&&r&&msg===tr('ไม่�
 // Same idea as the troops: buildings, storage tanks, cannons and vehicles are cut from big sheets (up to 7056px wide)
 // and were shrunk to their on-screen size for every building, every frame. On the main battle/home canvas, any
 // cut-out from a big sheet that is drawn at less than ~90% of its size now comes from a copy of that sheet shrunk
-// once (in halving steps, so it is crisp) to the current zoom. One copy is (re)made per frame at most; until it is
-// ready the original sheet is used, so zooming never stalls.
+// once (in halving steps, so it is crisp) into reusable size levels. One copy is (re)made per frame at most; until it is
+// ready the original sheet is used. Keep all three levels: differently sized units
+// and recoil transforms must not replace each other's cached sheet every frame.
 (function(){
  if(!ctx||!ctx.drawImage||typeof document==='undefined'||!document.createElement)return;
  var main=ctx,raw=main.drawImage,built=-1,copies=typeof WeakMap==='function'?new WeakMap():null;if(!copies)return;
  function big(img){if(!img)return false;var ok=(typeof HTMLImageElement!=='undefined'&&img instanceof HTMLImageElement&&img.complete)||(typeof ImageBitmap!=='undefined'&&img instanceof ImageBitmap);if(!ok)return false;var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;return w*h>=1024*700;}
  function copy(img,f){
-  var c=copies.get(img);if(c&&c.f===f)return c;
-  if(built===frame)return c||null;built=frame;
+  var levels=copies.get(img);if(!levels){levels={};copies.set(img,levels);}if(levels[f])return levels[f];
+  if(built===frame){return levels[.5]||levels[.25]||levels[.125]||null;}built=frame;
   try{var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,tw=Math.max(1,Math.round(w*f)),th=Math.max(1,Math.round(h*f)),cur=img,cw=w,ch=h;
    while(cw/2>tw){var nw=Math.max(tw,Math.round(cw/2)),nh=Math.max(th,Math.round(ch/2)),cv=document.createElement('canvas');cv.width=nw;cv.height=nh;var g=cv.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(cur,0,0,cw,ch,0,0,nw,nh);cur=cv;cw=nw;ch=nh;}
    var out=document.createElement('canvas');out.width=tw;out.height=th;var o=out.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(cur,0,0,cw,ch,0,0,tw,th);
-   c={c:out,f:f,kx:tw/w,ky:th/h};copies.set(img,c);return c;}catch(e){copies.set(img,{f:-1,c:null});return null;}
+   var c={c:out,f:f,kx:tw/w,ky:th/h};levels[f]=c;return c;}catch(e){levels[f]={c:null};return null;}
  }
  main.drawImage=function(img,sx,sy,sw,sh,dx,dy,dw,dh){
   if(arguments.length===9&&sw>0&&sh>0&&big(img)){
    var t=main.getTransform?main.getTransform():null,sc=t?Math.hypot(t.a,t.b):renderScale226(),need=Math.max(Math.abs(dw)/sw,Math.abs(dh)/sh)*sc;
-   if(need>0&&need<.9){var f=Math.min(.9,Math.ceil(need*20)/20),c=copy(img,f);
+   if(need>0&&need<.9){var f=need<=.125?.125:need<=.25?.25:.5,c=need<=.5?copy(img,f):null;
     if(c&&c.c)return raw.call(main,c.c,sx*c.kx,sy*c.ky,sw*c.kx,sh*c.ky,dx,dy,dw,dh);}
   }
   return raw.apply(main,arguments);
  };
 })();
 
-// ---------- 437i: dynamic resolution in big battles ----------
-// When a battle gets heavy (frame work above ~20ms on average), the battle canvas renders at a slightly lower
-// resolution (down to 1.25x) so the frame rate stays steady; it climbs back to full sharpness as soon as the action
-// calms down. Home base and menus always keep full resolution. Changes at most once a second, so no flicker.
-var dynScale437=9,dynAt437=0,renderScale437=renderScale226;
+// ---------- 441: stable resolution for busy bases and battles ----------
+// Menus remain native resolution. Limit canvas pixel work in dense scenes, then
+// adapt slowly with hysteresis so resizing does not repeatedly discard caches.
+var dynScale437=9,dynAt437=0,dynCool441=0,renderScale437=renderScale226;
 renderScale226=function(){
- var base=renderScale437.apply(this,arguments),r=screen==='raid'?E.raid:null,battle=r&&r.phase==='battle'&&!r.result;
- if(!battle){dynScale437=9;return base;}
- var now=Date.now();if(now-dynAt437>1000){dynAt437=now;var avg=typeof frameAvg420==='number'?frameAvg420:0;
-  if(dynScale437>base)dynScale437=base;
-  if(avg>20&&dynScale437>1.25)dynScale437=Math.max(1.25,dynScale437-.25);
-  else if(avg<11&&dynScale437<base)dynScale437=Math.min(base,dynScale437+.25);}
+ var base=renderScale437.apply(this,arguments),scene=screen==='raid'?E.raid:screen==='defense'?E.defense:null;
+ var buildings=scene?scene.buildings:E.d.buildings,units=scene?scene.troops||scene.enemies||[]:[];
+ if((buildings?buildings.length:0)+units.length>100)base=Math.min(base,1.5);
+ dynScale437=Math.min(base,dynScale437);
+ var now=Date.now();if(now-dynAt437>2000){dynAt437=now;var avg=typeof frameAvg420==='number'?frameAvg420:0;
+  if(avg>18&&dynScale437>1){dynScale437=Math.max(1,dynScale437-.25);dynCool441=now+12000;}
+  else if(avg<8&&now>dynCool441&&dynScale437<base){dynScale437=Math.min(base,dynScale437+.25);dynCool441=now+12000;}}
  return Math.min(base,dynScale437);
 };
