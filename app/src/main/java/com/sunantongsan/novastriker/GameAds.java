@@ -77,6 +77,7 @@ final class GameAds {
         if(owner==null||intent==null||!owner.matches("[0-9a-fA-F-]{36}")||!intent.matches("[0-9a-fA-F-]{36}"))return;
         activity.runOnUiThread(()->{
             if(destroyed)return;
+            if(!BuildConfig.DEBUG){rewardStatus("unavailable");return;}
             if(!prefs.getString("testIntent248","").isEmpty()){deliverTest248();return;}
             if(showing||testLoading248){rewardStatus("loading");return;}
             if(!enabled()||!consent.canRequestAds()){rewardStatus("disabled");return;}
@@ -98,10 +99,9 @@ final class GameAds {
         });
     }
 
-    // 399: until AdMob approves the account, banner and interstitial use Google's demo units.
-    // The game switches to the real units when the server enables live AdMob (admob230), no Play release needed.
+    // Published builds always request this account's real units; demo ads are debug-only.
     private static final String TEST_BANNER = "ca-app-pub-3940256099942544/6300978111", TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712";
-    private boolean liveAds() { return !BuildConfig.DEBUG && prefs.getBoolean("liveAds399", false); }
+    private boolean liveAds() { return !BuildConfig.DEBUG; }
     @JavascriptInterface public void liveAds399(boolean live) {
         activity.runOnUiThread(() -> {
             if (destroyed || prefs.getBoolean("liveAds399", false) == live) return;
