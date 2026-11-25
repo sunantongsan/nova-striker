@@ -200,7 +200,10 @@ function novaSpeedPrice365(seconds){
 }
 function duration(seconds){seconds=Math.max(0,Math.ceil(seconds));return Math.floor(seconds/60)+':'+('0'+seconds%60).slice(-2);}
 function initial(now){return{version:1,gems:30,checkin:{day:-1,streak:0},rewardIds:[],gold:900,power:500,stage:1,stars:{},army:[8,1,1,0,0,0,0,0,0],queue:[],last:now,buildings:[{id:1,type:'hq',x:5,y:5,lv:1},{id:2,type:'barracks',x:3,y:5,lv:1},{id:3,type:'mine',x:5,y:3,lv:1},{id:4,type:'reactor',x:7,y:5,lv:1},{id:5,type:'gun',x:5,y:7,lv:1},{id:6,type:'camp',x:7,y:7,lv:1}],next:7};}
-function Engine(storage,now){this.storage=storage;this.now=now||Date.now;this.d=initial(this.now());try{var d=JSON.parse(storage.getItem('novaRTS1'));/* 420: a broken number must never throw the whole base away */if(d&&typeof d==='object'){['gold','power'].forEach(function(k){if(!Number.isFinite(d[k])){d[k]=0;d.nanRepair420=(d.nanRepair420||[]).concat(k);}});if(Array.isArray(d.army))d.army=d.army.map(function(n){return Number.isFinite(n)&&n>=0?n:0;});}if(d&&d.version===1&&Array.isArray(d.buildings)&&d.buildings.some(function(b){return b.type==='hq';})&&d.buildings.every(function(b){return !!B[b.type]&&Number.isFinite(b.x)&&Number.isFinite(b.y)&&b.lv>=1&&b.lv<=MAX_BUILDING_LEVEL;})&&Array.isArray(d.army)&&d.army.length>=4&&d.army.length<=U.length&&d.army.every(function(n){return Number.isFinite(n)&&n>=0;})&&Array.isArray(d.queue)&&Number.isFinite(d.gold)&&Number.isFinite(d.power)){this.d=d;}}catch(e){}while(this.d.army.length<U.length)this.d.army.push(0);if(!Number.isFinite(this.d.gems))this.d.gems=30;if(!this.d.checkin)this.d.checkin={day:-1,streak:0};if(!Array.isArray(this.d.rewardIds))this.d.rewardIds=[];this.raid=null;this.defense=null;if(!this.d.tasks)this.d.tasks={day:-1,build:0,train:0,win:0,defend:0,claimed:[]};if(!this.d.defenseLevel)this.d.defenseLevel=1;this.migrateBase();if(Array.isArray(this.d.nanRepair420)){var self420=this;try{this.d.nanRepair420.forEach(function(k){self420.d[k]=Math.max(self420.d[k]||0,self420.resourceCapacity(k==='gold'?undefined:'power')||0);});}catch(e){}delete this.d.nanRepair420;this.d.repaired420=(this.d.repaired420||0)+1;}this.sync();}
+function Engine(storage,now){this.storage=storage;this.now=now||Date.now;this.d=initial(this.now());try{var d=JSON.parse(storage.getItem('novaRTS1'));/* 420: a broken number must never throw the whole base away */if(d&&typeof d==='object'){['gold','power'].forEach(function(k){if(!Number.isFinite(d[k])){d[k]=0;d.nanRepair420=(d.nanRepair420||[]).concat(k);}});if(Array.isArray(d.army))d.army=d.army.map(function(n){return Number.isFinite(n)&&n>=0?n:0;});}if(d&&d.version===1&&Array.isArray(d.buildings)&&d.buildings.some(function(b){return b.type==='hq';})&&d.buildings.every(function(b){return !!B[b.type]&&Number.isFinite(b.x)&&Number.isFinite(b.y)&&b.lv>=1&&b.lv<=MAX_BUILDING_LEVEL;})&&Array.isArray(d.army)&&d.army.length>=4&&d.army.length<=U.length&&d.army.every(function(n){return Number.isFinite(n)&&n>=0;})&&Array.isArray(d.queue)&&Number.isFinite(d.gold)&&Number.isFinite(d.power)){this.d=d;}}catch(e){}
+ // Older saves included the previous WebView's display lock. Keep its receipt for reconciliation.
+ if(this.d.pendingAd230)delete this.d.pendingAd230.showRequested;
+ while(this.d.army.length<U.length)this.d.army.push(0);if(!Number.isFinite(this.d.gems))this.d.gems=30;if(!this.d.checkin)this.d.checkin={day:-1,streak:0};if(!Array.isArray(this.d.rewardIds))this.d.rewardIds=[];this.raid=null;this.defense=null;if(!this.d.tasks)this.d.tasks={day:-1,build:0,train:0,win:0,defend:0,claimed:[]};if(!this.d.defenseLevel)this.d.defenseLevel=1;this.migrateBase();if(Array.isArray(this.d.nanRepair420)){var self420=this;try{this.d.nanRepair420.forEach(function(k){self420.d[k]=Math.max(self420.d[k]||0,self420.resourceCapacity(k==='gold'?undefined:'power')||0);});}catch(e){}delete this.d.nanRepair420;this.d.repaired420=(this.d.repaired420||0)+1;}this.sync();}
 Engine.prototype.save=function(){try{var serialized=JSON.stringify(this.d);if(serialized!==this.lastSaved215){this.storage.setItem('novaRTS1',serialized);this.lastSaved215=serialized;}this.saveFailed=false;return true;}catch(e){this.saveFailed=true;return false;}};
 Engine.prototype.hq=function(){return this.d.buildings.find(function(b){return b.type==='hq';}).lv;};
 Engine.prototype.capacity=function(){return 12+this.d.buildings.filter(function(b){return b.type==='camp'&&active(b);}).reduce(function(s,b){return s+8*b.lv;},0);};
@@ -1406,19 +1409,51 @@ var rewardTimer241=null;
 function scheduleReward241(){if(rewardTimer241)return;var p=E.d.pendingAd230;if(!p)return;var id=p.request_id;rewardTimer241=setTimeout(function(){rewardTimer241=null;var now=E.d.pendingAd230;if(!now||now.request_id!==id||!rewardOwner234(now))return;if(warBusy||document.hidden){scheduleReward241();return;}Game.checkAd230('claim');},4000);}
 Game.rewardStatus230=function(){var p=E.d.pendingAd230;if(!p)return;var r=p.receipt;
  if(p.completed234||r&&r.verified){scheduleReward241();return;}
- if(p.showRequested){close();return;}
+ if(p.showRequested){
+  if(p.status236==='loading')open('<h2>▶ Ads</h2><p role="status">'+mt251('กำลังโหลดวิดีโอ…','Loading video…')+'</p>');
+  return;
+ }
  var expired=r&&Date.parse(r.expires_at)<=Date.now(),error=p.error239||(p.status236==='load_failed236'?'โหลดระบบโฆษณาไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วกดลองอีกครั้ง':p.status236==='unavailable'?'ไม่มีโฆษณาพร้อมในขณะนี้':p.status236==='closed'?'ยังดูโฆษณาไม่ครบ':'');
- open('<h2>▶ Ads</h2><p role="status">'+escapeHTML(tr(expired?'รายการโฆษณาหมดอายุแล้ว':error||'กำลังเตรียมโฆษณา'))+'</p>'+(!warBusy&&(error||expired)?'<button class="wide green" onclick="'+(expired?'Game.restartAd236()':'Game.retryAd239()')+'">'+tr(expired?'เริ่มโฆษณาใหม่':'ลองอีกครั้ง')+'</button>':'')+'<button class="wide" onclick="Game.close()">'+tr('กลับฐาน')+'</button>');
+ open('<h2>▶ Ads</h2><p role="status">'+escapeHTML(expired?tr('รายการโฆษณาหมดอายุแล้ว'):p.status236==='unavailable'&&!p.error239?rewardFailure254('unavailable',tr(error)):tr(error||'กำลังเตรียมโฆษณา'))+'</p>'+(!warBusy&&(error||expired)?'<button class="wide green" onclick="'+(expired?'Game.restartAd236()':'Game.retryAd239()')+'">'+tr(expired?'เริ่มโฆษณาใหม่':'ลองอีกครั้ง')+'</button>':'')+'<button class="wide" onclick="Game.close()">'+tr('กลับฐาน')+'</button>');
 };
 Game.restartAd236=function(){var p=E.d.pendingAd230,r=p&&p.receipt;if(warBusy||!r||r.verified||r.claimed||p.completed234||Date.parse(r.expires_at)>Date.now())return;restartAd236={kind:p.kind,job:p.job};Game.checkAd230('cancel');};
-Game.showAd230=function(){var p=E.d.pendingAd230,r=p&&p.receipt;if(!r||p.showRequested||p.completed234||r.verified||r.claimed||r.cancelled||Date.parse(r.expires_at)<=Date.now())return;if(!rewardOwner234(p))return;p.showRequested=true;if(!E.save())return;close();if(root.NovaAds&&root.NovaAds.rewardVerified)root.NovaAds.rewardVerified(p.owner,p.request_id);};
+var rewardLoadTimer230=null;
+Game.showAd230=function(){
+ var p=E.d.pendingAd230,r=p&&p.receipt;
+ if(!r||p.showRequested||p.completed234||r.verified||r.claimed||r.cancelled||Date.parse(r.expires_at)<=Date.now()||!rewardOwner234(p))return;
+ // The SDK can only be showing a video in this session. Never serialize this lock.
+ Object.defineProperty(p,'showRequested',{value:true,writable:true,configurable:true,enumerable:false});
+ p.status236='opening';
+ if(!E.save()){p.showRequested=false;return;}
+ close();
+ try{root.NovaAds.rewardVerified(p.owner,p.request_id);}
+ catch(e){root.novaRewardStatus('unavailable');}
+};
 var rewardNativeStatus230=root.novaRewardStatus;root.novaRewardStatus=function(status){
  var p=E.d.pendingAd230;
- if(p){p.status236=status;if(['ready','closed','unavailable','disabled','cooldown','unconfigured','load_failed236'].includes(status))p.showRequested=false;E.save();if(status==='ready'&&!p.completed234){Game.showAd230();return;}Game.rewardStatus230();}
+ if(p&&p.showRequested){
+  clearTimeout(rewardLoadTimer230);
+  p.status236=status;
+  if(status==='loading'&&root.NovaAds&&root.NovaAds.provider!=='monetag'){
+   rewardLoadTimer230=setTimeout(function(){
+    if(E.d.pendingAd230!==p||!p.showRequested||p.status236!=='loading')return;
+    if(root.NovaAds.cancelRewardLoad254)root.NovaAds.cancelRewardLoad254(p.request_id);
+    root.novaRewardStatus('load_failed236');
+   },30000);
+  }
+  if(['ready','closed','unavailable','disabled','cooldown','unconfigured','load_failed236','limit'].includes(status))p.showRequested=false;
+  E.save();
+  if(status==='ready'&&!p.completed234){
+   if(!document.hidden){Game.showAd230();return;}
+   p.status236='closed';
+  }
+  if(!p.showRequested&&!['unavailable','load_failed236','closed','ready'].includes(status))p.error239=mt251('วิดีโอยังไม่พร้อม กรุณาลองอีกครั้ง','Video unavailable. Please retry.');
+  Game.rewardStatus230();
+ }
  if(status==='load_failed236')toast(tr('โหลดระบบโฆษณาไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วกดลองอีกครั้ง'));else rewardNativeStatus230(status);
 };
 var legacyReward230=root.novaRewardEarned;
-root.novaRewardEarned=function(id){if(!root.NovaAds||!root.NovaAds.rewardVerified){legacyReward230(id);return;}if(E.d.pendingAd230){E.d.pendingAd230.completed234=true;if(!E.save())return;close();scheduleReward241();Game.checkAd230('claim');toast(tr('ดูครบแล้ว กำลังรอการยืนยันรางวัล'));}if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);};
+root.novaRewardEarned=function(id){if(!root.NovaAds||!root.NovaAds.rewardVerified){legacyReward230(id);return;}if(E.d.pendingAd230){clearTimeout(rewardLoadTimer230);E.d.pendingAd230.showRequested=false;E.d.pendingAd230.completed234=true;if(!E.save())return;close();scheduleReward241();Game.checkAd230('claim');toast(tr('ดูครบแล้ว กำลังรอการยืนยันรางวัล'));}if(root.NovaAds.acknowledgeReward)root.NovaAds.acknowledgeReward(id);};
 var rewardEvent230=warEvent;warEvent=function(event,message){
  if(message.request_id&&message.request_id!==warActive)return;
  var req=lastWarRequest&&lastWarRequest.payload;
@@ -2045,7 +2080,10 @@ var statusSpeed264=root.novaRewardStatus;root.novaRewardStatus=function(status){
   },30000);return;
  }
  clearTimeout(speedLoadTimer264);speedLoadTimer264=null;speedWaitPhase264='native';
- if(status==='ready'){var p=E.d.pendingSpeed264;if(p&&p.provider==='admob')speedAdShow264(p);return;}
+ if(status==='ready'){
+  if(document.hidden){releaseUnwatched264();speedError264(mt251('กลับเข้าเกมแล้วกดลองอีกครั้ง','Return to the game and retry.'));return;}
+  var p=E.d.pendingSpeed264;if(p&&p.provider==='admob')speedAdShow264(p);return;
+ }
  if(status==='showing'||status==='test_showing248')return;
  var message=status==='closed'?mt251('ปิดวิดีโอก่อนจบ จึงยังไม่ได้เร่งเวลา','Video closed before completion. No speed-up applied.')
   :status==='disabled'?mt251('แอปยังขอโฆษณาไม่ได้ในขณะนี้','The app cannot request ads yet.')
