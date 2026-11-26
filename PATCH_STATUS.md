@@ -1,3 +1,17 @@
+# NOVA patch handoff — 2026-11-26
+
+## Patch 257 / 1.12.87-scroll-taps447
+
+Owner video: in the Army window, scrolling the troop list kept pressing "+ ผลิต" / info buttons by accident; buttons felt too big.
+
+Cause: tap407 fires a window button on pointerup *and* on pointercancel. WebView sends pointercancel when it takes a touch over for scrolling, so a scroll that started on a button pressed it.
+
+Changes (features/tap447/tap447.js, bundled after perf443):
+- Inside #modal, a touch that moves >9 px, scrolls anything, or is cancelled by the browser counts as a scroll; the following click (407 synthetic or native) is swallowed for 450 ms.
+- Smaller window buttons: train 30→24 px, filter/tabs 26 px, super-troop bar 28 px, attack-hub cards 118→76 px, "ฝึกทหาร" 34→28 px.
+
+Validation: tests/tap447.cjs; full TZ=UTC npm test passed; patch manifest builds. Headless Chrome (844x390, touch): before, a drag starting on "+ ผลิต" trained a troop; after, it does not, and a plain tap still trains.
+
 # NOVA patch handoff — 2026-11-21
 
 ## Patch 255 / 1.12.85-smooth443
