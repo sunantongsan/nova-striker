@@ -48,7 +48,7 @@ function integrate(source){
  source=source.replace('t.hp>0&&!t.alien&&!U[t.kind].air','t.hp>0&&!t.alien&&!t.titan342&&!U[t.kind].air');
  source=source.replace('try{musicTick218();if(screen', 'try{tickUI342(dt);musicTick218();if(screen');
  // Insert immediately before the outer IIFE closes, after all existing wrappers.
- const end=source.lastIndexOf("})(typeof globalThis");if(end<0)throw Error('Game closure not found');source=source.slice(0,end)+ui+'\n'+source.slice(end);
+ const end=source.lastIndexOf("})(typeof globalThis");if(end<0)throw Error('Game closure not found');source=source.slice(0,end)+ui+'\n'+fs.readFileSync(path.join(root,'features/rewardVideo/ready.js'),'utf8')+'\n'+source.slice(end);
  return source;
 }
 // Keep large, stable renderer/model data in the stable HTML shell. Small code-only

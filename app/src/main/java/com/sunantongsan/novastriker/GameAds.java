@@ -19,6 +19,11 @@ final class GameAds {
     private RewardedAd rewardReady;
     private boolean rewardLoading;
     private long rewardLoadedAt;
+    // Read from the WebView bridge thread; SDK ad objects stay on the UI thread.
+    private volatile long rewardCacheExpiresAt;
+    @JavascriptInterface public boolean rewardCached() {
+        return SystemClock.elapsedRealtime() < rewardCacheExpiresAt;
+    }
     private static final long REWARD_TTL_MS = 3500000L;
     private static final long REWARD_RETRY_MS = 30000L;
     private long rewardRetryAt;
@@ -48,6 +53,7 @@ final class GameAds {
             if (!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
             long now = SystemClock.elapsedRealtime();
             if (rewardReady == null || now - rewardLoadedAt >= REWARD_TTL_MS) {
+                rewardCacheExpiresAt = 0;
                 rewardReady = null;
                 if (now < rewardRetryAt) { rewardStatus("unavailable"); return; }
                 waitingReward = intent;
@@ -58,6 +64,7 @@ final class GameAds {
             }
             waitingReward = null;
             RewardedAd ad = rewardReady;
+            rewardCacheExpiresAt = 0;
             rewardReady = null;
             ad.setServerSideVerificationOptions(new ServerSideVerificationOptions.Builder().setUserId(owner).setCustomData(intent).build());
             showing=true;final boolean[] earned={false};
@@ -102,6 +109,7 @@ final class GameAds {
             scheduleReward(nextLoad - now);
             return;
         }
+        rewardCacheExpiresAt = 0;
         rewardReady = null;
         rewardLoading = true;
         int gen = generation;
@@ -117,6 +125,7 @@ final class GameAds {
                     if (consent.canRequestAds()) {
                         rewardReady = ad;
                         rewardLoadedAt = SystemClock.elapsedRealtime();
+                        rewardCacheExpiresAt = rewardLoadedAt + REWARD_TTL_MS;
                         rewardProblem = "";
                         scheduleReward(REWARD_TTL_MS);
                     }
@@ -260,7 +269,7 @@ final class GameAds {
             if (waitingReward != null) rewardStatus("closed");
             privacyFormOpen=true;
             adHandler.removeCallbacks(rewardRetry);
-            waitingReward=null; ready=null; rewardReady=null; generation++; clearBanner();
+            waitingReward=null; ready=null; rewardCacheExpiresAt=0; rewardReady=null; generation++; clearBanner();
             UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> { privacyFormOpen=false; initialize(); });
         });
     }
@@ -314,7 +323,7 @@ final class GameAds {
     private void done() { if (!destroyed) activity.adFinished(); }
     void resume() { foreground=true; preloadReward(); if(banner!=null && bannerAllowed) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
     void pause() { if (waitingReward != null) rewardStatus("closed"); waitingReward=null; foreground=false; adHandler.removeCallbacks(rewardRetry); adHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
-    void destroy() { destroyed=true; adHandler.removeCallbacksAndMessages(null); generation++; ready=null; rewardReady=null; clearBanner(); }
+    void destroy() { destroyed=true; adHandler.removeCallbacksAndMessages(null); generation++; ready=null; rewardCacheExpiresAt=0; rewardReady=null; clearBanner(); }
 }
 
 
