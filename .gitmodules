@@ -1,0 +1,3 @@
+[submodule "vendor/duck-war"]
+	path = vendor/duck-war
+	url = https://github.com/sunantongsan/duck-war.git
