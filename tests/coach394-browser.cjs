@@ -24,6 +24,23 @@ const source=integrate(fs.readFileSync('game.js','utf8'));
  async function until(page,re,ms){const end=Date.now()+ms;while(Date.now()<end){const t=await text(page);if(re.test(t))return t;await page.waitForTimeout(400);}throw Error('Timed out waiting for '+re+' last: '+await text(page));}
  async function tapWorld(page,x,y){await page.mouse.click(x,y);await page.waitForTimeout(700);}
 
+ // The first-play coach must leave account controls tappable on a fresh install.
+ {
+  const {page}=await session(()=>{
+   window.NovaCloud={available:()=>true,hasAccount:()=>false,accountInfo:()=>'{}',
+    emailAuth:action=>{window.submittedAccountAction=action;}};
+  });
+  assert.equal(await page.isVisible('#welcome'),false);
+  await page.click('#settingsButton');
+  await page.click('#modal button[onclick="Game.cloud()"]');
+  await page.click('#modal button[onclick*="emailForm"][onclick*="signup"]');
+  await page.fill('#authEmail','test@example.com');
+  await page.fill('#authPassword','test-password-258');
+  await page.click('#modal button[type="submit"]');
+  assert.equal(await page.evaluate(()=>window.submittedAccountAction),'signup');
+  await page.close();
+ }
+
  // Construction controls clear the bottom HUD, and resource cards show a single sprite.
  {const {page,errors}=await session();
   await page.setViewportSize({width:853,height:393});

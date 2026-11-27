@@ -146,6 +146,10 @@ function coachTick394(){
  try{
   if(!coachShouldRun394()){coachHide394();return;}
   if(!$('welcome').hidden||document.hidden){coachHide394();return;}
+  // Let the player finish signing in, then resume the same tutorial step.
+  if(coachModalOpen394()&&coachQ394('#modal #authEmail, #modal #authPassword, #modal button[onclick="Game.cloud()"], #modal button[onclick="Game.cloudLogin()"]')){
+   coachHide394();return;
+  }
   var s=coachState394(),step=coachSteps394[s.step];
   if(!step){coachFinish394(true);return;}
   var info=step()||{};
