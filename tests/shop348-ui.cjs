@@ -19,7 +19,7 @@ const touch={canvas:{addEventListener:(name,fn)=>tap=fn},screen:'home',coordinat
 vm.createContext(touch);const tapLine=src.split('\n').find(l=>l.startsWith("canvas.addEventListener('pointerdown'"));vm.runInContext(tapLine,touch);
 const event={button:0,preventDefault(){},stopImmediatePropagation(){}};tap(event);assert.equal(managed,1);assert.equal(selected,null);
 mech.hp=0;mech.resting347=true;tap(event);assert.equal(managed,2,'destroyed/resting mech is tappable');
-mech.hp=100;mech.resting347=false;touch.screen='raid';tap(event);assert.equal(selected,mech);assert.equal(managed,2);
+mech.hp=100;mech.resting347=false;touch.screen='raid';tap(event);assert.equal(selected,null,'444: battle taps never take control of the mech');assert.equal(managed,2);
 vm.runInContext(src.split('\n').find(l=>l.startsWith('Game.titanControl356=')),touch);touch.screen='home';touch.Game.titanControl356();assert.equal(closed,1);assert.equal(selected,mech);
 mech.resting347=true;touch.Game.titanControl356();assert.equal(managed,3);assert.equal(closed,1);
-console.log('PASS home tap management, zero-HP tap, explicit control and unchanged battle selection');
+console.log('PASS home tap management, zero-HP tap, explicit control; battle taps leave the mech on auto');

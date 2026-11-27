@@ -99,11 +99,11 @@ function titanTick342(scene,t,dt){if(t.hp<=0){t.action342='Collapse';delete t.pe
  else if(!t.manual342){
   t.pathAge=(t.pathAge||0)-dt;
   var revision=scene.obstacles443||0;
-  if(t.pathAge<=0||t.routeRevision443!==revision||t.routeTarget442!==target){
+  if(t.pathAge<=0||!t.route||!t.route.length||t.routeRevision443!==revision||t.routeTarget442!==(t.breach443||target)){
    t.route=titanPlan443(scene,t,target);
    t.routeTarget442=t.breach443||target;
    t.routeRevision443=revision;
-   t.pathAge=.7;
+   t.pathAge=2.5;// 444: commit to a route (0.7 s replans made it turn back and forth)
   }
   var waypoint=t.route[0];
   if(waypoint){

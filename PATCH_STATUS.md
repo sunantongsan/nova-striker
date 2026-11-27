@@ -1,3 +1,17 @@
+# NOVA patch handoff — 2026-11-27 (2)
+
+## Patch 261 / 1.12.91-auto-mech444
+
+Owner: remove player control of the mech entirely; the mech often dithers in one spot and won't push on.
+
+Changes (features/auto444/auto444.js, bundled last; engine.js; ui.js):
+- No manual control: joystick/skill panel and the home "บังคับหุ่น" button are hidden; selectTitan342 never grants control; battle taps on the mech pass through to troop deployment; home taps open the mech window. Deploy toast says it fights automatically.
+- Routes are kept 2.5 s (was replanned every 0.7 s → back-and-forth), and replanned at once when the route runs out.
+- Raiding mech stays on its chosen (non-wall) building until it falls, Clash-hero style.
+- Progress watchdog every 1.5 s: if not closer / not moved and the target took no damage, cut the building in front (walls included), else leap toward the target, else skip that target for 6 s.
+
+Validation: tests/battle444.cjs (VM: wall cut, leap, retarget, no manual select); shop348-ui updated for battle taps; full TZ=UTC npm test passed. Headless sim, mech alone 120 s, stall samples (3 s with <0.3 tile and no damage): stage 25 5→0, 40 1→0, 60 14→5 (remaining ones are guard-unit fights), destruction 58→75% (25), 23→29% (60).
+
 # NOVA patch handoff — 2026-11-27
 
 ## Patch 260 / 1.12.90-smooth-battle444

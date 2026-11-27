@@ -38,3 +38,28 @@ assert(/memo\.get\(signature\)/.test(hq)&&/while\(memo\.size>32\)/.test(hq),'HQ 
 assert(/Math\.round\(\(b\.aim\|\|0\)\*24\/\(Math\.PI\*2\)\)/.test(hq),'HQ aim in 24 steps');
 assert(/now-this\.recoverySaveAt347>=4000/.test(engine),'mech health is saved at most every 4 s during battle');
 console.log('battle444 ok');
+
+// --- always-automatic mech that does not stall
+const auto=fs.readFileSync('features/auto444/auto444.js','utf8');
+assert(fs.readFileSync('features/titan342/build.cjs','utf8').includes("features/auto444/auto444.js"),'auto444 is bundled');
+assert(/#titanControls342,#mechTap412\{display:none!important\}/.test(auto),'joystick/skill panel and home control button are gone');
+assert(/var found=screen!=='home'\?null:units\.find/.test(ui),'battle taps on the mech go to troop deployment');
+assert(/t\.pathAge=2\.5;/.test(engine),'routes are kept 2.5 s instead of 0.7 s');
+function autoSandbox(buildings,jumpOk){
+ const calls={jump:0,base:0,select:[]};
+ const s={Math,Game:{},document:{createElement:()=>({}),head:{appendChild(){}}},toast(){},
+  selectTitan342(t){calls.select.push(t);},mechTap412(){},trap278:()=>false,
+  titanTarget443(scene,t){calls.base++;return scene.buildings.filter(b=>b.hp>0&&b.type!=='wall').sort((a,b)=>Math.hypot(a.x-t.x,a.y-t.y)-Math.hypot(b.x-t.x,b.y-t.y))[0];},
+  titanTick342(scene,t,dt){t.aimTarget=s.titanTarget443(scene,t,dt);},
+  titanJump345(){calls.jump++;return jumpOk;}};
+ vm.createContext(s);vm.runInContext(auto,s);
+ const scene={buildings,troops:[]},t={titan342:true,hp:100,x:0,y:0,cool:0,jumpCooldown345:0};scene.troops.push(t);
+ for(let i=0;i<60;i++)s.titanTick342(scene,t,.05);// 3 s without moving
+ return {s,t,calls};
+}
+{const target={type:'hq',x:6,y:0,hp:100},wall={type:'wall',x:1.5,y:0,hp:50};const {t}=autoSandbox([target,wall],false);
+ assert.equal(t.breach443,wall,'a stalled mech cuts the wall in front of it');assert.equal(t.action342,'SwordSlash');}
+{const target={type:'hq',x:6,y:0,hp:100};const {t,calls}=autoSandbox([target],true);assert(calls.jump>0,'nothing to cut: it leaps toward the target');assert.equal(t.unstuck444,'jump');}
+{const a={type:'hq',x:6,y:0,hp:100},b={type:'mine',x:0,y:7,hp:100};const {t}=autoSandbox([a,b],false);assert(t.skip444&&t.skip444.b===a,'cannot cut or leap: tries another target');}
+{const {s,calls}=autoSandbox([{type:'hq',x:6,y:0,hp:1}],false);const m={manual342:true};s.selectTitan342(m);assert.equal(m.manual342,false);assert.equal(calls.select.at(-1),null,'selecting the mech never gives manual control');}
+console.log('auto444 ok');
