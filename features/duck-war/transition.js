@@ -8,6 +8,8 @@
   const key = 'duckwar.nova-welcome.v1';
   if (!localStorage.getItem(key) && (localStorage.getItem('novaRTS1') || window.NovaCloud?.hasAccount() || window.DuckHost?.upgraded())) {
     note.showModal();
+  } else {
+    localStorage.setItem(key, '1');
   }
   document.getElementById('duck-note-ok').onclick = () => note.close();
   note.addEventListener('close', () => localStorage.setItem(key, '1'));
