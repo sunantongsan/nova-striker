@@ -6,7 +6,7 @@
 // - Attack button opens a Clash-style attack hub; scouting shows End / Next and the troop bar,
 //   and dropping the first troop on a scouted player base starts the attack.
 (function(){
- var RED395=1.5,STREAM_MS395=130,HOLD_MS395=280;
+ var RED395=1.5,STREAM_MS395=130,HOLD_MS395=220;
  var flash395=0,pending395=null,hold395=null;
 
  // ---------- army: every trained troop goes to battle ----------
@@ -150,7 +150,7 @@
  canvas.addEventListener('pointermove',function(e){
   var h=hold395;if(!h||h.id!==e.pointerId)return;var p=coordinates(e);h.x=p.x;h.y=p.y;
   if(h.streaming){e.stopImmediatePropagation();e.preventDefault();return;}
-  if(Math.abs(p.x-h.sx)+Math.abs(p.y-h.sy)>7)stopHold395();
+  if(Math.abs(p.x-h.sx)+Math.abs(p.y-h.sy)>13)stopHold395();
  },true);
  ['pointerup','pointercancel'].forEach(function(t){canvas.addEventListener(t,function(e){var h=hold395;if(!h||h.id!==e.pointerId)return;var streamed=h.streaming;stopHold395();if(streamed){e.stopImmediatePropagation();hud();}},true);});
 

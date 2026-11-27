@@ -63,3 +63,30 @@ function autoSandbox(buildings,jumpOk){
 {const a={type:'hq',x:6,y:0,hp:100},b={type:'mine',x:0,y:7,hp:100};const {t}=autoSandbox([a,b],false);assert(t.skip444&&t.skip444.b===a,'cannot cut or leap: tries another target');}
 {const {s,calls}=autoSandbox([{type:'hq',x:6,y:0,hp:1}],false);const m={manual342:true};s.selectTitan342(m);assert.equal(m.manual342,false);assert.equal(calls.select.at(-1),null,'selecting the mech never gives manual control');}
 console.log('auto444 ok');
+
+// --- ruins and easy troop drops
+const ruin=fs.readFileSync('features/ruin444/ruin444.js','utf8'),dep=fs.readFileSync('features/deploy444/deploy444.js','utf8'),bld=fs.readFileSync('features/titan342/build.cjs','utf8');
+assert(bld.indexOf('ruin444.js')>bld.indexOf('auto444.js')&&bld.indexOf('deploy444.js')>bld.indexOf('ruin444.js'),'ruins and drops load last');
+{ // a destroyed building (HQ included) is drawn as a low rubble pile, never with its own art
+ const draws=[];let inner=0;
+ const s={Math,Date,wreckParts:{complete:true,naturalWidth:768,naturalHeight:512},tile:20,zoom:1,viewWidth:800,viewHeight:400,frame:0,drawNeeded:false,
+  point:()=>({x:200,y:200}),trap278:()=>false,drawBuilding(){inner++;},
+  ctx:{save(){},restore(){},translate(){},scale(){},beginPath(){},ellipse(){},fill(){},drawImage(...a){draws.push(a);},set globalAlpha(v){},set fillStyle(v){}}};
+ vm.createContext(s);vm.runInContext(ruin,s);
+ s.drawBuilding({type:'hq',x:1,y:1,hp:0,id:1});s.drawBuilding({type:'cannonturret',x:1,y:1,hp:0,id:2});
+ assert.equal(inner,0,'destroyed buildings skip their own wreck art');assert(draws.every(d=>d[0]===s.wreckParts),'only the rubble sheet is drawn');
+ s.drawBuilding({type:'cannonturret',x:1,y:1,hp:5,id:3});s.drawBuilding({type:'wall',x:1,y:1,hp:0,id:4});assert.equal(inner,2,'living buildings and walls keep their drawing');
+}
+{ // a tap in the red zone drops on the nearest open spot; online taps queue instead of failing
+ const calls=[];const r={mapSize:22,buildings:[{type:'gun',x:10,y:10,hp:5}],army:[3],result:null,liveMode:'attacker'};
+ const s={Math,Date,screen:'raid',drawNeeded:false,warBusy:false,liveRoom:null,E:{raid:r,d:{},deploy(i,x,y){calls.push([x,y]);return '';}},trap278:()=>false,mt251:a=>a,toast(){},hud(){},
+  setInterval(){},draw(){},ctx:{},point:()=>({x:0,y:0}),zoom:1};
+ vm.createContext(s);vm.runInContext(dep,s);
+ assert.equal(s.E.deploy(0,10.5,10.2),'');const [x,y]=calls[0];assert(Math.max(Math.abs(x-10),Math.abs(y-10))>=1.5,'moved out of the red zone');assert(Math.hypot(x-10.5,y-10.2)<1.6,'to the nearest edge');
+ s.E.deploy(0,2,2);assert.deepEqual(calls[1],[2,2],'open ground is untouched');
+ s.liveRoom={v:2,role:'attacker'};s.E.d.pendingSiegeDeploy={id:1};
+ assert.equal(s.E.deploy(0,3,3),'');assert.equal(s.E.deploy(0,4,4),'');assert.equal(s.E.deploy(0,5,5),'');assert.equal(calls.length,2,'queued while the server confirms');
+ assert.match(s.E.deploy(0,6,6),/หมด/,'cannot queue more troops than you have');
+}
+assert(/>\(screen==='raid'\?13:7\)\)drag\.moved=true/.test(fs.readFileSync('game.js','utf8')),'a small wobble is still a tap in battle');
+console.log('ruins/drops 444 ok');

@@ -1,3 +1,16 @@
+# NOVA patch handoff — 2026-11-27 (3)
+
+## Patch 262 / 1.12.92-ruins-drops444
+
+Owner: destroyed bases should sink/fade (some still showed their full shape); attacks still feel laggy; dropping troops should be as easy as Clash.
+
+Changes:
+- features/ruin444/ruin444.js (outermost drawBuilding): any destroyed non-wall building, HQ included, is drawn as a low, slightly faded rubble pile from combat-wrecks-171 on a scorched patch, settling in over 0.35 s with a dust burst; type-specific wreck art (charred cannon/silo/tanks/defense frames, tall 3D HQ wreck + HP bar) is no longer used in battle.
+- features/deploy444/deploy444.js: a red-zone tap drops on the nearest open spot (≤3 tiles) and flashes the zone; streaming over the red zone keeps going. Online (v2) attacks queue taps while the previous deploy awaits the server instead of failing with "กำลังส่งคำสั่ง"; queued taps never exceed the troops left; each tap shows a white drop ring at once.
+- game.js / army395: in battle a tap may wobble 13 units (was 7) before it becomes a pan; hold-to-stream starts after 220 ms (was 280).
+
+Validation: tests/battle444.cjs (VM: rubble path, red-zone snap, online queue + cap); full TZ=UTC npm test passed. Headless: all-destroyed base screenshot shows only rubble; red-zone deploy errors 130 → 0 in the scripted drop test.
+
 # NOVA patch handoff — 2026-11-27 (2)
 
 ## Patch 261 / 1.12.91-auto-mech444
