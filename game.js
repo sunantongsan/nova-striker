@@ -2663,10 +2663,32 @@ function dailyCalendarHTML340(){var c=checkinState233,streak=c?Math.max(0,c.stre
 checkinPanel233=function(){return welcomePanel247()+dailyCalendarHTML340()+'<button class="wide" onclick="Game.legacyBalance339()">'+mt251('รับยอด NOVA เดิมที่ยังไม่เคลม','Recover previous unclaimed NOVA')+'</button>';};
 var treasury340=treasury;treasury=function(){if(dailyView340)open(dailyCalendarHTML340());else treasury340();};
 var wallet340=Game.treasury;Game.treasury=Game.testShop=function(){dailyView340=false;wallet340();};
-Game.openDaily340=function(){dailyView340=true;open(dailyCalendarHTML340());if(!guest288&&!warBusy)Game.refreshCheckin233();};
+Game.openDaily340=function(){
+ dailyView340=true;
+ open(dailyCalendarHTML340());
+ var now=Date.now(),c=checkinState233;
+ var fresh=c&&testWallet&&now<dailyPollAt340&&now-dailyClockOffset340<Date.parse(c.next_reset);
+ var polling=dailyPollBusy340&&now<dailyPollAt340;
+ if(!guest288&&!warBusy&&!fresh&&!polling)Game.refreshCheckin233();
+};
 var closeDaily340=Game.close;Game.close=function(){dailyView340=false;closeDaily340();};
 var cloudDaily340=root.novaCloudEvent;root.novaCloudEvent=function(event,data){if(data&&data.request_id&&data.request_id.indexOf('daily340-')===0){if(data.request_id!==dailyPollBusy340)return;dailyPollBusy340=null;if(event==='war'&&data.data&&data.data.owner){testWallet=Object.assign({},testWallet||{},data.data);dailyStatus340(data.data);if(dailyView340&&modal.innerHTML.indexOf('daily-card340')>=0)treasury();}dailyBadge340();return;}var d=data&&data.data,owner=d&&d.owner,previous=owner&&(E.d.checkinCredits233||{})[owner],pending=!!(E.d.pendingTestCheckin248||E.d.pendingAd230&&E.d.pendingAd230.kind==='checkin');if(event==='signed_in'||event==='signed_out'){checkinState233=null;dailyReady340=false;dailyPollAt340=Date.now()+2200;dailyPollBusy340=null;dailyView340=false;}cloudDaily340(event,data);if(d&&testWallet&&owner===testWallet.owner)dailyStatus340(d);dailyBadge340();if(pending&&owner&&(E.d.checkinCredits233||{})[owner]!==previous&&d.checkin233&&d.checkin233.reward>0){completionAudio250();open('<section class="reward-success263"><h2>'+mt251('ยินดีด้วย!','Congratulations!')+'</h2><img src="assets/checkin-calendar-340.webp" alt="" style="width:80px;height:80px;object-fit:contain"><p><b>+'+Number(d.checkin233.reward)+' NOVA</b></p><button class="wide green" onclick="Game.close()">'+mt251('ตกลง','OK')+'</button></section>');}};
-function dailyBadge340(){var button=$('dailyCheckin340');if(!button)return;var c=checkinState233,expired=c&&c.next_reset&&Date.now()-dailyClockOffset340>=Date.parse(c.next_reset);dailyReady340=!!(c&&!c.claimed&&!expired&&!guest288);button.className='daily-calendar340'+(dailyReady340?' ready340':'');if(button.setAttribute)button.setAttribute('aria-label',dailyReady340?mt251('เช็คอินรายวัน พร้อมรับรางวัล','Daily check-in: reward available'):mt251('เช็คอินรายวัน','Daily check-in'));if(!document.hidden&&!guest288&&root.NovaCloud&&root.NovaCloud.hasAccount&&root.NovaCloud.hasAccount()&&root.NovaCloud.warAvailable&&root.NovaCloud.warAvailable()&&root.NovaCloud.warRequest&&(!c||expired)&&Date.now()>=dailyPollAt340){dailyPollBusy340='daily340-'+nonce160();dailyPollAt340=Date.now()+30000;try{root.NovaCloud.warRequest('test_status',JSON.stringify({checkin233:true}),dailyPollBusy340);}catch(e){dailyPollBusy340=null;}}}
+function dailyBadge340(){
+ var button=$('dailyCheckin340');if(!button)return;
+ var now=Date.now(),c=checkinState233,expired=c&&c.next_reset&&now-dailyClockOffset340>=Date.parse(c.next_reset);
+ dailyReady340=!!(c&&!c.claimed&&!expired&&!guest288);
+ var className='daily-calendar340'+(dailyReady340?' ready340':'');
+ if(button.className!==className)button.className=className;
+ var label=dailyReady340?mt251('เช็คอินรายวัน พร้อมรับรางวัล','Daily check-in: reward available'):mt251('เช็คอินรายวัน','Daily check-in');
+ if(button.setAttribute&&(!button.getAttribute||button.getAttribute('aria-label')!==label))button.setAttribute('aria-label',label);
+ if(document.hidden||guest288||(c&&!expired)||now<dailyPollAt340)return;
+ // Check the cheap local conditions before crossing the synchronous Android bridge.
+ dailyPollAt340=now+30000;
+ var cloud=root.NovaCloud;
+ if(!cloud||!cloud.warRequest||!cloud.hasAccount||!cloud.hasAccount()||!cloud.warAvailable||!cloud.warAvailable())return;
+ dailyPollBusy340='daily340-'+nonce160();
+ try{cloud.warRequest('test_status',JSON.stringify({checkin233:true}),dailyPollBusy340);}catch(e){dailyPollBusy340=null;}
+}
 
 var hudDaily340=hud;hud=function(){hudDaily340();dailyBadge340();};
 setTimeout(function(){dailyPollAt340=0;dailyBadge340();},2200);

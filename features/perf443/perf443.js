@@ -54,13 +54,17 @@
 // kept asking for 60 frames per second at full resolution while frames actually arrived late.
 (function(){
  if(typeof frameCost420!=='function'||typeof performance==='undefined')return;
- var inner=frameCost420,lastAt=0,gapAvg=16.7,holdUntil=0;
+ var inner=frameCost420,lastAt=0,gapAvg=16.7,lateAvg=0,holdUntil=0;
  frameCost420=function(ms){
   var now=performance.now(),gap=now-lastAt;lastAt=now;
-  if(gap>0&&gap<250)gapAvg=gapAvg*.9+gap*.1;
+  // This interval was scheduled using the previous frame's limit.
+  var target=Math.max(16.7,frameGap420);
+  if(gap>0&&gap<250){
+   gapAvg=gapAvg*.9+gap*.1;
+   lateAvg=lateAvg*.9+Math.max(0,gap-target)*.1;
+  }else lateAvg=0;
   inner(ms);
-  var target=Math.max(16.7,typeof frameGap420==='number'?frameGap420:16.7);
-  if(gapAvg>target+9)holdUntil=now+15000;
+  if(lateAvg>9)holdUntil=now+15000;
   if(now<holdUntil){frameGap420=32;if(gapAvg>42&&typeof frameAvg420==='number')frameAvg420=Math.max(frameAvg420,19);}
   // Village at rest (builders hammering, guards and mech idling): 30 frames per second is plenty and halves
   // the drawing work. Any touch (pan, zoom, drag) brings back full speed immediately.

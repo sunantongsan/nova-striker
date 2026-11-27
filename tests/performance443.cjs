@@ -47,6 +47,8 @@ function sandbox(transform){
  const {s,listeners}=sandbox({t:{a:1,b:0,c:0,d:1}});
  s.clock=10000;for(let i=0;i<60;i++){s.clock+=16.7;s.frameCost420(2);}
  assert.equal(s.frameGap420,32,'village at rest: 30 fps');
+ for(let i=0;i<150;i++){s.clock+=33.33;s.frameCost420(2);}
+ assert.equal(s.window.perf443.held(),false,'intentional 30 fps must not trigger the slow-device hold');
  listeners.pointerdown();for(let i=0;i<10;i++){s.clock+=16.7;s.frameCost420(2);}
  assert.equal(s.frameGap420,15,'touching: full speed');
  for(let i=0;i<60;i++){s.clock+=40;s.frameCost420(2);listeners.pointermove();}

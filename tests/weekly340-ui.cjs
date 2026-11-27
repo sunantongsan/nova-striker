@@ -15,6 +15,12 @@ const a=boot({novaRTSIntro:'1'}),G=a.s.Game,e=a.s.test232.e,owner='10000000-0000
 const reply=d=>{const r=a.requests.at(-1);a.s.novaCloudEvent('war',{action:r.a,request_id:r.id,data:d});};
 const base={owner,test_gems:0,test_checkin248:true,checkin233:{day:'2026-10-24',claimed:false,streak:6,reward:0,next_reward:200,server_time:new Date().toISOString(),next_reset:new Date(Date.now()+3600000).toISOString(),schedule340:true}};
 G.openDaily340();reply(base);assert(a.el('modal').innerHTML.includes('15 NOVA')&&a.el('modal').innerHTML.includes('checkinFree395'));assert(a.el('dailyCheckin340').className.includes('ready340'));assert(!a.el('modal').innerHTML.includes('test ad'));
+const requestsBefore=a.requests.length;
+let bridgeCalls=0;a.s.NovaCloud.hasAccount=()=>{bridgeCalls++;return true;};
+for(let i=0;i<100;i++)a.s.test232.badge();
+G.openDaily340();
+assert.equal(a.requests.length,requestsBefore,'reopening a fresh calendar uses the confirmed status');
+assert.equal(bridgeCalls,0,'refreshing the HUD with a valid status never crosses the Android bridge');
 const before=e.d.gems;G.checkin();const p=a.requests.at(-1).p;reply({...base,test_receipt248:{id:p.request_id,day:'2026-10-24',amount:200,claimed:false}});assert.equal(shown.length,1,'check-in launches video without another confirmation');assert.equal(e.d.gems,before);
 a.s.novaRewardStatus('closed');assert.equal(e.d.gems,before,'closing video early gives nothing');
 a.s.novaTestRewardEarned248(owner,p.request_id);assert.equal(e.d.gems,before,'SDK completion waits for server');const claimed={...base,checkin233:{...base.checkin233,claimed:true,streak:7,reward:200,next_reward:50},test_receipt248:{id:p.request_id,day:'2026-10-24',amount:200,claimed:true,granted:200}};reply(claimed);assert.equal(e.d.gems,before+200);assert(!a.el('dailyCheckin340').className.includes('ready340'));
