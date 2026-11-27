@@ -1,3 +1,22 @@
+# NOVA patch handoff — 2026-11-27
+
+## Patch 260 / 1.12.90-smooth-battle444
+
+Owner video: in a raid, after sending the mech every tap showed "หุ่นกำลังพักฟื้น" and no troop could be deployed; the battle was very choppy (~12 distinct frames/s with 0.3–0.6 s freezes in the recording).
+
+Causes:
+- The mech "armed" flag (deployTitan342) could stay on after the mech was out (a server reply re-arms it). The canvas tap handler then kept sending taps to the mech, which is "resting" as soon as it is damaged, and swallowed the tap.
+- In battle the mech was re-rendered in WebGL and copied out (createImageBitmap) up to 30x/s; the enemy HQ robot re-rendered + copied on every aim/charge change (aim in 88 steps). Headless profile: ~2.1 s of 12 s in createImageBitmap with the mech on the field.
+- Mech health was saved (whole save JSON to localStorage) every second while it took damage.
+
+Changes:
+- features/titan342/ui.js: mechSpent444 — if the mech is already on the field, used, or resting, a tap disarms the mech and goes to troop deployment.
+- features/titan342/renderer.js: cached444 — battle poses (clip frame at 15 fps × 16 facings) are rendered once into 160x200 canvases and reused (LRU 120). Home base keeps the live idle animation path.
+- features/titan342/hq-renderer.js: HQ poses memoised by signature (aim 24 steps, charge quarters, LRU 32).
+- features/titan342/engine.js: mech recovery save during battle at most every 4 s.
+
+Validation: tests/battle444.cjs (tap routing in a VM + cache guards); full TZ=UTC npm test passed. Headless Chrome before/after close-ups of mech and HQ match. No physical-phone FPS measured.
+
 # NOVA patch handoff — 2026-11-26
 
 ## Patch 257 / 1.12.87-scroll-taps447
