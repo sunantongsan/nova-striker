@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     private NovaBilling billing;
     void billingEvent348(String event, org.json.JSONObject data){if(!destroyed&&game!=null)game.evaluateJavascript("window.novaBilling348 && window.novaBilling348("+org.json.JSONObject.quote(event)+","+data.toString()+")",null);}
     void cloudEvent(String event, org.json.JSONObject data) { game.evaluateJavascript("window.novaCloudEvent && window.novaCloudEvent("+org.json.JSONObject.quote(event)+","+data.toString()+")",null); }
-    private boolean adsStarted, gameReady, destroyed, rolledBack;
+    private boolean gameCallbacksStarted, gameReady, destroyed, rolledBack;
     private GamePatcher patcher;
     private FrameLayout welcome;
     private TextView updateStatus;
@@ -75,7 +75,11 @@ public class MainActivity extends Activity {
             if("true".equals(value)) {
                 gameReady=true;welcome.setVisibility(View.GONE);patcher.bootSucceeded();
                 game.evaluateJavascript(BannerLayout.SCRIPT,null);
-                if(!adsStarted){adsStarted=true;ads.begin();cloud.callback(getIntent().getData());}
+                if (!gameCallbacksStarted) {
+                    gameCallbacksStarted = true;
+                    ads.deliverGameEvents();
+                    cloud.callback(getIntent().getData());
+                }
             } else if(!rolledBack&&patcher.rollback()) {
                 rolledBack=true;showProgress("กำลังกู้คืนข้อมูลเกมชุดก่อนหน้า…",-1);loadPreparedGame();
             } else showProgress("เปิดเกมไม่สำเร็จ กรุณาปิดแล้วเปิดเกมอีกครั้ง",0);
@@ -168,6 +172,7 @@ public class MainActivity extends Activity {
             public void progress(String text,int percent){runOnUiThread(()->showProgress(text,percent));}
             public void ready(){runOnUiThread(()->loadPreparedGame());}
         });
+        ads.begin();
         patcher.start();
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> game.evaluateJavascript("window.novaBack && window.novaBack()", null));

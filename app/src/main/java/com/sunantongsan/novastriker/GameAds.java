@@ -22,6 +22,11 @@ final class GameAds {
     private static final long REWARD_TTL_MS = 3500000L;
     private static final long REWARD_RETRY_MS = 30000L;
     private long rewardRetryAt;
+    private final android.os.Handler adHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable rewardRetry = this::preloadReward;
+    private boolean privacyFormOpen;
+    private boolean bannerAllowed;
+    private long bannerRetryAt;
     private String waitingReward;
     private volatile String rewardProblem = "";
     private static final String REWARD_UNIT = "ca-app-pub-4585492700643566/9387691342"; // Nova optional reward; UI remains gated until verified rewards are ready.
@@ -40,7 +45,7 @@ final class GameAds {
             if (destroyed) return;
             if (!foreground || showing) { rewardStatus("closed"); return; }
             if (!prefs.getString("rewardPending", "").isEmpty()) { deliverPending(); return; }
-            if (!consent.canRequestAds()) { rewardStatus("disabled"); return; }
+            if (!enabled() || !consent.canRequestAds()) { rewardStatus("disabled"); return; }
             long now = SystemClock.elapsedRealtime();
             if (rewardReady == null || now - rewardLoadedAt >= REWARD_TTL_MS) {
                 rewardReady = null;
@@ -78,16 +83,25 @@ final class GameAds {
         boolean google = error != null && "com.google.android.gms.ads".equals(error.getDomain());
         rewardProblem = stage + "/" + (google ? "google" : "other") + "/" + (error == null ? -1 : error.getCode());
         rewardRetryAt = SystemClock.elapsedRealtime() + REWARD_RETRY_MS;
+        scheduleReward(REWARD_RETRY_MS);
     }
     private void finishRewardLoad() {
         boolean notify = waitingReward != null && foreground;
         waitingReward = null;
         if (notify) rewardStatus(rewardReady != null ? "ready" : "unavailable");
     }
+    private void scheduleReward(long delay) {
+        adHandler.removeCallbacks(rewardRetry);
+        if (foreground && !destroyed && !privacyFormOpen) adHandler.postDelayed(rewardRetry, delay);
+    }
     private void preloadReward() {
         long now = SystemClock.elapsedRealtime();
-        if (!sdkReady || destroyed || !foreground || !consent.canRequestAds() || showing || rewardLoading
-                || now < rewardRetryAt || (rewardReady != null && now - rewardLoadedAt < REWARD_TTL_MS)) return;
+        if (!sdkReady || destroyed || privacyFormOpen || !foreground || !consent.canRequestAds() || showing || rewardLoading) return;
+        long nextLoad = rewardReady == null ? rewardRetryAt : rewardLoadedAt + REWARD_TTL_MS;
+        if (nextLoad > now) {
+            scheduleReward(nextLoad - now);
+            return;
+        }
         rewardReady = null;
         rewardLoading = true;
         int gen = generation;
@@ -104,6 +118,7 @@ final class GameAds {
                         rewardReady = ad;
                         rewardLoadedAt = SystemClock.elapsedRealtime();
                         rewardProblem = "";
+                        scheduleReward(REWARD_TTL_MS);
                     }
                     finishRewardLoad();
                 }
@@ -167,21 +182,34 @@ final class GameAds {
         });
     }
     @JavascriptInterface public void bannerLayoutAllowed(boolean allowed) {
-        activity.runOnUiThread(() -> { if(!destroyed) activity.setBannerLayoutAllowed(allowed); });
+        activity.runOnUiThread(() -> { if (destroyed) return;
+            bannerAllowed = allowed;
+            activity.setBannerLayoutAllowed(allowed);
+            if (allowed) {
+                if (banner != null && foreground) banner.resume();
+                loadBanner();
+            } else {
+                adHandler.removeCallbacks(bannerRetry);
+                if (banner != null) banner.pause();
+            } });
     }
     private AdView banner;
     private boolean bannerLoaded;
-    private final android.os.Handler bannerHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private final Runnable bannerRetry = this::loadBanner;
     private void clearBanner() {
-        bannerHandler.removeCallbacks(bannerRetry);
+        adHandler.removeCallbacks(bannerRetry);
         bannerLoaded=false;
         activity.showBanner(null);
         if (banner!=null) { banner.destroy(); banner=null; }
     }
     private void loadBanner() {
-        if (!initialized || !foreground || !enabled() || !consent.canRequestAds() || banner!=null) return;
-        bannerHandler.removeCallbacks(bannerRetry);
+        if (!sdkReady || !foreground || !bannerAllowed || !enabled() || !consent.canRequestAds() || banner!=null) return;
+        adHandler.removeCallbacks(bannerRetry);
+        long remaining = bannerRetryAt - SystemClock.elapsedRealtime();
+        if (remaining > 0) {
+            adHandler.postDelayed(bannerRetry, remaining);
+            return;
+        }
         final AdView view=new AdView(activity);
         final int gen=generation;
         banner=view;
@@ -197,7 +225,9 @@ final class GameAds {
             @Override public void onAdFailedToLoad(LoadAdError error) {
                 if (banner!=view || destroyed) return;
                 clearBanner();
-                if (foreground && enabled() && consent.canRequestAds()) bannerHandler.postDelayed(bannerRetry,60000);
+                long delay = error.getCode() == AdRequest.ERROR_CODE_NETWORK_ERROR ? 15000L : 60000L;
+                bannerRetryAt = SystemClock.elapsedRealtime() + delay;
+                if (foreground && bannerAllowed) adHandler.postDelayed(bannerRetry, delay);
             }
         });
         Bundle extras=new Bundle(); extras.putString("npa","1");
@@ -212,11 +242,13 @@ final class GameAds {
         consent = UserMessagingPlatform.getConsentInformation(activity);
     }
     void begin() {
-        deliverTest248();
-        deliverPending();
         if (enabled()) requestConsent();
     }
-    private boolean enabled() { return !destroyed; }
+    void deliverGameEvents() {
+        deliverTest248();
+        deliverPending();
+    }
+    private boolean enabled() { return !destroyed && !privacyFormOpen; }
     // Ads are on by default, like other games. Google's consent form (UMP) appears by itself only
     // where the law requires it; this opens Google's privacy options there and does nothing elsewhere.
     @JavascriptInterface public boolean privacyRequired() {
@@ -224,10 +256,12 @@ final class GameAds {
     }
     @JavascriptInterface public void settings() {
         activity.runOnUiThread(() -> {
-            if (destroyed || showing || !privacyRequired()) return;
+            if (!enabled() || showing || !privacyRequired()) return;
             if (waitingReward != null) rewardStatus("closed");
+            privacyFormOpen=true;
+            adHandler.removeCallbacks(rewardRetry);
             waitingReward=null; ready=null; rewardReady=null; generation++; clearBanner();
-            UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> initialize());
+            UserMessagingPlatform.showPrivacyOptionsForm(activity, error -> { privacyFormOpen=false; initialize(); });
         });
     }
     private void requestConsent() {
@@ -278,9 +312,9 @@ final class GameAds {
         });
     }
     private void done() { if (!destroyed) activity.adFinished(); }
-    void resume() { foreground=true; preloadReward(); if(banner!=null) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
-    void pause() { if (waitingReward != null) rewardStatus("closed"); waitingReward=null; foreground=false; bannerHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
-    void destroy() { destroyed=true; generation++; ready=null; rewardReady=null; clearBanner(); }
+    void resume() { foreground=true; preloadReward(); if(banner!=null && bannerAllowed) { banner.resume(); if(bannerLoaded && enabled() && consent.canRequestAds()) activity.showBanner(banner); } else loadBanner(); }
+    void pause() { if (waitingReward != null) rewardStatus("closed"); waitingReward=null; foreground=false; adHandler.removeCallbacks(rewardRetry); adHandler.removeCallbacks(bannerRetry); if(banner!=null) banner.pause(); activity.showBanner(null); }
+    void destroy() { destroyed=true; adHandler.removeCallbacksAndMessages(null); generation++; ready=null; rewardReady=null; clearBanner(); }
 }
 
 
