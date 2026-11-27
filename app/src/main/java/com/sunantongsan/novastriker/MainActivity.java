@@ -59,6 +59,37 @@ public class MainActivity extends Activity {
     private TextView updateStatus;
     private ProgressBar updateProgress;
     private static final String GAME_URL="https://appassets.androidplatform.net/assets/index.html";
+    private static final String DUCK_URL="https://appassets.androidplatform.net/assets/duck/index.html";
+    private boolean inServices, servicesPrepared, servicesPreparing;
+    private PlayUpdates playUpdates;
+    private void goDuck() {
+        inServices=false;
+        gameReady=false;
+        setBannerLayoutAllowed(false);
+        game.loadUrl(DUCK_URL);
+    }
+    private final class DuckHost {
+        @JavascriptInterface public boolean upgraded() {
+            try {
+                android.content.pm.PackageInfo info=getPackageManager().getPackageInfo(getPackageName(),0);
+                return info.lastUpdateTime>info.firstInstallTime;
+            } catch (android.content.pm.PackageManager.NameNotFoundException e) { return false; }
+        }
+        @JavascriptInterface public void openServices() { runOnUiThread(()->{
+            if(destroyed || inServices)return;
+            inServices=true;
+            gameReady=false;
+            setBannerLayoutAllowed(false);
+            welcome.setVisibility(View.VISIBLE);
+            if(servicesPrepared) loadPreparedGame();
+            else if(!servicesPreparing) { servicesPreparing=true; patcher.start(); }
+        }); }
+        @JavascriptInterface public void backToDucks() { runOnUiThread(()->{if(inServices)goDuck();}); }
+    }
+    private void back() {
+        if(inServices) goDuck();
+        else game.evaluateJavascript("window.duckBack && window.duckBack()",null);
+    }
     private void showProgress(String message,int percent) {
         if(destroyed)return;
         updateStatus.setText(message);updateProgress.setIndeterminate(percent<0);
@@ -71,10 +102,11 @@ public class MainActivity extends Activity {
     }
     private void finishBoot() {
         game.evaluateJavascript("!!window.novaPatchReady && !window.novaPatchError", value->{
-            if(destroyed)return;
+            if(destroyed || !inServices)return;
             if("true".equals(value)) {
                 gameReady=true;welcome.setVisibility(View.GONE);patcher.bootSucceeded();
                 game.evaluateJavascript(BannerLayout.SCRIPT,null);
+                game.evaluateJavascript("var services=document.createElement('script');services.src='duck/services.js';document.body.appendChild(services);",null);
                 if (!gameCallbacksStarted) {
                     gameCallbacksStarted = true;
                     ads.deliverGameEvents();
@@ -86,16 +118,16 @@ public class MainActivity extends Activity {
         });
     }
     private FrameLayout createWelcome() {
-        FrameLayout scene=new FrameLayout(this);scene.setBackgroundColor(0xff08214b);
+        FrameLayout scene=new FrameLayout(this);scene.setBackgroundColor(0xff83c7e9);
         ImageView art=new ImageView(this);art.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        try(java.io.InputStream in=getAssets().open("assets/nova-welcome-landscape306.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
+        try(java.io.InputStream in=getAssets().open("duck/assets/welcome.webp")){art.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(in,null));}catch(Exception ignored){}
         scene.addView(art,new FrameLayout.LayoutParams(-1,-1));
         int gap=(int)(10*getResources().getDisplayMetrics().density);
-        TextView title=new TextView(this);title.setText("NOVA STRIKER");title.setTextColor(0xffffdf72);title.setTextSize(26);title.setGravity(Gravity.LEFT);title.setTypeface(null,android.graphics.Typeface.BOLD_ITALIC);title.setShadowLayer(5,0,4,0xff083760);title.setPadding(gap*2,gap,0,0);scene.addView(title,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
+        TextView title=new TextView(this);title.setText("Duck War");title.setTextColor(0xffffdf72);title.setTextSize(26);title.setGravity(Gravity.LEFT);title.setTypeface(null,android.graphics.Typeface.BOLD_ITALIC);title.setShadowLayer(5,0,4,0xff083760);title.setPadding(gap*2,gap,0,0);scene.addView(title,new FrameLayout.LayoutParams(-1,-2,Gravity.TOP));
         LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(gap*2,gap/2,gap*2,gap);panel.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,new int[]{0x00081936,0x77081936,0xbb081936}));
         updateStatus=new TextView(this);updateStatus.setText("กำลังตรวจสอบข้อมูลเกม…");updateStatus.setTextColor(Color.WHITE);updateStatus.setTextSize(12);updateStatus.setGravity(Gravity.CENTER);updateStatus.setPadding(0,0,0,gap/2);panel.addView(updateStatus,new LinearLayout.LayoutParams(-1,-2));
         updateProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);updateProgress.setMax(100);updateProgress.setIndeterminate(true);updateProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xffb8ef7d));panel.addView(updateProgress,new LinearLayout.LayoutParams(-1,Math.max(4,gap/2)));
-        TextView hint=new TextView(this);hint.setText("เตรียมพร้อมสู่ภารกิจ NOVA");hint.setTextColor(0xffd0efff);hint.setTextSize(10);hint.setGravity(Gravity.CENTER);hint.setPadding(0,gap/2,0,0);panel.addView(hint);
+        TextView hint=new TextView(this);hint.setText("เตรียมพร้อมเข้าสู่เกม");hint.setTextColor(0xffd0efff);hint.setTextSize(10);hint.setGravity(Gravity.CENTER);hint.setPadding(0,gap/2,0,0);panel.addView(hint);
         scene.addView(panel,new FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM));return scene;
     }
     void rewardStatus(String status) { game.evaluateJavascript("window.novaRewardStatus && window.novaRewardStatus("+org.json.JSONObject.quote(status)+")",null); }
@@ -115,13 +147,26 @@ public class MainActivity extends Activity {
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this)).build();
         ads = new GameAds(this);
         game.addJavascriptInterface(ads, "NovaAds");
+        playUpdates=new PlayUpdates(this);
+        game.addJavascriptInterface(new DuckHost(),"DuckHost");
         cloud=new NovaCloud(this);
         game.addJavascriptInterface(cloud, "NovaCloud");
         billing=new NovaBilling(this,cloud);game.addJavascriptInterface(billing,"NovaBilling");
         game.setHapticFeedbackEnabled(true);game.addJavascriptInterface(new NovaHaptics(game),"NovaHaptics");
         game.setWebViewClient(new WebViewClient() {
             @Override public void onPageFinished(WebView view, String url) {
-                if (url.equals(GAME_URL)) { finishBoot(); game.getRootView().requestApplyInsets(); immersive303(); }
+                if (url.equals(DUCK_URL) && !inServices) {
+                    game.evaluateJavascript("!!window.duckReady && !window.duckError", value -> {
+                        if (destroyed || inServices) return;
+                        if ("true".equals(value)) {
+                            gameReady=true;
+                            welcome.setVisibility(View.GONE);
+                            updateBanner();
+                            playUpdates.check();
+                        } else showProgress("เปิด Duck War ไม่สำเร็จ กรุณาเปิดเกมอีกครั้ง",0);
+                    });
+                }
+                if (url.equals(GAME_URL) && inServices) { finishBoot(); game.getRootView().requestApplyInsets(); immersive303(); }
             }
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 WebResourceResponse response=null;
@@ -170,21 +215,25 @@ public class MainActivity extends Activity {
         root.requestApplyInsets();
         patcher=new GamePatcher(this,new GamePatcher.Listener(){
             public void progress(String text,int percent){runOnUiThread(()->showProgress(text,percent));}
-            public void ready(){runOnUiThread(()->loadPreparedGame());}
+            public void ready(){runOnUiThread(()->{servicesPrepared=true;servicesPreparing=false;if(inServices)loadPreparedGame();});}
         });
         ads.begin();
-        patcher.start();
+        if(getIntent().getData()!=null && "novastriker".equals(getIntent().getData().getScheme()))new DuckHost().openServices();
+        else goDuck();
         if (android.os.Build.VERSION.SDK_INT >= 33) {
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> game.evaluateJavascript("window.novaBack && window.novaBack()", null));
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, this::back);
         }
     }
-    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); if(cloud!=null&&gameReady)cloud.callback(intent.getData()); }
-    @Override public void onBackPressed() { game.evaluateJavascript("window.novaBack && window.novaBack()", null); }
+    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); if(cloud!=null && intent.getData()!=null) {
+        if(inServices && gameReady) cloud.callback(intent.getData());
+        else { gameCallbacksStarted=false; new DuckHost().openServices(); }
+    } }
+    @Override public void onBackPressed() { back(); }
     @Override protected void onPause() {
-        game.evaluateJavascript("typeof pauseGame === 'function' && pauseGame()", null);
+        game.evaluateJavascript("window.duckPause && window.duckPause(); typeof pauseGame === 'function' && pauseGame()", null);
         ads.pause(); game.onPause(); super.onPause();
     }
-    @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume(); if(billing!=null)billing.resume();
+    @Override protected void onResume() { super.onResume(); immersive303(); if(game != null) game.onResume(); if(ads != null) ads.resume(); if(billing!=null)billing.resume(); if(playUpdates!=null && gameReady && !inServices)playUpdates.check();
     }
     private void immersive303() {
         android.view.Window window=getWindow();

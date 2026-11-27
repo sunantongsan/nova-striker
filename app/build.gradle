@@ -7,8 +7,8 @@ android {
         applicationId 'com.sunantongsan.novastriker'
         minSdk 26
         targetSdk 36
-        versionCode 44
-        versionName '1.9.44'
+        versionCode 45
+        versionName '2.0.0'
         buildConfigField 'String', 'NOVA_PATCH_CHANNEL', '"test"'
         buildConfigField 'String', 'NOVA_PATCH_ORIGIN', '"https://nova-striker-updates.vercel.app"'
         buildConfigField 'String', 'NOVA_PATCH_BACKUP_ORIGIN', groovy.json.JsonOutput.toJson(providers.gradleProperty('novaPatchBackupOrigin').getOrElse('https://game.guardscan.xyz'))
@@ -34,8 +34,14 @@ android {
             }
         }
     }
-    sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets'), layout.buildDirectory.dir('generated/patchAssets')] }
+    sourceSets { main.assets.srcDirs = [layout.buildDirectory.dir('generated/gameAssets'), layout.buildDirectory.dir('generated/patchAssets'), layout.buildDirectory.dir('generated/duckAssets')] }
 }
+android.sourceSets.main.res.srcDir(rootProject.file('vendor/duck-war/app/src/main/res'))
+tasks.register('packageDuckWar', Exec) {
+    workingDir rootProject.projectDir
+    commandLine 'node', 'scripts/package-duck.cjs'
+}
+tasks.named('preBuild').configure { dependsOn 'packageDuckWar' }
 // One task writes both content and its manifest from the same verified bytes.
 tasks.register('generateTitanAssets', Exec) {
     workingDir rootProject.projectDir
@@ -48,6 +54,7 @@ tasks.register('generatePatchManifest', Exec) {
 }
 tasks.named('preBuild').configure { dependsOn 'generatePatchManifest' }
 dependencies {
+    implementation 'com.google.android.play:app-update:2.1.0'
     implementation 'com.android.billingclient:billing:9.1.0'
     implementation 'androidx.fragment:fragment:1.8.9'
     implementation 'androidx.activity:activity:1.10.1'
