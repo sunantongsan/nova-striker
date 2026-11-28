@@ -7,7 +7,7 @@ function boot(data={},platform='android'){
  const storage={getItem:k=>data[k]||null,setItem:(k,v)=>data[k]=v,removeItem:k=>delete data[k]};
  const s={crypto:require('node:crypto').webcrypto,console:{log(){},error:(...a)=>errors.push(a)},Date,Math,Uint8Array,performance:{now:()=>0},setTimeout:(f,ms)=>{timers.set(++timerId,{f,ms});return timerId;},clearTimeout:id=>timers.delete(id),Image:class{},localStorage:storage,document:{getElementById:el,addEventListener(){},hidden:false},addEventListener(){},requestAnimationFrame:f=>frame=f,location:{reload:()=>reloads++},NovaCloud:{hasAccount:()=>true,available:()=>true,warAvailable:()=>true,load(){},warRequest:(a,p,id)=>requests.push({a,p:JSON.parse(p),id})}};
  if(platform==='telegram'){s.Telegram={WebApp:{}};s.window=s;}
- vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v,select:id=>selected=id,clearBusy:()=>{warBusy=false;warActive=null;},badge:()=>dailyBadge340(),setClock:v=>dailyClockOffset340=v,pollNow:()=>dailyPollAt340=0,robots:()=>robots251,robotTick:()=>updateRobots251(),setOnline:()=>{E.d.onlineCrystal={owner:"a"};E.d.admob230=true;}};})(typeof globalThis!=='),s);
+ vm.createContext(s);vm.runInContext(source.replace('})(typeof globalThis!==','root.test232={e:E,setScreen:v=>screen=v,select:id=>selected=id,setBusy:()=>{warBusy=true;},clearBusy:()=>{warBusy=false;warActive=null;},badge:()=>dailyBadge340(),setClock:v=>dailyClockOffset340=v,pollNow:()=>dailyPollAt340=0,robots:()=>robots251,robotTick:()=>updateRobots251(),setOnline:()=>{E.d.onlineCrystal={owner:"a"};E.d.admob230=true;}};})(typeof globalThis!=='),s);
  return {s,el,data,errors,requests,timers,reloads:()=>reloads,frame:n=>frame(n)};
 }
 
@@ -63,4 +63,25 @@ console.log('PASS checkin395 UI: free 5 button, x3 video offer, one choice per d
  assert.equal(restart.requests.at(-1).p.speed264,'prepare');
  assert.equal(state.pendingAd230.request_id,id);
  console.log('PASS interrupted check-in: recover legacy receipt, cancel a stalled load, accept a speed-up tap');
+}
+
+// A calendar opened during unrelated cloud work must recover without being reopened.
+{
+ const g = boot({novaRTSIntro:'1'}), modal = g.el('modal');
+ g.s.Game.openDaily340();
+ const req = g.requests.at(-1);
+ g.s.novaCloudEvent('war',{action:req.a,request_id:req.id,data:ck({streak:3})});
+ g.s.test232.setBusy();
+ g.s.Game.openDaily340();
+ assert.match(modal.innerHTML,/data-checkin-wait/);
+ modal.querySelector = selector => selector === '[data-checkin-wait]' && modal.innerHTML.includes('data-checkin-wait');
+ g.s.test232.clearBusy();
+ const refresh = [...g.timers.values()].findLast(t => t.ms === 500);
+ refresh.f();
+ assert.doesNotMatch(modal.innerHTML,/data-checkin-wait/);
+ assert.match(modal.innerHTML,/class="wide green" +onclick="Game.checkinFree395/);
+ assert.match(modal.innerHTML,/class="wide gold395" disabled/);
+ g.s.Game.checkinFree395();
+ assert.equal(g.requests.at(-1).p.checkin395,'free');
+ console.log('PASS day four: normal claim recovers after background work with no video available');
 }

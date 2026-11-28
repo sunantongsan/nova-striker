@@ -95,7 +95,11 @@
    if (entry && (!entry.receipt || !videoAvailable())) {
     if (!button.hasAttribute('data-wait-video')) button.setAttribute('data-wait-video',button.innerHTML);
     button.disabled = true;
-    var message = entry.message || mt251('กำลังเตรียมวิดีโอ…','Preparing video…');
+    var message = entry.message || rewardFailure254('unavailable',mt251('กำลังเตรียมวิดีโอ…','Preparing video…'));
+    if (o.kind === 'checkin') {
+     var amount = checkinState233.video395 || (checkinState233.streak % 7 === 6 ? 45 : 15);
+     message = 'x3 = ' + amount + ' NOVA · ' + message;
+    }
     if (button.textContent !== message) button.textContent = message;
    } else if (button.hasAttribute('data-wait-video')) {
     button.innerHTML = button.getAttribute('data-wait-video');

@@ -48,6 +48,7 @@ function el412(tag,cls,html){var n=document.createElement(tag);if(cls)n.classNam
 function fluidIcon412(i){return '<i class="fluid403" style="background-position:'+(i*50)+'% 50%" aria-hidden="true"></i>';}
 function short412(n){n=Math.floor(n||0);return n>=1e6?(Math.floor(n/1e5)/10)+'M':n>=1e4?(Math.floor(n/100)/10)+'K':n.toLocaleString('en-US');}
 function compactWallet412(){
+ if(dailyView340)return;
  var sheet=modal.querySelector('.sheet'),content=modal.querySelector('.novaContent360'),daily=content&&content.querySelector('.daily-card340');
  if(!sheet||!content||!daily||content.dataset.w412)return;
  var kids=Array.prototype.slice.call(content.children),take=function(f){var i=kids.findIndex(f);return i<0?null:kids.splice(i,1)[0];};
